@@ -1,0 +1,72 @@
+<!--
+  ========================================
+  LIST OF EXISTENT SITES
+  ========================================
+-->
+
+{% extends 'extends/base.html' %}
+{% load static %}
+{% with home='dashboard:home' %}
+
+{% block tab_title %} VSF - Sites {% endblock tab_title %}
+
+{% block title %} Sites {% endblock title %}
+{% block sub_title %} List of all available Sites {% endblock sub_title %}
+
+{% block route %}
+<li class="breadcrumb-item"><a href="{% url list_sites %}">Home</a></li>
+<li class="breadcrumb-item active">Sites</li>
+{% endblock route %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped">
+        {% csrf_token %}
+        <thead>
+          <tr>
+            <th class="text-center text-capitalize" scope="col">Sites</th>
+            <th class="text-center text-capitalize" scope="col">Measurements</th>
+            <th class="text-center text-capitalize" scope="col">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for site in sites %}
+          <tr>
+            <th class="text-center text-capitalize" scope="row">
+              <a
+                class="text-dark"
+                href="{% url 'dashboard:site_details' id=site.id %}"
+                title="Go to site details"
+              >
+                {{ site.name }}
+              </a>
+            </th>
+            <td class="text-center text-capitalize">
+              <a class="text-dark" href="{% url 'dashboard:list_measurements' %}?site={{site.id}}">
+                Go to measurements
+              </a>
+            </td>
+            <td class="text-center text-capitalize">
+              <button type="button" class="btn btn-danger delete-site" id="site.id">Delete</button>
+            </td>
+          </tr>
+          {% empty %}
+          <td colspan="3" class="text-center">
+            <div class="alert alert-danger" role="alert">No sites to show!</div>
+          </td>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block custom_scripts %}
+{% include "includes/js/sites-includes-js/list-existent-sites-js.html" %}
+{% endblock custom_scripts %}
+
+{% endwith %}

@@ -1,0 +1,91 @@
+<!--
+  ******************************************
+  MODAL SUBMIT CONFIRMATION
+
+  This modal performs the selection of a site to link to some set of urls
+  ******************************************
+-->
+
+<div
+  class="modal fade"
+  id="submitConfirmationModal"
+  data-backdrop="static"
+  data-keyboard="false"
+  tabindex="-1"
+  aria-labelledby="submitConfirmationModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="submitConfirmationModalLabel">
+          Associated URL Preview
+        </h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <form class="col-12">
+              <table class="table table-striped mt-5">
+                <thead>
+                  <tr>
+                    <th scope="col">URL</th>
+                  </tr>
+                </thead>
+                <tbody id="vsf-grouped-sites">
+                  <!-- The body of this table is injected with JS -->
+                </tbody>
+              </table>
+
+              <table class="table table-striped mt-5">
+                <thead>
+                  <tr>
+                    <th scope="col">Associate</th>
+                    <th scope="col">Alias</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for site in sites %}
+                  <tr>
+                    <td>
+                      <div class="form-check" id="select-related-alias">
+                        <label class="form-check-label">
+                          <input
+                            name="selected-site"
+                            type="radio"
+                            aria-label="Group of associated URL"
+                            id="{{ site.id }}"
+                          />
+                        </label>
+                      </div>
+                    </td>
+                    <td>{{ site.name }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+        <button id="submitConfirmationBtn" class="btn btn-primary">
+          Confirm
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

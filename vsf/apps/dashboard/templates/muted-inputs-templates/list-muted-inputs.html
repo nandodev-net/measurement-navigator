@@ -1,0 +1,70 @@
+<!--
+    Main listing of categories
+-->
+
+{% extends 'extends/base.html' %}
+{% load static %}
+
+{% with home='dashboard:home' %}
+
+{% block tab_title %} VSF - Muted Inputs {% endblock tab_title %}
+
+{% block title %} Muted Inputs {% endblock title %}
+
+{% block sub_title %}
+    List of muted inputs
+{% endblock sub_title %}
+
+{% block route %}
+    <li class="breadcrumb-item"><a href="{% url list_fastpath %}">Home</a></li>
+    <li class="breadcrumb-item active">Muted Inputs</li>
+{% endblock route %}
+
+{% block content %}
+
+<div class="card mb-4">
+  <div class="card-header d-flex align-items-center">
+    <h6 class="m-0 font-weight-bold margin-auto mr-auto">All</h6>
+
+    <a href="#" class="btn p-0 mx-0 text-primary" title="Create a new event">
+      Create new muted input <i class="fas fa-plus"></i>
+    </a>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        class="table table-bordered"
+        id="dataTable"
+        width="100%"
+        cellspacing="0"
+      >
+        <thead>
+          <tr>
+            <th>Input</th>
+            <th>Type of Measurement</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Input</th>
+            <th>Type of Measurement</th>
+            <th>Actions</th>
+          </tr>
+        </tfoot>
+        <tbody>
+          {% for input in muted_inputs %}
+          <tr>
+            <td>{{input.url}}</td>
+            <td>{{input.type_med}}</td>
+            <td>???</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block custom_scripts %} {% endblock custom_scripts %}
+{% endwith %}

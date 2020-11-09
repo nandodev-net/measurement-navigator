@@ -1,0 +1,570 @@
+<!--
+  ========================================
+  MAIN LISTING MEASUREMENTS
+  ========================================
+ -->
+
+{% extends 'extends/base.html' %}
+{% load static %}
+{% block tab_title %} VSF - Fastpath {% endblock tab_title %}
+{% block title %} Fastpath {% endblock title %}
+{% block sub_title %} List of all available measurements {% endblock sub_title %}
+
+{% block route %}
+<li class="breadcrumb-item">
+  <a href="{% url home %}">Home</a>
+</li>
+<li class="breadcrumb-item active">Fastpath</li>
+{% endblock route %}
+
+{% block content %}
+<form id="urlForm">
+  <nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-3">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Since</span>
+            </div>
+            <input id="since" class="form-control mr-2" type="date" />
+          </div>
+        </div>
+
+        <div class="col-3">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Until</span>
+            </div>
+            <input id="until" class="form-control mr-2" type="date" />
+          </div>
+        </div>
+
+        <div class="col-6">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="asn">ASN</label>
+            </div>
+            <select class="custom-select" id="asn">
+              <option selected value="">Choose ASN Option</option>
+              <option value="AS8048">CANTV Servicios, Venezuela</option>
+              <option value="AS6306">TELEFONICA VENEZOLANA, C.A.</option>
+              <option value="AS27889">Telecomunicaciones MOVILNET</option>
+              <option value="AS21826">Corporación Telemic C.A.</option>
+              <option value="AS27807">
+                Fundación Centro Nacional de Innovación Tecnológica
+              </option>
+              <option value="AS20312">
+                Fundación Centro Nacional de Innovación Tecnológica - 2
+              </option>
+              <option value="AS11694">Universidad Simon Bolivar</option>
+              <option value="AS19192">Universidad Central de Venezuela</option>
+              <option value="AS7908">BT LATAM Venezuela, S.A.</option>
+              <option value="AS11562">Net Uno, C.A.</option>
+              <option value="AS23007">Universidad de Los Andes</option>
+              <option value="AS27717">Corporacion Digitel C.A.</option>
+              <option value="AS27890">Universidad de Oriente</option>
+              <option value="AS27892">Universidad del Zulia</option>
+              <option value="AS27891">
+                Universidad Pedagógica Experimental Libertador
+              </option>
+              <option value="AS7965">Universidad Catolica Andres Bello</option>
+              <option value="AS17287">Universidad de Carabobo</option>
+              <option value="AS27686">
+                Universidad Centro Occidental Lisandro Alvarado
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-4 mt-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="test-name">Test Type</label>
+            </div>
+            <select class="custom-select" id="test-name">
+              <option selected value="">Choose Test Type</option>
+              <option value="web_connectivity">Web Connectivity</option>
+              <option value="http_requests">HTTP Requests</option>
+              <option value="dns_consistency">DNS Consistency</option>
+              <option value="http_invalid_request_line">
+                HTTP Invalid Request Line
+              </option>
+              <option value="bridge_reachability">Bridgr Reachability</option>
+              <option value="http_header_field_manipulation">
+                HTTP Header Field Manipulation
+              </option>
+              <option value="multi_protocol_traceroute">
+                Multi Protocol Traceroute
+              </option>
+              <option value="meek_fronted_requests_test">
+                Meek Fronted Request Test
+              </option>
+              <option value="whatsapp">WhatsApp</option>
+              <option value="facebook_messenger">Facebook Messenger</option>
+              <option value="ndt">NTD</option>
+              <option value="dash">Dash</option>
+              <option value="telegram">Telegram</option>
+              <option value="psiphon">Psiphon</option>
+              <option value="tor">Tor</option>
+              <option value="unknown">Unknown</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-3 mt-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="anomaly-state">Anomaly</label>
+            </div>
+            <select class="custom-select" id="anomaly-state">
+              <option selected value="">Any</option>
+              <option value="false">Anomaly False</option>
+              <option value="true">Anomaly True</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-3 mt-3">
+          <input
+            id="input"
+            class="form-control mr-2"
+            type="search"
+            placeholder="URL"
+            aria-label="Search URL"
+          />
+        </div>
+
+        <div class="col-2 mt-3">
+          <button
+            id="url-form-button"
+            class="btn btn-primary btn-block"
+            type="submit"
+          >
+            Search
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <table class="table table-striped mt-5">
+    <thead>
+      <tr>
+        <th class="text-center" scope="col">URL</th>
+        <th class="text-center" scope="col">Data Ready</th>
+        <th class="text-center" scope="col">Test Type</th>
+        <th class="text-center" scope="col">Anomaly</th>
+        <th class="text-center" scope="col">ASN</th>
+        <th class="text-center" scope="col">Date</th>
+        <th class="text-center" scope="col">Detailed Info</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for measurement in inbox_measurements %}
+      <tr>
+        <!-- INPUT -->
+        <td>
+          {{ measurement.input }}
+        </td>
+
+        <!-- STATE -->
+        {% if measurement.report_ready == True %}
+        <td class="text-center">
+          <i class="far fa-check-circle text-success"></i>
+        </td>
+        {% elif measurement.report_ready == False %}
+        <td class="text-center">
+          <i class="fas fa-ban text-danger"></i>
+        </td>
+        {% else %}
+        <td class="text-center">
+          <i class="fas fa-exclamation-triangle text-warning"></i>
+        </td>
+        {% endif %}
+
+        <!-- TEST NAME -->
+        <td class="text-center">{{ measurement.test_name }}</td>
+
+        <!-- ANOMALY -->
+        {% if measurement.anomaly %}
+        <td class="text-center">
+          <i class="fas fa-exclamation-circle text-warning"></i>
+        </td>
+        {% else %}
+        <td class="text-center">N/A</td>
+        {% endif %}
+
+        <!-- ASN -->
+        <td class="text-center">
+          {{ measurement.probe_asn }}
+        </td>
+
+        <!-- TODO: necesitamos algún tipo de "mapeo" al nombre real -->
+
+        <!-- DATE -->
+        <td class="text-center">
+          {{ measurement.measurement_start_time }}
+        </td>
+
+        <!-- MODAL BUTTON -->
+        <td class="text-center">
+          <!-- BUTTON TRIGGER MODAL -->
+          <button
+            id="{{ measurement.id }}"
+            type="button"
+            class="btn btn-dark detail-btn"
+            data-toggle="modal"
+            data-target="#modalCompleteInfo"
+            aria-label="modalDetailedInfo"
+          >
+            Expand
+          </button>
+        </td>
+      </tr>
+      {% empty %}
+      <td colspan="7" class="text-center">
+        <div class="alert alert-danger" role="alert">
+          No sites to show!
+        </div>
+      </td>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <nav
+    class="d-flex justify-content-center align-items-center"
+    aria-label="Pagination FastPath"
+  >
+    <ul class="pagination mt-5 justify-content-center">
+      {% if inbox_measurements.has_previous %}
+      <li class="page-item">
+        <button id="page-one" class="page-link">&laquo; First</button>
+      </li>
+
+      <li class="page-item">
+        <button id="page-previous" class="page-link">Previous</button>
+      </li>
+      {% endif %}
+
+      <li class="page-item">
+        <a class="page-link" href="#">
+          Page {{ inbox_measurements.number }} of {{ inbox_measurements.paginator.num_pages }}
+        </a>
+      </li>
+
+      {% if inbox_measurements.has_next %}
+      <li class="page-item">
+        <button id="page-next" class="page-link">Next</button>
+      </li>
+
+      <li class="page-item">
+        <button id="page-last" class="page-link">last &raquo;</button>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+</form>
+
+<!-- MODAL -->
+<div
+  class="modal fade"
+  id="modalCompleteInfo"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="modalCompleteInfoTitle"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalCompleteInfoTitle">
+          Detailed Website's Report
+        </h5>
+
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-4">
+              <h6>TID</h6>
+            </div>
+            <div class="col-8">
+              <p id="tid-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Report ID</h6>
+            </div>
+            <div class="col-8">
+              <p id="report-id-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Input</h6>
+            </div>
+            <div class="col-8">
+              <p id="input-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Measurement URL</h6>
+            </div>
+            <div class="col-8">
+              <p id="measurement-url-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Report Ready</h6>
+            </div>
+            <div class="col-8">
+              <p id="report-ready-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Anomaly</h6>
+            </div>
+            <div class="col-8">
+              <p id="anomaly-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Confirmed</h6>
+            </div>
+            <div class="col-8">
+              <p id="confirmed-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Failure</h6>
+            </div>
+            <div class="col-8">
+              <p id="failure-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Measurement Start Time</h6>
+            </div>
+            <div class="col-8">
+              <p id="measurement-start-time-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Catch Date</h6>
+            </div>
+            <div class="col-8">
+              <p id="catch-date-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Test Name</h6>
+            </div>
+            <div class="col-8">
+              <p id="test-name-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Probe ASN</h6>
+            </div>
+            <div class="col-8">
+              <p id="probe-asn-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Probe CC</h6>
+            </div>
+            <div class="col-8">
+              <p id="probe-cc-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-4">
+              <h6>Scores</h6>
+            </div>
+            <div class="col-8">
+              <pre id="scores-detailed"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+
+{% block custom_scripts %}
+<script>
+  let urlSearch;
+  let data = {
+    page    : 1,
+    since   : "{{ search_params.since }}",
+    until   : "{{ search_params.until }}",
+    testName: "{{ search_params.testName }}",
+    input   : "{{ search_params.input }}",
+    asn     : "{{ search_params.asn }}",
+    anomaly : "{{ search_params.anomaly }}"
+  };
+
+  let since    = data.since;
+  let until    = data.until;
+  let testName = data.testName;
+  let input    = data.input;
+  let asn      = data.asn;
+  let anomaly  = data.anomaly;
+
+  (function () {
+    $("#since").val(since);
+    $("#until").val(until);
+    $("#test-name").val(testName);
+    $("#input").val(input);
+    $("#asn").val(asn);
+    $("#anomaly-state").val(anomaly);
+  })();
+
+  $("#urlForm").on("submit", function (event) {
+    event.preventDefault();
+
+    since    = $("#since").val();
+    until    = $("#until").val();
+    testName = $("#test-name").val();
+    input    = $("#input").val();
+    asn      = $("#asn").val();
+    anomaly  = $("#anomaly-state").val();
+
+    urlSearch = "{% url home %}";
+
+    data = {
+      page    : 1,
+      since   : since,
+      until   : until,
+      testName: testName,
+      input   : input,
+      asn     : asn,
+      anomaly : anomaly
+    };
+
+    let url = urlSearch + "?" + $.param(data);
+
+    window.location.href = url;
+  });
+
+  $("#page-one").on("click", function (event) {
+    event.preventDefault();
+
+    urlSearch = "{% url home %}";
+
+    data.page = 1;
+
+    let url = urlSearch + "?" + $.param(data);
+
+    window.location.href = url;
+  });
+  $("#page-previous").on("click", function (event) {
+    event.preventDefault();
+
+    urlSearch = "{% url home %}";
+
+    data.page = "{% if inbox_measurements.has_previous %}{{ inbox_measurements.previous_page_number }}{% else %}1{% endif %}";
+
+    let url = urlSearch + "?" + $.param(data);
+
+    window.location.href = url;
+  });
+  $("#page-next").on("click", function (event) {
+    event.preventDefault();
+
+    urlSearch = "{% url home %}";
+
+    data.page = "{% if inbox_measurements.has_next %}{{ inbox_measurements.next_page_number }}{% else %}{{inbox_measurements.paginator.num_pages }} {% endif %}";
+
+    let url = urlSearch + "?" + $.param(data);
+
+    window.location.href = url;
+  });
+
+  $("#page-last").on("click", function (event) {
+    event.preventDefault();
+
+    urlSearch = "{% url home %}";
+
+    data.page = "{{ inbox_measurements.paginator.num_pages }}";
+
+    let url = urlSearch + "?" + $.param(data);
+
+    window.location.href = url;
+  });
+
+  // Triggered when trying to retrieve data for a single measurement
+  $('.detail-btn').on("click", function ( event ) {
+    event.preventDefault();
+
+    $.ajax({
+      url    : "{% url 'dashboard:get_measurement' %}",
+      type   : "GET",
+      data   : { 'id': event.target.id },
+      success: function (measurementJson) {
+        $("#anomaly-detailed").text(measurementJson["anomaly"]);
+        $("#scores-detailed").text(
+          JSON.stringify(measurementJson["scores"], null, 2)
+        );
+        $("#tid-detailed").text(measurementJson["tid"]);
+        $("#confirmed-detailed").text(measurementJson["confirmed"]);
+        $("#failure-detailed").text(measurementJson["failure"]);
+        $("#input-detailed").text(measurementJson["input"]);
+        $("#catch-date-detailed").text(measurementJson["catch_date"]);
+        $("#report-ready-detailed").text(measurementJson["report_ready"]);
+        $("#report-id-detailed").text(measurementJson["report_id"]);
+        $("#probe-asn-detailed").text(measurementJson["probe_asn"]);
+        $("#probe-cc-detailed").text(measurementJson["probe_cc"]);
+        $("#test-name-detailed").text(measurementJson["test_name"]);
+        $("#measurement-url-detailed").text(measurementJson["measurement_url"]);
+        $("#measurement-start-time-detailed").text(
+          measurementJson["measurement_start_time"]
+        );
+      },
+    });
+  });
+</script>
+{% endblock custom_scripts %}

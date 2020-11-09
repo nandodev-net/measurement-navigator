@@ -1,0 +1,95 @@
+<!--
+  ******************************************
+  MODAL CREATE ALIAS
+
+  THIS MODAL EXPECTS THE FOLLOWING ARGUMENTS:
+
+  SITE-CREATION-FORM: FORM TO CREATE A NEW SITE, YOU CAN FIND IT IN THE FORMS.PY
+  ******************************************
+-->
+
+{% load widget_tweaks %}
+
+<!-- Modal -->
+<div
+  class="modal fade"
+  id="associateUrl"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="associateUrlLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="associateUrlLabel">Create Alias</h5>
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid">
+          <div class="row">
+            <form class="col-12" id="site-creation-form" method="POST">
+              {% csrf_token %}
+
+              <div class="form-group">
+                {% for hidden in site_creation_form.hidden_fields %}
+                  {{ hidden }}
+                {% endfor %}
+              </div>
+
+              <div class="form-group">
+                <div class="input-group input-group-default mb-3">
+                  <div class="input-group-prepend w-25">
+                    <span
+                      class="input-group-text vsf-flex-grow-1"
+                      id="inputGroup-sizing-default"
+                    >
+                      Alias
+                    </span>
+                  </div>
+                  {% render_field site_creation_form.name id="vsf-alias-input" class='form-control w-75' type='text' %}
+                </div>
+              </div>
+
+              <div>
+                {% for error in site_creation_form.name.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+
+              <div class="form-group">
+                <div class="input-group">
+                  <div class="input-group-prepend w-25">
+                    <span class="input-group-text vsf-flex-grow-1">Description</span>
+                  </div>
+                  {% render_field site_creation_form.description id="vsf-description-input" class='form-control vsf-form-control w-75' aria-label="With textarea" %}
+                </div>
+              </div>
+
+              <div>
+                {% for error in site_creation_form.description.errors %}
+                  {{ error }}
+                {% endfor %}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+        <button id="create-alias-btn" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>

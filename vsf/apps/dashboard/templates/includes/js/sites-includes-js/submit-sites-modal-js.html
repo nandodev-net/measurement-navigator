@@ -1,0 +1,189 @@
+<!--
+  ========================================
+
+  THIS SCRIPT CODE IS INTENDED TO BE COUPLED WITH THE SUBMIT-INFORMATION-MODAL.HTML
+
+  INCLUDE THIS SCRIPT IN THE CUSTOM SCRIPTS BLOCK OF THE PAGE WHERE THE SUBMIT-INFORMATION-MODAL.HTML
+  FILE IS INCLUDED
+
+  ========================================
+-->
+<script>
+  // THIS EVENT WILL CATCH EVERY CHECKED URL IN THE ARRAY
+  // AND IT WILL PRINT THEM IN THE MODAL TABLE
+
+  let selectedPages = [];
+
+  $("#submitConfirmationModal").on("show.bs.modal", function ( e ) {
+    "use strict";
+
+    // GET EVERY SELECTED URL
+    let pages = $('[class="associate-page"]:checked')
+      .toArray()
+      .map( ( checkBox ) => ( { url: checkBox.dataset.vsfurl, id: checkBox.id } ) );
+
+    // GET THE MODAL TABLE
+    let $table = $("#vsf-grouped-sites");
+
+    // APPEND AN ENTRY TO THE TABLE FOR EACH SELECTED ELEMENT
+    $table.empty();
+
+    pages.forEach( page => {
+
+      $table.append(
+        `<tr>
+          <td>
+            ${ page.url }
+          </td>
+         </tr>`);
+    });
+
+    // IF NO ELEMENTS WERE SELECTED, ADD A SINGLE ROW FILLING THE EMPTY SPACE
+    if ( pages.length === 0 ) {
+
+      $table.append(
+        `<tr>
+          <td class="text-center">
+            <div class="alert alert-danger" role="alert">No sites to show!</div>
+          </td>
+        </tr>`);
+    }
+
+    selectedPages = pages;
+  });
+
+  $("#submitConfirmationBtn").click(function ( event ) {
+    "use strict";
+    event.preventDefault();
+
+    // CHECK IF THERE'S PAGES TO ASSOCIATE
+    if ( selectedPages.length === 0 ) {
+
+      return;
+    }
+
+    // SET OF PAGES ID'S TO RELATE TO THE RIGHT SITE
+    let pagesIds = selectedPages.map( v => v.id );
+
+    // URL TO SEND HTTP REQUEST
+    let url = "{% url list_urls %}";
+
+    // SITE TO RELATE TO THIS SET OF URLS. SELECT THE INPUT THAT ITS CHECKED
+    let site = $("input[name=selected-site]:checked").toArray();
+
+    if ( site.length === 0 ) {
+
+      return;
+    }
+
+    // CHECK IN CASE NO SITE WAS SELECTED
+    site = site[0].id;
+
+    // DATA TO SEND WITH AJAX
+    let data = {
+      urls               : pagesIds,
+      site               : site,
+      csrfmiddlewaretoken: "{{ csrf_token }}"
+    };
+
+    // SEND DATA TO DJANGO
+    $.ajax({
+      type   : "POST",
+      url    : url,
+      data   : data,
+      success: function ( data ) {
+
+        $("submitConfirmationModal").modal("hide");
+
+        if ( data.error === null ) {
+
+          Swal.fire({
+            icon              : "success",
+            title             : "Successful linking!",
+            confirmButtonColor: "#28a745",
+            confirmButtonText : "Continue"
+          }).then( result => {
+
+            if ( result.isConfirmed ) {
+
+              location.reload();
+            }
+          });
+        } else {
+
+          Swal.fire({
+            icon              : "error",
+            title             : "There was an error in the process!",
+            text              : `${ data.error }`,
+            confirmButtonColor: "#dc3545",
+            confirmButtonText : "Continue"
+          });
+        }
+      },
+      error: function ( XMLHttpRequest, textStatus, errorThrown ) {
+
+        $("submitConfirmationModal").modal("hide");
+
+        Swal.fire({
+          icon              : "error",
+          title             : "There was an error!",
+          text              : `${ textStatus }, ${ errorThrown }`,
+          confirmButtonColor: "#dc3545",
+          confirmButtonText : "Continue"
+        });
+      }
+    });
+  });
+
+  $("#alt-submitConfirmationBtn").click(function ( event ) {
+
+    "use strict";
+    event.preventDefault();
+
+    let pages = $('[id*="temp-fid-"]:checked')
+      .toArray()
+      .map( checkBox => checkBox.id );
+
+    let url  = "{% url list_urls %}";
+    let site = $("#alias-name").val();
+
+    let data = {
+      urls               : pages === null ? []: pages,
+      site               : site === null ? "" : site,
+      csrfmiddlewaretoken: "{{ csrf_token }}"
+    };
+
+    $.ajax({
+      type   : "POST",
+      ulr    : url,
+      data   : data,
+      success: function ( data ) {
+
+        $("submitConfirmationModal").modal("hide");
+
+        Swal.fire({
+          icon              : "success",
+          title             : "The URL has been linked with the site!",
+          confirmButtonColor: "#28a745",
+          confirmButtonText : "Continue"
+        }).then( result => {
+
+          if ( result.isConfirmed ) {
+
+            location.reload();
+          }
+        });
+      },
+      error: function ( XMLHttpRequest, textStatus, errorThrown ) {
+
+        Swal.fire({
+          icon              : "error",
+          title             : "There was an error!",
+          text              : `${ textStatus }, ${ errorThrown }`,
+          confirmButtonColor: "#dc3545",
+          confirmButtonText : "Continue"
+        });
+      }
+    });
+  });
+</script>

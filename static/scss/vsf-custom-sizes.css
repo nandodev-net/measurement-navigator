@@ -1,0 +1,27 @@
+.pt-fix {
+  padding-top: 56px;
+}
+
+.vh-100-custom {
+  height: calc(100vh - 56px);
+}
+
+.h-100-custom {
+  min-height: calc(100% - 56px);
+  max-height: calc(100vh - 56px);
+}
+
+.w-sidenav-custom {
+  width: 16.66666667%;
+}
+
+.sidenav-bottom {
+  margin-top: auto;
+}
+
+.navbar-collapse-fix {
+  -webkit-box-flex: 0;
+      -ms-flex-positive: 0;
+          flex-grow: 0;
+}
+/*# sourceMappingURL=vsf-custom-sizes.css.map */

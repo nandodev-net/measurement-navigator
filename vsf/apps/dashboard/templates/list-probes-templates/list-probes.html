@@ -1,0 +1,70 @@
+<!--
+    Main listing of categories
+-->
+
+{% extends 'extends/base.html' %}
+{% load static %}
+
+{% with home='dashboard:home' %}
+
+{% block tab_title %} VSF - Probes {% endblock tab_title %}
+
+{% block title %} Probes {% endblock title %}
+
+{% block sub_title %}
+    List of all available probes
+{% endblock sub_title %}
+
+{% block route %}
+    <li class="breadcrumb-item"><a href="{% url list_fastpath %}">Home</a></li>
+    <li class="breadcrumb-item active">Probes</li>
+{% endblock route %}
+
+{% block content %}
+
+<div class="card mb-4">
+  <div class="card-header d-flex align-items-center">
+    <h6 class="m-0 font-weight-bold margin-auto mr-auto">All</h6>
+
+    <a href="#" class="btn p-0 mx-0 text-primary" title="Create a new event">
+      Create new Probe <i class="fas fa-plus"></i>
+    </a>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        class="table table-bordered"
+        id="dataTable"
+        width="100%"
+        cellspacing="0"
+      >
+        <thead>
+          <tr>
+            <th>Identification</th>
+            <th>Region</th>
+            <th>Country</th>
+            <th>City</th>
+            <th>ISP</th>
+            <th>Plan</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Identification</th>
+            <th>Region</th>
+            <th>Country</th>
+            <th>City</th>
+            <th>ISP</th>
+            <th>Plan</th>
+            <th>Actions</th>
+          </tr>
+        </tfoot>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block custom_scripts %} {% endblock custom_scripts %}
+{% endwith %}

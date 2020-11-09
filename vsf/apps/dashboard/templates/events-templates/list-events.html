@@ -1,0 +1,81 @@
+<!--
+    Main listing of events
+-->
+
+{% extends 'extends/base.html' %}
+{% load static %}
+
+{% with home='dashboard:home' %}
+
+{% block tab_title %} VSF - Events {% endblock tab_title %}
+
+{% block title %} Events {% endblock title %}
+
+{% block sub_title %}
+    List of all available events
+{% endblock sub_title %}
+
+{% block route %}
+    <li class="breadcrumb-item"><a href="{% url list_fastpath %}">Home</a></li>
+    <li class="breadcrumb-item active">Events</li>
+{% endblock route %}
+
+{% block content %}
+
+<div class="card mb-4">
+  <div class="card-header d-flex align-items-center">
+    <h6 class="m-0 font-weight-bold margin-auto mr-auto">All</h6>
+    <a href="#" class="btn p-0 mx-0 text-primary" title="Create a new event">
+      Create new event <i class="fas fa-plus"></i>
+    </a>
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table
+        class="table table-bordered"
+        id="dataTable"
+        width="100%"
+        cellspacing="0"
+      >
+        <thead>
+          <tr>
+            <th>Identification</th>
+            <th>ISP</th>
+            <th>Target</th>
+            <th>Start</th>
+            <th>Finish</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tfoot>
+          <tr>
+            <th>Identification</th>
+            <th>ISP</th>
+            <th>Target</th>
+            <th>Start</th>
+            <th>Finish</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </tfoot>
+        <tbody>
+          {% for event in events %}
+          <tr>
+            <td>{{event.identification}}</td>
+            <td>{{event.isp}}</td>
+            <td>{{event.target.url}}</td>
+            <td>{{event.start_date}}</td>
+            <td>{{event.end_date}}</td>
+            <td>{{event.status}}</td>
+            <td>{{event.actions}}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+{% block custom_scripts %} {% endblock custom_scripts %}
+{% endwith %}

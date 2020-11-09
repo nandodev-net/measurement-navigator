@@ -1,0 +1,86 @@
+<!--
+  ========================================
+  MAIN LISTING PAGES
+  ========================================
+ -->
+
+{% extends 'extends/base.html' %}
+{% load static %}
+
+{% with home='dashboard:home' %}
+
+{% block tab_title %} VSF - Domains {% endblock tab_title %}
+{% block title %} {{ site.name }} {% endblock title %}
+{% block sub_title %} {{ site.description }} {% endblock sub_title %}
+
+{% block route %}
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:home' %}">Home</a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:list_sites' %}">Sites</a>
+</li>
+<li class="breadcrumb-item active">{{ site.name }}</li>
+{% endblock route %}
+
+{% block content %}
+<form>
+  <nav class="navbar navbar-light bg-light"></nav>
+
+  <table class="table table-striped mt-5">
+    <thead>
+      <tr>
+        <th scope="col">URL</th>
+        <th scope="col">Remove from site</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for url in urls %}
+      <tr>
+        <td>
+          <a
+            href="{% url 'dashboard:list_measurements'%}?input={{url.url}}"
+            title="Measurements for this url"
+          >
+            {{ url.url }}
+          </a>
+        </td>
+        <td>
+          <button
+            type="button"
+            class="btn btn-danger delete-site"
+            id="{{ url.url }}"
+          >Remove
+        </button>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td class="text-center" colspan="2">
+          <div class="alert alert-danger" role="alert">No sites to show!</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <nav aria-label="Navigation URL">
+    <ul class="pagination mt-5 justify-content-center">
+      <li class="page-item">
+        <button class="page-link">Previous</button>
+      </li>
+      <li class="page-item">
+        <button class="page-link">1</button>
+      </li>
+      <li class="page-item">
+        <button class="page-link">Next</button>
+      </li>
+    </ul>
+  </nav>
+</form>
+
+{% endblock content %} {% block custom_scripts %}
+{% include "includes/js/sites-includes-js/site-details-js.html" %}
+{% endblock custom_scripts %}
+
+{% endwith %}

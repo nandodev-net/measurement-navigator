@@ -1,0 +1,78 @@
+<!--
+    Login Page
+-->
+{% extends 'extends/base_accounting.html' %}
+{% load widget_tweaks %}
+
+{% block tab_title %} VSF - Login {% endblock tab_title %}
+{% block title %} Login {% endblock title %}
+
+{% block body %}
+
+<form method="post" action="{% url 'dashboard:login' %}">
+  {% csrf_token %}
+  <div class="form-group">
+    <label class="mb-1" for="inputEmailAddress">
+      {{ form.username.label_tag }}
+    </label>
+    {% render_field form.username class="form-control py-4" id="inputEmailAddress" placeholder="Enter email address" %}
+  </div>
+
+  <div class="form-group">
+    <label class="mb-1" for="inputPassword"
+      >{{ form.password.label_tag }}</label
+    >
+    {% render_field form.password class="form-control py-4" id="inputPassword" type="password" placeholder="Enter password" %}
+  </div>
+  <div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input
+        class="custom-control-input"
+        id="rememberPasswordCheck"
+        type="checkbox"
+      />
+      <label class="custom-control-label" for="rememberPasswordCheck"
+        >Remember password
+      </label>
+    </div>
+  </div>
+  <div class="form-group w-100 mt-4 mb-0">
+    <input class="btn btn-primary w-100" type="submit" value="login" />
+    <input type="hidden" name="next" value="{{ next }}" />
+    <!--
+        <a class="btn btn-primary" href="#">Login</a>
+    -->
+  </div>
+</form>
+
+<!-- Check for errors -->
+{% if form.errors %}
+<div class="alert alert-danger my-2">
+  <strong>Error:</strong>
+  <!--
+    @TODO we have to find out how to render each field in the error
+    by itself
+    {% for error in form.errors %}
+    {{form.errors}}
+    {% endfor %}
+  -->
+  <p>Unmatching username and password</p>
+</div>
+{% endif %}
+{% endblock body %}
+
+{% block footer %}
+<div class="py-4 bg-light mt-auto">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-center">
+      <div>
+        <a class="small" href="{% url 'dashboard:password_reset' %}"
+          >Forgot Password?</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock footer %}
+
+

@@ -1,0 +1,86 @@
+<!--
+  ========================================
+  THIS SCRIPT IS INTENDED TO BE COUPLED WITH THE CREATE-ALIAS-MODAL.HTML
+
+  INCLUDE THIS HTML IN THE CUSTOM SCRIPT BLOCK IN THE TEMPLATE THAT INCLUDES
+  CREATE-ALIAS-MODAL.HTML
+  ========================================
+-->
+
+<script>
+
+  /*
+  ========================================
+  VERIFYING THAT THE INPUTS WAS FILLED
+  ========================================
+  */
+
+  if ($("#vsf-alias-input").val() === "") {
+
+    $("#create-alias-btn").prop("disabled", true);
+  }
+
+  if ($("#vsf-description-input").val() === "") {
+
+    $("#create-alias-btn").prop("disabled", true);
+  }
+
+  $("#vsf-alias-input").keyup(function () {
+
+    $("#create-alias-btn").prop("disabled", this.value.trim() === "" ? true : false);
+  });
+
+  /*
+  ========================================
+  THIS PART IS THE AJAX REQUEST
+  ========================================
+  */
+
+  $("#create-alias-btn").click(function ( event ) {
+
+    "use strict";
+    event.preventDefault();
+
+    let $form = $("#site-creation-form");
+    let data  = $form.serialize();
+    let url   = '{% url "sites:create_site" %}';
+
+    $.ajax({
+      type   : "POST",
+      url    : url,
+      data   : data,
+      success: function ( data, status ) {
+
+        $("#associateUrl").modal("hide");
+
+        if ( data.error === null ) {
+          Swal.fire({
+            icon              : "success",
+            title             : "The alias has been created!",
+            confirmButtonColor: "#28a745",
+            confirmButtonText : "Continue"
+          }).then((result) => {
+
+            if ( result.isConfirmed ) {
+
+              location.reload();
+            }
+          });
+        }
+        else {
+          alert("REINALDO DEJA DE IGNORAR EL ERROR HANDLING")
+        }
+      },
+      error: function ( XMLHttpRequest, textStatus, errorThrown ) {
+
+        Swal.fire({
+          icon              : "error",
+          title             : "There was an error!",
+          text              : `${ textStatus }: ${ errorThrown }`,
+          confirmButtonColor: "#dc3545",
+          confirmButtonText : "Continue"
+        });
+      }
+    });
+  });
+</script>

@@ -1,0 +1,52 @@
+from django.db import models
+
+# Create your models here.
+# Django imports
+from django.db                      import models
+from django.utils                   import timezone
+
+# Third party imports
+import uuid
+
+# Application imports
+
+class Flag(models.Model):
+    """
+        A flag entry identifies a measurement that has some kind of 
+        issue. A measurement with no flag is a regular measurement,
+        with soft flag, the measurement has some kind of anomaly, and
+        a hard flag means that the measurement might be part of a blocking
+        event. Muted is a measurement to ignore.
+    """
+    NONE = 'none'
+    SOFT = 'soft'
+    HARD = 'hard'
+    MUTED = 'muted'
+
+    TYPE = {
+        NONE: 'None',
+        SOFT: 'Soft',
+        HARD: 'Hard',
+        MUTED: 'Muted',
+    }
+
+
+    # Sorted choices
+    TYPE_CHOICES = [    # Items are sorted alphabetically
+        (k, v) for k, v in sorted(TYPE.items(), key=lambda t: t[1])]
+
+    
+    uuid = models.UUIDField(
+        default=uuid.uuid4, unique=True, editable=False, db_index=True
+    )
+    
+    # Flag type
+    flag = models.CharField(
+        max_length=10, choices=TYPE_CHOICES, default=NONE
+    )
+ 
+    # Date when this flag was created
+    creation_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return str(self.flag) + " : " + str(self.creation_date)

@@ -1,0 +1,46 @@
+<script>
+  $('.delete-site').click(function ( event ) {
+
+    "use strict";
+    event.preventDefault();
+
+    let urlToDelete = event.target.id;
+    let urlToPost = '{% url "sites:remove_from_site" %}';
+
+    let data = {
+      url                : urlToDelete,
+      csrfmiddlewaretoken: "{{ csrf_token }}",
+    };
+
+    $.ajax({
+      type   : "POST",
+      url    : urlToPost,
+      data   : data,
+      success: function ( data, status ) {
+
+        Swal.fire({
+          icon              : "success",
+          title             : "The operation was successful!",
+          confirmButtonColor: "#28a745",
+          confirmButtonText : "Continue"
+        }).then((result) => {
+
+          if ( result.isConfirmed ) {
+
+            location.reload();
+          }
+        });
+      },
+      error: function ( jq, status, error ) {
+
+        Swal.fire({
+          icon              : "error",
+          title             : "There was an error!",
+          text              : `${ status }: ${ error }`,
+          confirmButtonColor: "#dc3545",
+          confirmButtonText : "Continue"
+        });
+      }
+    });
+  });
+</script>
