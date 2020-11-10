@@ -1,17 +1,18 @@
+#   django imports
+from django.db                      import models
+from django.contrib.postgres.fields import JSONField
+from django.utils 					import timezone
+
 """
     This model is based on the following data base model
     from the ooni fast path database:
     https://github.com/ooni/pipeline/blob/master/af/oometa/018-fastpath.install.sql
 	Warning: Even though the above link should be the data model, that's not what actually
 	happens, so we adopted the actual data format that comes from the api when you make requests like:
-	curl https://api.ooni.io/api/v1/measurements\?until\=2020-07-15\&probe_cc\=VE\&since\=2020-07-14
+	curl https://api.ooni.io/api/v1/measurements?until=2020-07-15&probe_cc=VE&since=2020-07-14
 
 	The ones whose measurement_id starts with 'temp-fid' are the ones that comes from the fast path
 """
-#   django imports
-from django.db                      import models
-from django.contrib.postgres.fields import JSONField
-from django.utils 					import timezone
 
 class FastPath(models.Model):
 	"""
@@ -59,7 +60,7 @@ class FastPath(models.Model):
 	confirmed = models.BooleanField(default=False)
 	failure = models.BooleanField(default=False)
 	input = models.TextField()
-	tid = models.CharField(unique=True, max_length=100) # measurement id == tid
+	tid = models.CharField(max_length=100, null=True) # measurement id == tid
 	measurement_start_time = models.DateTimeField()
 	measurement_url = models.URLField(null=True, max_length=500)
 	probe_asn = models.CharField(null=False, max_length=20)
