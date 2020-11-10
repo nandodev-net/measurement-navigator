@@ -27,7 +27,7 @@ def fp_update():
     # | yesterday | today | tomorrow 
     now = datetime.now() + timedelta(days=1)
     yesterday = now - timedelta(days=1)
-    return request_fp_data(yesterday.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"))
+    return request_fp_data(yesterday.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"), False)
     
 @shared_task
 def measurement_update():

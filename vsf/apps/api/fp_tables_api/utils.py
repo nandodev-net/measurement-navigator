@@ -83,7 +83,7 @@ def checkPostData(data) -> bool:
 
         return True
 
-def request_fp_data(since: str, until: str) -> (int, [str]):
+def request_fp_data(since: str, until: str, from_fastpath = True) -> (int, [str]):
     """
         Given the start and end date for a set of measurements, 
         perform a get request to ooni in order to get the 
@@ -126,17 +126,19 @@ def request_fp_data(since: str, until: str) -> (int, [str]):
         data = req.json()
         metadata = data['metadata'] 
         next_url = metadata.get('next_url')
-        # results = filter(
+        if from_fastpath:
+            results = filter(
             # since we just care about fast path data, we filter the ones whose measurement_id begins with
             # 'temp-fid' according to what Federico (from ooni) told us
             # UPDATE: by today, measurement_id is not reported by the ooni queries, so 
             # we can't rely on it to check whether a measurement comes from the fastpath or not.
-            # @TODO
-
-        #        lambda res: 
-        #            res['measurement_id'].startswith("temp-fid"), 
-        #        data['results']
-        #    )
+            # @TODO               
+            lambda res: 
+                    res.get('measurement_id',"").startswith("temp-fid"), 
+                data['results']
+            )
+        else:
+            results = data['results']
 
         for result in results:
 
@@ -145,7 +147,7 @@ def request_fp_data(since: str, until: str) -> (int, [str]):
                 confirmed = result['confirmed'],
                 failure = result['failure'],
                 input= str(result['input']),
-                tid= result['measurement_id'],
+                tid= result.get('measurement_id'),
                 measurement_start_time=result['measurement_start_time'],
                 measurement_url=result['measurement_url'],
                 probe_asn= result['probe_asn'],
@@ -162,10 +164,14 @@ def request_fp_data(since: str, until: str) -> (int, [str]):
     saved_measurements = []
     for fp in objects:
         try: 
-            FastPath.objects.get(tid=fp.tid)
+            FastPath.objects.get(
+                        measurement_start_time=fp.measurement_start_time, 
+                        input=fp.input,
+                        report_id=fp.report_id,
+                        test_name=fp.test_name)
         except:
             fp.save()
-            saved_measurements.append(fp.tid)
+            saved_measurements.append(fp.id)
     
     return (req.status_code, saved_measurements)
 
