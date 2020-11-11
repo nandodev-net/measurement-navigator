@@ -1,0 +1,179 @@
+<!--
+  ========================================
+  MAIN DNS LISTING
+  ========================================
+ -->
+
+ {% extends 'extends/base.html' %}
+ {% load static %}
+ 
+ {% block custom_stylesheet %}
+ <link
+   rel="stylesheet"
+   type="text/css"
+   href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.22/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/sl-1.3.1/datatables.min.css"
+ />
+ {% endblock custom_stylesheet %}
+ 
+ {% block tab_title %} VSF - HTTP {% endblock tab_title %}
+ {% block title %} HTTP {% endblock title %}
+ {% block sub_title %} List and filter all the currently available DNS Sub-measurements {% endblock sub_title %}
+ 
+ {% block route %}
+ <li class="breadcrumb-item">
+   <a href="{% url home %}">Home</a>
+ </li>
+ <li class="breadcrumb-item">
+   <a href="{% url 'dashboard:list_measurements' %}">Measurements</a>
+ </li>
+ <li class="breadcrumb-item active">HTTP</li>
+ {% endblock route %}
+ 
+ {% block content %}
+ <form id="urlForm">
+   <nav class="navbar navbar-light bg-light mb-5">
+     <div class="container-fluid">
+       <div class="row">
+         <div class="col-3">
+           <div class="input-group">
+             <div class="input-group-prepend">
+               <span class="input-group-text">Since</span>
+             </div>
+             <input id="since" class="form-control mr-2 additional-filter" type="date" />
+           </div>
+         </div>
+ 
+         <div class="col-3">
+           <div class="input-group">
+             <div class="input-group-prepend">
+               <span class="input-group-text">Until</span>
+             </div>
+             <input id="until" class="form-control mr-2 additional-filter" type="date" />
+           </div>
+         </div>
+ 
+         <div class="col-6">
+           <div class="input-group mr-2">
+             <div class="input-group-prepend">
+               <label class="input-group-text" for="asn">ASN</label>
+             </div>
+             <select id="asn" class="custom-select additional-filter">
+               <option selected value="">Any</option>
+               <option value="AS8048">CANTV Servicios, Venezuela</option>
+               <option value="AS6306">TELEFONICA VENEZOLANA, C.A.</option>
+               <option value="AS27889">Telecomunicaciones MOVILNET</option>
+               <option value="AS21826">Corporación Telemic C.A.</option>
+               <option value="AS27807">
+                 Fundación Centro Nacional de Innovación Tecnológica
+               </option>
+               <option value="AS20312">
+                 Fundación Centro Nacional de Innovación Tecnológica - 2
+               </option>
+               <option value="AS11694">Universidad Simon Bolivar</option>
+               <option value="AS19192">Universidad Central de Venezuela</option>
+               <option value="AS7908">BT LATAM Venezuela, S.A.</option>
+               <option value="AS11562">Net Uno, C.A.</option>
+               <option value="AS23007">Universidad de Los Andes</option>
+               <option value="AS27717">Corporacion Digitel C.A.</option>
+               <option value="AS27890">Universidad de Oriente</option>
+               <option value="AS27892">Universidad del Zulia</option>
+               <option value="AS27891">
+                 Universidad Pedagógica Experimental Libertador
+               </option>
+               <option value="AS7965">Universidad Catolica Andres Bello</option>
+               <option value="AS17287">Universidad de Carabobo</option>
+               <option value="AS27686">
+                 Universidad Centro Occidental Lisandro Alvarado
+               </option>
+             </select>
+           </div>
+         </div>
+ 
+         <div class="col-3 mt-3">
+           <div class="input-group mr-2">
+             <div class="input-group-prepend">
+               <label class="input-group-text" for="anomaly-state">Anomaly</label>
+             </div>
+             <select id="anomaly-state" class="custom-select additional-filter">
+               <option selected value="">Any</option>
+               <option value="false">Anomaly False</option>
+               <option value="true">Anomaly True</option>
+             </select>
+           </div>
+         </div>
+ 
+         <div class="col-3 mt-3">
+           <input
+             id="input"
+             class="form-control mr-2 additional-filter"
+             type="search"
+             placeholder="URL"
+             aria-label="Search URL"
+           />
+         </div>
+ 
+         <div class="col-3 mt-3">
+           <div class="input-group mr-sm-2">
+             <div class="input-group-prepend">
+               <label class="input-group-text" for="site">Site</label>
+             </div>
+             <select class="custom-select additional-filter" id="site">
+               <option selected value="">Any Site</option>
+               {% for site in sites %}
+               <option value="{{ site.id }}" title="{{ site.description }}">
+                 {{ site.name }}
+               </option>
+               {% endfor %}
+             </select>
+           </div>
+         </div>
+       </div>
+     </div>
+   </nav>
+ 
+   <div class="w-100 overflow-auto">
+     <table class="table table-striped mt-5 datatable" id="my-table">
+       <thead>
+         <tr>
+           <th class="text-center text-capitalize" scope="col">Input</th>
+           <th class="text-center text-capitalize" scope="col">Start Time</th>
+           <th class="text-center text-capitalize" scope="col">ASN</th>
+           <th class="text-center text-capitalize" scope="col">country</th>
+           <th class="text-center text-capitalize" scope="col">Site</th>
+           <th class="text-center text-capitalize" scope="col">Anomaly</th>
+           <th class="text-center text-capitalize" scope="col">Status Code Match</th>
+           <th class="text-center text-capitalize" scope="col">Headers Match</th>
+           <th class="text-center text-capitalize" scope="col">Body Length Match</th>
+           <th class="text-center text-capitalize" scope="col">Body proportion</th>
+         </tr>
+       </thead>
+ 
+       <tbody></tbody>
+ 
+       <tfoot></tfoot>
+ 
+     </table>
+   </div>
+ </form>
+ 
+ <!-- Modal -->
+ <div
+   class="modal fade"
+   id="modalCompleteInfo"
+   tabindex="-1"
+   role="dialog"
+   aria-labelledby="modalCompleteInfoTitle"
+   aria-hidden="true"
+ ></div>
+ 
+ {% endblock content %}
+ 
+ {% block custom_scripts %}
+ <script
+   type="text/javascript"
+   src="https://cdn.datatables.net/v/bs4/jqc-1.12.4/jszip-2.5.0/dt-1.10.22/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/sl-1.3.1/datatables.min.js"
+ ></script>
+ 
+ {% include "testing/list-http-dt-js.html" %}
+ {% endblock custom_scripts %}
+ 

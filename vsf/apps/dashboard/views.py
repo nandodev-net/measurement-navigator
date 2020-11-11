@@ -716,3 +716,106 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'dns_consistency' : item.dns_consistency,
             })
         return json_data
+
+class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
+    """
+        This is the front-end view for showing the HTTP subemasurement
+        table. Note that this view is coupled to the ListDNSBackEnd view.
+    """
+    template_name = "testing/list-http.html"
+
+class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
+    """
+        This is the back enf for showinf the HTTP submeasurement table. The dynamic
+        table talks to this view
+    """
+    columns = [
+            'measurement__raw_measurement__input',
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__probe_cc',
+            'site_name',
+            'measurement__anomaly',
+            'status_code_match',
+            'headers_match',
+            'body_length_match',
+            'body_proportion'
+
+        ]
+
+    order_columns = [
+            'measurement__raw_measurement__input',
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__probe_cc',
+            'site_name',
+            'measurement__anomaly'
+        ]
+
+    def get_initial_queryset(self):
+        urls = URL\
+                .objects\
+                .all()\
+                .select_related('site')\
+                .filter( url=OuterRef('measurement__raw_measurement__input') )
+
+        qs   = SubMeasModels.HTTP.objects.all()\
+                .select_related('measurement')\
+                .select_related('measurement__raw_measurement')\
+                .annotate(
+                        site=Subquery(urls.values('site')),
+                        site_name=Subquery(urls.values('site__name'))
+                    )
+        return qs
+
+    def filter_queryset(self, qs):
+
+        get = self.request.GET or {}
+
+        # Get filter data
+
+        input       = get.get('input')
+        since       = get.get('since')
+        ASN         = get.get('asn')
+        country     = get.get('country')
+        anomaly     = get.get('anomaly')
+        until       = get.get('until')
+        site        = get.get('site')
+
+        if input:
+            qs = qs.filter(measurement__raw_measurement__input__contains=input)
+        if since:
+            qs = qs.filter(measurement__raw_measurement__measurement_start_time__gte=since)
+        if ASN:
+            qs = qs.filter(measurement__raw_measurement__probe_asn=ASN)
+        if country:
+            qs = qs.filter(measurement__raw_measurement__probe_cc=country)
+        if until:
+            qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
+        if site:
+            qs = qs.filter(site=site)
+        if anomaly:
+            qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
+
+        return qs
+
+    def prepare_results(self, qs):
+        # prepare list with output column data
+        # queryset is already paginated here
+        json_data = []
+        for item in qs:
+            json_data.append({
+                'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
+                'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
+                'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
+                'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
+                'measurement__id' : item.measurement.id,
+                'site' : item.site,
+                'site_name' : item.site_name if item.site_name else "(no site)",
+                'measurement__anomaly' : item.measurement.anomaly,
+                'status_code_match' : item.status_code_match,
+                'headers_match' : item.headers_match,
+                'body_length_match' : item.body_length_match,
+                'body_proportion' : item.body_proportion,
+            })
+        return json_data

@@ -35,8 +35,10 @@ urlpatterns = [
     #   Measurements
     path('measurements_data',               views.ListMeasurementsBackEnd.as_view(),   name="list_measurements_data"),
     path('measurements',                    views.ListMeasurementsTemplate.as_view(),  name="list_measurements"),
-    path('measurements/dns',                views.ListDNSTemplate.as_view(),            name='list_dns'),
-    path('measurements/dns_data',           views.ListDNSBackEnd.as_view(),             name='list_dns_data'),
+    path('measurements/dns',                views.ListDNSTemplate.as_view(),           name='list_dns'),
+    path('measurements/dns_data',           views.ListDNSBackEnd.as_view(),            name='list_dns_data'),
+    path('measurements/http',               views.ListHTTPTemplate.as_view(),          name='list_http'),
+    path('measurements/http_data',          views.ListHTTPBackEnd.as_view(),           name='list_http_data'),
 
     #   Sites
     path('pages',                           views.ListUrls.as_view(),               name="list_urls"),
