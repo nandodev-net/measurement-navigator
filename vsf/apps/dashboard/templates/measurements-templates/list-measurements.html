@@ -24,7 +24,12 @@
 <li class="breadcrumb-item">
   <a href="{% url home %}">Home</a>
 </li>
-<li class="breadcrumb-item active">Measurements</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:list_measurements' %}">Measurements</a>
+</li>
+<li class="breadcrumb-item active">
+  <a href="{% url 'dashboard:list_measurements' %}">Measurement's List</a>
+</li>
 
 {% endblock route %}
 

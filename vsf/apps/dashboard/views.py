@@ -719,10 +719,10 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
 
 class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
     """
-        This is the front-end view for showing the HTTP subemasurement
+        This is the front-end view for showing the HTTP submeasurement
         table. Note that this view is coupled to the ListDNSBackEnd view.
     """
-    template_name = "testing/list-http.html"
+    template_name = "measurements-templates/list-http.html"
 
 class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
     """

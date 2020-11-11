@@ -1,7 +1,7 @@
 <script>
     $(document).ready(function () {
         "use strict";
-    
+
         let oTable = $(".datatable").DataTable({
             order: [[0, "desc"]],
             columns: [
@@ -79,7 +79,7 @@
                     ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
                     =====================================
                 */
-    
+
                 let site        = $("#site").val();
                 let since       = $("#since").val();
                 let until       = $("#until").val();
@@ -87,32 +87,32 @@
                 let asn         = $("#asn").val();
                 let anomaly     = $("#anomaly-state").val();
                 let country     = "";
-    
+
                 if ( site )
                     data.site = site;
-    
+
                 if ( since )
                     data.since = since;
-    
+
                 if ( until )
                     data.until = until;
-    
+
                 if ( input )
                     data.input = input;
-    
+
                 if ( asn )
                     data.asn = asn;
-    
+
                 if ( anomaly )
                     data.anomaly = anomaly;
-    
+
                 if ( country )
                     data.country = country;
                 },
                 type: "GET",
             },
             initComplete: function () {
-                
+
             },
             select: true,
             lengthChange: false,
@@ -126,7 +126,7 @@
                     =====================================
                     */
                     let data = dt.rows({ selected: true }).data();
-    
+
                     if ( data.length === 0 ) {
                     Swal.fire({
                         icon              : "warning",
@@ -136,7 +136,7 @@
                     });
                     return;
                     }
-    
+
                     let id = data[0].measurement__id;
                     $.ajax({
                     type   : "GET",
@@ -149,11 +149,11 @@
                         confirmButtonColor: "#28a745",
                         confirmButtonText : "Continue"
                         });
-    
+
                         console.log( measurementData );
                     },
                     error  : function ( jqXHR, textStatus, errorThrown ) {
-    
+
                         Swal.fire({
                         icon              : "Error",
                         title             : "There is an error in the inputs!",
@@ -167,21 +167,21 @@
                 }
             ]
         });
-    
+
         /*
         =====================================
         TRIGGERED WHEN A CUSTOM FILTER IS SELECTED
         =====================================
         */
         $(".additional-filter").change( ( e ) => oTable.draw() );
-    
+
         /*
         =====================================
         REQUIRED TO PERFORM ROW SELECTION
         =====================================
         */
         oTable.on("select deselect", ( e ) => {
-    
+
         let selectedRows = oTable.rows( { selected: true } ).count();
         oTable.button( 0).enable( selectedRows === 1 );
         });
