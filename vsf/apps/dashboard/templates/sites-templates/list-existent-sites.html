@@ -1,3 +1,4 @@
+
 <!--
   ========================================
   LIST OF EXISTENT SITES
@@ -19,15 +20,28 @@
 {% endblock route %}
 
 {% block content %}
+
 <div class="container-fluid">
   <div class="row">
-    <div class="col">
+    <div class="col-12 d-flex justify-content-end align-items-center">
+      <button
+        type="button"
+        class="btn btn-block btn-primary font-weight-bold text-white"
+        data-toggle="modal"
+        data-target="#associateUrl"
+      >
+        Create Site
+      </button>
+    </div>
+    <div class="col-12 mt-5">
       <table class="table table-striped">
         {% csrf_token %}
         <thead>
           <tr>
             <th class="text-center text-capitalize" scope="col">Sites</th>
-            <th class="text-center text-capitalize" scope="col">Measurements</th>
+            <th class="text-center text-capitalize" scope="col">
+              Measurements
+            </th>
             <th class="text-center text-capitalize" scope="col">Delete</th>
           </tr>
         </thead>
@@ -44,12 +58,21 @@
               </a>
             </th>
             <td class="text-center text-capitalize">
-              <a class="text-dark" href="{% url 'dashboard:list_measurements' %}?site={{site.id}}">
+              <a
+                class="text-dark"
+                href="{% url 'dashboard:list_measurements' %}?site={{site.id}}"
+              >
                 Go to measurements
               </a>
             </td>
             <td class="text-center text-capitalize">
-              <button type="button" class="btn btn-danger delete-site" id="site.id">Delete</button>
+              <button
+                type="button"
+                class="btn btn-danger delete-site"
+                id="site.id"
+              >
+                Delete
+              </button>
             </td>
           </tr>
           {% empty %}
@@ -63,6 +86,7 @@
   </div>
 </div>
 
+{% include "includes/sites-includes/create-sites-modal.html" with site_creation_form=site_creation_form %}
 {% endblock content %}
 
 {% block custom_scripts %}

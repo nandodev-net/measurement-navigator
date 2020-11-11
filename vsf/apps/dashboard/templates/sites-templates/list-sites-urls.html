@@ -120,7 +120,7 @@
         data-toggle="modal"
         data-target="#submitConfirmationModal"
       >
-        Associate - Existent Alias
+        Associate - Existent Site
       </button>
     </div>
   </div>
@@ -157,7 +157,7 @@
   </nav>
 </form>
 
-{% include "includes/sites-includes/create-alias-modal.html" with site_creation_form=site_creation_form %}
+{% include "includes/sites-includes/create-sites-modal.html" with site_creation_form=site_creation_form %}
 {% include "includes/sites-includes/submit-sites-modal.html" %}
 {% endblock content %}
 {% block custom_scripts %}
@@ -261,7 +261,7 @@
   });
 </script>
 
-{% include "includes/js/sites-includes-js/create-alias-modal-js.html" %}
+{% include "includes/js/sites-includes-js/create-sites-modal-js.html" %}
 {% include "includes/js/sites-includes-js/submit-sites-modal-js.html" %}
 {% endblock custom_scripts %}
 {% endwith %}

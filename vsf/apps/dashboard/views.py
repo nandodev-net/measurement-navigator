@@ -230,7 +230,13 @@ class ListSites(VSFLoginRequiredMixin, TemplateView):
         sites = Site.objects.all().order_by('name')
 
         context = super().get_context_data()
-        context['sites'] = sites
+
+        # Generate the site form
+        siteForm = SiteForm()
+
+        # Return the context
+        context['site_creation_form']   = siteForm
+        context['sites']                = sites
 
         return context
 
