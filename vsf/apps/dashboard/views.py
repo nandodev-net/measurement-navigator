@@ -743,7 +743,11 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_asn',
             'measurement__raw_measurement__probe_cc',
             'site_name',
-            'measurement__anomaly'
+            'measurement__anomaly',
+            'status_code_match',
+            'headers_match',
+            'body_length_match',
+            'body_proportion'
         ]
 
     def get_initial_queryset(self):
@@ -775,7 +779,23 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         anomaly     = get.get('anomaly')
         until       = get.get('until')
         site        = get.get('site')
+        body_proportion_min = get.get('body_proportion_min')
+        body_proportion_max = get.get('body_proportion_max')
+        status_code_match   = get.get('status_code_match')
+        headers_match       = get.get('headers_match')
+        body_length_match   = get.get('body_length_match')
 
+        # Try to parse float values
+        try:
+            body_proportion_min = float(body_proportion_min)
+        except:
+            body_proportion_min = 0
+        
+        try:
+            body_proportion_max = float(body_proportion_max)
+        except:
+            body_proportion_max = 1
+        
         if input:
             qs = qs.filter(measurement__raw_measurement__input__contains=input)
         if since:
@@ -790,6 +810,18 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
+        if status_code_match:
+            qs = qs.filter(status_code_match= status_code_match.lower() == 'true')
+        if headers_match:
+            qs = qs.filter(headers_match= headers_match.lower() == 'true')
+        if body_length_match:
+            qs = qs.filter(body_length_match= body_length_match.lower() == 'true')
+        # avoid filtering border values since they add no information to the filter
+        if body_proportion_max != 1: 
+            qs = qs.filter(body_proportion__lt=body_proportion_max)
+        if body_proportion_min != 0:
+            qs = qs.filter(body_proportion__lt=body_proportion_min)
+        
 
         return qs
 

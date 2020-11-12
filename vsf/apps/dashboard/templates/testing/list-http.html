@@ -102,7 +102,7 @@
            </div>
          </div>
  
-         <div class="col-3 mt-3">
+         <div class="col-6 mt-3">
            <input
              id="input"
              class="form-control mr-2 additional-filter"
@@ -127,6 +127,85 @@
              </select>
            </div>
          </div>
+
+         <!-- Status code match -->
+         <div class="col-3 mt-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="status-code-match">Status Code</label>
+            </div>
+            <select id="status-code-match" class="custom-select additional-filter">
+              <option selected value="">Any</option>
+              <option value="false">Don't Match</option>
+              <option value="true">Match</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Headers match -->
+        <div class="col-3 mt-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="headers-match">Headers</label>
+            </div>
+            <select id="headers-match" class="custom-select additional-filter">
+              <option selected value="">Any</option>
+              <option value="false">Don't Match</option>
+              <option value="true">Match</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Body length match -->
+        <div class="col-3 mt-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="body-length-match">Body Length</label>
+            </div>
+            <select id="body-length-match" class="custom-select additional-filter">
+              <option selected value="">Any</option>
+              <option value="false">Don't Match</option>
+              <option value="true">Match</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Body proportion -->
+        <div class="col-6 mt-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="body-proportion-min">Min. Body Proportion </label>
+            </div>
+            <input 
+              id="body-proportion-min"  
+              class="additional-filter"
+              type="range" 
+              min="0" 
+              max="1" 
+              step="0.01" 
+              value="0"
+            >
+          </div>
+        </div>
+
+        <!-- Body proportion -->
+        <div class="col-6 mt-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="body-proportion-max">Max. Body Proportion </label>
+            </div>
+            <input 
+              id="body-proportion-max" 
+              class="additional-filter"
+              type="range" 
+              min="0" 
+              max="1" 
+              step="0.01" 
+              value="1"
+            >
+          </div>
+        </div>
+
        </div>
      </div>
    </nav>
