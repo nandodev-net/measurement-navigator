@@ -1,0 +1,206 @@
+<script>
+    $(document).ready(function () {
+        "use strict";
+
+        let oTable = $(".datatable").DataTable({
+            order: [[0, "desc"]],
+            columns: [
+                /*
+                =====================================
+                ROW DESCRIPTIONS
+                =====================================
+                */
+                {
+                data      : "measurement__raw_measurement__input",
+                orderable : true,
+                searchable: true
+                },
+                {
+                data      : "measurement__raw_measurement__measurement_start_time",
+                orderable : true,
+                searchable: true
+                },
+                {
+                data      : "measurement__raw_measurement__probe_asn",
+                orderable : true,
+                searchable: true
+                },
+                {
+                data      : "measurement__raw_measurement__probe_cc",
+                orderable : true,
+                searchable: true
+                },
+                {
+                data      : "site_name",
+                orderable : true,
+                searchable: true
+                },
+                {
+                data      : "measurement__anomaly",
+                orderable : true,
+                searchable: true
+                },
+                {
+                data      : "status_blocked",
+                orderable : true,
+                searchable: false
+                },
+                {
+                data      : "status_failure",
+                orderable : true,
+                searchable: false
+                },
+                {
+                data      : "status_success",
+                orderable : true,
+                searchable: false
+                },
+                {
+                data      : "ip",
+                orderable : true,
+                searchable: false
+                },
+            ],
+            searching : true,
+            processing: true,
+            serverSide: true,
+            rowId     : "measurement__id",
+            dom       : "Blrtip",
+            ajax      : {
+                /*
+                =====================================
+                CONFIGURATION FOR THE AJAX REQUEST TO THE SERVER
+                =====================================
+                */
+                url : '{% url "dashboard:list_tcp_data" %}',
+                data: function ( data ) {
+                    /*
+                        =====================================
+                        ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
+                        =====================================
+                    */
+        
+                    let site        = $("#site").val();
+                    let since       = $("#since").val();
+                    let until       = $("#until").val();
+                    let input       = $("#input").val();
+                    let asn         = $("#asn").val();
+                    let anomaly     = $("#anomaly-state").val();
+                    let country     = "";
+                    let status_blocked  = $("#status-blocked").val();
+                    let status_failure  = $("#status-failure").val();
+                    let status_success  = $("#status-success").val();
+                    let ip              = $("#ip").val();
+        
+                    if ( site )
+                        data.site = site;
+        
+                    if ( since )
+                        data.since = since;
+        
+                    if ( until )
+                        data.until = until;
+        
+                    if ( input )
+                        data.input = input;
+        
+                    if ( asn )
+                        data.asn = asn;
+        
+                    if ( anomaly )
+                        data.anomaly = anomaly;
+        
+                    if ( country )
+                        data.country = country;
+
+                    if ( status_blocked )
+                        data.status_blocked = status_blocked;
+                    
+                    if ( status_failure )
+                        data.status_failure = status_failure;
+                    
+                    if ( status_success )
+                        data.status_success = status_success;
+                        
+                    if ( ip )
+                        data.ip = ip
+                
+                },
+                type: "GET",
+            },
+            initComplete: function () {
+
+            },
+            select: true,
+            lengthChange: false,
+            buttons: [
+                {
+                text: "Get Measurement Data",
+                action: function ( e, dt, node, config ) {
+                    /*
+                    =====================================
+                    THIS FUNCTION IS CALLED WHENEVER THE 'GET MEASUREMENT DATA' BUTTON IS TRIGGERED
+                    =====================================
+                    */
+                    let data = dt.rows({ selected: true }).data();
+
+                    if ( data.length === 0 ) {
+                    Swal.fire({
+                        icon              : "warning",
+                        title             : "There is nothing selected!",
+                        confirmButtonColor: "#ffc107",
+                        confirmButtonText : "Continue"
+                    });
+                    return;
+                    }
+
+                    let id = data[0].measurement__id;
+                    $.ajax({
+                    type   : "GET",
+                    url    : '{% url "measurements:get_measurement" %}',
+                    data   : { id: id },
+                    success: function ( measurementData ) {
+                        Swal.fire({
+                        icon              : "success",
+                        title             : "Modal Coming Soon!",
+                        confirmButtonColor: "#28a745",
+                        confirmButtonText : "Continue"
+                        });
+
+                        console.log( measurementData );
+                    },
+                    error  : function ( jqXHR, textStatus, errorThrown ) {
+
+                        Swal.fire({
+                        icon              : "Error",
+                        title             : "There is an error in the inputs!",
+                        confirmButtonColor: "#28a745",
+                        confirmButtonText : "Continue"
+                        });
+                    }
+                    });
+                },
+                enabled: false
+                }
+            ]
+        });
+
+        /*
+        =====================================
+        TRIGGERED WHEN A CUSTOM FILTER IS SELECTED
+        =====================================
+        */
+        $(".additional-filter").change( ( e ) => oTable.draw() );
+
+        /*
+        =====================================
+        REQUIRED TO PERFORM ROW SELECTION
+        =====================================
+        */
+        oTable.on("select deselect", ( e ) => {
+
+        let selectedRows = oTable.rows( { selected: true } ).count();
+        oTable.button( 0).enable( selectedRows === 1 );
+        });
+    });
+</script>

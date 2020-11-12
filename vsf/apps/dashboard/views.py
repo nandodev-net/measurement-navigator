@@ -724,10 +724,20 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
     """
     template_name = "measurements-templates/list-http.html"
 
+    def get_context_data(self, **kwargs):
+        # Return the site list so we can perform some
+        # filtering based on the site
+
+        sites = Site.objects.all()
+
+        context =  super().get_context_data()
+        context['sites'] = sites
+        return context
+
 class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
     """
-        This is the back enf for showinf the HTTP submeasurement table. The dynamic
-        table talks to this view
+        This is the back end for the HTTP submeasurement table. The dynamic
+        table in "ListHTTPTemplate" talks to this view
     """
     columns = [
             'measurement__raw_measurement__input',
@@ -849,5 +859,134 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'headers_match' : item.headers_match,
                 'body_length_match' : item.body_length_match,
                 'body_proportion' : item.body_proportion,
+            })
+        return json_data
+
+class ListTCPTemplate(VSFLoginRequiredMixin, TemplateView):
+    """
+        This is the front-end view for showing the HTTP submeasurement
+        table. Note that this view is coupled to the ListDNSBackEnd view.
+    """
+    template_name = "measurements-templates/list-tcp.html"
+    def get_context_data(self, **kwargs):
+        # Return the site list so we can perform some
+        # filtering based on the site
+
+        sites = Site.objects.all()
+
+        context =  super().get_context_data()
+        context['sites'] = sites
+        return context
+
+class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
+    """
+        This is the back end for the HTTP submeasurement table. The dynamic
+        table in "ListHTTPTemplate" talks to this view
+    """
+    columns = [
+            'measurement__raw_measurement__input',
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__probe_cc',
+            'site_name',
+            'measurement__anomaly',
+            'status_blocking',
+            'status_failure',
+            'status_success',
+            'ip'
+        ]
+
+    order_columns = [
+            'measurement__raw_measurement__input',
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__probe_cc',
+            'site_name',
+            'measurement__anomaly',
+            'status_blocking',
+            'status_failure',
+            'status_success',
+            'ip'
+        ]
+
+    def get_initial_queryset(self):
+        urls = URL\
+                .objects\
+                .all()\
+                .select_related('site')\
+                .filter( url=OuterRef('measurement__raw_measurement__input') )
+
+        qs   = SubMeasModels.TCP.objects.all()\
+                .select_related('measurement')\
+                .select_related('measurement__raw_measurement')\
+                .annotate(
+                        site=Subquery(urls.values('site')),
+                        site_name=Subquery(urls.values('site__name'))
+                    )
+        return qs
+
+    def filter_queryset(self, qs):
+
+        get = self.request.GET or {}
+
+        # Get filter data
+
+        input       = get.get('input')
+        since       = get.get('since')
+        ASN         = get.get('asn')
+        country     = get.get('country')
+        anomaly     = get.get('anomaly')
+        until       = get.get('until')
+        site        = get.get('site')
+        status_blocked = get.get('status_blocked')
+        status_failure = get.get('status_failure')
+        status_success = get.get('status_success')
+        ip             = get.get('ip')
+        
+        if input:
+            qs = qs.filter(measurement__raw_measurement__input__contains=input)
+        if since:
+            qs = qs.filter(measurement__raw_measurement__measurement_start_time__gte=since)
+        if ASN:
+            qs = qs.filter(measurement__raw_measurement__probe_asn=ASN)
+        if country:
+            qs = qs.filter(measurement__raw_measurement__probe_cc=country)
+        if until:
+            qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
+        if site:
+            qs = qs.filter(site=site)
+        if anomaly:
+            qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
+        if status_blocked:
+            qs = qs.filter(status_blocked= status_blocked.lower() == 'true')
+        if status_failure:
+            qs = qs.filter(status_failure__contains= status_failure)
+        if status_success:
+            qs = qs.filter(status_success= status_success.lower() == 'true')
+        if ip: 
+            qs = qs.filter(ip__contains=ip)
+        
+        
+
+        return qs
+
+    def prepare_results(self, qs):
+        # prepare list with output column data
+        # queryset is already paginated here
+        json_data = []
+        for item in qs:
+            json_data.append({
+                'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
+                'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
+                'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
+                'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
+                'measurement__id' : item.measurement.id,
+                'site' : item.site,
+                'site_name' : item.site_name if item.site_name else "(no site)",
+                'measurement__anomaly' : item.measurement.anomaly,
+                'status_blocked' : item.status_blocked,
+                'status_failure' : item.status_failure or "N/A",
+                'status_success' : item.status_success,
+                'ip' : item.ip,
             })
         return json_data

@@ -39,7 +39,8 @@ urlpatterns = [
     path('measurements/dns_data',           views.ListDNSBackEnd.as_view(),            name='list_dns_data'),
     path('measurements/http',               views.ListHTTPTemplate.as_view(),          name='list_http'),
     path('measurements/http_data',          views.ListHTTPBackEnd.as_view(),           name='list_http_data'),
-
+    path('measurements/tcp',               views.ListTCPTemplate.as_view(),            name='list_tcp'),
+    path('measurements/tcp_data',          views.ListTCPBackEnd.as_view(),             name='list_tcp_data'),
     #   Sites
     path('pages',                           views.ListUrls.as_view(),               name="list_urls"),
     path('list_sites',                      views.ListSites.as_view(),              name="list_sites"),
