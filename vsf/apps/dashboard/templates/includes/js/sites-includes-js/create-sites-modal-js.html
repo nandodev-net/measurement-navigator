@@ -1,9 +1,9 @@
 <!--
   ========================================
-  THIS SCRIPT IS INTENDED TO BE COUPLED WITH THE CREATE-ALIAS-MODAL.HTML
+  THIS SCRIPT IS INTENDED TO BE COUPLED WITH THE CREATE-SITES-MODAL.HTML
 
   INCLUDE THIS HTML IN THE CUSTOM SCRIPT BLOCK IN THE TEMPLATE THAT INCLUDES
-  CREATE-ALIAS-MODAL.HTML
+  CREATE-SITES-MODAL.HTML
   ========================================
 -->
 
@@ -15,19 +15,19 @@
   ========================================
   */
 
-  if ($("#vsf-alias-input").val() === "") {
+  if ($("#vsf-sites-input").val() === "") {
 
-    $("#create-alias-btn").prop("disabled", true);
+    $("#create-sites-btn").prop("disabled", true);
   }
 
   if ($("#vsf-description-input").val() === "") {
 
-    $("#create-alias-btn").prop("disabled", true);
+    $("#create-sites-btn").prop("disabled", true);
   }
 
-  $("#vsf-alias-input").keyup(function () {
+  $("#vsf-sites-input").keyup(function () {
 
-    $("#create-alias-btn").prop("disabled", this.value.trim() === "" ? true : false);
+    $("#create-sites-btn").prop("disabled", this.value.trim() === "" ? true : false);
   });
 
   /*
@@ -36,7 +36,7 @@
   ========================================
   */
 
-  $("#create-alias-btn").click(function ( event ) {
+  $("#create-sites-btn").click(function ( event ) {
 
     "use strict";
     event.preventDefault();
@@ -56,7 +56,7 @@
         if ( data.error === null ) {
           Swal.fire({
             icon              : "success",
-            title             : "The alias has been created!",
+            title             : "The site has been created!",
             confirmButtonColor: "#28a745",
             confirmButtonText : "Continue"
           }).then((result) => {
@@ -68,7 +68,12 @@
           });
         }
         else {
-          alert("REINALDO DEJA DE IGNORAR EL ERROR HANDLING")
+          Swal.fire({
+            icon              : "success",
+            title             : "The name's site is already in use!",
+            confirmButtonColor: "#dc3545",
+            confirmButtonText : "Continue"
+          })
         }
       },
       error: function ( XMLHttpRequest, textStatus, errorThrown ) {

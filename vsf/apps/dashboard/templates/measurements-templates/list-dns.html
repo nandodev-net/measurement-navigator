@@ -23,10 +23,11 @@
 <li class="breadcrumb-item">
   <a href="{% url home %}">Home</a>
 </li>
+<li class="breadcrumb-item active">Measurements</li>
 <li class="breadcrumb-item">
-  <a href="{% url 'dashboard:list_measurements' %}">Measurements</a>
+  <a href="{% url 'dashboard:list_dns' %}">DNS List</a>
 </li>
-<li class="breadcrumb-item active">DNS</li>
+
 {% endblock route %}
 
 {% block content %}

@@ -5,7 +5,7 @@
     - custom_stylesheet: for additional styling
     - title: Main Page title
     - sub_title: small additional title below the title
-    - site_route: breadcrum showing the site navigation route
+    - site_route: breadcrumb showing the site navigation route
     - route: the navigation route itself
     - content: main page body
     - scripts: page scripts
@@ -14,7 +14,7 @@
 
 {% load static %}
 
-{% with home='dashboard:home' logout='dashboard:logout' list_fastpath='dashboard:list_fastpath' list_events='dashboard:list_events' list_cases='dashboard:list_cases' list_categories='dashboard:list_categories' new_category='dashboard:new_category' list_muted_inputs='dashboard:list_muted_inputs' list_probes='dashboard:list_probes' list_urls='dashboard:list_urls' list_sites='dashboard:list_sites' list_measurements='dashboard:list_measurements' list_dns='dashboard:list_dns' %}
+{% with home='dashboard:home' logout='dashboard:logout' list_fastpath='dashboard:list_fastpath' list_events='dashboard:list_events' list_cases='dashboard:list_cases' list_categories='dashboard:list_categories' new_category='dashboard:new_category' list_muted_inputs='dashboard:list_muted_inputs' list_probes='dashboard:list_probes' list_urls='dashboard:list_urls' list_sites='dashboard:list_sites' list_measurements='dashboard:list_measurements' list_dns='dashboard:list_dns' list_http='dashboard:list_http' %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -62,7 +62,6 @@
       <a class="navbar-brand mr-auto" href="{% url home %}">VSF</a>
 
       <div class="collapse navbar-collapse navbar-collapse-fix">
-        
 
         <ul class="navbar-nav">
           <li class="nav-item dropdown">
@@ -330,6 +329,7 @@
                 <nav class="sb-sidenav-menu-nested nav">
                   <a class="nav-link" href="{% url list_measurements %}"> Measurement List </a>
                   <a class="nav-link" href="{% url list_dns %}"> DNS List </a>
+                  <a class="nav-link" href="{% url list_http %}"> HTTP List </a>
                 </nav>
               </div>
             </li>
