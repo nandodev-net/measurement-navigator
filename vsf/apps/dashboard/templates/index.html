@@ -40,7 +40,7 @@
           </div>
         </div>
 
-        <div class="col-6">
+        <div class="col-3">
           <div class="input-group mr-2">
             <div class="input-group-prepend">
               <label class="input-group-text" for="asn">ASN</label>
@@ -73,6 +73,21 @@
               <option value="AS27686">
                 Universidad Centro Occidental Lisandro Alvarado
               </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="col-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="data-ready">Data Ready</label>
+            </div>
+            <select class="custom-select" id="data-ready">
+              <option selected value="">Any</option>
+              <option value="ready">Ready</option>
+              <option value="not_ready">Not Ready</option>
+              <option value="undetermined">Undetermined</option>
+              <option value="dead">Dead</option>
             </select>
           </div>
         </div>
@@ -170,17 +185,21 @@
         </td>
 
         <!-- STATE -->
-        {% if measurement.report_ready == True %}
+        {% if measurement.data_ready == 'ready' %}
         <td class="text-center">
-          <i class="far fa-check-circle text-success"></i>
+          <i class="far fa-check-circle text-success" title="Report Stored"></i>
         </td>
-        {% elif measurement.report_ready == False %}
-        <td class="text-center">
+        {% elif measurement.data_ready == 'not_ready' %}
+        <td class="text-center" title="Report Not Available Yet">
           <i class="fas fa-ban text-danger"></i>
         </td>
-        {% else %}
-        <td class="text-center">
+        {% elif measurement.data_ready == 'undetermined' %}
+        <td class="text-center" title="Missing report">
           <i class="fas fa-exclamation-triangle text-warning"></i>
+        </td>
+        {% else %}
+        <td class="text-center" title="Ignored Measurement" >
+          <i class="fas fa-skull-crossbones text-disabled"></i>
         </td>
         {% endif %}
 
@@ -444,7 +463,8 @@
     testName: "{{ search_params.testName }}",
     input   : "{{ search_params.input }}",
     asn     : "{{ search_params.asn }}",
-    anomaly : "{{ search_params.anomaly }}"
+    anomaly : "{{ search_params.anomaly }}",
+    data_ready : "{{ search_params.data_ready }}"
   };
 
   let since    = data.since;
@@ -453,6 +473,7 @@
   let input    = data.input;
   let asn      = data.asn;
   let anomaly  = data.anomaly;
+  let data_ready = data.data_ready;
 
   (function () {
     $("#since").val(since);
@@ -472,6 +493,7 @@
     input    = $("#input").val();
     asn      = $("#asn").val();
     anomaly  = $("#anomaly-state").val();
+    data_ready = $("#data-ready").val();
 
     urlSearch = "{% url home %}";
 
@@ -482,7 +504,8 @@
       testName: testName,
       input   : input,
       asn     : asn,
-      anomaly : anomaly
+      anomaly : anomaly,
+      data_ready : data_ready
     };
 
     let url = urlSearch + "?" + $.param(data);

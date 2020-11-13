@@ -111,6 +111,11 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
         if (anomaly != None and anomaly != ""):
             fp_inbox = fp_inbox.filter(anomaly=anomaly == "true")
 
+        data_ready = req.get("data_ready")
+        print(data_ready)
+        if data_ready:
+            fp_inbox = fp_inbox.filter(data_ready=data_ready)
+
         current_page = self._paginate(fp_inbox)
 
         context['inbox_measurements'] = current_page
@@ -449,7 +454,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         test_types = list(map(lambda m: {'name':m[1], 'value':m[0]}, test_types))
 
         # Now the available sites:
-        sites = Site.objects.all().values('name', 'description', 'id')
+        sites = Site.objects.all().values('name', 'description_eng', 'id')
 
         # Get the pre-fill search fields
         get = self.request.GET or {}
