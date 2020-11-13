@@ -49,7 +49,8 @@ class CreateSiteView(VSFLoginRequiredMixin, CreateView):
         with the site name and description. Its post request expects the following
         fields in the request
             'name' : string         # Unique name for this site
-            'description' : string  # Description for this site
+            'description_spa' : string  # Spanish description for this site
+            'description_eng' : string  # Optional English description for this site
 
         After the request is processed, a json is returned with the error information.
         The possible responses:
@@ -57,7 +58,7 @@ class CreateSiteView(VSFLoginRequiredMixin, CreateView):
             'error' : null | 'unvalid_fields'# A string specifying type of error, or null if no errors
         }
     """
-    fields = ['name', 'description']
+    fields = ['name', 'description_spa', 'description_eng']
     model  = Site
 
     def form_invalid(self, form):

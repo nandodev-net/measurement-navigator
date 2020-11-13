@@ -13,7 +13,11 @@ class Site(models.Model):
                 null=False, 
                 max_length=40
             )
-    description = models.TextField()    # A simple description for the site
+    description_spa = models.TextField()    # A simple spanish description for the site 
+
+    description_eng = models.TextField(     # A simple English description for this site (optional)
+                    null = True 
+            )
 
 class URL(models.Model):
     """

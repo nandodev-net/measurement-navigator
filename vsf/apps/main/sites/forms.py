@@ -10,4 +10,4 @@ class SiteForm(ModelForm):
     """
     class Meta:
         model = Site
-        fields = ['name', 'description']
+        fields = ['name', 'description_spa', 'description_eng']
