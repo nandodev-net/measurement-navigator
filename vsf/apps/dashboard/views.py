@@ -449,7 +449,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         test_types = list(map(lambda m: {'name':m[1], 'value':m[0]}, test_types))
 
         # Now the available sites:
-        sites = Site.objects.all().values('name', 'description', 'id')
+        sites = Site.objects.all().values('name', 'description_spa', 'description_eng', 'id')
 
         # Get the pre-fill search fields
         get = self.request.GET or {}
