@@ -111,6 +111,11 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
         if (anomaly != None and anomaly != ""):
             fp_inbox = fp_inbox.filter(anomaly=anomaly == "true")
 
+        data_ready = req.get("data_ready")
+        print(data_ready)
+        if data_ready:
+            fp_inbox = fp_inbox.filter(data_ready=data_ready)
+
         current_page = self._paginate(fp_inbox)
 
         context['inbox_measurements'] = current_page

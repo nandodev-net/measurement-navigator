@@ -56,6 +56,16 @@ class FastPath(models.Model):
 		TOR = 'tor'
 		UNKNOWN = 'unknown'
 
+	class DataReady(models.TextChoices):
+		"""
+			The DataReady Enum lists all the possible states that a fastpath measurement
+			can adopt
+		"""
+		READY 		 = "ready" # The entire measurement is stored in the database
+		NOT_READY 	 = "not_ready" # The measurement is not supposed to be available in the ooni api yet
+		UNDETERMINED = "undetermined" # The measurement should be available in the ooni api, but we could not found it
+		DEAD		 = "dead" #The measurement could not be found for a long time, so it will be ignored
+
 	anomaly = models.BooleanField(default=False)
 	confirmed = models.BooleanField(default=False)
 	failure = models.BooleanField(default=False)
@@ -69,5 +79,10 @@ class FastPath(models.Model):
 	scores = JSONField()
 	test_name = models.CharField(choices=Ootest.choices, max_length=40)
 	# The following fields are defined by our database logic.
-	report_ready = models.NullBooleanField(default=False)
+	report_ready = models.NullBooleanField(default=False) # DEPRECATE LATER
+	#	data_ready = enum that checks if the measurement is ready, not ready, undefined or dead
+	data_ready = models.CharField(max_length=20, null=False, choices=DataReady.choices, default=DataReady.NOT_READY) 
+	#	when was this measurement catched ?
 	catch_date = models.DateTimeField(default=timezone.now)
+	#	how many times we tried to retrieve this measurement from the ooni api
+	trys = models.IntegerField(null=False, default=0)	

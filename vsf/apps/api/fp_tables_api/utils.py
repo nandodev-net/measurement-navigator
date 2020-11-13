@@ -83,7 +83,7 @@ def checkPostData(data) -> bool:
 
         return True
 
-def request_fp_data(since: str, until: str, from_fastpath = True) -> (int, [str]):
+def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int, [str]):
     """
         Given the start and end date for a set of measurements, 
         perform a get request to ooni in order to get the 
@@ -178,12 +178,16 @@ def request_fp_data(since: str, until: str, from_fastpath = True) -> (int, [str]
 
 def update_measurement_table(
                             n_measurements : int = None,
-                            test_name      : str = None
-                            ):
+                            test_name      : str = None,
+                            retrys         : int = -1
+                            ) -> dict:
     """
         Store at the most 'n_measurements' ready measurements of type 'test_name' 
         into the  database. Defaults to all measurements yo can add, for
         any kind of measurement. 
+
+        Set the measurements with a 'try' value greater than 'retrys' as DEAD. 
+        If 'retrys' is negative, then it is never set to DEAD, no matter how many trys it has.
 
         This function will update the Measurement table
         and the fast path table depending on the availability of 
@@ -194,15 +198,20 @@ def update_measurement_table(
         perform a request for the measurementl.
         If the measurement is available, change report_ready to true and
         create a new measurement object in the database. Otherwise, 
-        report_ready is set to null
+        report_ready is set to null.
+
+        Returns a dict with two fields:
+            success: Ammount of new measurements succesfully saved
+            error:   Ammount of undetermined measurements
     """
     # from apps.api.fp_tables_api.utils import update_measurement_table
 
     treshold = timezone.now() - timezone.timedelta(days=1)
     # Get interesting measurements:
     fpMeasurements =    FastPath.objects\
-                                .exclude(report_ready=True)\
-                                .filter(measurement_start_time__lt=treshold)
+                                .exclude(data_ready=FastPath.DataReady.READY)\
+                                .exclude(data_ready=FastPath.DataReady.DEAD)\
+                                .filter(catch_date__lt=treshold)
 
     # Filter by test_name
     if test_name:
@@ -216,8 +225,8 @@ def update_measurement_table(
 
     # Save the measurements at the end 
     # in case something fails 
-    meas_to_save = []
-    new_measurements = []
+    meas_to_save = []       # Measurements with errors 
+    new_measurements = []   # New Measurements with their fp equivalent
     for fp in fpMeasurements:
         
         # Ask for the measurement based on its report id
@@ -335,19 +344,40 @@ def update_measurement_table(
         #new_measurements.append(new_measurement)
         #meas_to_save.append(fp)
 
+    results = {
+        "success" : 0, # ammount of succesfully saved new measurements
+        "error"   : 0, # ammount of undetermined measurements
+    }
     for fp in meas_to_save:
+        results["error"] += 1
+        if retrys >= 0 and fp.trys > retrys:
+            fp.data_ready = FastPath.DataReady.DEAD
+        else:
+            fp.data_ready = FastPath.DataReady.UNDETERMINED
+            fp.trys += 1
+        
         fp.save()
     
     for (meas, fp) in new_measurements:
         try:
             meas.save()
+            fp.data_ready = FastPath.DataReady.READY
+            results["success"] += 1
+
         except Exception as e:
             print("Could not save measurement: ", fp.input, ", ", fp.measurement_start_time)
             print("Could not save measurement: ", meas.input, ", ", meas.measurement_start_time)
             print("Error", e)
             fp.report_ready = None
+            # set this measurement as undetermined and increse its number of trys
+            fp.data_ready = FastPath.DataReady.UNDETERMINED
+            fp.trys += 1
+
+            results["error"] += 1
 
         try:
             fp.save() 
         except:
             pass
+
+    return results
