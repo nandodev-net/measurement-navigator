@@ -37,4 +37,4 @@ def measurement_update():
         request a small ammount of them periodically rather than requesting them 
         all at the same time
     """
-    return update_measurement_table(1000, retrys=3)
+    return update_measurement_table(200, retrys=3)
