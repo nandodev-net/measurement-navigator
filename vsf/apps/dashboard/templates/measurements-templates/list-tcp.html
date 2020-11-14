@@ -1,12 +1,12 @@
 <!--
   ========================================
-  MAIN DNS LISTING
+  MAIN TCP LISTING
   ========================================
  -->
 
  {% extends 'extends/base.html' %}
  {% load static %}
- 
+
  {% block custom_stylesheet %}
  <link
    rel="stylesheet"
@@ -14,11 +14,11 @@
    href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.22/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/sl-1.3.1/datatables.min.css"
  />
  {% endblock custom_stylesheet %}
- 
+
  {% block tab_title %} VSF - TCP {% endblock tab_title %}
  {% block title %} TCP {% endblock title %}
  {% block sub_title %} List and filter all the currently available TCP Sub-measurements {% endblock sub_title %}
- 
+
  {% block route %}
  <li class="breadcrumb-item">
    <a href="{% url home %}">Home</a>
@@ -29,9 +29,9 @@
  <li class="breadcrumb-item active">
    TCP
  </li>
- 
+
  {% endblock route %}
- 
+
  {% block content %}
  <form id="urlForm">
    <nav class="navbar navbar-light bg-light mb-5">
@@ -45,7 +45,7 @@
              <input id="since" class="form-control mr-2 additional-filter" type="date" />
            </div>
          </div>
- 
+
          <div class="col-3">
            <div class="input-group">
              <div class="input-group-prepend">
@@ -54,7 +54,7 @@
              <input id="until" class="form-control mr-2 additional-filter" type="date" />
            </div>
          </div>
- 
+
          <div class="col-6">
            <div class="input-group mr-2">
              <div class="input-group-prepend">
@@ -91,7 +91,7 @@
              </select>
            </div>
          </div>
- 
+
          <div class="col-3 mt-3">
            <div class="input-group mr-2">
              <div class="input-group-prepend">
@@ -104,7 +104,7 @@
              </select>
            </div>
          </div>
- 
+
          <div class="col-6 mt-3">
            <input
              id="input"
@@ -114,7 +114,7 @@
              aria-label="Search URL"
            />
          </div>
- 
+
          <div class="col-3 mt-3">
            <div class="input-group mr-sm-2">
              <div class="input-group-prepend">
@@ -130,7 +130,7 @@
              </select>
            </div>
          </div>
-        
+
         <!-- Status Blocked -->
         <div class="col-3 mt-3">
             <div class="input-group mr-2">
@@ -184,7 +184,7 @@
        </div>
      </div>
    </nav>
- 
+
    <div class="w-100 overflow-auto">
      <table class="table table-striped mt-5 datatable" id="my-table">
        <thead>
@@ -201,15 +201,15 @@
            <th class="text-center text-capitalize" scope="col">IP</th>
          </tr>
        </thead>
- 
+
        <tbody></tbody>
- 
+
        <tfoot></tfoot>
- 
+
      </table>
    </div>
  </form>
- 
+
  <!-- Modal -->
  <div
    class="modal fade"
@@ -219,15 +219,14 @@
    aria-labelledby="modalCompleteInfoTitle"
    aria-hidden="true"
  ></div>
- 
+
  {% endblock content %}
- 
+
  {% block custom_scripts %}
  <script
    type="text/javascript"
    src="https://cdn.datatables.net/v/bs4/jqc-1.12.4/jszip-2.5.0/dt-1.10.22/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/sl-1.3.1/datatables.min.js"
  ></script>
- 
+
  {% include "includes/js/measurements-includes-js/list-tcp-dt-js.html" %}
  {% endblock custom_scripts %}
- 
