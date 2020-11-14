@@ -1,3 +1,8 @@
+/*
+=====================================
+THIS IS SCSS FILE THAT CONTAINS SOME MISC CUSTOM RULES
+=====================================
+*/
 .vsf-flex-grow-1 {
   -webkit-box-flex: 1;
       -ms-flex-positive: 1;
@@ -11,5 +16,12 @@ textarea.vsf-form-control {
 
 .dt-buttons-custom {
   width: 49.98888888%;
+}
+
+.vsf-append-input-range {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  width: 1%;
 }
 /*# sourceMappingURL=vsf-utilities.css.map */

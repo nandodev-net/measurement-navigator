@@ -1,6 +1,9 @@
-/**************************************
- * THIS IS THE MAIN FILE FOR SCSS RULES
- **************************************/
+@charset "UTF-8";
+/*
+=====================================
+THIS IS THE MAIN FILE FOR SCSS RULES
+=====================================
+*/
 #layoutAuthentication {
   display: flex;
   flex-direction: column;
@@ -145,6 +148,12 @@
   color: #fff;
 }
 
+/*
+=====================================
+THIS IS THE SCSS FILE FOR CUSTOM RULES THAT
+FIXES SOME SIZES ON THE TEMPLATE
+=====================================
+*/
 .pt-fix {
   padding-top: 56px;
 }
@@ -170,6 +179,11 @@
   flex-grow: 0;
 }
 
+/*
+=====================================
+THIS IS SCSS FILE THAT CONTAINS SOME MISC CUSTOM RULES
+=====================================
+*/
 .vsf-flex-grow-1 {
   flex-grow: 1;
 }
@@ -183,6 +197,19 @@ textarea.vsf-form-control {
   width: 49.98888888%;
 }
 
+.vsf-append-input-range {
+  flex: 1 1 auto;
+  width: 1%;
+}
+
+/*
+=====================================
+THIS IS SCSS FILE THAT APPLIES SOME CUSTOMIZATIONS
+TO THE DATATABLE´S VIEW
+
+`!DEFAULT` ALLOWS OVERRIDING VARIABLES THAT ARE DEFINED BEFORE @IMPORT
+=====================================
+*/
 /*
  * Table styles
  */
