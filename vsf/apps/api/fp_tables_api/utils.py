@@ -8,9 +8,9 @@ from rest_framework.generics    import  (
     RetrieveUpdateAPIView,
 )
 from rest_framework.status      import  (
-    HTTP_200_OK, 
-    HTTP_201_CREATED, 
-    HTTP_204_NO_CONTENT, 
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
     HTTP_412_PRECONDITION_FAILED
@@ -36,12 +36,12 @@ from apps.main.measurements.models      import RawMeasurement
 
 def checkPostData(data) -> bool:
         """
-        This function will check if the input data on the post request is valid. 
+        This function will check if the input data on the post request is valid.
         The input data should contain:
             since: measurement since this date (date in string format)
-            until: measurement until this date (date in string format) 
+            until: measurement until this date (date in string format)
             probe_cc: 2 chars country code
-        
+
         The dates are expected to be in the following format: YYYY-mm-dd
         """
 
@@ -56,7 +56,7 @@ def checkPostData(data) -> bool:
         # Check if every field is a string
         if (not isinstance(since, str)) or (not isinstance(until,str)) or (not isinstance(probe_cc,str)):
             print("bad types")
-            return False 
+            return False
 
         # Check valid fields
         if (since == None) or (until == None) or (probe_cc == None):
@@ -73,24 +73,24 @@ def checkPostData(data) -> bool:
             datetime.datetime.strptime(until, date_format)
         except:
             return False
-        
+
         # Check country code has 2 chars & uppercase (ooni requires it to be upper)
         if len(probe_cc) != 2 or not probe_cc.isupper():
             # Warning: It's still possible that the country code is not valid,
             # further validation will be performed during the database queryng
             return False
-        
+
 
         return True
 
 def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int, [str]):
     """
-        Given the start and end date for a set of measurements, 
-        perform a get request to ooni in order to get the 
-        recent fast path objects and store them in the database. 
-        
-        The function returns the status code for the ooni request 
-        and a list of tid corresponding to the actually added measurements. 
+        Given the start and end date for a set of measurements,
+        perform a get request to ooni in order to get the
+        recent fast path objects and store them in the database.
+
+        The function returns the status code for the ooni request
+        and a list of tid corresponding to the actually added measurements.
 
         both the since and until date should be in the following format:
         YYYY-mm-dd.
@@ -105,13 +105,13 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int,
 
     # Check if the post data is valid:
     if not checkPostData(data):
-        raise AttributeError("Unvalid input arguments. Given: \n" + 
-                                "   Since: " + since + "\n" + 
+        raise AttributeError("Unvalid input arguments. Given: \n" +
+                                "   Since: " + since + "\n" +
                                 "   Until: " + until)
 
     # Perform a get request from Ooni
     next_url = 'https://api.ooni.io/api/v1/measurements?' + urlencode(data)
-        
+
     objects = [] # List of measurement objects obtained
     while next_url != None:
         try:
@@ -124,17 +124,17 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int,
 
         # Since everything went ok, we get the data in json format
         data = req.json()
-        metadata = data['metadata'] 
+        metadata = data['metadata']
         next_url = metadata.get('next_url')
         if from_fastpath:
             results = filter(
             # since we just care about fast path data, we filter the ones whose measurement_id begins with
             # 'temp-fid' according to what Federico (from ooni) told us
-            # UPDATE: by today, measurement_id is not reported by the ooni queries, so 
+            # UPDATE: by today, measurement_id is not reported by the ooni queries, so
             # we can't rely on it to check whether a measurement comes from the fastpath or not.
-            # @TODO               
-            lambda res: 
-                    res.get('measurement_id',"").startswith("temp-fid"), 
+            # @TODO
+            lambda res:
+                    res.get('measurement_id',"").startswith("temp-fid"),
                 data['results']
             )
         else:
@@ -158,21 +158,21 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int,
             )
             URL.objects.get_or_create(url=fp.input)
             objects.append(fp)
-    
 
-    # Save only if this measurement does not exists    
+
+    # Save only if this measurement does not exists
     saved_measurements = []
     for fp in objects:
-        try: 
+        try:
             FastPath.objects.get(
-                        measurement_start_time=fp.measurement_start_time, 
+                        measurement_start_time=fp.measurement_start_time,
                         input=fp.input,
                         report_id=fp.report_id,
                         test_name=fp.test_name)
         except:
             fp.save()
             saved_measurements.append(fp.id)
-    
+
     return (req.status_code, saved_measurements)
 
 
@@ -182,22 +182,22 @@ def update_measurement_table(
                             retrys         : int = -1
                             ) -> dict:
     """
-        Store at the most 'n_measurements' ready measurements of type 'test_name' 
+        Store at the most 'n_measurements' ready measurements of type 'test_name'
         into the  database. Defaults to all measurements yo can add, for
-        any kind of measurement. 
+        any kind of measurement.
 
-        Set the measurements with a 'try' value greater than 'retrys' as DEAD. 
+        Set the measurements with a 'try' value greater than 'retrys' as DEAD.
         If 'retrys' is negative, then it is never set to DEAD, no matter how many trys it has.
 
         This function will update the Measurement table
-        and the fast path table depending on the availability of 
+        and the fast path table depending on the availability of
         measurements in the fast path table.
-        
+
         Get every measurement in the database whose report_ready
-        is set to false or None, and whose catch_date - now > 24h. 
+        is set to false or None, and whose catch_date - now > 24h.
         perform a request for the measurementl.
         If the measurement is available, change report_ready to true and
-        create a new measurement object in the database. Otherwise, 
+        create a new measurement object in the database. Otherwise,
         report_ready is set to null.
 
         Returns a dict with two fields:
@@ -220,24 +220,24 @@ def update_measurement_table(
     # Limit to n_measurements
     if n_measurements:
         fpMeasurements = fpMeasurements[:n_measurements]
-    
+
     measurements_url = "https://api.ooni.io/api/v1/measurements"
 
-    # Save the measurements at the end 
-    # in case something fails 
-    meas_to_save = []       # Measurements with errors 
+    # Save the measurements at the end
+    # in case something fails
+    meas_to_save = []       # Measurements with errors
     new_measurements = []   # New Measurements with their fp equivalent
     for fp in fpMeasurements:
-        
+
         # Ask for the measurement based on its report id
         # Note that the 'limit' number needs to be high enough, so we don't need to paginate.
         try:
             req = requests.get(
-                measurements_url, 
+                measurements_url,
                 params={
                     "report_id" : fp.report_id,
                     "input" : fp.input,
-                    "limit":5000 
+                    "limit":5000
                 })
         except:
             print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
@@ -253,16 +253,16 @@ def update_measurement_table(
             fp.report_ready = None
             meas_to_save.append(fp)
             continue
-        
+
         data = req.json()
         data = data.get("results")
 
         if data == None:
             raise AttributeError("Unexpected data format from Ooni")
-        
+
         measurement = filter(
-            lambda d: 
-                dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time, 
+            lambda d:
+                dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time,
             data) # Search for the one whose start_time matches with this measurement's start time
 
         measurement = list(measurement)
@@ -272,7 +272,7 @@ def update_measurement_table(
             fp.report_ready = None
             meas_to_save.append(fp)
             continue
-        
+
         # Get the measurement data
         measurement = measurement[0]
 
@@ -281,7 +281,7 @@ def update_measurement_table(
         new_url = measurement.get("measurement_url")
         if new_url != fp.measurement_url and new_url != None:
             fp.measurement_url = new_url
-        
+
         # Request data for the Measurement Table
         try:
             req = requests.get(fp.measurement_url)
@@ -293,7 +293,7 @@ def update_measurement_table(
             continue
 
 
-        # If data could not be found or a network error ocurred, 
+        # If data could not be found or a network error ocurred,
         # mark this as incomplete and process the following measurements
         if req.status_code != 200:
             print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
@@ -303,12 +303,12 @@ def update_measurement_table(
             continue
 
         data = req.json()
-        
+
         # Update the id if it has changed
-        new_id = data.get("id") 
+        new_id = data.get("id")
         if new_id != fp.tid and new_id != None:
             fp.tid = new_id
-            
+
         # If there's no id, then we have some unconsistent data
         if new_id == None:
             print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
@@ -355,9 +355,9 @@ def update_measurement_table(
         else:
             fp.data_ready = FastPath.DataReady.UNDETERMINED
             fp.trys += 1
-        
+
         fp.save()
-    
+
     for (meas, fp) in new_measurements:
         try:
             meas.save()
@@ -376,7 +376,7 @@ def update_measurement_table(
             results["error"] += 1
 
         try:
-            fp.save() 
+            fp.save()
         except:
             pass
 

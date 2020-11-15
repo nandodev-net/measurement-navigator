@@ -112,7 +112,7 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
             fp_inbox = fp_inbox.filter(anomaly=anomaly == "true")
 
         data_ready = req.get("data_ready")
-        print(data_ready)
+
         if data_ready:
             fp_inbox = fp_inbox.filter(data_ready=data_ready)
 

@@ -226,6 +226,13 @@ textarea.vsf-form-control {
   width: 49.98888888%;
 }
 
+.vsf-append-input-range {
+  -webkit-box-flex: 1;
+      -ms-flex: 1 1 auto;
+          flex: 1 1 auto;
+  width: 1%;
+}
+
 /*
 =====================================
 THIS IS SCSS FILE THAT APPLIES SOME CUSTOMIZATIONS
