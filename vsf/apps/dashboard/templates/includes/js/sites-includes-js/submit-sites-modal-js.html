@@ -14,9 +14,8 @@
 
   let selectedPages = [];
 
-  $("#submitConfirmationModal").on("show.bs.modal", function ( e ) {
+  $("#submitAddSiteModal").on("show.bs.modal", function ( e ) {
     "use strict";
-    console.log('entro')
     // GET EVERY SELECTED URL
     let pages = $('[class="associate-page"]:checked')
       .toArray()

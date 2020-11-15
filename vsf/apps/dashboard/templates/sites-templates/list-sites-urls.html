@@ -118,7 +118,7 @@
         type="button"
         class="btn btn-primary"
         data-toggle="modal"
-        data-target="#submitConfirmationModal"
+        data-target="#submitAddSiteModal"
       >
         Add to Site
       </button>
@@ -162,7 +162,7 @@
 {% endblock content %}
 {% block custom_scripts %}
 <script>
-  $("#submitConfirmationModal").on("show.bs.modal", function ( event ) {
+  $("#submitAddSiteModal").on("show.bs.modal", function ( event ) {
     $("#associateUrl").modal("hide");
   });
 </script>
