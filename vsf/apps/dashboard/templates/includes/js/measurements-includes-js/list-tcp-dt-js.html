@@ -160,14 +160,9 @@
                     url    : '{% url "measurements:get_measurement" %}',
                     data   : { id: id },
                     success: function ( measurementData ) {
-                        Swal.fire({
-                        icon              : "success",
-                        title             : "Modal Coming Soon!",
-                        confirmButtonColor: "#28a745",
-                        confirmButtonText : "Continue"
-                        });
 
                         console.log( measurementData );
+
                         $("#annotations-detailed").html( prettyPrintJson.toHtml(measurementData["annotations"]) );
                         $("#bucket-date-detailed").text(measurementData["bucket_date"]);
                         $("#data-format-version-detailed").text(measurementData["data_format_version"]);
