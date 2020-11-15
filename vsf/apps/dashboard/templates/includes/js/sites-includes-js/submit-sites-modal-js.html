@@ -12,17 +12,17 @@
   // THIS EVENT WILL CATCH EVERY CHECKED URL IN THE ARRAY
   // AND IT WILL PRINT THEM IN THE MODAL TABLE
 
-  let selectedPages = [];
+  var selectedPages = [];
 
   $("#submitAddSiteModal").on("show.bs.modal", function ( e ) {
     "use strict";
     // GET EVERY SELECTED URL
-    let pages = $('[class="associate-page"]:checked')
+    var pages = $('[class="associate-page"]:checked')
       .toArray()
       .map( ( checkBox ) => ( { url: checkBox.dataset.vsfurl, id: checkBox.id } ) );
 
     // GET THE MODAL TABLE
-    let $table = $("#vsf-grouped-sites");
+    var $table = $("#vsf-grouped-sites");
 
     // APPEND AN ENTRY TO THE TABLE FOR EACH SELECTED ELEMENT
     $table.empty();
@@ -53,13 +53,13 @@
     }
 
     // SET OF PAGES ID'S TO RELATE TO THE RIGHT SITE
-    let pagesIds = selectedPages.map( v => v.id );
+    var pagesIds = selectedPages.map( v => v.id );
 
     // URL TO SEND HTTP REQUEST
-    let url = "{% url list_urls %}";
+    var url = "{% url list_urls %}";
 
     // SITE TO RELATE TO THIS SET OF URLS. SELECT THE INPUT THAT ITS CHECKED
-    let site = $("input[name=selected-site]:checked").toArray();
+    var site = $("input[name=selected-site]:checked").toArray();
 
     if ( site.length === 0 ) {
 
@@ -70,7 +70,7 @@
     site = site[0].id;
 
     // DATA TO SEND WITH AJAX
-    let data = {
+    var data = {
       urls               : pagesIds,
       site               : site,
       csrfmiddlewaretoken: "{{ csrf_token }}"
@@ -83,7 +83,7 @@
       data   : data,
       success: function ( data ) {
 
-        $("submitConfirmationModal").modal("hide");
+        $("submitAddSiteModal").modal("hide");
 
         if ( data.error === null ) {
 
@@ -111,8 +111,6 @@
         }
       },
       error: function ( XMLHttpRequest, textStatus, errorThrown ) {
-
-        $("submitConfirmationModal").modal("hide");
 
         Swal.fire({
           icon              : "error",
