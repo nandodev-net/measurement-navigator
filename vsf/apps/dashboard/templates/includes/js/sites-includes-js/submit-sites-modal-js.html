@@ -41,12 +41,7 @@
     // IF NO ELEMENTS WERE SELECTED, ADD A SINGLE ROW FILLING THE EMPTY SPACE
     if ( pages.length === 0 ) {
 
-      $table.append(
-        `<tr>
-          <td class="text-center">
-            <div class="alert alert-danger" role="alert">No sites to show!</div>
-          </td>
-        </tr>`);
+      $table.append('<tr><td class="text-center"><div class="alert alert-danger" role="alert">No sites to show!</div></td></tr>');
     }
 
     selectedPages = pages;
