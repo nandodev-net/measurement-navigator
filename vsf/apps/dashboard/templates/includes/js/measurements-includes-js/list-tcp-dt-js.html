@@ -176,7 +176,7 @@
                         $("#report-id-detailed").text(measurementData["report_id"]);
                         $("#software-name-detailed").text(measurementData["software_name"]);
                         $("#software-version-detailed").text(measurementData["software_version"]);
-                        $("#test-helpers-detailed").text(measurementData["test_helpers"]);
+                        $("#test-helpers-detailed").html( prettyPrintJson.toHtml(measurementData["text_helpers"]) )
                         $("#test-name-detailed").text(measurementData["test_name"]);
                         $("#test-runtime-detailed").text(measurementData["test_runtime"]);
                         $("#test-start-time-detailed").text(measurementData["test_start_time"]);
