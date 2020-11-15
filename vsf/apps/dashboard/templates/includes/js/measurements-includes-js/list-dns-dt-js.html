@@ -50,11 +50,9 @@ $(document).ready(function () {
             orderable : false,
             searchable: false,
             render    :
-                function (data) {
+                function (data, type, row, meta) {
 
-                    $('.vsf-custom-td').html(data);
-
-                    return $('.vsf-custom-td').innerHTML;
+                    return `<pre> ${ JSON.stringify(data, null, 2) } </pre>`
                 }
             },
             {
