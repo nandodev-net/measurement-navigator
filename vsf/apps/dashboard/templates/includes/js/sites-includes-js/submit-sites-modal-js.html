@@ -12,18 +12,18 @@
   // THIS EVENT WILL CATCH EVERY CHECKED URL IN THE ARRAY
   // AND IT WILL PRINT THEM IN THE MODAL TABLE
 
-  var selectedPages = [];
+  let selectedPages = [];
 
-  $("#submitAddSiteModal").click( function ( e ) {
+  $("#submitAddSiteModal").on("show.bs.modal", function ( e ) {
     "use strict";
+
     // GET EVERY SELECTED URL
-    console.log("entro");
-    var pages = $('.associate-page:checked')
+    let pages = $('[class="associate-page"]:checked')
       .toArray()
       .map( ( checkBox ) => ( { url: checkBox.dataset.vsfurl, id: checkBox.id } ) );
 
     // GET THE MODAL TABLE
-    var $table = $("#vsf-grouped-sites");
+    let $table = $("#vsf-grouped-sites");
 
     // APPEND AN ENTRY TO THE TABLE FOR EACH SELECTED ELEMENT
     $table.empty();
@@ -31,13 +31,22 @@
     pages.forEach( page => {
 
       $table.append(
-        '<tr><td>' + page.url + '</td></tr>');
+        `<tr>
+          <td>
+            ${ page.url }
+          </td>
+         </tr>`);
     });
 
     // IF NO ELEMENTS WERE SELECTED, ADD A SINGLE ROW FILLING THE EMPTY SPACE
     if ( pages.length === 0 ) {
 
-      $table.append('<tr><td class="text-center"><div class="alert alert-danger" role="alert">No sites to show!</div></td></tr>');
+      $table.append(
+        `<tr>
+          <td class="text-center">
+            <div class="alert alert-danger" role="alert">No sites to show!</div>
+          </td>
+        </tr>`);
     }
 
     selectedPages = pages;
@@ -54,13 +63,13 @@
     }
 
     // SET OF PAGES ID'S TO RELATE TO THE RIGHT SITE
-    var pagesIds = selectedPages.map( v => v.id );
+    let pagesIds = selectedPages.map( v => v.id );
 
     // URL TO SEND HTTP REQUEST
-    var url = "{% url list_urls %}";
+    let url = "{% url list_urls %}";
 
     // SITE TO RELATE TO THIS SET OF URLS. SELECT THE INPUT THAT ITS CHECKED
-    var site = $("input[name=selected-site]:checked").toArray();
+    let site = $("input[name=selected-site]:checked").toArray();
 
     if ( site.length === 0 ) {
 
@@ -71,7 +80,7 @@
     site = site[0].id;
 
     // DATA TO SEND WITH AJAX
-    var data = {
+    let data = {
       urls               : pagesIds,
       site               : site,
       csrfmiddlewaretoken: "{{ csrf_token }}"
@@ -84,7 +93,7 @@
       data   : data,
       success: function ( data ) {
 
-        $("submitAddSiteModal").modal("hide");
+        $("submitConfirmationModal").modal("hide");
 
         if ( data.error === null ) {
 
@@ -112,6 +121,8 @@
         }
       },
       error: function ( XMLHttpRequest, textStatus, errorThrown ) {
+
+        $("submitConfirmationModal").modal("hide");
 
         Swal.fire({
           icon              : "error",
