@@ -17,7 +17,7 @@
   $("#submitAddSiteModal").on("show.bs.modal", function ( e ) {
     "use strict";
     // GET EVERY SELECTED URL
-    var pages = $('[class="associate-page"]:checked')
+    var pages = $('.associate-page:checked')
       .toArray()
       .map( ( checkBox ) => ( { url: checkBox.dataset.vsfurl, id: checkBox.id } ) );
 
