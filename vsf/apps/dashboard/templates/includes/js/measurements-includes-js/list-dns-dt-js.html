@@ -52,13 +52,18 @@ $(document).ready(function () {
             render    :
                 function (data, type, row, meta) {
 
-                    return `<pre> ${ JSON.stringify(data, null, 2) } </pre>`
+                    return `<pre> ${ prettyPrintJson.toHtml(data) } </pre>`
                 }
             },
             {
             data      : "control_resolver_answers",
             orderable : false,
-            searchable: false
+            searchable: false,
+            render    :
+                function (data, type, row, meta) {
+
+                    return `<pre> ${ prettyPrintJson.toHtml(data) } </pre>`
+                }
             },
             {
             data      : "client_resolver",
