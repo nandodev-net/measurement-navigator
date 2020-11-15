@@ -48,7 +48,14 @@ $(document).ready(function () {
             {
             data      : "answers",
             orderable : false,
-            searchable: false
+            searchable: false,
+            render    :
+                function (data, type, row, meta) {
+
+                    $('.vsf-custom-td').html(data);
+
+                    return $('.vsf-custom-td').innerHTML;
+                }
             },
             {
             data      : "control_resolver_answers",
