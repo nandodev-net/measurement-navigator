@@ -168,7 +168,7 @@
                         });
 
                         console.log( measurementData );
-                        $("#annotations-detailed").text(measurementData["anomaly"]);
+                        $("#annotations-detailed").html(measurementData["annotations"]);
                         $('#modalMeasurementInfo').modal('show');
                     },
                     error  : function ( jqXHR, textStatus, errorThrown ) {

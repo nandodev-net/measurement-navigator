@@ -4,220 +4,242 @@
   ========================================
  -->
 
- {% extends 'extends/base.html' %}
- {% load static %}
+{% extends 'extends/base.html' %}
 
- {% block custom_stylesheet %}
- <link
-   rel="stylesheet"
-   type="text/css"
-   href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.22/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/sl-1.3.1/datatables.min.css"
- />
- {% endblock custom_stylesheet %}
+{% load static %}
 
- {% block tab_title %} VSF - TCP {% endblock tab_title %}
- {% block title %} TCP {% endblock title %}
- {% block sub_title %} List and filter all the currently available TCP Sub-measurements {% endblock sub_title %}
+{% block custom_stylesheet %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="https://cdn.datatables.net/v/bs4/jszip-2.5.0/dt-1.10.22/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/sl-1.3.1/datatables.min.css"
+/>
+<link rel=stylesheet
+href=https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css
+/>
+{% endblock custom_stylesheet %}
 
- {% block route %}
- <li class="breadcrumb-item">
-   <a href="{% url home %}">Home</a>
- </li>
- <li class="breadcrumb-item">
-    <a href="{% url 'dashboard:list_measurements' %}">Measurements</a>
- </li>
- <li class="breadcrumb-item active">
-   TCP
- </li>
+{% block tab_title %} VSF - TCP {% endblock tab_title %}
+{% block title %} TCP {% endblock title %}
 
- {% endblock route %}
+{% block sub_title %}
+List and filter all the currently available TCP Sub-measurements
+{% endblock sub_title %}
 
- {% block content %}
- <form id="urlForm">
-   <nav class="navbar navbar-light bg-light mb-5">
-     <div class="container-fluid">
-       <div class="row">
-         <div class="col-3">
-           <div class="input-group">
-             <div class="input-group-prepend">
-               <span class="input-group-text">Since</span>
-             </div>
-             <input id="since" class="form-control mr-2 additional-filter" type="date" />
-           </div>
-         </div>
+{% block route %}
+<li class="breadcrumb-item">
+  <a href="{% url home %}">Home</a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:list_measurements' %}">Measurements</a>
+</li>
+<li class="breadcrumb-item active">TCP</li>
+{% endblock route %}
 
-         <div class="col-3">
-           <div class="input-group">
-             <div class="input-group-prepend">
-               <span class="input-group-text">Until</span>
-             </div>
-             <input id="until" class="form-control mr-2 additional-filter" type="date" />
-           </div>
-         </div>
+{% block content %}
+<form id="urlForm">
+  <nav class="navbar navbar-light bg-light mb-5">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-3">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Since</span>
+            </div>
+            <input
+              id="since"
+              class="form-control mr-2 additional-filter"
+              type="date"
+            />
+          </div>
+        </div>
 
-         <div class="col-6">
-           <div class="input-group mr-2">
-             <div class="input-group-prepend">
-               <label class="input-group-text" for="asn">ASN</label>
-             </div>
-             <select id="asn" class="custom-select additional-filter">
-               <option selected value="">Any</option>
-               <option value="AS8048">CANTV Servicios, Venezuela</option>
-               <option value="AS6306">TELEFONICA VENEZOLANA, C.A.</option>
-               <option value="AS27889">Telecomunicaciones MOVILNET</option>
-               <option value="AS21826">Corporación Telemic C.A.</option>
-               <option value="AS27807">
-                 Fundación Centro Nacional de Innovación Tecnológica
-               </option>
-               <option value="AS20312">
-                 Fundación Centro Nacional de Innovación Tecnológica - 2
-               </option>
-               <option value="AS11694">Universidad Simon Bolivar</option>
-               <option value="AS19192">Universidad Central de Venezuela</option>
-               <option value="AS7908">BT LATAM Venezuela, S.A.</option>
-               <option value="AS11562">Net Uno, C.A.</option>
-               <option value="AS23007">Universidad de Los Andes</option>
-               <option value="AS27717">Corporacion Digitel C.A.</option>
-               <option value="AS27890">Universidad de Oriente</option>
-               <option value="AS27892">Universidad del Zulia</option>
-               <option value="AS27891">
-                 Universidad Pedagógica Experimental Libertador
-               </option>
-               <option value="AS7965">Universidad Catolica Andres Bello</option>
-               <option value="AS17287">Universidad de Carabobo</option>
-               <option value="AS27686">
-                 Universidad Centro Occidental Lisandro Alvarado
-               </option>
-             </select>
-           </div>
-         </div>
+        <div class="col-3">
+          <div class="input-group">
+            <div class="input-group-prepend">
+              <span class="input-group-text">Until</span>
+            </div>
+            <input
+              id="until"
+              class="form-control mr-2 additional-filter"
+              type="date"
+            />
+          </div>
+        </div>
 
-         <div class="col-3 mt-3">
-           <div class="input-group mr-2">
-             <div class="input-group-prepend">
-               <label class="input-group-text" for="anomaly-state">Anomaly</label>
-             </div>
-             <select id="anomaly-state" class="custom-select additional-filter">
-               <option selected value="">Any</option>
-               <option value="false">Anomaly False</option>
-               <option value="true">Anomaly True</option>
-             </select>
-           </div>
-         </div>
+        <div class="col-6">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="asn">ASN</label>
+            </div>
+            <select id="asn" class="custom-select additional-filter">
+              <option selected value="">Any</option>
+              <option value="AS8048">CANTV Servicios, Venezuela</option>
+              <option value="AS6306">TELEFONICA VENEZOLANA, C.A.</option>
+              <option value="AS27889">Telecomunicaciones MOVILNET</option>
+              <option value="AS21826">Corporación Telemic C.A.</option>
+              <option value="AS27807">
+                Fundación Centro Nacional de Innovación Tecnológica
+              </option>
+              <option value="AS20312">
+                Fundación Centro Nacional de Innovación Tecnológica - 2
+              </option>
+              <option value="AS11694">Universidad Simon Bolivar</option>
+              <option value="AS19192">Universidad Central de Venezuela</option>
+              <option value="AS7908">BT LATAM Venezuela, S.A.</option>
+              <option value="AS11562">Net Uno, C.A.</option>
+              <option value="AS23007">Universidad de Los Andes</option>
+              <option value="AS27717">Corporacion Digitel C.A.</option>
+              <option value="AS27890">Universidad de Oriente</option>
+              <option value="AS27892">Universidad del Zulia</option>
+              <option value="AS27891">
+                Universidad Pedagógica Experimental Libertador
+              </option>
+              <option value="AS7965">Universidad Catolica Andres Bello</option>
+              <option value="AS17287">Universidad de Carabobo</option>
+              <option value="AS27686">
+                Universidad Centro Occidental Lisandro Alvarado
+              </option>
+            </select>
+          </div>
+        </div>
 
-         <div class="col-6 mt-3">
-           <input
-             id="input"
-             class="form-control mr-2 additional-filter"
-             type="search"
-             placeholder="URL"
-             aria-label="Search URL"
-           />
-         </div>
+        <div class="col-3 mt-3">
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="anomaly-state"
+                >Anomaly</label
+              >
+            </div>
+            <select id="anomaly-state" class="custom-select additional-filter">
+              <option selected value="">Any</option>
+              <option value="false">Anomaly False</option>
+              <option value="true">Anomaly True</option>
+            </select>
+          </div>
+        </div>
 
-         <div class="col-3 mt-3">
-           <div class="input-group mr-sm-2">
-             <div class="input-group-prepend">
-               <label class="input-group-text" for="site">Site</label>
-             </div>
-             <select class="custom-select additional-filter" id="site">
-               <option selected value="">Any Site</option>
-               {% for site in sites %}
-               <option value="{{ site.id }}" title="{{ site.description }}">
-                 {{ site.name }}
-               </option>
-               {% endfor %}
-             </select>
-           </div>
-         </div>
+        <div class="col-6 mt-3">
+          <input
+            id="input"
+            class="form-control mr-2 additional-filter"
+            type="search"
+            placeholder="URL"
+            aria-label="Search URL"
+          />
+        </div>
+
+        <div class="col-3 mt-3">
+          <div class="input-group mr-sm-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="site">Site</label>
+            </div>
+            <select class="custom-select additional-filter" id="site">
+              <option selected value="">Any Site</option>
+              {% for site in sites %}
+              <option value="{{ site.id }}" title="{{ site.description }}">
+                {{ site.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
 
         <!-- Status Blocked -->
         <div class="col-4 mt-3">
-            <div class="input-group mr-2">
-                <div class="input-group-prepend">
-                <label class="input-group-text" for="status-blocked">Blocked</label>
-                </div>
-                <select id="status-blocked" class="custom-select additional-filter">
-                    <option selected value="">Any</option>
-                    <option value="false">False</option>
-                    <option value="true">True</option>
-                </select>
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="status-blocked"
+                >Blocked</label
+              >
             </div>
+            <select id="status-blocked" class="custom-select additional-filter">
+              <option selected value="">Any</option>
+              <option value="false">False</option>
+              <option value="true">True</option>
+            </select>
+          </div>
         </div>
 
         <!-- Status Failure -->
         <div class="col-8 mt-3">
-            <input
-              id="status-failure"
-              class="form-control mr-2 additional-filter"
-              type="search"
-              placeholder="Status Failure"
-              aria-label="Search By Failure"
-            />
+          <input
+            id="status-failure"
+            class="form-control mr-2 additional-filter"
+            type="search"
+            placeholder="Status Failure"
+            aria-label="Search By Failure"
+          />
         </div>
 
         <!-- Status Success -->
         <div class="col-4 mt-3">
-            <div class="input-group mr-2">
-                <div class="input-group-prepend">
-                <label class="input-group-text" for="status-success">Success</label>
-                </div>
-                <select id="status-success" class="custom-select additional-filter">
-                    <option selected value="">Any</option>
-                    <option value="false">False</option>
-                    <option value="true">True</option>
-                </select>
+          <div class="input-group mr-2">
+            <div class="input-group-prepend">
+              <label class="input-group-text" for="status-success"
+                >Success</label
+              >
             </div>
+            <select id="status-success" class="custom-select additional-filter">
+              <option selected value="">Any</option>
+              <option value="false">False</option>
+              <option value="true">True</option>
+            </select>
+          </div>
         </div>
 
         <!-- IP -->
         <div class="col-8 mt-3">
-            <input
-              id="ip"
-              class="form-control mr-2 additional-filter"
-              type="search"
-              placeholder="IP"
-              aria-label="Search By IP"
-            />
+          <input
+            id="ip"
+            class="form-control mr-2 additional-filter"
+            type="search"
+            placeholder="IP"
+            aria-label="Search By IP"
+          />
         </div>
+      </div>
+    </div>
+  </nav>
 
-       </div>
-     </div>
-   </nav>
+  <div class="w-100 overflow-auto">
+    <table class="table table-striped mt-5 datatable" id="my-table">
+      <thead>
+        <tr>
+          <th class="text-center text-capitalize" scope="col">Input</th>
+          <th class="text-center text-capitalize" scope="col">Start Time</th>
+          <th class="text-center text-capitalize" scope="col">ASN</th>
+          <th class="text-center text-capitalize" scope="col">country</th>
+          <th class="text-center text-capitalize" scope="col">Site</th>
+          <th class="text-center text-capitalize" scope="col">Anomaly</th>
+          <th class="text-center text-capitalize" scope="col">
+            Status Blocking
+          </th>
+          <th class="text-center text-capitalize" scope="col">
+            Status Failure
+          </th>
+          <th class="text-center text-capitalize" scope="col">
+            Status Success
+          </th>
+          <th class="text-center text-capitalize" scope="col">IP</th>
+        </tr>
+      </thead>
 
-   <div class="w-100 overflow-auto">
-     <table class="table table-striped mt-5 datatable" id="my-table">
-       <thead>
-         <tr>
-           <th class="text-center text-capitalize" scope="col">Input</th>
-           <th class="text-center text-capitalize" scope="col">Start Time</th>
-           <th class="text-center text-capitalize" scope="col">ASN</th>
-           <th class="text-center text-capitalize" scope="col">country</th>
-           <th class="text-center text-capitalize" scope="col">Site</th>
-           <th class="text-center text-capitalize" scope="col">Anomaly</th>
-           <th class="text-center text-capitalize" scope="col">Status Blocking</th>
-           <th class="text-center text-capitalize" scope="col">Status Failure</th>
-           <th class="text-center text-capitalize" scope="col">Status Success</th>
-           <th class="text-center text-capitalize" scope="col">IP</th>
-         </tr>
-       </thead>
+      <tbody></tbody>
 
-       <tbody></tbody>
+      <tfoot></tfoot>
+    </table>
+  </div>
+</form>
 
-       <tfoot></tfoot>
+{% include "includes/measurements-includes/detailed-info-modal.html" %} 
+{% endblock content %} 
 
-     </table>
-   </div>
- </form>
-
- {% include "includes/measurements-includes/detailed-info-modal.html" %}
- {% endblock content %}
-
- {% block custom_scripts %}
- <script
-   type="text/javascript"
-   src="https://cdn.datatables.net/v/bs4/jqc-1.12.4/jszip-2.5.0/dt-1.10.22/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/sl-1.3.1/datatables.min.js"
- ></script>
-
- {% include "includes/js/measurements-includes-js/list-tcp-dt-js.html" %}
- {% endblock custom_scripts %}
+{% block custom_scripts %}
+<script
+  type="text/javascript"
+  src="https://cdn.datatables.net/v/bs4/jqc-1.12.4/jszip-2.5.0/dt-1.10.22/b-1.6.5/b-colvis-1.6.5/b-html5-1.6.5/sl-1.3.1/datatables.min.js"
+></script>
+<script src=https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js></script>
+{% include "includes/js/measurements-includes-js/list-tcp-dt-js.html" %} 
+{% endblock custom_scripts %}

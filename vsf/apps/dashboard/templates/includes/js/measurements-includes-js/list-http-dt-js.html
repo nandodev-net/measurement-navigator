@@ -79,7 +79,7 @@
                         ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
                         =====================================
                     */
-        
+
                     let site        = $("#site").val();
                     let since       = $("#since").val();
                     let until       = $("#until").val();
@@ -92,40 +92,40 @@
                     let body_length_match   = $("#body-length-match").val();
                     let body_proportion_min     = $("#body-proportion-min").val();
                     let body_proportion_max     = $("#body-proportion-max").val();
-        
+
                     if ( site )
                         data.site = site;
-        
+
                     if ( since )
                         data.since = since;
-        
+
                     if ( until )
                         data.until = until;
-        
+
                     if ( input )
                         data.input = input;
-        
+
                     if ( asn )
                         data.asn = asn;
-        
+
                     if ( anomaly )
                         data.anomaly = anomaly;
-        
+
                     if ( country )
                         data.country = country;
 
                     if ( status_code_match )
                         data.status_code_match = status_code_match;
-                    
+
                     if ( headers_match )
                         data.headers_match = headers_match;
-                    
+
                     if ( body_length_match )
                         data.body_length_match = body_length_match;
 
                     if ( body_proportion_min )
                         data.body_proportion_min = body_proportion_min;
-                    
+
                     if ( body_proportion_max )
                         data.body_proportion_max = body_proportion_max;
                 },
