@@ -79,7 +79,7 @@
                         ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
                         =====================================
                     */
-        
+
                     let site        = $("#site").val();
                     let since       = $("#since").val();
                     let until       = $("#until").val();
@@ -91,40 +91,40 @@
                     let status_failure  = $("#status-failure").val();
                     let status_success  = $("#status-success").val();
                     let ip              = $("#ip").val();
-        
+
                     if ( site )
                         data.site = site;
-        
+
                     if ( since )
                         data.since = since;
-        
+
                     if ( until )
                         data.until = until;
-        
+
                     if ( input )
                         data.input = input;
-        
+
                     if ( asn )
                         data.asn = asn;
-        
+
                     if ( anomaly )
                         data.anomaly = anomaly;
-        
+
                     if ( country )
                         data.country = country;
 
                     if ( status_blocked )
                         data.status_blocked = status_blocked;
-                    
+
                     if ( status_failure )
                         data.status_failure = status_failure;
-                    
+
                     if ( status_success )
                         data.status_success = status_success;
-                        
+
                     if ( ip )
                         data.ip = ip
-                
+
                 },
                 type: "GET",
             },
@@ -168,6 +168,8 @@
                         });
 
                         console.log( measurementData );
+                        $("#annotations-detailed").text(measurementData["anomaly"]);
+                        $('#modalMeasurementInfo').modal('show');
                     },
                     error  : function ( jqXHR, textStatus, errorThrown ) {
 

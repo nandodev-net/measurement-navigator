@@ -104,9 +104,10 @@
               <option selected value="">Choose Test Type</option>
               {% for test in test_types %}
               <option
-                {% if prefill.test_name == test.value %}selected{% endif %}
-                value="{{test.value}}">
-                {{test.name}}
+                {% if prefill.test_name == test.value %} selected {% endif %}
+                value="{{ test.value }}"
+              >
+                {{ test.name }}
               </option>
               {% endfor %}
             </select>
@@ -133,7 +134,7 @@
             type="search"
             placeholder="URL"
             aria-label="Search URL"
-            value="{{prefill.input}}"
+            value="{{ prefill.input }}"
           />
         </div>
 
@@ -182,16 +183,7 @@
   </table>
 </form>
 
-<!-- Modal -->
-<div
-  class="modal fade"
-  id="modalCompleteInfo"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="modalCompleteInfoTitle"
-  aria-hidden="true"
-></div>
-
+{% include "includes/measurements-includes/detailed-info-modal.html" %}
 {% endblock content %}
 
 {% block custom_scripts %}

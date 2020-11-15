@@ -197,7 +197,7 @@
            <th class="text-center text-capitalize" scope="col">Anomaly</th>
            <th class="text-center text-capitalize" scope="col">Status Blocking</th>
            <th class="text-center text-capitalize" scope="col">Status Failure</th>
-           <th class="text-center text-capitalize" scope="col">Satus Success</th>
+           <th class="text-center text-capitalize" scope="col">Status Success</th>
            <th class="text-center text-capitalize" scope="col">IP</th>
          </tr>
        </thead>
@@ -210,16 +210,7 @@
    </div>
  </form>
 
- <!-- Modal -->
- <div
-   class="modal fade"
-   id="modalCompleteInfo"
-   tabindex="-1"
-   role="dialog"
-   aria-labelledby="modalCompleteInfoTitle"
-   aria-hidden="true"
- ></div>
-
+ {% include "includes/measurements-includes/detailed-info-modal.html" %}
  {% endblock content %}
 
  {% block custom_scripts %}
