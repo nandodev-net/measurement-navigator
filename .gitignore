@@ -142,7 +142,9 @@ dmypy.json
 .jshintrc
 
 # DJANGO IGNORED CONFIG FILES
-**/migrations/*.py
+**/migrations/**
+!**/migrations
+!**/migrations/__init__.py
 manage.py
 vsf/settings/development.py
 vsf/settings/production.py
