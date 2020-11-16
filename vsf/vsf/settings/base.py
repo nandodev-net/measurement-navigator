@@ -41,7 +41,7 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework'
+    'rest_framework',
 ]
 
 
@@ -54,9 +54,9 @@ INSTALLED_APPS = [
     'apps.main.measurements.submeasurements.apps.SubmeasurementsConfig',
     'apps.main.ooni_fp.fp_tables.apps.FpTablesConfig',
     'apps.main.sites.apps.SitesConfig',
+    'apps.main.asns.apps.AsnsConfig',
     'apps.dashboard.apps.DashboardConfig',
     'apps.api.fp_tables_api.apps.FpTablesAPIConfig',
-    'django_sass'
 ]
 
 THIRD_PARTY_APPS = [
@@ -64,6 +64,7 @@ THIRD_PARTY_APPS = [
     'drf_yasg',
     'django_celery_results',
     'django_celery_beat',
+    'django_sass',
 ]
 
 
