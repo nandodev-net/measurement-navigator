@@ -65,33 +65,10 @@
               <label class="input-group-text" for="asn">ASN</label>
             </div>
             <select id="asn" class="custom-select additional-filter">
-              <option selected value="">Any</option>
-              <option value="AS8048">CANTV Servicios, Venezuela</option>
-              <option value="AS6306">TELEFONICA VENEZOLANA, C.A.</option>
-              <option value="AS27889">Telecomunicaciones MOVILNET</option>
-              <option value="AS21826">Corporación Telemic C.A.</option>
-              <option value="AS27807">
-                Fundación Centro Nacional de Innovación Tecnológica
-              </option>
-              <option value="AS20312">
-                Fundación Centro Nacional de Innovación Tecnológica - 2
-              </option>
-              <option value="AS11694">Universidad Simon Bolivar</option>
-              <option value="AS19192">Universidad Central de Venezuela</option>
-              <option value="AS7908">BT LATAM Venezuela, S.A.</option>
-              <option value="AS11562">Net Uno, C.A.</option>
-              <option value="AS23007">Universidad de Los Andes</option>
-              <option value="AS27717">Corporacion Digitel C.A.</option>
-              <option value="AS27890">Universidad de Oriente</option>
-              <option value="AS27892">Universidad del Zulia</option>
-              <option value="AS27891">
-                Universidad Pedagógica Experimental Libertador
-              </option>
-              <option value="AS7965">Universidad Catolica Andres Bello</option>
-              <option value="AS17287">Universidad de Carabobo</option>
-              <option value="AS27686">
-                Universidad Centro Occidental Lisandro Alvarado
-              </option>
+              <option selected value="">Any ASN</option>
+              {% for asn in asns %}
+                    <option value= {{asn.asn}} >{{asn.asn}} - {{asn.name}}</option>
+              {% endfor %}
             </select>
           </div>
         </div>
