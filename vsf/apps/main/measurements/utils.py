@@ -6,7 +6,8 @@ import json
 import requests
 
 # Local imports
-from .models                    import Measurement, RawMeasurement
+from .models                                        import Measurement, RawMeasurement
+import apps.main.measurements.submeasurements.models  as SubMeas
 
 """
     An experiment is a composition of several nettest + some additional
