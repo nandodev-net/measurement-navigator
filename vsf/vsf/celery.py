@@ -44,7 +44,13 @@ app.conf.beat_schedule = {
         'task':'apps.api.fp_tables_api.tasks.measurement_update',
         'schedule':600,
         'args':()
-    }
+    },
+    # SoftFlagMeasurement updates the possible flags for every sub measurement
+    'every-hour-too':{
+        'task':'apps.main.measurements.submeasurements.tasks.SoftFlagMeasurements',
+        'schedule':3600,
+        'args':()
+    },
 }
 
 # Load task modules from all registered Django app configs.
