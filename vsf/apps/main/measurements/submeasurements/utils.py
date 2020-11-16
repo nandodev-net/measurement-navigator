@@ -1,7 +1,8 @@
 
 # Local imports
-from .models                        import DNS, HTTP, TCP, SubMeasurement
-from apps.main.measurements.models  import RawMeasurement, Measurement
+from .models                             import DNS, HTTP, TCP, SubMeasurement
+from apps.main.measurements.models       import RawMeasurement, Measurement
+from apps.main.measurements.flags.models import Flag
 
 # -- SubMeasurement Creation -------------------------------------------------------+
 
@@ -254,6 +255,71 @@ def createTCPFromWebCon(measurement : RawMeasurement) -> [TCP]:
     return new_tcp
 
 # -- Flag Checking -------------------------------------------------------+
+
+def SoftFlag(since=None, until=None):
+    """
+        This function Flags every measurement from the start time 
+        "since" to "until".  if some of them is not provided, 
+        take the highest/lowest possible bound.
+    """
+    dnss  = DNS.objects.all()\
+                .select_related('measurement', 'measurement__raw_measurement', 'flag')\
+                .filter(flag__flag = None)
+
+    tcps  = TCP.objects.all()\
+                .select_related('measurement', 'measurement__raw_measurement', 'flag')\
+                .filter(flag__flag = None)
+
+    https = HTTP.objects.all()\
+                .select_related('measurement', 'measurement__raw_measurement', 'flag')\
+                .filter(flag__flag = None)
+
+    # apply filtering if necessary
+    dnss = dnss.filter(measurement__measurement_start_time__lt = until) if until else dnss
+    dnss = dnss.filter(measurement__measurement_start_time__gt = since) if since else dnss
+
+    tcps = tcps.filter(measurement__measurement_start_time__lt = until) if until else tcps
+    tcps = tcps.filter(measurement__measurement_start_time__gt = since) if since else tcps
+
+    https = https.filter(measurement__measurement_start_time__lt = until) if until else https
+    https = https.filter(measurement__measurement_start_time__gt = since) if since else https
+
+    meas = [m for m in dnss] + [m for m in tcps] + [m for m in https]
+    tagged = []
+    not_tagged = []
+    for m in meas:
+        if check_submeasurement(m):
+            new_flag = Flag.objects.create(flag = Flag.FlagType.SOFT) # create a new flag
+            m.flag = new_flag   # set the new flag
+            m.save()            # Store the measurement
+            tagged.append(m)    # annotate the saved objects
+        else:
+            new_flag = Flag.objects.create(flag = Flag.FlagType.OK) # create a new flag
+            m.flag = new_flag       # set the new flag
+            m.save()                # Store the measurement
+            not_tagged.append(m)    # annotate the saved objects
+
+    return {
+            'tagged':tagged, 
+            'not_tagged':not_tagged, 
+            'tagged_ammount':len(tagged), 
+            'not_tagged_ammount':len(not_tagged)
+        }
+        
+
+def check_submeasurement(submeasurement : SubMeasurement) -> bool:
+    """
+        Shortcut function to check if a submeasurement should be tagget 
+        with a soft flag
+    """
+    if isinstance(submeasurement, TCP):
+        return check_tcp(submeasurement)
+    elif isinstance(submeasurement, HTTP):
+        return check_http(submeasurement)
+    elif isinstance(submeasurement, DNS):
+        return check_dns(submeasurement)
+
+    return False
 
 def check_dns(dns : DNS) -> bool:
     """
