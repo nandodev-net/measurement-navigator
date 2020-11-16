@@ -18,22 +18,15 @@ class Flag(models.Model):
         a hard flag means that the measurement might be part of a blocking
         event. Muted is a measurement to ignore.
     """
-    NONE = 'none'
-    SOFT = 'soft'
-    HARD = 'hard'
-    MUTED = 'muted'
 
-    TYPE = {
-        NONE: 'None',
-        SOFT: 'Soft',
-        HARD: 'Hard',
-        MUTED: 'Muted',
-    }
-
-
-    # Sorted choices
-    TYPE_CHOICES = [    # Items are sorted alphabetically
-        (k, v) for k, v in sorted(TYPE.items(), key=lambda t: t[1])]
+    class FlagType(models.TextChoices):
+        """
+        	Every kind of possible flag value
+        """
+        OK 		     = "ok"     # The measurement has no problems
+        SOFT 	     = "soft"   # The measurement has some problem
+        HARD         = "hard"   # this measurement is grouped with other measurements as they have a common problem
+        MUTED		 = "muted"  # ignore this measurement
 
     
     uuid = models.UUIDField(
@@ -42,11 +35,17 @@ class Flag(models.Model):
     
     # Flag type
     flag = models.CharField(
-        max_length=10, choices=TYPE_CHOICES, default=NONE
+        max_length=10, null=False, choices=FlagType.choices, default=FlagType.OK
     )
  
     # Date when this flag was created
-    creation_date = models.DateTimeField(default=timezone.now)
+    creation_date = models.DateTimeField(editable=False, auto_now_add=True)
+
+    # Update date:
+    update_date = models.DateTimeField(auto_now=True)
+
 
     def __str__(self):
         return str(self.flag) + " : " + str(self.creation_date)
+
+    
