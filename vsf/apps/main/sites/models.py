@@ -16,7 +16,8 @@ class Site(models.Model):
     description_spa = models.TextField()    # A simple spanish description for the site 
 
     description_eng = models.TextField(     # A simple English description for this site (optional)
-                    null = True 
+                    null = True,
+                    blank = True 
             )
 
 class URL(models.Model):
