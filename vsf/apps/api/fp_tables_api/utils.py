@@ -30,6 +30,7 @@ from urllib.parse   import urlencode
 
 # Local imports
 from apps.main.sites.models             import URL
+from apps.main.asns.models              import ASN
 from .                                  import utils
 from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
@@ -157,6 +158,7 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int,
                 test_name= result['test_name'],
             )
             URL.objects.get_or_create(url=fp.input)
+            ASN.objects.get_or_create(asn=fp.probe_asn)
             objects.append(fp)
 
 
