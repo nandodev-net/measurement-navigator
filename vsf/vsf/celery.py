@@ -42,7 +42,7 @@ app.conf.beat_schedule = {
     # measurement_update to check for complete measurements to download
     'every-hour':{
         'task':'apps.api.fp_tables_api.tasks.measurement_update',
-        'schedule':3600,
+        'schedule':600,
         'args':()
     }
 }
