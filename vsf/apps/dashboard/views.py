@@ -15,6 +15,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from apps.main.sites.forms                      import SiteForm
 from apps.main.sites.models                     import URL, Site
 from .forms                                     import NewCategoryForm
+from apps.main.asns                             import models as AsnModels
 from apps.main.ooni_fp.fp_tables                import models as fp_models
 from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMeasModels
@@ -120,6 +121,7 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
 
         context['inbox_measurements'] = current_page
         context['search_params'] = req
+        context['asns'] = AsnModels.ASN.objects.all()
 
         return context
 
@@ -492,6 +494,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         context['test_types'] = test_types
         context['sites'] = sites
         context['prefill'] = prefill
+        context['asns'] = AsnModels.ASN.objects.all()
         return context
 
 class ListMeasurementsBackEnd(BaseDatatableView):
@@ -599,6 +602,7 @@ class ListDNSTemplate(VSFLoginRequiredMixin, TemplateView):
         context =  super().get_context_data()
         context['test_types'] = test_types
         context['sites'] = sites
+        context['asns'] = AsnModels.ASN.objects.all()
         return context
 
 class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
@@ -729,6 +733,7 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
 
         context =  super().get_context_data()
         context['sites'] = sites
+        context['asns'] = AsnModels.ASN.objects.all()
         return context
 
 class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
@@ -873,6 +878,7 @@ class ListTCPTemplate(VSFLoginRequiredMixin, TemplateView):
 
         context =  super().get_context_data()
         context['sites'] = sites
+        context['asns'] = AsnModels.ASN.objects.all()
         return context
 
 class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
