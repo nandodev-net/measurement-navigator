@@ -34,23 +34,31 @@ app.conf.beat_schedule = {
     #    'args':(20,3)
     #},
     # fp update to search for new recent measurements in the fast path
-    'every-day':{
+    'update-fastpath':{
         'task': 'apps.api.fp_tables_api.tasks.fp_update',
         'schedule':3600,
         'args':()
     },
     # measurement_update to check for complete measurements to download
-    'every-hour':{
+    'update-measurements':{
         'task':'apps.api.fp_tables_api.tasks.measurement_update',
         'schedule':600,
         'args':()
     },
     # SoftFlagMeasurement updates the possible flags for every sub measurement
-    'every-hour-too':{
+    'update-soft-flags':{
         'task':'apps.main.measurements.submeasurements.tasks.SoftFlagMeasurements',
         'schedule':3600,
         'args':()
     },
+    # Count Flags submeasurements updates the value of previous_counter field in submeasurements
+    # field
+    'update-hf-counters':{
+        'task':'apps.main.measurements.submeasurements.tasks.SoftFlagMeasurements',
+        'schedule':3600,
+        'args':()
+    },
+    
 }
 
 # Load task modules from all registered Django app configs.
