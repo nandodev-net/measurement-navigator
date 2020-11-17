@@ -629,11 +629,12 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_cc',
             'site_name',
             'measurement__anomaly',
+            'flag__flag'
             'dns_consistency',
             'answers',
             'control_answers',
             'control_resolver_hostname',
-            'hostname'
+            'hostname',
 
         ]
 
@@ -643,7 +644,8 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_asn',
             'measurement__raw_measurement__probe_cc',
             'site_name',
-            'measurement__anomaly'
+            'measurement__anomaly',
+            'flag__flag'
         ]
 
     def get_initial_queryset(self):
@@ -654,7 +656,7 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 .filter( url=OuterRef('measurement__raw_measurement__input') )
 
         qs   = SubMeasModels.DNS.objects.all()\
-                .select_related('measurement')\
+                .select_related('measurement', 'flag')\
                 .select_related('measurement__raw_measurement')\
                 .annotate(
                         site=Subquery(urls.values('site')),
@@ -715,6 +717,7 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'control_resolver_answers' : item.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
+                'flag__flag'            : item.flag.flag
             })
         return json_data
 
@@ -748,6 +751,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_cc',
             'site_name',
             'measurement__anomaly',
+            'flag__flag'
             'status_code_match',
             'headers_match',
             'body_length_match',
@@ -762,6 +766,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_cc',
             'site_name',
             'measurement__anomaly',
+            'flag__flag'
             'status_code_match',
             'headers_match',
             'body_length_match',
@@ -776,7 +781,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 .filter( url=OuterRef('measurement__raw_measurement__input') )
 
         qs   = SubMeasModels.HTTP.objects.all()\
-                .select_related('measurement')\
+                .select_related('measurement','flag')\
                 .select_related('measurement__raw_measurement')\
                 .annotate(
                         site=Subquery(urls.values('site')),
@@ -857,6 +862,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'site' : item.site,
                 'site_name' : item.site_name if item.site_name else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
+                'flag__flag'           : item.flag.flag,
                 'status_code_match' : item.status_code_match,
                 'headers_match' : item.headers_match,
                 'body_length_match' : item.body_length_match,
@@ -893,6 +899,7 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_cc',
             'site_name',
             'measurement__anomaly',
+            'flag__flag'
             'status_blocking',
             'status_failure',
             'status_success',
@@ -906,6 +913,7 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_cc',
             'site_name',
             'measurement__anomaly',
+            'flag__flag',
             'status_blocking',
             'status_failure',
             'status_success',
@@ -920,7 +928,7 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 .filter( url=OuterRef('measurement__raw_measurement__input') )
 
         qs   = SubMeasModels.TCP.objects.all()\
-                .select_related('measurement')\
+                .select_related('measurement', 'flag')\
                 .select_related('measurement__raw_measurement')\
                 .annotate(
                         site=Subquery(urls.values('site')),
@@ -987,6 +995,7 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'site' : item.site,
                 'site_name' : item.site_name if item.site_name else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
+                'flag__flag'           : item.flag.flag,
                 'status_blocked' : item.status_blocked,
                 'status_failure' : item.status_failure or "N/A",
                 'status_success' : item.status_success,
