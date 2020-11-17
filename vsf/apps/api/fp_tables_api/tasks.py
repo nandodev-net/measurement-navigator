@@ -11,8 +11,8 @@ def sum (a,b):
     time.sleep(2)
     return a+b
     
-@shared_task
-def fp_update(time_limit=720)):
+@shared_task(time_limit=750)
+def fp_update():
     """
         Update the fast path table;
         This function will request fast path table to the ooni api
@@ -29,8 +29,8 @@ def fp_update(time_limit=720)):
     yesterday = now - timedelta(days=1)
     return request_fp_data(yesterday.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"), False)
     
-@shared_task
-def measurement_update(time_limit=720)):
+@shared_task(time_limit=750)
+def measurement_update():
     """
         Update Measurement table by requesting for new measurements availables
         in the fast path. If there's too many measurements, it's recommended to 
