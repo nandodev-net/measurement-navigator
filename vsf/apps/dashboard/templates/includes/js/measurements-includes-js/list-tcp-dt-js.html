@@ -150,26 +150,23 @@
                     let data = dt.rows({ selected: true }).data();
 
                     if ( data.length === 0 ) {
+
                     Swal.fire({
                         icon              : "warning",
                         title             : "There is nothing selected!",
                         confirmButtonColor: "#ffc107",
                         confirmButtonText : "Continue"
                     });
+
                     return;
                     }
 
                     let id = data[0].measurement__id;
+
                     $.ajax({
                     type   : "GET",
                     url    : '{% url "measurements:get_measurement" %}',
                     data   : { id: id },
-                    beforeSend: function() {
-                        $('.lds-roller').show();
-                      },
-                    complete: function() {
-                        $('.lds-roller').hide();
-                      },
                     success: function ( measurementData ) {
 
                         $("#annotations-detailed").html( prettyPrintJson.toHtml(measurementData["annotations"]) );
