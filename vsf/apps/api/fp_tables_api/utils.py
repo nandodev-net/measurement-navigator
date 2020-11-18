@@ -276,6 +276,8 @@ def update_measurement_table(
         if data == None:
             raise AttributeError("Unexpected data format from Ooni")
 
+        fp.measurement_start_time += datetime.timedelta(days=4)
+
         measurement = filter(
             lambda d:
                 dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time,
