@@ -1,56 +1,68 @@
 <script>
-  $('.delete-site').click(function ( event ) {
-
+  $(".delete-site").click(function (event) {
     "use strict";
     event.preventDefault();
 
-    let id   = event.target.id;
-    let url  = '{% url "sites:delete_site" %}';
+    let id  = event.target.id;
+    let url = '{% url "sites:delete_site" %}';
 
     let data = {
       id                 : id,
       csrfmiddlewaretoken: "{{ csrf_token }}"
     };
 
-    $.ajax({
-      type   : "POST",
-      url    : url,
-      data   : data,
-      success: function ( data ) {
+    Swal.fire({
+      icon              : "warning",
+      title             : "Do you want to save the changes?",
+      showDenyButton    : true,
+      confirmButtonText : `Yes`,
+      confirmButtonColor: "#ffc107",
+      denyButtonText    : `No`
+    }).then((result) => {
 
-        if ( data.error === null ) {
+      if (result.isConfirmed) {
 
-          Swal.fire({
-            icon              : "success",
-            title             : "The removal was successful!",
-            confirmButtonColor: "#28a745",
-            confirmButtonText : "Continue"
-          }).then( result => {
+        $.ajax({
+          type   : "POST",
+          url    : url,
+          data   : data,
+          success: function (data) {
 
-            if ( result.isConfirmed ) {
+            if (data.error === null) {
 
-              location.reload();
+              Swal.fire({
+                icon              : "success",
+                title             : "The removal was successful!",
+                confirmButtonColor: "#28a745",
+                confirmButtonText : "Continue"
+              }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                  location.reload();
+                }
+              });
+            } else {
+
+              Swal.fire({
+                icon              : "error",
+                title             : "There was an error in the deletion of the element!",
+                text              : `${data.error}`,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText : "Continue"
+              });
             }
-          });
-        } else {
+          },
+          error: function (XMLHttpRequest, textStatus, errorThrown) {
 
-          Swal.fire({
-            icon              : "error",
-            title             : "There was an error in the deletion of the element!",
-            text              : `${ data.error }`,
-            confirmButtonColor: "#dc3545",
-            confirmButtonText : "Continue"
-          });
-        }
-      },
-      error: function ( XMLHttpRequest, textStatus, errorThrown ) {
-
-        Swal.fire({
-          icon              : "error",
-          title             : "There was an error!",
-          text              : `${ textStatus }: ${ errorThrown }`,
-          confirmButtonColor: "#dc3545",
-          confirmButtonText : "Continue"
+            Swal.fire({
+              icon              : "error",
+              title             : "There was an error!",
+              text              : `${textStatus}: ${errorThrown}`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText : "Continue"
+            });
+          },
         });
       }
     });
