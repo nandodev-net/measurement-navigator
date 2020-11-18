@@ -71,12 +71,6 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
     """
     submeasurements = [HTTP, TCP, DNS]
 
-    times = RawMeasurement.objects.all()\
-                                .aggregate(
-                                        Min('measurement_start_time'), 
-                                        Max('measurement_start_time')
-                                    )
-
     # just a shortcut
     start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
 
@@ -91,7 +85,7 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
         
         groups = filter(lambda l:len(l) >= minimum_measurements,grouper(meas))
 
-        # A list lists of measurements such that every measurement in an internal
+        # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
         tagged_meas = []
 
@@ -118,9 +112,9 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                 if hi >= n_meas:
                     hi -= 1
 
-                # the ammount of anomalies in that time is higher than the given counter, 
+                # if the ammount of anomalies in that time is higher than the given counter, 
                 # all those measurements should be tagged
-                if group[lo].previous_counter - group[hi].previous_counter + 1 >= minimum_measurements:
+                if group[hi].previous_counter - group[lo].previous_counter + 1 >= minimum_measurements:
                     tagged_meas.append(group[lo:hi+1])
 
                 min_date = temp_max
