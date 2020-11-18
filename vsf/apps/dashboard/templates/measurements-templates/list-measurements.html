@@ -49,7 +49,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text">Since</span>
             </div>
-            <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{prefill.since}}"/>
+            <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}"/>
           </div>
         </div>
 
@@ -58,7 +58,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text">Until</span>
             </div>
-            <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{prefill.until}}"/>
+            <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}"/>
           </div>
         </div>
 
@@ -70,7 +70,7 @@
             <select id="asn" class="custom-select additional-filter">
               <option selected value="">Any ASN</option>
               {% for asn in asns %}
-                    <option value= {{asn.asn}} >{{asn.asn}} - {{asn.name}}</option>
+                    <option value="{{ asn.asn }}" >{{ asn.asn }} - {{ asn.name }}</option>
               {% endfor %}
             </select>
           </div>
