@@ -138,13 +138,14 @@ $(document).ready(function () {
 
                 if ( data.length === 0 ) {
 
-                Swal.fire({
-                    icon              : "warning",
-                    title             : "There is nothing selected!",
-                    confirmButtonColor: "#ffc107",
-                    confirmButtonText : "Continue"
-                });
-                return;
+                    Swal.fire({
+                        icon              : "warning",
+                        title             : "There is nothing selected!",
+                        confirmButtonColor: "#ffc107",
+                        confirmButtonText : "Continue"
+                    });
+
+                    return;
                 }
 
                 let id = data[0].id;
