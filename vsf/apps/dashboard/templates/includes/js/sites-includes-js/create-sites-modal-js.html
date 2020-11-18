@@ -35,9 +35,15 @@
     let url   = '{% url "sites:create_site" %}';
 
     $.ajax({
-      type   : "POST",
-      url    : url,
-      data   : data,
+      type      : "POST",
+      url       : url,
+      data      : data,
+      beforeSend: function() {
+        $('.lds-roller').show();
+      },
+      complete: function() {
+        $('.lds-roller').hide();
+      },
       success: function ( data, status ) {
 
         $("#associateUrl").modal("hide");
