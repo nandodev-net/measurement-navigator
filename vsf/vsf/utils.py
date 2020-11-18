@@ -5,6 +5,9 @@
 from django.db.models       import OuterRef, Subquery
 from django.db.models.query import QuerySet
 
+# Third party imports
+import bisect
+
 # Local imports
 from apps.main.measurements.models  import Measurement, RawMeasurement
 from apps.main.sites.models         import Site, URL
@@ -28,3 +31,7 @@ def MeasurementXRawMeasurementXSite() -> QuerySet:
                     )
 
     return qs
+
+
+# -- Some algorithm help ----
+
