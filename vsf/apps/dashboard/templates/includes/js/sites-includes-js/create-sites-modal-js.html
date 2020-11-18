@@ -8,33 +8,22 @@
 -->
 
 <script>
-
-  /*
-  ========================================
-  VERIFYING THAT THE INPUTS WAS FILLED
-  ========================================
-  */
-
-  if ($("#vsf-sites-input").val() === "") {
-
-    $("#create-sites-btn").prop("disabled", true);
-  }
-
-  if ($("#vsf-description-input").val() === "") {
-
-    $("#create-sites-btn").prop("disabled", true);
-  }
-
-  $("#vsf-sites-input").keyup(function () {
-
-    $("#create-sites-btn").prop("disabled", this.value.trim() === "" ? true : false);
-  });
-
   /*
   ========================================
   THIS PART IS THE AJAX REQUEST
   ========================================
   */
+
+  $( "#vsf-sites-input, #vsf-description-input" ).on("change paste keyup", function() {
+
+    if ( $("#vsf-sites-input" ).val() === "" || $("#vsf-description-input" ).val() === "" )  {
+
+      $("#create-sites-btn").attr('disabled', true);
+    } else {
+
+      $("#create-sites-btn").attr('disabled', false);
+    }
+  });
 
   $("#create-sites-btn").click(function ( event ) {
 
@@ -54,6 +43,7 @@
         $("#associateUrl").modal("hide");
 
         if ( data.error === null ) {
+
           Swal.fire({
             icon              : "success",
             title             : "The site has been created!",
@@ -68,6 +58,7 @@
           });
         }
         else {
+
           Swal.fire({
             icon              : "warning",
             title             : "The name's site is already in use!",
