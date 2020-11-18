@@ -164,9 +164,13 @@
                     type   : "GET",
                     url    : '{% url "measurements:get_measurement" %}',
                     data   : { id: id },
+                    beforeSend: function() {
+                        $('.lds-roller').show();
+                      },
+                    complete: function() {
+                        $('.lds-roller').hide();
+                      },
                     success: function ( measurementData ) {
-
-                        console.log( measurementData );
 
                         $("#annotations-detailed").html( prettyPrintJson.toHtml(measurementData["annotations"]) );
                         $("#bucket-date-detailed").text(measurementData["bucket_date"]);

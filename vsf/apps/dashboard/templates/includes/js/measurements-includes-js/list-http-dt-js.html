@@ -167,15 +167,13 @@
                     type   : "GET",
                     url    : '{% url "measurements:get_measurement" %}',
                     data   : { id: id },
+                    beforeSend: function() {
+                        $('.lds-roller').show();
+                      },
+                    complete: function() {
+                        $('.lds-roller').hide();
+                      },
                     success: function ( measurementData ) {
-                        Swal.fire({
-                        icon              : "success",
-                        title             : "Modal Coming Soon!",
-                        confirmButtonColor: "#28a745",
-                        confirmButtonText : "Continue"
-                        });
-
-                        console.log( measurementData );
 
                         $("#annotations-detailed").html( prettyPrintJson.toHtml(measurementData["annotations"]) );
                         $("#bucket-date-detailed").text(measurementData["bucket_date"]);
@@ -195,6 +193,8 @@
                         $("#test-runtime-detailed").text(measurementData["test_runtime"]);
                         $("#test-start-time-detailed").text(measurementData["test_start_time"]);
                         $("#test-version-detailed").text(measurementData["test_version"]);
+
+                        $('#modalMeasurementInfo').modal('show');
                     },
                     error  : function ( jqXHR, textStatus, errorThrown ) {
 

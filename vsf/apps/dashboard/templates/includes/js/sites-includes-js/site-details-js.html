@@ -23,9 +23,15 @@
       if ( result.isConfirmed ) {
 
         $.ajax({
-          type   : "POST",
-          url    : urlToPost,
-          data   : data,
+          type      : "POST",
+          url       : urlToPost,
+          data      : data,
+          beforeSend: function() {
+            $('.lds-roller').show();
+          },
+          complete  : function() {
+            $('.lds-roller').hide();
+          },
           success: function ( data, status ) {
 
             Swal.fire({
