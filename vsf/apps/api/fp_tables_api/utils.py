@@ -233,13 +233,27 @@ def update_measurement_table(
 
         # Ask for the measurement based on its report id
         # Note that the 'limit' number needs to be high enough, so we don't need to paginate.
+        # ---- DEBUG, DELETE LATER @TODO --+
+        meas = {
+                    "report_id" : fp.report_id,
+                    "input" : fp.input or "",
+                    'test_name' : fp.test_name,
+                    'start_time':fp.measurement_start_time,
+                    "limit":5000,
+            } 
+
+        for (k,v) in meas.items():
+            print(k, " : ", v)
+
+        # ---------------------------------+
         try:
             req = requests.get(
                 measurements_url,
                 params={
                     "report_id" : fp.report_id,
-                    "input" : fp.input,
-                    "limit":5000
+                    "input" : fp.input or "",
+                    'test_name' : fp.test_name,
+                    "limit":5000,
                 })
         except:
             print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
@@ -266,6 +280,8 @@ def update_measurement_table(
             lambda d:
                 dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time,
             data) # Search for the one whose start_time matches with this measurement's start time
+
+        print("data: ", data)
 
         measurement = list(measurement)
         if len(measurement) != 1:
