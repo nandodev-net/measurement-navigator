@@ -48,7 +48,7 @@
             <select class="custom-select" id="asn">
               <option selected value="">Any ASN</option>
               {% for asn in asns %}
-                    <option value= {{asn.asn}} >{{asn.asn}} - {{asn.name}}</option>
+                    <option value="{{ asn.asn }}" >{{ asn.asn }} - {{ asn.name }}</option>
               {% endfor %}
             </select>
           </div>
