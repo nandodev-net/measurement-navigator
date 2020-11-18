@@ -36,13 +36,16 @@
       <div class="modal-body">
         <div class="container-fluid">
           <div class="row">
-            <form class="col-12" id="site-creation-form" method="POST">
+            <form
+              class="col-12"
+              id="site-creation-form"
+              action="#"
+              method="POST"
+            >
               {% csrf_token %}
 
               <div class="form-group">
-                {% for hidden in site_creation_form.hidden_fields %}
-                  {{ hidden }}
-                {% endfor %}
+                {% for hidden in site_creation_form.hidden_fields %} {{ hidden }} {% endfor %}
               </div>
 
               <div class="form-group">
@@ -55,49 +58,60 @@
                       Site
                     </span>
                   </div>
-                  {% render_field site_creation_form.name id="vsf-sites-input" class='form-control w-75' type='text' %}
+                  {% render_field site_creation_form.name id="vsf-sites-input" class='form-control w-75' type='text' required="true" %}
                 </div>
               </div>
 
               <div>
-                {% for error in site_creation_form.name.errors %}
-                  {{ error }}
-                {% endfor %}
+                {% for error in site_creation_form.name.errors %} {{ error }} {% endfor %}
               </div>
 
               <div class="form-group">
                 <div class="input-group">
                   <div class="input-group-prepend w-25">
-                    <span class="input-group-text vsf-flex-grow-1">Description</span>
+                    <span class="input-group-text vsf-flex-grow-1"
+                      >Description</span
+                    >
                   </div>
-                  {% render_field site_creation_form.description_spa id="vsf-description-input" class='form-control vsf-form-control w-75' aria-label="With textarea" %}
+                  {% render_field site_creation_form.description_spa id="vsf-description-input" class='form-control vsf-form-control w-75' aria-label="With textarea" required="true" %}
                 </div>
               </div>
 
               <div class="form-group">
                 <div class="input-group">
                   <div class="input-group-prepend w-25">
-                    <span class="input-group-text vsf-flex-grow-1">Description Eng</span>
+                    <span class="input-group-text vsf-flex-grow-1"
+                      >Description Eng</span
+                    >
                   </div>
                   {% render_field site_creation_form.description_eng id="vsf-description-eng-input" class='form-control vsf-form-control w-75' aria-label="With textarea" %}
                 </div>
               </div>
 
-              <div>
-                {% for error in site_creation_form.description.errors %}
-                  {{ error }}
-                {% endfor %}
+              <div class="form-group">
+                {% for error in site_creation_form.description.errors %} {{ error }} {% endfor %}
+              </div>
+
+              <div class="form-group">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-dismiss="modal"
+                >
+                  Close
+                </button>
+                <button
+                  id="create-sites-btn"
+                  type="button"
+                  class="btn btn-primary"
+                  disabled
+                >
+                  Save changes
+                </button>
               </div>
             </form>
           </div>
         </div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">
-          Close
-        </button>
-        <button id="create-sites-btn" class="btn btn-primary">Save changes</button>
       </div>
     </div>
   </div>

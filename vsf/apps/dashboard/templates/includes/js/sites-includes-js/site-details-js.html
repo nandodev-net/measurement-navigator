@@ -12,35 +12,47 @@
       csrfmiddlewaretoken: "{{ csrf_token }}",
     };
 
-    $.ajax({
-      type   : "POST",
-      url    : urlToPost,
-      data   : data,
-      success: function ( data, status ) {
+    Swal.fire({
+      icon              : "warning",
+      title             : 'Do you want to save the changes?',
+      showDenyButton    : true,
+      confirmButtonText : `Yes`,
+      confirmButtonColor: "#ffc107",
+      denyButtonText    : `No`,
+    }).then( result => {
+      if ( result.isConfirmed ) {
 
-        Swal.fire({
-          icon              : "success",
-          title             : "The operation was successful!",
-          confirmButtonColor: "#28a745",
-          confirmButtonText : "Continue"
-        }).then((result) => {
+        $.ajax({
+          type   : "POST",
+          url    : urlToPost,
+          data   : data,
+          success: function ( data, status ) {
 
-          if ( result.isConfirmed ) {
+            Swal.fire({
+              icon              : "success",
+              title             : "The operation was successful!",
+              confirmButtonColor: "#28a745",
+              confirmButtonText : "Continue"
+            }).then((result) => {
 
-            location.reload();
+              if ( result.isConfirmed ) {
+
+                location.reload();
+              }
+            });
+          },
+          error: function ( jq, status, error ) {
+
+            Swal.fire({
+              icon              : "error",
+              title             : "There was an error!",
+              text              : `${ status }: ${ error }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText : "Continue"
+            });
           }
         });
-      },
-      error: function ( jq, status, error ) {
-
-        Swal.fire({
-          icon              : "error",
-          title             : "There was an error!",
-          text              : `${ status }: ${ error }`,
-          confirmButtonColor: "#dc3545",
-          confirmButtonText : "Continue"
-        });
       }
-    });
+    })
   });
 </script>
