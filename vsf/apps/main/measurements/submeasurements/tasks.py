@@ -3,10 +3,14 @@ from celery import shared_task
 import time
 from datetime import datetime, timedelta
 
-from .utils import SoftFlag
+from .utils import SoftFlag, count_flags
 
 
 @shared_task
 def SoftFlagMeasurements():
     return SoftFlag()
     
+
+@shared_task
+def count_flags_submeasurements():
+    return count_flags
