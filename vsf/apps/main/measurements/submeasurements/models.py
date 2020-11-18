@@ -19,6 +19,14 @@ class SubMeasurement(models.Model):
                                     on_delete=models.CASCADE)
     flag = models.OneToOneField(to=Flag, null=True, on_delete=models.SET_NULL)
 
+    # The following fields are required for the hard flag logic:
+    # The 'previous_counter' field stores an integer 'N' such that 
+    # N = the ammount of measurements such that each measurement m holds:
+    #   * m is soft flagged
+    #   * m.start_time < self.start_time
+    #   * m.measurement.raw_measurement.input == self.measurement.raw_measurement.input
+    previous_counter = models.IntegerField(default=0)
+
     class Meta:
         abstract = True # When abstract is True, django wont make a table for this model
 

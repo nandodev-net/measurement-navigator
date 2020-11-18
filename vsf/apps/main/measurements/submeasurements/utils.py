@@ -1,4 +1,6 @@
 
+# @TODO we have to refactor this file, it's too big
+
 # Local imports
 from .models                             import DNS, HTTP, TCP, SubMeasurement
 from apps.main.measurements.models       import RawMeasurement, Measurement
@@ -389,3 +391,52 @@ def check_tcp(tcp : TCP) -> bool:
     """
 
     return tcp.status_blocked 
+
+# HARD FLAG LOGIC
+def count_flags():
+    """
+        This function sets the value of "previous counter"
+        for every submeasurement according to its meaning
+    """
+
+    submeasurements = [DNS, TCP, HTTP]
+    ready_to_update = []
+
+    # Iterate over the submeasurements types:
+    for SM in submeasurements:
+
+        # Get the data we need, all the submeasurements ordered by input, and by date
+        sms = SM.objects.all()\
+                .select_related('measurement', 'measurement__raw_measurement', 'flag')\
+                .order_by('measurement__raw_measurement__input', 'measurement__raw_measurement__measurement_start_time')
+        
+        sms_ready = []          # store ready measurements in this list:
+        groups = grouper(sms)   # perform a partition over the measurements by its input
+        for group in groups:
+            counter = 0
+            for sm in group:
+                counter += sm.flag.flag == Flag.FlagType.SOFT # If this measurement is tagged, add one to counter
+                sm.previous_counter = counter
+                sms_ready.append(sm)
+
+        ready_to_update.append((SM, sms_ready))
+
+    for (SM, sms) in ready_to_update:
+        SM.objects.bulk_update(sms, ["previous_counter"])
+            
+
+def grouper(submeas : [SubMeasurement]) -> [[SubMeasurement]]:
+    """
+        Utility function to group together measurements of the same input
+    """
+    acc = []
+    curr = []
+    get_input = lambda m: m.measurement.raw_measurement.input
+    for sm in submeas:
+        if len(curr) == 0 or get_input(sm) == get_input(curr[0]):
+            curr.append(sm)
+        else:
+            acc.append(curr)
+            curr = []
+
+    return acc
