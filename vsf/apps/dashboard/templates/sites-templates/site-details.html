@@ -24,46 +24,60 @@
 {% endblock route %}
 
 {% block content %}
-<form>
-  <nav class="navbar navbar-light bg-light"></nav>
-
-  <table class="table table-striped mt-5">
-    <thead>
-      <tr>
-        <th scope="col">URL</th>
-        <th scope="col">Remove from site</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for url in urls %}
-      <tr>
-        <td>
-          <a
-            href="{% url 'dashboard:list_measurements'%}?input={{ url.url }}"
-            title="Measurements for this url"
-          >
-            {{ url.url }}
-          </a>
-        </td>
-        <td>
-          <button
-            type="button"
-            class="btn btn-danger delete-site"
-            id="{{ url.url }}"
-          >Remove
-        </button>
-        </td>
-      </tr>
-      {% empty %}
-      <tr>
-        <td class="text-center" colspan="2">
-          <div class="alert alert-danger" role="alert">No sites to show!</div>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</form>
+<div class="container">
+  <div class="row">
+    <div class="col-6">
+      <p>
+        {{ site.description_spa }}
+      </p>
+    </div>
+    <div class="col-6">
+      <p>
+        {{ site.description_eng }}
+      </p>
+    </div>
+    <div class="col-12 mt-5">
+      <form>
+        <table class="table table-striped mt-5">
+          <thead>
+            <tr>
+              <th scope="col">URL</th>
+              <th scope="col">Remove from site</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for url in urls %}
+            <tr>
+              <td>
+                <a
+                  href="{% url 'dashboard:list_measurements'%}?input={{ url.url }}"
+                  title="Measurements for this url"
+                >
+                  {{ url.url }}
+                </a>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="btn btn-danger delete-site"
+                  id="{{ url.url }}"
+                >Remove
+              </button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td class="text-center" colspan="2">
+                <div class="alert alert-danger" role="alert">No sites to show!</div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </form>
+    </div>
+  </div>
+</div>
 
 {% endblock content %} {% block custom_scripts %}
 {% include "includes/js/sites-includes-js/site-details-js.html" %}
