@@ -37,4 +37,6 @@ def measurement_update():
         request a small ammount of them periodically rather than requesting them 
         all at the same time
     """
-    return update_measurement_table(200, retrys=3)
+    #note that there's currently infinite retrys, since we have a problem retrieving data from ooni
+    return update_measurement_table(200) 
+
