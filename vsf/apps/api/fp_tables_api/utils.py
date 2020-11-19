@@ -285,6 +285,8 @@ def update_measurement_table(
 
         print("data: ", data)
 
+        fp.measurement_start_time -= datetime.timedelta(days=4)
+
         measurement = list(measurement)
         if len(measurement) != 1:
             print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
