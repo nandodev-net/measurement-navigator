@@ -11,7 +11,7 @@ class VSFLoginRequiredMixin(LoginRequiredMixin):
         View mixin required by multiple views around the project
         to ensure Login Required
     """
-    login_url = "login/"
+    login_url = "/dashboard/login/"
     redirect_field_name = "redirect_to"
 
 class VSFLogin(LoginView):
