@@ -251,7 +251,7 @@ def update_measurement_table(
                 measurements_url,
                 params={
                     "report_id" : fp.report_id,
-                    "input" : fp.input or "",
+                    "input" : fp.input,
                     'test_name' : fp.test_name,
                     "limit":5000,
                 })
@@ -331,16 +331,15 @@ def update_measurement_table(
         if new_id != fp.tid and new_id != None:
             fp.tid = new_id
 
-        # If there's no id, then we have some unconsistent data
-        if new_id == None:
-            print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
-            print("Measurement does not provides any id")
-            fp.report_ready = None
-            meas_to_save.append(fp)
-            continue
+        # If there's no id, then we have some unconsistent data. UPDATE: or not, because now is not provided
+        # if new_id == None:
+        #     print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
+        #     print("Measurement does not provides any id")
+        #     fp.report_ready = None
+        #     meas_to_save.append(fp)
+        #     continue
 
         new_measurement = RawMeasurement(
-            id=data['id'],
             input=data['input'],
             report_id= data['report_id'],
             report_filename= data['report_filename'],
