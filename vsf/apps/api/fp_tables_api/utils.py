@@ -342,8 +342,8 @@ def update_measurement_table(
         new_measurement = RawMeasurement(
             input=data['input'],
             report_id= data['report_id'],
-            report_filename= data['report_filename'],
-            options= data['options'],
+            report_filename= data['report_filename'], #
+            options= data['options'], #
             probe_cc= data['probe_cc'],
             probe_asn= data['probe_asn'],
             probe_ip=data['probe_ip'],
@@ -356,7 +356,7 @@ def update_measurement_table(
             software_name= data['software_name'],
             software_version= data['software_version'],
             test_version= data['test_version'],
-            bucket_date= data['bucket_date'],
+            bucket_date= data['bucket_date'], #
             test_keys= data['test_keys'],
             annotations= data['annotations']
         )
