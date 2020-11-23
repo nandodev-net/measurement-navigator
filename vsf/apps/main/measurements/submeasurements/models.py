@@ -17,7 +17,7 @@ class SubMeasurement(models.Model):
     measurement = models.ForeignKey(
                                     to=Measurement,
                                     on_delete=models.CASCADE)
-    flag = models.OneToOneField(to=Flag, null=True, on_delete=models.SET_NULL)
+    flag = models.ForeignKey(to=Flag, null=True, on_delete=models.SET_NULL)
 
     # The following fields are required for the hard flag logic:
     # The 'previous_counter' field stores an integer 'N' such that 

@@ -717,7 +717,7 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'control_resolver_answers' : item.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag__flag'            : item.flag.flag
+                'flag__flag'            : item.flag.flag if item.flag else "no flag"
             })
         return json_data
 
@@ -862,7 +862,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'site' : item.site,
                 'site_name' : item.site_name if item.site_name else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag.flag,
+                'flag__flag'           : item.flag.flag if item.flag else "no flag",
                 'status_code_match' : item.status_code_match,
                 'headers_match' : item.headers_match,
                 'body_length_match' : item.body_length_match,
@@ -995,7 +995,7 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'site' : item.site,
                 'site_name' : item.site_name if item.site_name else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag.flag,
+                'flag__flag'           : item.flag.flag if item.flag else "no flag",
                 'status_blocked' : item.status_blocked,
                 'status_failure' : item.status_failure or "N/A",
                 'status_success' : item.status_success,

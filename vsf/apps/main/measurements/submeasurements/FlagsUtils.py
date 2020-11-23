@@ -27,6 +27,7 @@ def count_flags():
         # Get the data we need, all the submeasurements ordered by input, and by date
         sms = SM.objects.all()\
                 .select_related('measurement', 'measurement__raw_measurement', 'flag')\
+                .exclude(flag=None)\
                 .order_by('measurement__raw_measurement__input', 'measurement__raw_measurement__measurement_start_time')
         
         sms_ready = []          # store ready measurements in this list:
@@ -74,14 +75,16 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
     # just a shortcut
     start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
 
+    result = {'hard_tagged':[]}
     # For every submeasurement type...
     for SM in submeasurements:
         meas = SM.objects.all()\
                     .select_related('measurement', 'measurement__raw_measurement', 'flag')\
                     .exclude(flag=None)\
-                    .exclude(flag__flag=Flag.FlagType.OK)\
+                    .exclude(flag__flag__in=[Flag.FlagType.OK, Flag.FlagType.HARD])\
                     .order_by(  'measurement__raw_measurement__input', 
-                                'measurement__raw_measurement__measurement_start_time')
+                                'measurement__raw_measurement__measurement_start_time',
+                                'previous_counter')
         
         groups = filter(lambda l:len(l) >= minimum_measurements,grouper(meas))
 
@@ -90,6 +93,15 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
         tagged_meas = []
 
         for group in groups:
+            # -- DEBUG, DELETE LATER @TODO -------+
+            for m in group:
+                print(  "Input: ", m.measurement.raw_measurement.input, 
+                        ". Start time: ", m.measurement.raw_measurement.measurement_start_time,
+                        ". Flag: ", m.flag.flag,
+                        ". Counter: ", m.previous_counter)
+
+            # ------------------------------------+
+
 
             # Search min and max
             n_meas = len(group)
@@ -114,17 +126,19 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
 
                 # if the ammount of anomalies in that time is higher than the given counter, 
                 # all those measurements should be tagged
-                if group[hi].previous_counter - group[lo].previous_counter + 1 >= minimum_measurements:
+                if group[hi].previous_counter - group[lo].previous_counter + (group[hi].flag.flag == Flag.FlagType.SOFT) >= minimum_measurements:
                     tagged_meas.append(group[lo:hi+1])
 
                 min_date = temp_max
         
         for tagged_group in tagged_meas:
-            flag = Flag(flag=Flag.FlagType.HARD)
-            flag.save()
+            flag = Flag.objects.create(flag=Flag.FlagType.HARD)
             for m in tagged_group:
                 m.flag = flag
                 m.save()
+                result['hard_tagged'].append(m)
+
+    return result
             
 
 
