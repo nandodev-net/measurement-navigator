@@ -68,7 +68,7 @@ class RawMeasurement(models.Model):
     software_name = models.CharField(max_length=30)
     software_version = models.CharField(max_length=100)
     test_version = models.CharField(max_length=100)
-    bucket_date = models.DateTimeField()
+    bucket_date = models.DateTimeField(null=True)
 
     # ---------------------------------------------- #
     test_keys = JSONField()
