@@ -11,7 +11,7 @@ def sum (a,b):
     time.sleep(2)
     return a+b
     
-@shared_task(time_limit=750)
+@shared_task(time_limit=2000)
 def fp_update():
     """
         Update the fast path table;
@@ -29,7 +29,7 @@ def fp_update():
     yesterday = now - timedelta(days=1)
     return request_fp_data(yesterday.strftime("%Y-%m-%d"), now.strftime("%Y-%m-%d"), False)
     
-@shared_task(time_limit=750)
+@shared_task(time_limit=2000)
 def measurement_update():
     """
         Update Measurement table by requesting for new measurements availables
