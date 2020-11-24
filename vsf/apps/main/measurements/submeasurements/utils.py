@@ -266,7 +266,7 @@ def SoftFlag(since=None, until=None, limit : int = None):
 
         You can limit the number of considered measurements by providing a "limit" number,
         the maximum ammount of measurements to check
-        
+
     """
     dnss  = DNS.objects.all()\
                 .select_related('measurement', 'measurement__raw_measurement', 'flag')\
@@ -281,14 +281,14 @@ def SoftFlag(since=None, until=None, limit : int = None):
                 .filter(flag__flag = None)
 
     # apply filtering if necessary
-    dnss = dnss.filter(measurement__measurement_start_time__lt = until) if until else dnss
-    dnss = dnss.filter(measurement__measurement_start_time__gt = since) if since else dnss
+    dnss = dnss.filter(measurement__raw_measurement__measurement_start_time__lt = until) if until else dnss
+    dnss = dnss.filter(measurement__raw_measurement__measurement_start_time__gt = since) if since else dnss
 
-    tcps = tcps.filter(measurement__measurement_start_time__lt = until) if until else tcps
-    tcps = tcps.filter(measurement__measurement_start_time__gt = since) if since else tcps
+    tcps = tcps.filter(measurement__raw_measurement__measurement_start_time__lt = until) if until else tcps
+    tcps = tcps.filter(measurement__raw_measurement__measurement_start_time__gt = since) if since else tcps
 
-    https = https.filter(measurement__measurement_start_time__lt = until) if until else https
-    https = https.filter(measurement__measurement_start_time__gt = since) if since else https
+    https = https.filter(measurement__raw_measurement__measurement_start_time__lt = until) if until else https
+    https = https.filter(measurement__raw_measurement__measurement_start_time__gt = since) if since else https
 
     meas = [m for m in dnss] + [m for m in tcps] + [m for m in https]
     if limit and limit > 0:
