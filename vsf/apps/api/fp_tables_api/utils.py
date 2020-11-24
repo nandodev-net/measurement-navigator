@@ -355,7 +355,7 @@ def update_measurement_table(
             software_name= data['software_name'],
             software_version= data['software_version'],
             test_version= data['test_version'],
-            bucket_date= data['bucket_date'], #
+            bucket_date= data.get('bucket_date'), #
             test_keys= data['test_keys'],
             annotations= data['annotations']
         )
