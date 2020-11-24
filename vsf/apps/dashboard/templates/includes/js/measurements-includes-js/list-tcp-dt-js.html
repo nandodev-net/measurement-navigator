@@ -226,5 +226,9 @@
         });
     });
 
-    $('#collapseTestKeys').collapse({"toggle"});
+    $('#collapseTestKeys').collapse({toggle});
+
+    $('#collapseTestKeys').on('show hide', function() {
+        $(this).css('height', 'auto');
+    });
 </script>
