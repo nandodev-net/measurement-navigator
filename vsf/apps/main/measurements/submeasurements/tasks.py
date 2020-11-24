@@ -8,9 +8,9 @@ from .utils import SoftFlag, count_flags
 
 @shared_task
 def SoftFlagMeasurements():
-    return SoftFlag()
+    return SoftFlag(limit=1000)
     
 
 @shared_task
 def count_flags_submeasurements():
-    return count_flags
+    return count_flags()

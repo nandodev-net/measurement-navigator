@@ -258,11 +258,15 @@ def createTCPFromWebCon(measurement : RawMeasurement) -> [TCP]:
 
 # -- Flag Checking -------------------------------------------------------+
 
-def SoftFlag(since=None, until=None):
+def SoftFlag(since=None, until=None, limit : int = None):
     """
         This function Flags every measurement from the start time 
         "since" to "until".  if some of them is not provided, 
         take the highest/lowest possible bound.
+
+        You can limit the number of considered measurements by providing a "limit" number,
+        the maximum ammount of measurements to check
+        
     """
     dnss  = DNS.objects.all()\
                 .select_related('measurement', 'measurement__raw_measurement', 'flag')\
@@ -287,6 +291,9 @@ def SoftFlag(since=None, until=None):
     https = https.filter(measurement__measurement_start_time__gt = since) if since else https
 
     meas = [m for m in dnss] + [m for m in tcps] + [m for m in https]
+    if limit and limit > 0:
+        meas = meas[:limit]
+    
     tagged = []
     not_tagged = []
     for m in meas:
