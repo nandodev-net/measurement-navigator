@@ -236,7 +236,7 @@ def update_measurement_table(
         # ---- DEBUG, DELETE LATER @TODO --+
         meas = {
                     "report_id" : fp.report_id,
-                    "input" : fp.input or "",
+                    "input" : fp.input,
                     'test_name' : fp.test_name,
                     'start_time':fp.measurement_start_time,
                     "limit":5000,
@@ -278,16 +278,14 @@ def update_measurement_table(
 
         fp.measurement_start_time += datetime.timedelta(days=4)
 
-        measurement = filter(
-            lambda d:
-                dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time,
-            data) # Search for the one whose start_time matches with this measurement's start time
+        measurement = [d for d in data if 
+                        dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time
+                        ]
 
         print("data: ", data)
 
         fp.measurement_start_time -= datetime.timedelta(days=4)
 
-        measurement = list(measurement)
         if len(measurement) != 1:
             print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
             print("Too many equal measurements: ", len(measurement))
@@ -342,17 +340,17 @@ def update_measurement_table(
         new_measurement = RawMeasurement(
             input=data['input'],
             report_id= data['report_id'],
-            report_filename= data['report_filename'], #
-            options= data['options'], #
-            probe_cc= data['probe_cc'],
+            report_filename= data.get('report_filename','NO_AVAILABLE'), #
+            options= data.get('options', "NO_AVAILABLE"), #
+            probe_cc= data.get('probe_cc','VE'),
             probe_asn= data['probe_asn'],
-            probe_ip=data['probe_ip'],
+            probe_ip=data.get('probe_ip'),
             data_format_version= data['data_format_version'],
             test_name= data['test_name'],
-            test_start_time= data['test_start_time'],
+            test_start_time= data.get('test_start_time'),
             measurement_start_time= data['measurement_start_time'],
-            test_runtime= data['test_runtime'],
-            test_helpers= data['test_helpers'],
+            test_runtime= data.get('test_runtime'),
+            test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
             software_name= data['software_name'],
             software_version= data['software_version'],
             test_version= data['test_version'],
