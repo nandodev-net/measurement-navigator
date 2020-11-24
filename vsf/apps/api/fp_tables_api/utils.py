@@ -276,15 +276,16 @@ def update_measurement_table(
         if data == None:
             raise AttributeError("Unexpected data format from Ooni")
 
-        fp.measurement_start_time += datetime.timedelta(days=4)
+        
 
         measurement = [d for d in data if 
-                        dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time
+                        dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time or
+                        dateparse.parse_datetime(d.get("measurement_start_time")) == (fp.measurement_start_time + datetime.timedelta(days=4)) # PQC
                         ]
 
         print("data: ", data)
 
-        fp.measurement_start_time -= datetime.timedelta(days=4)
+        
 
         if len(measurement) != 1:
             print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
