@@ -265,48 +265,37 @@ def SoftFlag(since=None, until=None, limit : int = None):
         take the highest/lowest possible bound.
 
         You can limit the number of considered measurements by providing a "limit" number,
-        the maximum ammount of measurements to check
+        the maximum ammount of measurements to check per measurement type. 
 
     """
-    dnss  = DNS.objects.all()\
-                .select_related('measurement', 'measurement__raw_measurement', 'flag')\
-                .filter(flag__flag = None)
 
-    tcps  = TCP.objects.all()\
-                .select_related('measurement', 'measurement__raw_measurement', 'flag')\
-                .filter(flag__flag = None)
+    meas_types = [DNS, TCP, HTTP]
 
-    https = HTTP.objects.all()\
-                .select_related('measurement', 'measurement__raw_measurement', 'flag')\
-                .filter(flag__flag = None)
 
-    # apply filtering if necessary
-    dnss = dnss.filter(measurement__raw_measurement__measurement_start_time__lt = until) if until else dnss
-    dnss = dnss.filter(measurement__raw_measurement__measurement_start_time__gt = since) if since else dnss
-
-    tcps = tcps.filter(measurement__raw_measurement__measurement_start_time__lt = until) if until else tcps
-    tcps = tcps.filter(measurement__raw_measurement__measurement_start_time__gt = since) if since else tcps
-
-    https = https.filter(measurement__raw_measurement__measurement_start_time__lt = until) if until else https
-    https = https.filter(measurement__raw_measurement__measurement_start_time__gt = since) if since else https
-
-    meas = [m for m in dnss] + [m for m in tcps] + [m for m in https]
-    if limit and limit > 0:
-        meas = meas[:limit]
-    
     tagged = []
     not_tagged = []
-    for m in meas:
-        if check_submeasurement(m):
-            new_flag = Flag.objects.create(flag = Flag.FlagType.SOFT) # create a new flag
-            m.flag = new_flag   # set the new flag
-            m.save()            # Store the measurement
-            tagged.append(m)    # annotate the saved objects
-        else:
-            new_flag = Flag.objects.create(flag = Flag.FlagType.OK) # create a new flag
-            m.flag = new_flag       # set the new flag
-            m.save()                # Store the measurement
-            not_tagged.append(m)    # annotate the saved objects
+    for MS in meas_types:
+        measurements = MS.objects.all()\
+                            .select_related('measurement', 'measurement__raw_measurement', 'flag')\
+                            .filter(flag__flag = None)
+
+        if limit and limit > 0:
+            measurements = measurements[:limit]
+        
+        measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__lt = until) if until else measurements
+        measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__gt = since) if since else measurements
+        
+        for m in measurements:
+            if check_submeasurement(m):
+                new_flag = Flag.objects.create(flag = Flag.FlagType.SOFT) # create a new flag
+                m.flag = new_flag   # set the new flag
+                m.save()            # Store the measurement
+                tagged.append(m)    # annotate the saved objects
+            else:
+                new_flag = Flag.objects.create(flag = Flag.FlagType.OK) # create a new flag
+                m.flag = new_flag       # set the new flag
+                m.save()                # Store the measurement
+                not_tagged.append(m)    # annotate the saved objects
 
     return {
             'tagged':tagged, 
