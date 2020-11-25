@@ -6,35 +6,34 @@
 
 {% extends 'extends/base.html' %}
 {% load static %}
-
 {% block custom_stylesheet %}
 <link
   rel="stylesheet"
   type="text/css"
   href="https://cdn.datatables.net/v/bs4/dt-1.10.22/b-1.6.5/sl-1.3.1/datatables.min.css"
 />
-<link
-  rel=stylesheet
-  href=https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css
+<link rel=stylesheet
+href=https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css
 />
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - DNS {% endblock tab_title %}
 {% block title %} DNS {% endblock title %}
-{% block sub_title %} List and filter all the currently available DNS Sub-measurements {% endblock sub_title %}
+
+{% block sub_title %}
+List and filter all the currently available DNS Sub-measurements
+{% endblock sub_title %}
 
 {% block route %}
 <li class="breadcrumb-item">
   <a href="{% url home %}">Home</a>
 </li>
 <li class="breadcrumb-item">
-   <a href="{% url 'dashboard:list_measurements' %}">Measurements</a>
+  <a href="{% url 'dashboard:list_measurements' %}">Measurements</a>
 </li>
-<li class="breadcrumb-item active">
-  DNS
-</li>
+<li class="breadcrumb-item active">DNS</li>
 
-{% endblock route %} 
+{% endblock route %}
 
 {% block content %}
 <form id="urlForm">
@@ -46,7 +45,11 @@
             <div class="input-group-prepend">
               <span class="input-group-text">Since</span>
             </div>
-            <input id="since" class="form-control mr-2 additional-filter" type="date" />
+            <input
+              id="since"
+              class="form-control mr-2 additional-filter"
+              type="date"
+            />
           </div>
         </div>
 
@@ -55,7 +58,11 @@
             <div class="input-group-prepend">
               <span class="input-group-text">Until</span>
             </div>
-            <input id="until" class="form-control mr-2 additional-filter" type="date" />
+            <input
+              id="until"
+              class="form-control mr-2 additional-filter"
+              type="date"
+            />
           </div>
         </div>
 
@@ -67,7 +74,9 @@
             <select id="asn" class="custom-select additional-filter">
               <option selected value="">Any ASN</option>
               {% for asn in asns %}
-                    <option value="{{ asn.asn }}" >{{ asn.asn }} - {{ asn.name }}</option>
+              <option value="{{ asn.asn }}">
+                {{ asn.asn }} - {{ asn.name }}
+              </option>
               {% endfor %}
             </select>
           </div>
@@ -76,11 +85,11 @@
         <div class="col-3 mt-3">
           <div class="input-group mr-2">
             <input
-            id="consistency"
-            class="form-control mr-2 additional-filter"
-            type="search"
-            placeholder="Consistency"
-            aria-label="Consistency Search"
+              id="consistency"
+              class="form-control mr-2 additional-filter"
+              type="search"
+              placeholder="Consistency"
+              aria-label="Consistency Search"
             />
           </div>
         </div>
@@ -88,7 +97,9 @@
         <div class="col-3 mt-3">
           <div class="input-group mr-2">
             <div class="input-group-prepend">
-              <label class="input-group-text" for="anomaly-state">Anomaly</label>
+              <label class="input-group-text" for="anomaly-state"
+                >Anomaly</label
+              >
             </div>
             <select id="anomaly-state" class="custom-select additional-filter">
               <option selected value="">Any</option>
@@ -140,15 +151,18 @@
           <th class="text-center text-capitalize" scope="col">Flag</th>
           <th class="text-center text-capitalize" scope="col">Consistency</th>
           <th class="text-center text-capitalize" scope="col">answers</th>
-          <th class="text-center text-capitalize" scope="col">control resolver answers</th>
-          <th class="text-center text-capitalize" scope="col">client resolver</th>
+          <th class="text-center text-capitalize" scope="col">
+            control resolver answers
+          </th>
+          <th class="text-center text-capitalize" scope="col">
+            client resolver
+          </th>
         </tr>
       </thead>
 
       <tbody></tbody>
 
       <tfoot></tfoot>
-
     </table>
   </div>
 </form>
@@ -159,8 +173,8 @@
 {% block custom_scripts %}
 <script
   type="text/javascript"
-  src="https://cdn.datatables.net/v/bs4-4.1.1/jq-3.3.1/dt-1.10.22/b-1.6.5/sl-1.3.1/datatables.min.js">
-</script>
+  src="https://cdn.datatables.net/v/bs4/dt-1.10.22/b-1.6.5/sl-1.3.1/datatables.min.js"
+></script>
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
 {% include "includes/js/measurements-includes-js/list-dns-dt-js.html" %}
 {% endblock custom_scripts %}
