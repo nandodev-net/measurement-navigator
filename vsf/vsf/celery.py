@@ -54,7 +54,13 @@ app.conf.beat_schedule = {
     # Count Flags submeasurements updates the value of previous_counter field in submeasurements
     # field
     'update-hf-counters':{
-        'task':'apps.main.measurements.submeasurements.tasks.SoftFlagMeasurements',
+        'task':'apps.main.measurements.submeasurements.tasks.count_flags_submeasurements',
+        'schedule':3600,
+        'args':()
+    },
+    # Run the hard flag algorithm over all the measurements
+    'update-hard-flags':{
+        'task':'apps.main.measurements.submeasurements.tasks.count_flags_submeasurements',
         'schedule':3600,
         'args':()
     },
