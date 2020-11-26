@@ -49,15 +49,21 @@ def grouper(submeas : [SubMeasurement]) -> [[SubMeasurement]]:
     """
         Utility function to group together measurements of the same input
     """
+    n_meas = len(submeas)
+    if len(submeas) == 0:
+        return []
+
     acc = []
-    curr = []
+    curr = [submeas[0]]
     get_input = lambda m: m.measurement.raw_measurement.input
-    for sm in submeas:
-        if len(curr) == 0 or get_input(sm) == get_input(curr[0]):
+
+    for i in range(1,n_meas):
+        sm = submeas[i]
+        if get_input(sm) == get_input(curr[0]):
             curr.append(sm)
         else:
             acc.append(curr)
-            curr = []
+            curr = [sm]
 
     return acc
 
@@ -115,7 +121,8 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                 temp_max = min_date + time_window
 
                 # search for the latest measurement whose start_time is less than temp_max
-                for m in group[lo:]:
+                for i in range(lo, n_meas):
+                    m = group[i]
                     if start_time(m) > temp_max:
                         hi -= 1
                         break
@@ -146,3 +153,35 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
         
 
 
+class Grouper():
+    def __init__(self, queryset):
+        self.queryset_it = iter(queryset)
+
+    def __iter__(self):
+        try:
+            self.next_elem = next(self.queryset_it)
+        except:
+            self.next_elem = None
+        return self
+    
+    def __next__(self):
+        if self.next_elem is None:
+            raise StopIteration
+        get_input = lambda m: m.measurement.raw_measurement.input
+        acc = []
+        while True:
+            acc.append(self.next_elem)
+            try:
+                self.next_elem = next(self.queryset_it)
+            except StopIteration:
+                self.next_elem = None
+                if len(acc) == 0:
+                    raise StopIteration
+                else:
+                    return acc
+            if get_input(acc[0]) == get_input(self.next_elem):
+                acc.append(self.next_elem)
+            else:
+                break
+        return acc
+    

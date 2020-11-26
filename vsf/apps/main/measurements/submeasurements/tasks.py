@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from .utils import SoftFlag, count_flags, hard_flag
 
 
-@shared_task(time_limit=300)
+@shared_task(time_limit=1800)
 def SoftFlagMeasurements():
     return SoftFlag(limit=1000)
     
