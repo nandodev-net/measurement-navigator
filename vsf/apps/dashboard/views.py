@@ -649,6 +649,12 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         ]
 
     def get_initial_queryset(self):
+        # alternativa: 
+        # select dns.id from submeasurements_dns dns join measurements_measurement ms on dns.measurement_id=ms.id join measurements_rawmeasurement rms on ms.raw_measurement_id=rms.id join (select url, sites.name as site_name from sites_url urls left join sites_site sites on urls.site_id=sites.id) as urls on input=urls.url order by rms.measurement_start_time limit 10;
+        # Time for this query to end: 189.96 seconds
+        # time for the raw version: 1.89 seconds
+        import time
+
         urls = URL\
                 .objects\
                 .all()\
