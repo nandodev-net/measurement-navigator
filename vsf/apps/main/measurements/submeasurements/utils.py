@@ -389,4 +389,4 @@ def check_tcp(tcp : TCP) -> bool:
     return tcp.status_blocked 
 
 # @TODO format later
-from .FlagsUtils import count_flags
+from .FlagsUtils import count_flags, hard_flag
