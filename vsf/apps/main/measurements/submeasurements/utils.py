@@ -1,6 +1,10 @@
 
 # @TODO we have to refactor this file, it's too big
 
+
+# Django imports 
+from django.core.paginator               import Paginator
+
 # Local imports
 from .models                             import DNS, HTTP, TCP, SubMeasurement
 from apps.main.measurements.models       import RawMeasurement, Measurement
@@ -258,7 +262,7 @@ def createTCPFromWebCon(measurement : RawMeasurement) -> [TCP]:
 
 # -- Flag Checking -------------------------------------------------------+
 
-def SoftFlag(since=None, until=None, limit : int = None):
+def SoftFlag(since=None, until=None, limit : int = None, page_size : int = 1000, absolute : bool = False):
     """
         This function Flags every measurement from the start time 
         "since" to "until".  if some of them is not provided, 
@@ -266,37 +270,55 @@ def SoftFlag(since=None, until=None, limit : int = None):
 
         You can limit the number of considered measurements by providing a "limit" number,
         the maximum ammount of measurements to check per measurement type. 
+        
+        "Absolute" means that every measurement will be considered, even if it is already checked.
+        Use with aution
 
+        "page_size" means the size of the page while paginating the query
     """
 
-    meas_types = [DNS, TCP, HTTP]
+    # Argument checker
+    assert isinstance(page_size, int), "Limit argument should be an integer number"
+    assert page_size > 0, "Limit argument should be a positive number"
 
+    meas_types = [DNS, TCP, HTTP]
 
     tagged = 0
     not_tagged = 0
     for MS in meas_types:
         measurements = MS.objects.all()\
                             .select_related('measurement', 'measurement__raw_measurement', 'flag')\
-                            .filter(flag__flag = None)
-
+        
+        # Apply optional filtering
+        if until:
+            measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__lt = until)
+        if since:
+            measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__gt = since) 
+        if not absolute:
+            measurements = measurements.filter(flag = None)
         if limit and limit > 0:
             measurements = measurements[:limit]
+
+        measurements = measurements.order_by('measurement')
+
+        # Apply pagination
+        paginator = Paginator(measurements, page_size)
         
-        measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__lt = until) if until else measurements
-        measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__gt = since) if since else measurements
-        
-        for m in measurements:
-            if check_submeasurement(m):
-                new_flag = Flag.objects.create(flag = Flag.FlagType.SOFT) # create a new flag
-                m.flag = new_flag   # set the new flag
-                m.save()            # Store the measurement
-                tagged += 1         # annotate the saved objects
-            else:
-                new_flag = Flag.objects.create(flag = Flag.FlagType.OK) # create a new flag
-                m.flag = new_flag       # set the new flag
-                m.save()                # Store the measurement
-                not_tagged += 1    # annotate the saved objects
-            del m
+        for i in paginator.page_range:
+            page = paginator.page(i)
+            for m in page:
+                if check_submeasurement(m):
+                    new_flag = Flag.objects.create(flag = Flag.FlagType.SOFT) # create a new flag
+                    m.flag = new_flag   # set the new flag
+                    m.save()            # Store the measurement
+                    tagged += 1         # annotate the saved objects
+                else:
+                    new_flag = Flag.objects.create(flag = Flag.FlagType.OK) # create a new flag
+                    m.flag = new_flag       # set the new flag
+                    m.save()                # Store the measurement
+                    not_tagged += 1    # annotate the saved objects
+
+            del page
 
     return {
             'tagged':tagged, 
