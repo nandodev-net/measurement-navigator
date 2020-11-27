@@ -171,9 +171,46 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int,
                         input=fp.input,
                         report_id=fp.report_id,
                         test_name=fp.test_name)
+            continue
+        except:
+            pass
+
+        #Since this measurement is not yet stored, try to recover its complete data if possible
+        try:
+            req = requests.get(fp.measurement_url)
+            assert req.status_code == 200
         except:
             fp.save()
             saved_measurements.append(fp.id)
+            continue
+
+
+        data = req.json()
+        RawMeasurement.objects.create(
+            input=data['input'],
+            report_id= data['report_id'],
+            report_filename= data.get('report_filename','NO_AVAILABLE'), #
+            options= data.get('options', "NO_AVAILABLE"), #
+            probe_cc= data.get('probe_cc','VE'),
+            probe_asn= data['probe_asn'],
+            probe_ip=data.get('probe_ip'),
+            data_format_version= data['data_format_version'],
+            test_name= data['test_name'],
+            test_start_time= data.get('test_start_time'),
+            measurement_start_time= data['measurement_start_time'],
+            test_runtime= data.get('test_runtime'),
+            test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
+            software_name= data['software_name'],
+            software_version= data['software_version'],
+            test_version= data['test_version'],
+            bucket_date= data.get('bucket_date'), #
+            test_keys= data['test_keys'],
+            annotations= data['annotations']
+        )
+        fp.report_ready = True
+        fp.data_ready = FastPath.DataReady.READY
+        fp.save()
+        saved_measurements.append(fp.id)
 
     return (req.status_code, saved_measurements)
 
@@ -337,6 +374,7 @@ def update_measurement_table(
         #     fp.report_ready = None
         #     meas_to_save.append(fp)
         #     continue
+            
 
         new_measurement = RawMeasurement(
             input=data['input'],
