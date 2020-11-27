@@ -296,10 +296,12 @@ def SoftFlag(since=None, until=None, limit : int = None, page_size : int = 1000,
             measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__gt = since) 
         if not absolute:
             measurements = measurements.filter(flag = None)
+
+        measurements = measurements.order_by('measurement')
+        
         if limit and limit > 0:
             measurements = measurements[:limit]
 
-        measurements = measurements.order_by('measurement')
 
         # Apply pagination
         paginator = Paginator(measurements, page_size)
