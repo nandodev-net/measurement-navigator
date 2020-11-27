@@ -296,6 +296,7 @@ def SoftFlag(since=None, until=None, limit : int = None):
                 m.flag = new_flag       # set the new flag
                 m.save()                # Store the measurement
                 not_tagged += 1    # annotate the saved objects
+            del m
 
     return {
             'tagged':tagged, 
