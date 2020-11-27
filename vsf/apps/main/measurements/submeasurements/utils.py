@@ -272,8 +272,8 @@ def SoftFlag(since=None, until=None, limit : int = None):
     meas_types = [DNS, TCP, HTTP]
 
 
-    tagged = []
-    not_tagged = []
+    tagged = 0
+    not_tagged = 0
     for MS in meas_types:
         measurements = MS.objects.all()\
                             .select_related('measurement', 'measurement__raw_measurement', 'flag')\
@@ -290,18 +290,16 @@ def SoftFlag(since=None, until=None, limit : int = None):
                 new_flag = Flag.objects.create(flag = Flag.FlagType.SOFT) # create a new flag
                 m.flag = new_flag   # set the new flag
                 m.save()            # Store the measurement
-                tagged.append(m)    # annotate the saved objects
+                tagged += 1         # annotate the saved objects
             else:
                 new_flag = Flag.objects.create(flag = Flag.FlagType.OK) # create a new flag
                 m.flag = new_flag       # set the new flag
                 m.save()                # Store the measurement
-                not_tagged.append(m)    # annotate the saved objects
+                not_tagged += 1    # annotate the saved objects
 
     return {
             'tagged':tagged, 
             'not_tagged':not_tagged, 
-            'tagged_ammount':len(tagged), 
-            'not_tagged_ammount':len(not_tagged)
         }
         
 
