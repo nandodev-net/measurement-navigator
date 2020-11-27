@@ -11,7 +11,7 @@ def sum (a,b):
     time.sleep(2)
     return a+b
     
-@shared_task(time_limit=2000)
+@shared_task(time_limit=3600)
 def fp_update():
     """
         Update the fast path table;
