@@ -5,8 +5,7 @@ from django.contrib.postgres.fields import JSONField
 
 # Local imports
 from apps.main.measurements.models                       import Measurement
-from apps.main.measurements.flags.models import Flag
-
+from apps.main.measurements.flags.models                 import Flag
 # Create your models here.
 class SubMeasurement(models.Model):
     """
@@ -26,6 +25,23 @@ class SubMeasurement(models.Model):
     #   * m.start_time < self.start_time
     #   * m.measurement.raw_measurement.input == self.measurement.raw_measurement.input
     previous_counter = models.IntegerField(default=0)
+
+    def save(   self, 
+                force_insert=False, 
+                force_update=False, 
+                using=None,
+                update_fields=None):
+        # We import this here so we can avoid circular imports
+        from .utils import check_submeasurement   
+        
+        should_flag = check_submeasurement(self)
+        flag_type = Flag.FlagType.SOFT if should_flag else Flag.FlagType.OK
+        try:
+            self.flag = Flag.objects.create(flag=flag_type)
+        except:
+            pass
+
+        return super().save(force_insert, force_update, using, update_fields)
 
     class Meta:
         abstract = True # When abstract is True, django wont make a table for this model
