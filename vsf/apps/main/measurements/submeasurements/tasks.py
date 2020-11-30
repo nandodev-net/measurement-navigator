@@ -8,7 +8,7 @@ from .utils import SoftFlag, count_flags, hard_flag
 
 @shared_task(time_limit=3600)
 def SoftFlagMeasurements():
-    return SoftFlag(limit=10000)
+    return SoftFlag(limit=5000)
     
 
 @shared_task(time_limit=600)
