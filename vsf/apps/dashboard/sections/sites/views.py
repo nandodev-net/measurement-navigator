@@ -31,7 +31,7 @@ class ListSites(VSFLoginRequiredMixin, TemplateView):
 
         return context
 
-class ListUrls(VSFLoginRequiredMixin, VSFListPaginate):
+class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
     """
         This view Will handle listing and linking between sites
         and urls.

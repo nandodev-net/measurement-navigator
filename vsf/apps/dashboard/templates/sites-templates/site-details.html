@@ -18,7 +18,7 @@
   <a href="{% url 'dashboard:home' %}">Home</a>
 </li>
 <li class="breadcrumb-item">
-  <a href="{% url 'dashboard:list_sites' %}">Sites</a>
+  <a href="{% url 'dashboard:site:list_sites' %}">Sites</a>
 </li>
 <li class="breadcrumb-item active">{{ site.name }}</li>
 {% endblock route %}
@@ -50,7 +50,7 @@
             <tr>
               <td>
                 <a
-                  href="{% url 'dashboard:list_measurements'%}?input={{ url.url }}"
+                  href="{% url 'dashboard:measurement:list_measurements'%}?input={{ url.url }}"
                   title="Measurements for this url"
                 >
                   {{ url.url }}
