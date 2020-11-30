@@ -84,7 +84,7 @@ def checkPostData(data) -> bool:
 
         return True
 
-def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int, [str]):
+def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:int =None) -> (int, [str]):
     """
         Given the start and end date for a set of measurements,
         perform a get request to ooni in order to get the
@@ -92,6 +92,11 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int,
 
         The function returns the status code for the ooni request
         and a list of tid corresponding to the actually added measurements.
+
+        'from_fastpath' param remains unused for now, we need this in the first place
+        to recover not-ready measurements, but that concept seems to be gone. 
+
+        'limit' param provides a limit for the maximum ammount of stored measurements
 
         both the since and until date should be in the following format:
         YYYY-mm-dd.
@@ -186,31 +191,40 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True) -> (int,
 
 
         data = req.json()
-        RawMeasurement.objects.create(
-            input=data['input'],
-            report_id= data['report_id'],
-            report_filename= data.get('report_filename','NO_AVAILABLE'), #
-            options= data.get('options', "NO_AVAILABLE"), #
-            probe_cc= data.get('probe_cc','VE'),
-            probe_asn= data['probe_asn'],
-            probe_ip=data.get('probe_ip'),
-            data_format_version= data['data_format_version'],
-            test_name= data['test_name'],
-            test_start_time= data.get('test_start_time'),
-            measurement_start_time= data['measurement_start_time'],
-            test_runtime= data.get('test_runtime'),
-            test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
-            software_name= data['software_name'],
-            software_version= data['software_version'],
-            test_version= data['test_version'],
-            bucket_date= data.get('bucket_date'), #
-            test_keys= data['test_keys'],
-            annotations= data['annotations']
-        )
-        fp.report_ready = True
-        fp.data_ready = FastPath.DataReady.READY
+        try:
+            RawMeasurement.objects.create(
+                input=data['input'],
+                report_id= data['report_id'],
+                report_filename= data.get('report_filename','NO_AVAILABLE'), #
+                options= data.get('options', "NO_AVAILABLE"), #
+                probe_cc= data.get('probe_cc','VE'),
+                probe_asn= data['probe_asn'],
+                probe_ip=data.get('probe_ip'),
+                data_format_version= data['data_format_version'],
+                test_name= data['test_name'],
+                test_start_time= data.get('test_start_time'),
+                measurement_start_time= data['measurement_start_time'],
+                test_runtime= data.get('test_runtime'),
+                test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
+                software_name= data['software_name'],
+                software_version= data['software_version'],
+                test_version= data['test_version'],
+                bucket_date= data.get('bucket_date'), #
+                test_keys= data['test_keys'],
+                annotations= data['annotations']
+            )
+            fp.report_ready = True
+            data_state = FastPath.DataReady.READY
+        except:
+            fp.report_ready = False
+            data_state = FastPath.DataReady.UNDETERMINED
+
+        fp.data_ready = data_state
         fp.save()
         saved_measurements.append(fp.id)
+
+        if limit and (len(saved_measurements) >= limit):
+            break
 
     return (req.status_code, saved_measurements)
 
