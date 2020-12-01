@@ -66,7 +66,7 @@
     let pagesIds = selectedPages.map( v => v.id );
 
     // URL TO SEND HTTP REQUEST
-    let url = "{% url list_urls %}";
+    let url = "{% url 'dashboard:site:list_domains' %}";
 
     // SITE TO RELATE TO THIS SET OF URLS. SELECT THE INPUT THAT ITS CHECKED
     let site = $("input[name=selected-site]:checked").toArray();

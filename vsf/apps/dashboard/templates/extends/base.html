@@ -14,7 +14,7 @@
 
 {% load static %}
 
-{% with home='dashboard:home' logout='dashboard:logout' list_fastpath='dashboard:list_fastpath' list_events='dashboard:list_events' list_cases='dashboard:list_cases' list_categories='dashboard:list_categories' new_category='dashboard:new_category' list_muted_inputs='dashboard:list_muted_inputs' list_probes='dashboard:list_probes' list_urls='dashboard:list_urls' list_sites='dashboard:list_sites' list_measurements='dashboard:list_measurements' list_dns='dashboard:list_dns' list_http='dashboard:list_http' list_tcp='dashboard:list_tcp' %}
+{% with home='dashboard:home' logout='dashboard:logout' list_fastpath='dashboard:list_fastpath' %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -159,7 +159,7 @@
                 data-parent="#sidenavMenu"
               >
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url list_events %}">
+                  <a class="nav-link" href="{% url 'dashboard:event:list_events' %}">
                     List Events
                   </a>
                   <a class="nav-link" href="#"> New Event </a>
@@ -194,15 +194,15 @@
                 data-parent="#sidenavMenu"
               >
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url list_cases %}">
+                  <a class="nav-link" href="{% url 'dashboard:case:list_cases' %}">
                     List Cases
                   </a>
                   <a class="nav-link" href="#"> New Case </a>
                   <a class="nav-link" href="#"> New Case from events </a>
-                  <a class="nav-link" href="{% url list_categories %}">
+                  <a class="nav-link" href="{% url 'dashboard:case:list_categories' %}">
                     List Categories
                   </a>
-                  <a class="nav-link" href="{% url new_category %}">
+                  <a class="nav-link" href="{% url 'dashboard:case:new_category' %}">
                     New Category
                   </a>
                 </nav>
@@ -233,7 +233,7 @@
                 data-parent="#sidenavMenu"
               >
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url list_muted_inputs %}">
+                  <a class="nav-link" href="{% url 'dashboard:list_muted_inputs' %}">
                     List Muted Inputs
                   </a>
                   <a class="nav-link" href="#"> New Muted Input </a>
@@ -263,7 +263,7 @@
                 data-parent="#sidenavMenu"
               >
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url list_probes %}">
+                  <a class="nav-link" href="{% url 'dashboard:list_probes' %}">
                     List Probes
                   </a>
                   <a class="nav-link" href="#"> New Probes </a>
@@ -295,8 +295,8 @@
                 data-parent="#sidenavMenu"
               >
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url list_urls %}">  Domain List </a>
-                  <a class="nav-link" href="{% url list_sites %}">
+                  <a class="nav-link" href="{% url 'dashboard:sites:list_domains' %}">  Domain List </a>
+                  <a class="nav-link" href="{% url 'dashboard:site:list_sites' %}">
                     Sites
                   </a>
                 </nav>
@@ -327,10 +327,10 @@
                 data-parent="#sidenavMenu"
               >
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url list_measurements %}"> Measurement List </a>
-                  <a class="nav-link" href="{% url list_dns %}"> DNS List </a>
-                  <a class="nav-link" href="{% url list_http %}"> HTTP List </a>
-                  <a class="nav-link" href="{% url list_tcp %}"> TCP List </a>
+                  <a class="nav-link" href="{% url 'dashboard:measurement:list_measurements' %}"> Measurement List </a>
+                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_dns' %}"> DNS List </a>
+                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_http' %}"> HTTP List </a>
+                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_tcp' %}"> TCP List </a>
                 </nav>
               </div>
             </li>

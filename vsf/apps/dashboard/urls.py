@@ -35,6 +35,8 @@ urlpatterns = [
     path('login',                           views.VSFLogin.as_view(),           name='login'),
     path('',                                include('django.contrib.auth.urls')),
 
+
+
     # Site Pages
 
     #   Main dashboard
@@ -42,26 +44,49 @@ urlpatterns = [
     path('get_measurement',                 views.GetMeasurement.as_view(),     name='get_measurement'),
 
     #   Measurements
-    path('measurements_data',               measurements_views.ListMeasurementsBackEnd.as_view(),   name="list_measurements_data"),
-    path('measurements',                    measurements_views.ListMeasurementsTemplate.as_view(),  name="list_measurements"),
-    path('measurements/dns',                submeasurements_views.ListDNSTemplate.as_view(),           name='list_dns'),
-    path('measurements/dns_data',           submeasurements_views.ListDNSBackEnd.as_view(),            name='list_dns_data'),
-    path('measurements/http',               submeasurements_views.ListHTTPTemplate.as_view(),          name='list_http'),
-    path('measurements/http_data',          submeasurements_views.ListHTTPBackEnd.as_view(),           name='list_http_data'),
-    path('measurements/tcp',                submeasurements_views.ListTCPTemplate.as_view(),            name='list_tcp'),
-    path('measurements/tcp_data',           submeasurements_views.ListTCPBackEnd.as_view(),             name='list_tcp_data'),
+    path(
+        'measurements/',
+        include(
+            'apps.dashboard.sections.measurements.urls',
+            namespace='measurement'
+        )
+    ),
+
+    #   Submeasurements
+    path(
+        'submeasurements/',
+        include(
+            'apps.dashboard.sections.measurements.submeasurements.urls',
+            namespace='submeasurement'
+        )
+    ),
+
     #   Sites
-    path('pages',                           sites_views.ListUrls.as_view(),               name="list_urls"),
-    path('list_sites',                      sites_views.ListSites.as_view(),              name="list_sites"),
-    path('sites/<int:id>',                  sites_views.SiteDetailView.as_view(),         name='site_details'),
+    path(
+        'sites/',
+        include(
+            'apps.dashboard.sections.sites.urls',
+            namespace='site'
+        )
+    ),
 
     #   Events
-    path('events',                          events_views.ListEvents.as_view(),         name="list_events"),
+    path(
+        'events/',
+        include(
+            'apps.dashboard.sections.events.urls',
+            namespace='event'
+        )
+    ),
 
     #   Cases
-    path('cases',                           cases_views.ListCases.as_view(),          name="list_cases"),
-    path('cases/categories',                cases_views.ListCategories.as_view(),     name="list_categories"),
-    path('cases/categories/new_category',   cases_views.NewCategory.as_view(),        name="new_category"),
+    path(
+        'cases/',
+        include(
+            'apps.dashboard.sections.cases.urls',
+            namespace='case'
+        )
+    ),
 
     #   Misc
     path('muted_Inputs',                    events_views.ListMutedInputs.as_view(),    name="list_muted_inputs"),
