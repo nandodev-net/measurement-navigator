@@ -31,6 +31,7 @@ class URL(models.Model):
     url = models.URLField(
                 unique=True,
                 null=False,
+                db_index=True
             )
             
     #if a site is deleted, set this field to null since a lot of reports would be lost
