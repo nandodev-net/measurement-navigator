@@ -174,6 +174,23 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
         context['asns'] = AsnModels.ASN.objects.all()
         return context
 
+def query():
+    urls = URL\
+            .objects\
+            .all()\
+            .select_related('site')\
+            .filter( url=OuterRef('measurement__raw_measurement__input') )
+
+    qs   = SubMeasModels.DNS.objects.all()\
+            .select_related('measurement', 'flag')\
+            .select_related('measurement__raw_measurement')\
+            .annotate(
+                    site=Subquery(urls.values('site')),
+                    site_name=Subquery(urls.values('site__name')),
+                    client_resolver=RawSQL("measurements_rawmeasurement.test_keys->'client_resolver'", ())
+                )                
+    return qs
+
 class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
     """
         This is the back end for the HTTP submeasurement table. The dynamic
@@ -208,6 +225,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'body_proportion'
         ]
 
+    
     def get_initial_queryset(self):
         urls = URL\
                 .objects\
