@@ -54,7 +54,7 @@ class DNS(SubMeasurement):
     control_resolver_failure = models.CharField(
         max_length=50,
         null=True,
-        blank=True
+        blank=True,
     )
     control_resolver_answers = JSONField(null=True)
     control_resolver_hostname = models.GenericIPAddressField(
