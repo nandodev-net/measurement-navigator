@@ -51,7 +51,7 @@ class RawMeasurement(models.Model):
     _DATABASE = 'titan_db'
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True)
-    input = models.TextField(null=True)
+    input = models.TextField(null=True, db_index=True)
     annotations = JSONField()
     report_id = models.CharField(max_length=100)
     report_filename = models.CharField(max_length=250)
@@ -62,7 +62,7 @@ class RawMeasurement(models.Model):
     data_format_version = models.CharField(max_length=100)
     test_name = models.CharField(max_length=60, choices=TestTypes.choices)
     test_start_time = models.DateTimeField(null=True)
-    measurement_start_time = models.DateTimeField()
+    measurement_start_time = models.DateTimeField(db_index=True)
     test_runtime = models.FloatField(null=True)
     test_helpers = models.TextField(null=True)
     software_name = models.CharField(max_length=30)
