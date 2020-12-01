@@ -19,7 +19,6 @@ def count_flags():
     """
 
     submeasurements = [DNS, TCP, HTTP]
-    ready_to_update = []
 
     # Iterate over the submeasurements types:
     for SM in submeasurements:
@@ -28,21 +27,24 @@ def count_flags():
         sms = SM.objects.all()\
                 .select_related('measurement', 'measurement__raw_measurement', 'flag')\
                 .exclude(flag=None)\
-                .order_by('measurement__raw_measurement__input', 'measurement__raw_measurement__measurement_start_time')
-        
-        sms_ready = []          # store ready measurements in this list:
-        groups = grouper(sms)   # perform a partition over the measurements by its input
+                .order_by('measurement__raw_measurement__input', 'measurement__raw_measurement__measurement_start_time')\
+                .values('measurement__raw_measurement__input', 'id', 'flag__flag')
+        groups = Grouper(sms)   # perform a partition over the measurements by its input
         for group in groups:
+            print(group[0]['measurement__raw_measurement__input'], " : ", len(group))
+            sms_ready = []          # store ready measurements in this list:
             counter = 0
             for sm in group:
-                counter += sm.flag.flag == Flag.FlagType.SOFT # If this measurement is tagged, add one to counter
-                sm.previous_counter = counter
+                counter += sm['flag__flag'] == Flag.FlagType.SOFT # If this measurement is tagged, add one to counter
+                sm['previous_counter'] = counter
                 sms_ready.append(sm)
-
-        ready_to_update.append((SM, sms_ready))
-
-    for (SM, sms) in ready_to_update:
-        SM.objects.bulk_update(sms, ["previous_counter"])
+        
+            # Save the currently updated group
+            for m in sms_ready:
+                instance = SM.objects.get(id=m['id'])
+                instance.previous_counter = m['previous_counter']
+                instance.save()
+            
             
 
 def grouper(submeas : [SubMeasurement]) -> [[SubMeasurement]]:
@@ -55,7 +57,7 @@ def grouper(submeas : [SubMeasurement]) -> [[SubMeasurement]]:
 
     acc = []
     curr = [submeas[0]]
-    get_input = lambda m: m.measurement.raw_measurement.input
+    get_input = lambda m: m['measurement__raw_measurement__input']
 
     for i in range(1,n_meas):
         sm = submeas[i]
@@ -149,13 +151,16 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
             
 
 
-
-        
-
-
 class Grouper():
-    def __init__(self, queryset):
+    """
+        Provides an object for lazy grouping a list of objects.
+        Given an iterator sorted by some key, and the function to retrieve such key,
+        provide an iterator over the groups of objects with the same key. Every iteration
+        return a list of objects with the same key.
+    """
+    def __init__(self, queryset, get_key = lambda m: m['measurement__raw_measurement__input']):
         self.queryset_it = iter(queryset)
+        self.get_key = get_key
 
     def __iter__(self):
         try:
@@ -167,7 +172,7 @@ class Grouper():
     def __next__(self):
         if self.next_elem is None:
             raise StopIteration
-        get_input = lambda m: m.measurement.raw_measurement.input
+        get_input = self.get_key
         acc = []
         while True:
             acc.append(self.next_elem)
@@ -179,9 +184,8 @@ class Grouper():
                     raise StopIteration
                 else:
                     return acc
-            if get_input(acc[0]) == get_input(self.next_elem):
-                acc.append(self.next_elem)
-            else:
+            if get_input(acc[0]) != get_input(self.next_elem):
                 break
+
         return acc
     
