@@ -80,9 +80,13 @@ urlpatterns = [
     ),
 
     #   Cases
-    path('cases',                           cases_views.ListCases.as_view(),          name="list_cases"),
-    path('cases/categories',                cases_views.ListCategories.as_view(),     name="list_categories"),
-    path('cases/categories/new_category',   cases_views.NewCategory.as_view(),        name="new_category"),
+    path(
+        'cases/',
+        include(
+            'apps.dashboard.sections.cases.urls',
+            namespace='case'
+        )
+    ),
 
     #   Misc
     path('muted_Inputs',                    events_views.ListMutedInputs.as_view(),    name="list_muted_inputs"),
