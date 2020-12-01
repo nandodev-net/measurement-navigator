@@ -15,7 +15,7 @@
 {% block sub_title %} List of all available Sites {% endblock sub_title %}
 
 {% block route %}
-<li class="breadcrumb-item"><a href="{% url list_sites %}">Home</a></li>
+<li class="breadcrumb-item"><a href="{% url 'dashboard:site:list_sites' %}">Home</a></li>
 <li class="breadcrumb-item active">Sites</li>
 {% endblock route %}
 
@@ -51,7 +51,7 @@
             <th class="text-center text-capitalize" scope="row">
               <a
                 class="text-dark"
-                href="{% url 'dashboard:site_details' id=site.id %}"
+                href="{% url 'dashboard:site:site_details' id=site.id %}"
                 title="Go to site details"
               >
                 {{ site.name }}
@@ -60,7 +60,7 @@
             <td class="text-center text-capitalize">
               <a
                 class="text-dark"
-                href="{% url 'dashboard:list_measurements' %}?site={{ site.id }}"
+                href="{% url 'dashboard:measurement:list_measurements' %}?site={{ site.id }}"
               >
                 Go to measurements
               </a>

@@ -13,7 +13,7 @@
 {% block sub_title %} List of all available pages {% endblock sub_title %}
 {% block route %}
 <li class="breadcrumb-item">
-  <a href="{% url list_urls %}">Home</a>
+  <a href="{% url 'dashboard:site:list_domains' %}">Home</a>
 </li>
 <li class="breadcrumb-item active">Pages</li>
 {% endblock route %}
@@ -73,7 +73,7 @@
         <td>
           <a
             class="text-info"
-            href="{% url 'dashboard:list_measurements'%}?input={{ url.url }}"
+            href="{% url 'dashboard:measurement:list_measurements'%}?input={{ url.url }}"
           >
             {{ url.url }}
           </a>
@@ -82,7 +82,7 @@
           {% if url.site_id != -1 %}
           <a
             class="text-info"
-            href="{% url 'dashboard:site_details' id=url.site_id %}"
+            href="{% url 'dashboard:sites:site_details' id=url.site_id %}"
           >
             {{ url.site_name }}</a
           >
@@ -171,7 +171,7 @@
 <script>
   'use strict';
 
-  let urlSearch = '{% url "dashboard:list_urls" %}?';
+  let urlSearch = '{% url "dashboard:site:list_domains" %}?';
   let site = "";
   let data = {};
 
