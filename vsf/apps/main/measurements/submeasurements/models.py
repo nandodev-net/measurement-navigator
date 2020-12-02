@@ -46,6 +46,13 @@ class SubMeasurement(models.Model):
     class Meta:
         abstract = True # When abstract is True, django wont make a table for this model
 
+class DNSJsonFields(models.Model):
+    """
+        Test model to check performance penalty for json data storage
+    """
+    control_resolver_answers = JSONField(null=True)
+    answers = JSONField(null=True)
+
 class DNS(SubMeasurement):
     """
     Model for DNS submeasurement, which can be found, for example,
@@ -68,6 +75,10 @@ class DNS(SubMeasurement):
     inconsistent = models.NullBooleanField()
     dns_consistency  = models.CharField(max_length=50, null=True, blank=True)
     hostname = models.CharField(max_length=100, null=True, blank=True) # añadido por Luis, Andrés debe revisar esto
+    jsons = models.ForeignKey(to=DNSJsonFields, null=True, on_delete=models.SET_NULL)
+
+
+
 
 class HTTP(SubMeasurement):
     """
