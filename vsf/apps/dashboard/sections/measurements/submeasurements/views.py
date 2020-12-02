@@ -188,7 +188,7 @@ def query():
                     site=Subquery(urls.values('site')),
                     site_name=Subquery(urls.values('site__name')),
                     client_resolver=RawSQL("measurements_rawmeasurement.test_keys->'client_resolver'", ())
-                ).order_by('measurement__raw_measurement__input')
+                ).order_by('measurement__raw_measurement__input')[:10]
     return qs
 
 class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
