@@ -153,6 +153,9 @@
               url: '{% url "measurements:get_measurement" %}',
               data: { id: id },
               success: function (measurementData) {
+
+                console.log(measurementData);
+                
                 $("#annotations-detailed").html(
                   prettyPrintJson.toHtml(measurementData["annotations"])
                 );
