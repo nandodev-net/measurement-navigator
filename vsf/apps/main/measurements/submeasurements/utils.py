@@ -6,7 +6,7 @@
 from django.core.paginator               import Paginator
 
 # Local imports
-from .models                             import DNS, HTTP, TCP, SubMeasurement
+from .models                             import DNS, DNSJsonFields, HTTP, TCP, SubMeasurement
 from apps.main.measurements.models       import RawMeasurement, Measurement
 from apps.main.measurements.flags.models import Flag
 
@@ -74,17 +74,16 @@ def createDNSFromWebConn(web_con_measurement : RawMeasurement) -> [DNS]:
             inconsistent = False
         elif dns_consistency == 'inconsistent':
             inconsistent = True
-        
+        jsonf = DNSJsonFields.objects.create(answers=query['answers'],control_resolver_answers=cr['answers'])        
         dns = DNS(
             measurement=None,
             flag=None,
             control_resolver_failure=cr['failure'],
-            control_resolver_answers=cr['answers'],
             failure=dns_experiment_failure,
-            answers=query['answers'],
             hostname=query['hostname'],
             dns_consistency= dns_consistency,
-            inconsistent= inconsistent
+            inconsistent= inconsistent,
+            jsons=jsonf
         )
         new_dns.append(dns)
 
@@ -165,31 +164,30 @@ def createDNSFromDNSCons(measurement : RawMeasurement) -> [DNS]:
                 except:
                         pass
                 
+                jsonf = DNSJsonFields.objects.create(answers=query['answers'], control_resolver_answers=cr['answers'])
                 if dns_consistency:
                     dns = DNS(
                         measurement=None,
                         control_resolver_failure=cr['failure'],
-                        control_resolver_answers=cr['answers'],
                         control_resolver_hostname=cr['resolver_hostname'],
                         failure=query['failure'],
-                        answers=query['answers'],
                         resolver_hostname=query['resolver_hostname'],
                         dns_consistency=dns_consistency,
                         inconsistent=is_inconsistent,
-                        hostname=query['hostname']
+                        hostname=query['hostname'],
+                        jsons=jsonf
                     )
 
                 else:
                     dns = DNS(
                         measurement=None,
                         control_resolver_failure=cr['failure'],
-                        control_resolver_answers=cr['answers'],
                         control_resolver_hostname=cr['resolver_hostname'],
                         failure=query['failure'],
-                        answers=query['answers'],
                         resolver_hostname=query['resolver_hostname'],
                         dns_consistency=dns_consistency,
-                        hostname=query['hostname']
+                        hostname=query['hostname'],
+                        jsons=jsonf
                     )
 
                 new_dns.append(dns)

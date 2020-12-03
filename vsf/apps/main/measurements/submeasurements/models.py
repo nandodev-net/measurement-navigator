@@ -63,12 +63,10 @@ class DNS(SubMeasurement):
         null=True,
         blank=True,
     )
-    control_resolver_answers = JSONField(null=True)
     control_resolver_hostname = models.GenericIPAddressField(
         null=True, blank=True)  # servidor DNS de control
 
     failure = models.CharField(max_length=50, null=True, blank=True)
-    answers = JSONField(null=True)
     resolver_hostname = models.GenericIPAddressField(
         null=True, blank=True)  # servidor DNS que se esta evaluando, (target)
 
@@ -76,7 +74,6 @@ class DNS(SubMeasurement):
     dns_consistency  = models.CharField(max_length=50, null=True, blank=True)
     hostname = models.CharField(max_length=100, null=True, blank=True) # añadido por Luis, Andrés debe revisar esto
     jsons = models.ForeignKey(to=DNSJsonFields, null=True, on_delete=models.SET_NULL)
-
 
 
 
