@@ -91,7 +91,7 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 .filter( url=OuterRef('measurement__raw_measurement__input') )
 
         qs   = SubMeasModels.DNS.objects.all()\
-                .select_related('measurement', 'flag', 'jsons')\
+                .select_related('measurement')\
                 .select_related('measurement__raw_measurement')\
                 .annotate(
                         site=Subquery(urls.values('site')),
