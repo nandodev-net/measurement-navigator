@@ -3,14 +3,45 @@
 
 # Django imports:
 from django.db.models   import Min, Max
+from django.db          import connection
 
 # Third party imports:
 from datetime import datetime, timedelta
 
 # Local imports
-from .models                                import DNS,TCP, HTTP,SubMeasurement
+from .models                                import DNS, TCP, HTTP, SubMeasurement
 from apps.main.measurements.flags.models    import Flag
 from apps.main.measurements.models          import RawMeasurement
+
+def count_flags_sql():
+    """
+        This function sets the vale of "previous counter" 
+        for every submeasurment according to its meaning, 
+        but with raw SQL code so it should be faster
+    """
+
+    submeasurements = ['dns','http','tcp']
+    with connection.cursor() as cursor:
+        for subm in submeasurements:
+            cursor.execute(
+                (
+                    "WITH sq as ( " +
+                        "SELECT  " +
+                                "{submsmnt}.id as {submsmnt}_id,  " +
+                                "sum(CAST(f.flag='soft' AS INT)) OVER (PARTITION BY rms.input ORDER BY rms.measurement_start_time, {submsmnt}.id ASC) as previous " +
+                        "FROM " +
+                            "submeasurements_{submsmnt} {submsmnt} JOIN measurements_measurement ms ON ms.id = {submsmnt}.measurement_id " +
+                                                    "JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id " +
+                                                    "JOIN flags_flag f ON f.id = {submsmnt}.flag_id " +
+                        ") " +
+                    "UPDATE submeasurements_{submsmnt} {submsmnt} " +
+                        "SET  " +
+                            "previous_counter = sq.previous " +
+                        "FROM sq " +
+                        "WHERE {submsmnt}.id = sq.{submsmnt}_id; "
+                ).format(submsmnt=subm)
+            )
+
 # HARD FLAG LOGIC
 def count_flags():
     """
@@ -44,30 +75,6 @@ def count_flags():
                 instance = SM.objects.get(id=m['id'])
                 instance.previous_counter = m['previous_counter']
                 instance.save()
-            
-            
-
-def grouper(submeas : [SubMeasurement]) -> [[SubMeasurement]]:
-    """
-        Utility function to group together measurements of the same input
-    """
-    n_meas = len(submeas)
-    if len(submeas) == 0:
-        return []
-
-    acc = []
-    curr = [submeas[0]]
-    get_input = lambda m: m['measurement__raw_measurement__input']
-
-    for i in range(1,n_meas):
-        sm = submeas[i]
-        if get_input(sm) == get_input(curr[0]):
-            curr.append(sm)
-        else:
-            acc.append(curr)
-            curr = [sm]
-
-    return acc
 
 def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements : int = 3):
     """
@@ -78,74 +85,85 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
             minimum_measurements =  minimum ammount of too-near measurements to consider a hard
                                     flag
     """
-    submeasurements = [HTTP, TCP, DNS]
+    submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns')]
 
     # just a shortcut
     start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
 
     result = {'hard_tagged':[]}
     # For every submeasurement type...
-    for SM in submeasurements:
-        meas = SM.objects.all()\
-                    .select_related('measurement', 'measurement__raw_measurement', 'flag')\
-                    .exclude(flag=None)\
-                    .exclude(flag__flag__in=[Flag.FlagType.OK, Flag.FlagType.HARD])\
-                    .order_by(  'measurement__raw_measurement__input', 
-                                'measurement__raw_measurement__measurement_start_time',
-                                'previous_counter')
+    for (SM, label) in submeasurements:
+
+        meas = SM.objects.raw(
+            (   "SELECT " +
+                "submeasurements_{label}.id, " +
+                "previous_counter, " +
+                "rms.measurement_start_time, " +
+                "dense_rank() OVER (order by rms.input) as group_id " +
+
+                "FROM " +
+                "submeasurements_{label} JOIN measurements_measurement ms ON ms.id = submeasurements_{label}.measurement_id " +
+                                        "JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id " +
+                                        "JOIN flags_flag f ON f.id = submeasurements_{label}.flag_id " +
+                "WHERE " +
+                "f.flag<>'ok' " +
+                "ORDER BY rms.input, rms.measurement_start_time, previous_counter; "
+            ).format(label=label)
+        )
+
+        # deprecated & slow, delete later
+        # meas = SM.objects.all()\
+        #             .select_related('measurement', 'measurement__raw_measurement', 'flag')\
+        #             .exclude(flag=None)\
+        #             .exclude(flag__flag__in=[Flag.FlagType.OK, Flag.FlagType.HARD])\
+        #             .order_by(  'measurement__raw_measurement__input', 
+        #                         'measurement__raw_measurement__measurement_start_time',
+        #                         'previous_counter')\
+        #             .values('previous_counter','id', 'measurement__raw_measurement__input')
         
-        groups = filter(lambda l:len(l) >= minimum_measurements,grouper(meas))
+        groups = filter(lambda l:len(l) >= minimum_measurements,Grouper(meas, lambda m: m.group_id))
 
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
         tagged_meas = []
 
         for group in groups:
-            # -- DEBUG, DELETE LATER @TODO -------+
-            for m in group:
-                print(  "Input: ", m.measurement.raw_measurement.input, 
-                        ". Start time: ", m.measurement.raw_measurement.measurement_start_time,
-                        ". Flag: ", m.flag.flag,
-                        ". Counter: ", m.previous_counter)
-
-            # ------------------------------------+
-
-
             # Search min and max
             n_meas = len(group)
             min_date = start_time(group[0])
             max_date = start_time(group[n_meas - 1])
-
+            
             lo = 0
             hi = 0
-            while min_date < max_date:
+            while min_date < max_date and hi < n_meas:
                 lo = hi
                 temp_max = min_date + time_window
-
                 # search for the latest measurement whose start_time is less than temp_max
                 for i in range(lo, n_meas):
                     m = group[i]
-                    if start_time(m) > temp_max:
-                        hi -= 1
+                    time = start_time(m)
+                    if time > temp_max:
+                        temp_max = time
+                        hi = i-1
                         break
-                    hi += 1
+                    hi = i
                 
                 if hi >= n_meas:
-                    hi -= 1
+                    hi = n_meas - 1
 
                 # if the ammount of anomalies in that time is higher than the given counter, 
                 # all those measurements should be tagged
-                if group[hi].previous_counter - group[lo].previous_counter + (group[hi].flag.flag == Flag.FlagType.SOFT) >= minimum_measurements:
+                if group[hi].previous_counter - group[lo].previous_counter + (group[hi].flag.flag != Flag.FlagType.OK) >= minimum_measurements:
                     tagged_meas.append(group[lo:hi+1])
-
+                hi += 1
                 min_date = temp_max
         
         for tagged_group in tagged_meas:
             flag = Flag.objects.create(flag=Flag.FlagType.HARD)
             for m in tagged_group:
                 m.flag = flag
-                m.save()
                 result['hard_tagged'].append(m)
+            SM.objects.bulk_update(tagged_group, ['flag'])
 
     return result
             
