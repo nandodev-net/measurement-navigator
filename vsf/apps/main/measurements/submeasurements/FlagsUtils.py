@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 # Local imports
 from .models                                import DNS, TCP, HTTP, SubMeasurement
 from apps.main.measurements.flags.models    import Flag
+from apps.configs.models                    import Config
 from apps.main.measurements.models          import RawMeasurement
 
 def count_flags_sql():
@@ -76,7 +77,7 @@ def count_flags():
                 instance.previous_counter = m['previous_counter']
                 instance.save()
 
-def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements : int = 3):
+def hard_flag():
     """
         This function evaluates the measurements and flags them properly in the database
         params:
@@ -85,6 +86,9 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
             minimum_measurements =  minimum ammount of too-near measurements to consider a hard
                                     flag
     """
+    time_window = timedelta(days=int(Config.objects.all()[0].hardflag_timewindow))
+    minimum_measurements = int(Config.objects.all()[0].hardflag_minmeasurements)
+
     submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns')]
 
     # just a shortcut
