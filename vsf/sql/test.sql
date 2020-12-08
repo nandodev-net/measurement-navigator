@@ -1,14 +1,14 @@
--- This SQL query updates the measurement.input fk so that it points to the correct url entry
-
-WITH measurements AS 
-    (
-        SELECT rms.input as input, ms.input_id as input_id, ms.id as measurement_id FROM 
-            measurements_rawmeasurement rms join measurements_measurement ms ON rms.id=ms.raw_measurement_id
-    )
-UPDATE measurements_measurement ms1
-    SET input_id = urls.id
-
-    FROM measurements ms JOIN sites_url urls ON ms.input=urls.url
-
-    WHERE ms1.id=ms.measurement_id;
+-- This query can update the previous_counter for dns submeasurements
+WITH resolvers AS (
+    SELECT 
+        dns.id AS dns_id, 
+        cast(rms.test_keys->>'client_resolver' AS inet) AS client_resolver
+    FROM submeasurements_dns dns 
+        JOIN measurements_measurement ms ON dns.measurement_id=ms.id
+        JOIN measurements_rawmeasurement rms ON rms.id=ms.raw_measurement_id
+)
+UPDATE submeasurements_dns dns
+SET client_resolver = resolvers.client_resolver
+FROM resolvers
+WHERE dns.id = resolvers.dns_id
 
