@@ -96,7 +96,6 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 .annotate(
                         site=Subquery(urls.values('site')),
                         site_name=Subquery(urls.values('site__name')),
-                        client_resolver=RawSQL("measurements_rawmeasurement.test_keys->'client_resolver'", ())
                     )
 
         return qs
@@ -153,7 +152,7 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag__flag'            : item.flag.flag if item.flag else "no flag"
+                'flag__flag'      : item.flag.flag if item.flag else "no flag"
             })
         return json_data
 
