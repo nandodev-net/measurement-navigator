@@ -3,7 +3,7 @@ from celery import shared_task
 import time
 from datetime import datetime, timedelta
 
-from .utils import SoftFlag, count_flags, hard_flag
+from .utils import SoftFlag, count_flags_sql, hard_flag
 
 
 @shared_task(time_limit=3600)
@@ -13,7 +13,7 @@ def SoftFlagMeasurements():
 
 @shared_task(time_limit=600)
 def count_flags_submeasurements():
-    return count_flags()
+    return count_flags_sql()
 
 @shared_task(time_limit=1800)
 def hard_flag_task():
