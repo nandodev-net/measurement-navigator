@@ -48,16 +48,16 @@
             if (data === "ok") {
               return `<div class="text-center text-success">
                         <i title="OK" class="fas fa-thumbs-up fa-2x"></i>
-                      </div>`
+                      </div>`;
             } else if (data === "hard") {
               return `<div class="text-center text-danger">
                         <i title="HARD" class="fas fa-flag fa-2x"></i>
-                      </div>`
+                      </div>`;
             } else {
               return `<div class="text-center text-warning">
                         <i title="SOFT" class="fas fa-flag fa-2x"></i>
-                      </div>`
-            };
+                      </div>`;
+            }
           },
         },
         {
@@ -168,9 +168,8 @@
               url: '{% url "measurements:get_measurement" %}',
               data: { id: id },
               success: function (measurementData) {
-
                 console.log(measurementData);
-                
+
                 $("#annotations-detailed").html(
                   prettyPrintJson.toHtml(measurementData["annotations"])
                 );
