@@ -202,8 +202,16 @@ textarea.vsf-form-control {
   width: 1%;
 }
 
-.bg-opacity {
-  opacity: 0.4;
+.bg-custom-success {
+  background-color: rgba(41, 168, 71, 0.4) !important;
+}
+
+.bg-custom-danger {
+  background-color: rgba(220, 53, 70, 0.4) !important;
+}
+
+.bg-custom-warning {
+  background-color: rgba(255, 193, 7, 0.4) !important;
 }
 
 /*

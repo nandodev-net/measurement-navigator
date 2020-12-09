@@ -46,15 +46,15 @@
           searchable: true,
           render: function (data, type, row, meta) {
             if (data === "ok") {
-              return `<div class="w-100 h-100 bg-success bg-opacity text-center text-success">
+              return `<div class="w-100 h-100 text-center bg-custom-success text-success">
                         <i title="OK" class="fas fa-thumbs-up"></i>
                       </div>`
             } else if (data === "hard") {
-              return `<div class="w-100 h-100 text-center bg-danger bg-opacity text-danger">
+              return `<div class="w-100 h-100 text-center bg-custom-danger text-danger">
                         <i title="HARD" class="fas fa-flag"></i>
                       </div>`
             } else {
-              return `<div class="w-100 h-100 text-center bg-warning bg-opacity text-warning">
+              return `<div class="w-100 h-100 text-center bg-custom-warning text-warning">
                         <i title="SOFT" class="far fa-flag"></i>
                       </div>`
             };
