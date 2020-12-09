@@ -44,6 +44,13 @@
           data: "flag__flag",
           orderable: true,
           searchable: true,
+          render: function (data, type, row, meta) {
+            if (data === "ok") {
+              return `<i class="fas fa-thumbs-up"></i>`
+            } else {
+              return `<i class="fas fa-couch"></i>`
+            };
+          },
         },
         {
           data: "dns_consistency",
