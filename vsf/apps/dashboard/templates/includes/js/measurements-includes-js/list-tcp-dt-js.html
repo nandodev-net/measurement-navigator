@@ -44,6 +44,21 @@
           data: "flag__flag",
           orderable: true,
           searchable: true,
+          render: function (data, type, row, meta) {
+            if (data === "ok") {
+              return `<div class="text-center text-success">
+                        <i title="OK" class="fas fa-thumbs-up fa-2x"></i>
+                      </div>`
+            } else if (data === "hard") {
+              return `<div class="text-center text-danger">
+                        <i title="HARD" class="fas fa-flag fa-2x"></i>
+                      </div>`
+            } else {
+              return `<div class="text-center text-warning">
+                        <i title="SOFT" class="fas fa-flag fa-2x"></i>
+                      </div>`
+            };
+          },
         },
         {
           data: "status_blocked",
