@@ -40,6 +40,7 @@
           orderable: true,
           searchable: true,
           render: function (data, type, row, meta) {
+            console.log(data);
             if (data === "true") {
               return `<div class="text-center text-warning">
                         <i title="TRUE" class="fas fa-exclamation-circle fa-2x"></i>
