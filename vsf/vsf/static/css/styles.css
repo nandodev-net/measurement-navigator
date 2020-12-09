@@ -202,6 +202,10 @@ textarea.vsf-form-control {
   width: 1%;
 }
 
+.bg-opacity {
+  opacity: 0.4;
+}
+
 /*
 =====================================
 THIS IS SCSS FILE THAT APPLIES SOME CUSTOMIZATIONS
