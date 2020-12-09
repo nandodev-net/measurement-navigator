@@ -74,7 +74,7 @@ class DNS(SubMeasurement):
     dns_consistency  = models.CharField(max_length=50, null=True, blank=True)
     hostname = models.CharField(max_length=100, null=True, blank=True) # añadido por Luis, Andrés debe revisar esto
     jsons = models.ForeignKey(to=DNSJsonFields, null=True, on_delete=models.SET_NULL)
-
+    client_resolver = models.GenericIPAddressField(null=True)
 
 
 class HTTP(SubMeasurement):

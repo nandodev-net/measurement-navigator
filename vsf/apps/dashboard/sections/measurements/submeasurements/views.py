@@ -60,8 +60,8 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__anomaly',
             'flag__flag'
             'dns_consistency',
-            'answers',
-            'control_answers',
+            'jsons__answers',
+            'jsons__control_answers',
             'control_resolver_hostname',
             'hostname',
 
@@ -91,13 +91,13 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 .filter( url=OuterRef('measurement__raw_measurement__input') )
 
         qs   = SubMeasModels.DNS.objects.all()\
-                .select_related('measurement', 'flag')\
+                .select_related('measurement')\
                 .select_related('measurement__raw_measurement')\
                 .annotate(
                         site=Subquery(urls.values('site')),
                         site_name=Subquery(urls.values('site__name')),
-                        client_resolver=RawSQL("measurements_rawmeasurement.test_keys->'client_resolver'", ())
                     )
+
         return qs
 
     def filter_queryset(self, qs):
@@ -148,11 +148,11 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'site' : item.site,
                 'site_name' : item.site_name if item.site_name else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'answers' : item.answers,
-                'control_resolver_answers' : item.control_resolver_answers,
+                'jsons__answers' : item.jsons.answers,
+                'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag__flag'            : item.flag.flag if item.flag else "no flag"
+                'flag__flag'      : item.flag.flag if item.flag else "no flag"
             })
         return json_data
 
@@ -188,7 +188,7 @@ def query():
                     site=Subquery(urls.values('site')),
                     site_name=Subquery(urls.values('site__name')),
                     client_resolver=RawSQL("measurements_rawmeasurement.test_keys->'client_resolver'", ())
-                ).order_by('measurement__raw_measurement__input')[:10]
+                ).order_by('measurement__raw_measurement__input')[:10j]
     return qs
 
 class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
@@ -208,7 +208,6 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'headers_match',
             'body_length_match',
             'body_proportion'
-
         ]
 
     order_columns = [
