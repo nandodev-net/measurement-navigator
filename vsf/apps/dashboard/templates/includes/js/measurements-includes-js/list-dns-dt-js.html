@@ -39,6 +39,17 @@
           data: "measurement__anomaly",
           orderable: true,
           searchable: true,
+          render: function (data, type, row, meta) {
+            if (data === "True") {
+              return `<div class="text-center text-success">
+                        <i title="TRUE" class="far fa-flag fa-3x"></i>
+                      </div>`;
+            } else {
+              return `<div class="text-center text-danger">
+                        <i title="FALSE" class="far fa-flag fa-3x"></i>
+                      </div>`;
+            }
+          },
         },
         {
           data: "flag__flag",
@@ -46,16 +57,16 @@
           searchable: true,
           render: function (data, type, row, meta) {
             if (data === "ok") {
-              return `<div class="text-center bg-custom-success text-success">
-                        <i title="OK" class="fas fa-thumbs-up"></i>
+              return `<div class="text-center text-success">
+                        <i title="OK" class="fas fa-thumbs-up fa-3x"></i>
                       </div>`
             } else if (data === "hard") {
-              return `<div class="text-center bg-custom-danger text-danger">
-                        <i title="HARD" class="fas fa-flag"></i>
+              return `<div class="text-center text-danger">
+                        <i title="HARD" class="fas fa-flag fa-3x"></i>
                       </div>`
             } else {
-              return `<div class="text-center bg-custom-warning text-warning">
-                        <i title="SOFT" class="far fa-flag"></i>
+              return `<div class="text-center text-warning">
+                        <i title="SOFT" class="fas fa-flag fa-3x"></i>
                       </div>`
             };
           },
