@@ -41,12 +41,12 @@
           searchable: true,
           render: function (data, type, row, meta) {
             if (data === "true") {
-              return `<div class="text-center text-success">
-                        <i title="TRUE" class="far fa-flag fa-2x"></i>
+              return `<div class="text-center text-warning">
+                        <i title="TRUE" class="fas fa-exclamation-circle fa-2x"></i>
                       </div>`;
             } else {
-              return `<div class="text-center text-danger">
-                        <i title="FALSE" class="far fa-flag fa-2x"></i>
+              return `<div class="text-center text-muted">
+                        <i title="FALSE" class="fas fa-exclamation-circle fa-2x"></i>
                       </div>`;
             }
           }
