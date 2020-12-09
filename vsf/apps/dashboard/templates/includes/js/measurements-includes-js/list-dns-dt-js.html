@@ -46,9 +46,13 @@
           searchable: true,
           render: function (data, type, row, meta) {
             if (data === "ok") {
-              return `<i class="fas fa-thumbs-up"></i>`
+              return `<div class="text-center text-success">
+                        <i class="fas fa-thumbs-up"></i>
+                      </div>`
             } else {
-              return `<i class="fas fa-couch"></i>`
+              return `<div class="text-center text-primary">
+                        <i class="fas fa-couch"></i>
+                      </div>`
             };
           },
         },
