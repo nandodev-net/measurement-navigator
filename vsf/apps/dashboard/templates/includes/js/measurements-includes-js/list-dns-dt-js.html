@@ -39,16 +39,6 @@
           data: "measurement__anomaly",
           orderable: true,
           searchable: true,
-          render: function (data, type, row, meta) {
-            if (data === "true") {
-              return `<div class="text-center text-warning">
-                        <i title="TRUE" class="fas fa-exclamation-circle fa-2x"></i>
-                      </div>`;
-            } else {
-              return `<div class="text-center text-muted">
-                        <i title="FALSE" class="fas fa-exclamation-circle fa-2x"></i>
-                      </div>`;
-            }
           },
         },
         {
