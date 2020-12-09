@@ -1,0 +1,81 @@
+<!--
+  ========================================
+  MAIN DNS LISTING
+  ========================================
+ -->
+
+ {% extends 'extends/base.html' %}
+
+ {% load static %}
+ 
+ {% block custom_stylesheet %}
+ <link
+   rel="stylesheet"
+   type="text/css"
+   href="https://cdn.datatables.net/v/bs4/dt-1.10.22/b-1.6.5/sl-1.3.1/datatables.min.css"
+ />
+ <link rel=stylesheet
+   href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
+ />
+ {% endblock custom_stylesheet %}
+ 
+ {% block tab_title %} VSF - Controls {% endblock tab_title %}
+ {% block title %} Controls {% endblock title %}
+ 
+ {% block sub_title %} run some functions to make some changes in the database {% endblock sub_title %}
+ 
+ {% block route %}
+ <li class="breadcrumb-item">
+   <a href="{% url home %}">Home</a>
+ </li>
+ <li class="breadcrumb-item active">Control Panel</li>
+ {% endblock route %}
+ 
+ {% block content %}
+ <div class="container">
+     <form action="#" id="request-fp-data-form" method="POST"> {% csrf_token %}
+        <div class="fp-data">
+            <h3> <strong> Request Fastpath Data </strong> </h3>
+            <small> Update our FastPath table and try to get some new measurements </small> <br>
+            <label for="request-fp-data-since">Since</label>
+            <input type="date" name="since" id="request-fp-data-since" placeholder="yyyy-mm-dd"> <br>
+            <label for="request-fp-data-until">Until</label>
+            <input type="date" name="until" id="request-fp-data-until"> <br>
+            <label for="reqest-fp-data-from-fastpath">Only Fastpath?</label>
+            <input type="checkbox" name="only_fastpath" id="reqest-fp-data-from-fastpath">
+            <input type="text" value="fastpath" hidden name="control_type">
+        </div>
+        <button type="submit">Send</button>
+        <small id="fastpath-waiting" hidden>This may take a while...</small>
+     </form>
+ </div>
+ {% endblock content %}
+ 
+ {% block custom_scripts %}
+ <script>
+     'use strict';
+
+    // Send a request to the server to update the fastpath table
+    $(document).ready(function (){
+        $("#request-fp-data-form").submit(function (e){
+            e.preventDefault(); // prevent the form to trigger
+            let waiting_message = document.getElementById('fastpath-waiting');
+            console.log("wtf")
+            waiting_message.hidden = false;
+
+            // show the waiting message
+
+            // Send the request
+            $.ajax({
+                url : "{% url 'dashboard:control_panel:controls' %}",
+                data : $("#request-fp-data-form").serialize(),
+                type : 'POST',
+                success : () => {alert("Everything ok"); waiting_message.hidden = true;},
+                error: () => {alert("There was an error"); waiting_message.hidden = true;}
+            })        
+        });
+    });
+
+ </script>
+ {% endblock custom_scripts %}
+ 

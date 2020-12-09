@@ -45,9 +45,9 @@ class FastPathIngestView(APIView):
     """
     ooni_url = 'https://api.ooni.io/api/v1/measurements' 
 
-    def post(self, request, since, until, format=None):
+    def post(self, request, since, until, only_fastpath : bool = False, format=None):
         #try:
-        (status, measurements) = utils.request_fp_data(since, until)        
+        (status, measurements) = utils.request_fp_data(since, until, only_fastpath)        
         #except:
         #    return Response([], status=HTTP_400_BAD_REQUEST)
 

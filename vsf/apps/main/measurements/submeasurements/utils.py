@@ -51,7 +51,7 @@ def createDNSFromWebConn(web_con_measurement : RawMeasurement) -> [DNS]:
     control_resolver        = test_keys['control']
     dns_consistency         = test_keys['dns_consistency']
     dns_experiment_failure  = test_keys['dns_experiment_failure']
-
+    client_resolver         = test_keys.get('client_resolver')
     cr = {} # control resolver information
     try:
         cr['failure'] = control_resolver['dns']['failure']
@@ -83,7 +83,8 @@ def createDNSFromWebConn(web_con_measurement : RawMeasurement) -> [DNS]:
             hostname=query['hostname'],
             dns_consistency= dns_consistency,
             inconsistent= inconsistent,
-            jsons=jsonf
+            jsons=jsonf,
+            client_resolver=client_resolver
         )
         new_dns.append(dns)
 
@@ -103,6 +104,7 @@ def createDNSFromDNSCons(measurement : RawMeasurement) -> [DNS]:
     errors              = test_keys['errors']
     failures            = test_keys['failures']
     control_resolver    = test_keys['control']
+    client_resolver     = test_keys.get('client_resolver')
 
     new_dns : [DNS] = []
     # Control resolver ip addres:
@@ -175,7 +177,8 @@ def createDNSFromDNSCons(measurement : RawMeasurement) -> [DNS]:
                         dns_consistency=dns_consistency,
                         inconsistent=is_inconsistent,
                         hostname=query['hostname'],
-                        jsons=jsonf
+                        jsons=jsonf,
+                        client_resolver=client_resolver
                     )
 
                 else:
@@ -187,7 +190,8 @@ def createDNSFromDNSCons(measurement : RawMeasurement) -> [DNS]:
                         resolver_hostname=query['resolver_hostname'],
                         dns_consistency=dns_consistency,
                         hostname=query['hostname'],
-                        jsons=jsonf
+                        jsons=jsonf,
+                        client_resolver=client_resolver
                     )
 
                 new_dns.append(dns)
@@ -410,4 +414,4 @@ def check_tcp(tcp : TCP) -> bool:
     return tcp.status_blocked 
 
 # @TODO format later
-from .FlagsUtils import count_flags, hard_flag
+from .FlagsUtils import count_flags_sql, hard_flag

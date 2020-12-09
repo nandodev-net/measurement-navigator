@@ -47,6 +47,7 @@ DJANGO_APPS = [
 
 INSTALLED_APPS = [
     'apps.vsf_base.apps.VsfBaseConfig',
+    'apps.configs.apps.ConfigsConfig',
     'apps.main.events.apps.EventsConfig',
     'apps.main.cases.apps.CasesConfig',
     'apps.main.measurements.flags.apps.FlagsConfig',
