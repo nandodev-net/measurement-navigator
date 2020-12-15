@@ -1,4 +1,5 @@
 #Django imports
+from django.http.response import Http404
 from django.views.generic           import TemplateView
 from apps.main.measurements import submeasurements
 #Inheritance imports
@@ -181,13 +182,20 @@ class ListMeasurementsBackEnd(BaseDatatableView):
 
 class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
     """
-        given the uuid for some measurement, return a page with the following
+        Given the uuid "id" for some measurement, return a page with the following
         data passed within context:
             + measurement: The simple measurement object itself
             + submeasurements: A dict object with the following fields:
                 - dns  : A list (possibly empty) with dns submeasurements
                 - tcp  : A list (possibly empty) with tcp submeasurements
                 - http : A list (possibly empty) with http submeasurements
+            + error : a string specifying an error type
+                - id_not_specified : unable to find an 'id' atribute in the get request
+                - not_found        : there's no measurement with the provided id
+                - null             : Everything ok
+        Possible error:
+
+
     """
     template_name = "measurements-templates/detailed-info-url.html"
 
@@ -200,7 +208,17 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
         # Get the measurement
         # id = kwargs.get('id')
         id = self.request.GET.get('id')
-        measurement = MeasModels.Measurement.objects.get(id=id)
+        # Raise 404 if id is not provided
+        if id is None:
+            context['error'] = 'id_not_provided'
+            return context
+        
+        # Raise 404 if id cannot be found or if such id is an invalid one
+        try:
+            measurement = MeasModels.Measurement.objects.get(id=id)
+        except:
+            context['error'] = 'not_found'
+            return context
 
         # List the models, so it is easy to change when adding new submeasurement models
         models : List[(SubMModels.SubMeasurement, str)] = [ (SubMModels.DNS, 'dns'), 
@@ -215,4 +233,5 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
 
         # Return the context
         context['measurement'] = measurement
+        context['error'] = None
         return context
