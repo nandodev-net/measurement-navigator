@@ -1,9 +1,11 @@
 #Django imports
 from django.views.generic           import TemplateView
+from apps.main.measurements import submeasurements
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
+from typing                                     import List
 #Utils import
 from vsf.utils                                  import MeasurementXRawMeasurementXSite
 from apps.main.measurements.utils               import search_measurement_by_queryset, search_measurement
@@ -11,8 +13,7 @@ from apps.main.measurements.utils               import search_measurement_by_que
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
 from apps.main.measurements                     import models as MeasModels
-
-
+from apps.main.measurements.submeasurements     import models as SubMModels
 
 
 # --- MEASUREMENTS VIEWS --- #
@@ -177,3 +178,41 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'anomaly' : item.anomaly
             })
         return json_data
+
+class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
+    """
+        given the uuid for some measurement, return a page with the following
+        data passed within context:
+            + measurement: The simple measurement object itself
+            + submeasurements: A dict object with the following fields:
+                - dns  : A list (possibly empty) with dns submeasurements
+                - tcp  : A list (possibly empty) with tcp submeasurements
+                - http : A list (possibly empty) with http submeasurements
+    """
+    template_name = "measurements-templates/detailed-info-url.html"
+
+    def get_context_data(self, **kwargs):
+
+
+        # Get the context so far
+        context = super().get_context_data()
+
+        # Get the measurement
+        # id = kwargs.get('id')
+        id = self.request.GET.get('id')
+        measurement = MeasModels.Measurement.objects.get(id=id)
+
+        # List the models, so it is easy to change when adding new submeasurement models
+        models : List[(SubMModels.SubMeasurement, str)] = [ (SubMModels.DNS, 'dns'), 
+                                                            (SubMModels.TCP, 'tcp'), 
+                                                            (SubMModels.HTTP, 'http')
+                                                        ]
+
+        # Ask every submeasurement related to this measurement for each type
+        context['submeasurements'] = {}
+        for (Model, label) in models:
+            context['submeasurements'][label] = Model.objects.filter(measurement=measurement)
+
+        # Return the context
+        context['measurement'] = measurement
+        return context
