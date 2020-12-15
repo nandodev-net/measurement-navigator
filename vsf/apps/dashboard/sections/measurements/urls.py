@@ -1,6 +1,6 @@
 from django.conf.urls import include
 from django.urls import path
-from .views import ListMeasurementsTemplate, ListMeasurementsBackEnd
+from .views import ListMeasurementsTemplate, ListMeasurementsBackEnd, MeasurementDetails
 
 app_name = 'measurements'
 
@@ -16,5 +16,11 @@ urlpatterns = [
         'list_measurements/',                    
         ListMeasurementsTemplate.as_view(),  
         name="list_measurements"),
+
+    path(
+        'measurement',
+        MeasurementDetails.as_view(),
+        name="details"
+    )
 
 ]
