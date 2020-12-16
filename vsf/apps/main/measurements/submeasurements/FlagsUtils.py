@@ -2,17 +2,18 @@
 # directly. Instead, import utils.py so you can have a public api for this functions
 
 # Django imports:
+from typing import List
 from django.db.models   import Min, Max
 from django.db          import connection
 
 # Third party imports:
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 
 # Local imports
 from .models                                import DNS, TCP, HTTP, SubMeasurement
 from apps.main.measurements.flags.models    import Flag
 from apps.configs.models                    import Config
-from apps.main.measurements.models          import RawMeasurement
+from apps.main.measurements.models          import Measurement, RawMeasurement
 
 def count_flags_sql():
     """
@@ -77,7 +78,7 @@ def count_flags():
                 instance.previous_counter = m['previous_counter']
                 instance.save()
 
-def hard_flag():
+def hard_flag(time_window : timedelta, minimum_measurements : int):
     """
         This function evaluates the measurements and flags them properly in the database
         params:
@@ -86,8 +87,6 @@ def hard_flag():
             minimum_measurements =  minimum ammount of too-near measurements to consider a hard
                                     flag
     """
-    time_window = timedelta(days=int(Config.objects.all()[0].hardflag_timewindow))
-    minimum_measurements = int(Config.objects.all()[0].hardflag_minmeasurements)
 
     submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns')]
 
@@ -157,8 +156,8 @@ def hard_flag():
 
                 # if the ammount of anomalies in that time is higher than the given counter, 
                 # all those measurements should be tagged
-                if group[hi].previous_counter - group[lo].previous_counter + (group[hi].flag.flag != Flag.FlagType.OK) >= minimum_measurements:
-                    tagged_meas.append(group[lo:hi+1])
+                if group[hi].previous_counter - group[lo].previous_counter + (group[lo].flag.flag != Flag.FlagType.OK) >= minimum_measurements:
+                    tagged_meas.append(filter(lambda m: m.flag.flag != Flag.FlagType.OK ,group[lo:hi+1]))
                 hi += 1
                 min_date = temp_max
         
@@ -171,7 +170,6 @@ def hard_flag():
 
     return result
             
-
 
 class Grouper():
     """
@@ -211,3 +209,93 @@ class Grouper():
 
         return acc
     
+
+def __bin_search_max(max_date : datetime, measurements : List[SubMeasurement], start : int, end : int) -> int:
+    """
+        return the index of the latest measurement within the given max_date
+    """
+    lo = start
+    hi = end
+    mid = start + (end - start) // 2
+
+    # just a shortcut
+    start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
+
+    while lo < hi:
+
+        if start_time(measurements[mid]) > max_date:
+            hi = mid
+        else:
+            lo = mid
+        if hi - lo == 1:
+            return_hi = int(start_time(measurements[hi]) <= max_date)
+            # branchless since this is hot code
+            return hi * return_hi + lo * (1 - return_hi)
+
+    return hi
+
+def select( measurements : List[SubMeasurement],
+            timedelta : timedelta = timedelta(days=1), 
+            minimum_measurements : int = 7, 
+            interval_size : int = 10
+            ) -> List[SubMeasurement]:
+    """
+        This aux function selects from a list of measurements
+        every measurement with anomalies based on a minimum ammount of measurements
+        and a time delta
+    """
+    # Measurement ammount, if not enough to fill a window or an interval, return an empty list
+    n_meas : int = len(measurements)
+
+    if n_meas < minimum_measurements:
+        return []
+
+    # Resulting list
+    result : List[SubMeasurement] = []
+
+    # shortcuts
+    start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
+    anomaly_count = lambda lo, hi : measurements[hi].previous_counter -\
+                                    measurements[lo].previous_counter +\
+                                    measurements[lo].flag.flag != Flag.FlagType.OK
+
+    # Pointers to start and end positions in our measurement window
+    lo : int = 0
+    hi : int = interval_size - 1
+    while n_meas - lo >= minimum_measurements:
+        # Search for anomaly measurements
+        if measurements[lo].flag.flag == Flag.FlagType.OK:
+            lo += 1
+            hi += 1
+            continue
+
+        max_in_date = __bin_search_max(start_time(measurements[lo]) + timedelta, measurements, lo, hi)
+
+        n_anomalies = anomaly_count(lo, max_in_date)
+        # If too many anomalies in this interval:
+        if n_anomalies < minimum_measurements:
+            lo += 1
+            hi += 1
+            continue
+
+        # If too many anomalies, start a selecting process.
+        while n_anomalies > 1:
+            last_index = lo
+            for i in range(lo, min(max_in_date + 1, n_meas)):
+                if measurements[i].flag.flag != Flag.FlagType.OK:
+                    result.append(measurements[i])
+                    last_index = i
+
+            lo = last_index
+            hi = lo + interval_size - 1
+            # search for anomaly measurements whose start time is within the given window 
+            max_in_date = __bin_search_max(
+                                start_time(measurements[last_index]), 
+                                measurements, 
+                                last_index, 
+                                last_index + interval_size - 1)
+            n_anomalies = anomaly_count(last_index, max_in_date)
+                
+    return result
+
+
