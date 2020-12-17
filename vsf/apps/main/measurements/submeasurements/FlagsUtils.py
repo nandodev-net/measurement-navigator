@@ -238,7 +238,7 @@ def select( measurements : List[SubMeasurement],
             timedelta : timedelta = timedelta(days=1), 
             minimum_measurements : int = 7, 
             interval_size : int = 10
-            ) -> List[SubMeasurement]:
+            ) -> List[List[SubMeasurement]]:
     """
         This aux function selects from a list of measurements
         every measurement with anomalies based on a minimum ammount of measurements
@@ -251,7 +251,7 @@ def select( measurements : List[SubMeasurement],
         return []
 
     # Resulting list
-    result : List[SubMeasurement] = []
+    result : List[List[SubMeasurement]] = []
 
     # shortcuts
     start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
@@ -279,11 +279,12 @@ def select( measurements : List[SubMeasurement],
             continue
 
         # If too many anomalies, start a selecting process.
+        current_block : List[Measurement] = []
         while n_anomalies > 1:
             last_index = lo
             for i in range(lo, min(max_in_date + 1, n_meas)):
                 if measurements[i].flag.flag != Flag.FlagType.OK:
-                    result.append(measurements[i])
+                    current_block.append(measurements[i])
                     last_index = i
 
             lo = last_index
@@ -295,7 +296,7 @@ def select( measurements : List[SubMeasurement],
                                 last_index, 
                                 last_index + interval_size - 1)
             n_anomalies = anomaly_count(last_index, max_in_date)
-                
+        result.append(current_block)
     return result
 
 
