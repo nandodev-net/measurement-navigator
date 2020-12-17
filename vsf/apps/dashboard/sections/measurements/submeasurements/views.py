@@ -7,6 +7,7 @@ from django.db.models               import OuterRef, Subquery
 from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
+from datetime                                   import datetime
 # Local imports
 from apps.main.sites.models                     import URL, Site
 from apps.main.asns                             import models as AsnModels
@@ -28,10 +29,28 @@ class ListDNSTemplate(VSFLoginRequiredMixin, TemplateView):
         test_types = list(map(lambda m: {'name':m[1], 'value':m[0]}, test_types))
         sites = Site.objects.all()
 
+        # Get the most recent measurement:
+        last_measurement_date = SubMeasModels\
+                                .DNS\
+                                .objects.all()\
+                                .order_by("-measurement__raw_measurement__measurement_start_time")\
+                                .values("measurement__raw_measurement__measurement_start_time")\
+                                .first()
+                                
+        #   If there is no measurements, result is going to be none, cover that case.
+        if last_measurement_date is None:
+            last_measurement_date = "No measurements yet"
+        else:
+            last_measurement_date = datetime.strftime(
+                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"], 
+                                                "%Y-%m-%d %H:%M:%S"
+                                            )
+
         context =  super().get_context_data()
         context['test_types'] = test_types
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
+        context['last_measurement_date'] = last_measurement_date
         return context
 
 class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
@@ -169,9 +188,27 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
 
         sites = Site.objects.all()
 
+        # Get the most recent measurement:
+        last_measurement_date = SubMeasModels\
+                                .HTTP\
+                                .objects.all()\
+                                .order_by("-measurement__raw_measurement__measurement_start_time")\
+                                .values("measurement__raw_measurement__measurement_start_time")\
+                                .first()
+                                
+        #   If there is no measurements, result is going to be none, cover that case.
+        if last_measurement_date is None:
+            last_measurement_date = "No measurements yet"
+        else:
+            last_measurement_date = datetime.strftime(
+                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"], 
+                                                "%Y-%m-%d %H:%M:%S"
+                                            )
+
         context =  super().get_context_data()
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
+        context['last_measurement_date'] = last_measurement_date
         return context
 
 def query():
@@ -334,9 +371,27 @@ class ListTCPTemplate(VSFLoginRequiredMixin, TemplateView):
 
         sites = Site.objects.all()
 
+        # Get the most recent measurement:
+        last_measurement_date = SubMeasModels\
+                                .TCP\
+                                .objects.all()\
+                                .order_by("-measurement__raw_measurement__measurement_start_time")\
+                                .values("measurement__raw_measurement__measurement_start_time")\
+                                .first()
+                                
+        #   If there is no measurements, result is going to be none, cover that case.
+        if last_measurement_date is None:
+            last_measurement_date = "No measurements yet"
+        else:
+            last_measurement_date = datetime.strftime(
+                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"], 
+                                                "%Y-%m-%d %H:%M:%S"
+                                            )
+
         context =  super().get_context_data()
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
+        context['last_measurement_date'] = last_measurement_date
         return context
 
 class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
