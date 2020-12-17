@@ -7,6 +7,7 @@ from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from typing                                     import List
+from datetime                                   import datetime
 #Utils import
 from vsf.utils                                  import MeasurementXRawMeasurementXSite
 from apps.main.measurements.utils               import search_measurement_by_queryset, search_measurement
@@ -85,11 +86,26 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         if test_name:
             prefill['test_name'] = test_name
 
+        # Get the most recent measurement:
+        last_measurement_date = MeasModels\
+                                .Measurement\
+                                .objects.all()\
+                                .order_by("-raw_measurement__measurement_start_time")\
+                                .values("raw_measurement__measurement_start_time")\
+                                .first()
+                                
+        #   If there is no measurements, result is going to be none, cover that case.
+        if last_measurement_date is None:
+            last_measurement_date = "No measurements yet"
+        else:
+            last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
+
         context = super().get_context_data()
         context['test_types'] = test_types
         context['sites'] = sites
         context['prefill'] = prefill
         context['asns'] = AsnModels.ASN.objects.all()
+        context['last_measurement_date'] = last_measurement_date
         return context
 
 class ListMeasurementsBackEnd(BaseDatatableView):
