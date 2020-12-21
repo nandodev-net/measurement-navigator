@@ -18,7 +18,7 @@ def sum (a,b):
     return a+b
     
 @shared_task(time_limit=3600, name="update-fastpath", base=VSFTask)
-def fp_update(since : datetime = None, until : datetime = None, only_fastpath : bool = False):
+def fp_update(since : str = None, until : str = None, only_fastpath : bool = False):
     """
         Update the fast path table;
         This function will request fast path table to the ooni api
@@ -41,8 +41,11 @@ def fp_update(since : datetime = None, until : datetime = None, only_fastpath : 
 
     if since is None:
         since = until - timedelta(days=1)
+
+    until = datetime.strftime(until,"%Y-%m-%d")
+    since = datetime.strftime(since,"%Y-%m-%d")
     try: 
-        request_fp_data(datetime.strftime(since,"%Y-%m-%d"), datetime.strftime(until,"%Y-%m-%d"), only_fastpath)
+        request_fp_data(since, until, only_fastpath)
         cache.set("update-fastpath", ProcessState.IDLE)
     except Exception as e:
         cache.set("update-fastpath", ProcessState.FAILED + " : " + str(e) + f". Args: {since}, {until}")
