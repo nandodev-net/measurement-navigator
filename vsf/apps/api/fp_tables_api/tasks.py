@@ -45,8 +45,8 @@ def fp_update(since : datetime = None, until : datetime = None, only_fastpath : 
         request_fp_data(datetime.strftime(since,"%Y-%m-%d"), datetime.strftime(until,"%Y-%m-%d"), only_fastpath)
         cache.set("update-fastpath", ProcessState.IDLE)
     except Exception as e:
-        cache.set("update-fastpath", ProcessState.FAILED + str(e))
-    return 
+        cache.set("update-fastpath", ProcessState.FAILED + " : " + str(e) + f". Args: {since}, {until}")
+    
     
 @shared_task(time_limit=2000, name="recover-measurements")
 def measurement_update():
