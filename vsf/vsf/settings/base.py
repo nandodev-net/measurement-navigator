@@ -177,3 +177,12 @@ STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
 
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'django-cache'
+
+# Caching config:
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'process_state',
+        'TIMEOUT' : 86400
+    }
+}
