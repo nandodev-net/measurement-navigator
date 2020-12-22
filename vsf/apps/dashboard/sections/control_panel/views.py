@@ -21,6 +21,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
     
     class CONTROL_TYPES:
         FASTPATH = 'fastpath'
+        UNKNOWN  = 'unknown'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -34,18 +35,41 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        req = request.POST
-        since = req.get('since')
-        until = req.get('until')
-        only_fastpath = req.get('only_fastpath') is not None
-        control = req.get('control_type')
-        if control == ControlPanel.CONTROL_TYPES.FASTPATH:
-            date_format = "%Y-%m-%d"
-            since = datetime.strptime(since, date_format)
-            until = datetime.strptime(until, date_format)
+        """
+            Return a result based on the following possible outcomes:
+                result :=
+                        ok : The process started to run succesfully
+                    |   already_running : didn't started the process since it was already running       
+        """
+        # Define possible responses
+        OK = 'ok'
+        RUNNING = 'already_running'
 
-            return fp_update.delay(since, until)
-        return JsonResponse( {"result":"everything ok"} )
+        # Map from control panel options to function names
+        process_names = {
+            self.CONTROL_TYPES.FASTPATH : fp_update.name,
+        }
+
+        # Get request data 
+        req = request.POST
+        control = req.get('control_type')
+
+        # Check the state; if process is not running and not failed, then it is busy right now, 
+        # try not to run int
+        state = cache.get(process_names.get(control, self.CONTROL_TYPES.UNKNOWN))
+        if state != ProcessState.IDLE and state != ProcessState.FAILED:
+            return JsonResponse({"result" : RUNNING}) 
+
+        # Perform different actions depending on the control triggered
+        if control == ControlPanel.CONTROL_TYPES.FASTPATH:
+            since = req.get('since')
+            until = req.get('until')
+            only_fastpath = req.get('only_fastpath') is not None
+            fp_update.apply_async(kwargs = {'until' : until, 'since' : since})
+            return JsonResponse ( {"result" : OK} )
+
+
+        return JsonResponse( {"result" : OK} )
 
     
     #def update_fastpath(self, since, until, only_fastpath):
