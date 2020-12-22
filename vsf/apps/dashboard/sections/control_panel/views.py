@@ -31,7 +31,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
                                 }
 
         context['states'] = ProcessState.__dict__
-        
+        context['control_types'] = self.CONTROL_TYPES.__dict__
         return context
 
     def post(self, request, *args, **kwargs):
@@ -91,7 +91,7 @@ def get_process_state(request):
     process_list = list(req.getlist('process[]'))
     ans = {}
     for process in process_list:
-        ans[process] = cache.get(process)
+        ans[process] = cache.get(process) or "unknown state"
         print(f"{process} : {ans[process]}")
     return JsonResponse({ "process_status" : ans })
     
