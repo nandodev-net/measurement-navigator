@@ -98,3 +98,7 @@ class VSFTask(Task):
         cache so we can query if it is running at any time
     """
     Request = VSFRequest
+
+    def after_return(self, status, retval, task_id, args, kwargs, einfo):
+        cache.set(self.task_name, ProcessState.IDLE)
+        return super().after_return(status, retval, task_id, args, kwargs, einfo)
