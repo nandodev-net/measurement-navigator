@@ -57,7 +57,7 @@ class VSFRequest(Request):
         defined by the ProcessState enum
     """
     def on_timeout(self, soft, timeout):
-        name = self.task_name 
+        name = self.task_name() 
 
         # If for some reason this task's name is not registered, register it
         if cache.get(name) is None:
@@ -73,7 +73,7 @@ class VSFRequest(Request):
         return super().on_timeout(soft, timeout)
 
     def on_failure(self, exc_info, send_failed_event, return_ok):
-        name = self.task_name 
+        name = self.task_name() 
 
         # If for some reason this task's name is not registered, register it
         if cache.get(name) is None:
@@ -100,5 +100,5 @@ class VSFTask(Task):
     Request = VSFRequest
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        cache.set(self.task_name, ProcessState.IDLE)
+        cache.set(self.name, ProcessState.IDLE)
         return super().after_return(status, retval, task_id, args, kwargs, einfo)
