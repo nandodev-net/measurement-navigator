@@ -15,6 +15,10 @@ from apps.main.measurements.flags.models    import Flag
 from apps.configs.models                    import Config
 from apps.main.measurements.models          import Measurement, RawMeasurement
 
+
+from time import time
+
+
 def count_flags_sql():
     """
         This function sets the vale of "previous counter" 
@@ -244,6 +248,8 @@ def select( measurements : List[SubMeasurement],
         every measurement with anomalies based on a minimum ammount of measurements
         and a time delta
     """
+
+
     # Measurement ammount, if not enough to fill a window or an interval, return an empty list
     n_meas : int = len(measurements)
 
@@ -296,7 +302,8 @@ def select( measurements : List[SubMeasurement],
                                 last_index, 
                                 last_index + interval_size - 1)
             n_anomalies = anomaly_count(last_index, max_in_date)
+        print('HOLA')
         result.append(current_block)
+        
+
     return result
-
-
