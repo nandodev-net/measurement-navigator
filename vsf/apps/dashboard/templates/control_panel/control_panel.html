@@ -57,60 +57,106 @@
  
  {% block custom_scripts %}
  <script>
-     'use strict';
+    'use strict';
 
+    /*
+      Every task control has its state-showing element
+      called after the process it is monitoring. This JS
+      sends a post request every 2 seconds to the control panel
+      view so it can check the state of every process. Once
+      the state is obteained, it is rendered in every state-showing
+      element by printing the state name with a meaningfull color.
+    */
     
     // Send a request to the server to update the fastpath table
     $(document).ready(function (){
 
-        let responding = false;
-        // Check for the the state of every asynchronous process
-        window.setInterval(function(){
-          if (responding)
-            return
+      let responding = false;
+      let control_types = {
+        fastpathUpdate : '{{control_types.FASTPATH}}'
+      };
+      let states = {
+        starting  : '{{states.STARTING}}',
+        running   : '{{states.RUNNING}}',
+        idle      : '{{states.IDLE}}',
+        failing   : '{{states.FAILING}}',
+        failed    : '{{states.FAILED}}',
+      };
 
-          let fp_update_name = $("#update-fastpath").data("process-name")
+      // Check for the the state of every asynchronous process
+      window.setInterval(function(){
+        if (responding)
+          return
 
-          //console.log(fp_update_name);
-          let data = {
-            'process' : [fp_update_name],
-            'csrfmiddlewaretoken' : '{{csrf_token}}'
-          }
-          responding = true;
+        let fp_update_name = $("#update-fastpath").data("process-name")
+
+        //console.log(fp_update_name);
+        let data = {
+          'process' : [fp_update_name],
+          'csrfmiddlewaretoken' : '{{csrf_token}}'
+        }
+        responding = true;
+        $.ajax({
+          url : "{% url 'dashboard:control_panel:process_state' %}",
+          type : "POST",
+          data : data,
+          success : function (data) {
+            responding = false;
+            let status = Object.entries(data.process_status);
+            status.forEach(proc => {
+              $("#" + proc[0]).text(proc[1])
+            });
+          },
+          error   : () => {console.log("error retrieving process state"); responding=false}
+        })
+
+      }, 1000);
+
+      // Update fastpath triggered
+      $("#request-fp-data-form").submit(function (e){
+          e.preventDefault(); // prevent the form to trigger
+          let waiting_message = document.getElementById('fastpath-waiting');
+          waiting_message.hidden = false;
+
+          // show the waiting message
+
+          // Send the request
           $.ajax({
-            url : "{% url 'dashboard:control_panel:process_state' %}",
-            type : "POST",
-            data : data,
-            success : function (data) {
-              responding = false;
-              let status = Object.entries(data.process_status);
-              status.forEach(proc => {
-                $("#" + proc[0]).text(proc[1])
-              });
-            },
-            error   : () => {console.log("error retrieving process state"); responding=false}
-          })
-
-        }, 1000);
-
-        // Update fastpath triggered
-        $("#request-fp-data-form").submit(function (e){
-            e.preventDefault(); // prevent the form to trigger
-            let waiting_message = document.getElementById('fastpath-waiting');
-            //console.log("wtf")
-            waiting_message.hidden = false;
-
-            // show the waiting message
-
-            // Send the request
-            $.ajax({
-                url : "{% url 'dashboard:control_panel:controls' %}",
-                data : $("#request-fp-data-form").serialize(),
-                type : 'POST',
-                success : () => {alert("Everything ok"); waiting_message.hidden = true;},
-                error: () => {alert("There was an error"); waiting_message.hidden = true;}
-            })        
-        });
+              url : "{% url 'dashboard:control_panel:controls' %}",
+              data : $("#request-fp-data-form").serialize(),
+              type : 'POST',
+              success : () => {alert("Everything ok"); waiting_message.hidden = true;},
+              error: () => {alert("There was an error"); waiting_message.hidden = true;}
+          })        
+      });
+      
+      // --- Aux functions --- //
+      function update_state($state_element, state){
+        $state_element.text(state);
+        // Clear possible colors
+        $state_element.removeClass('text-warning');
+        $state_element.removeClass('text-danger');
+        $state_element.removeClass('text-success');
+        $state_element.removeClass('text-info');
+        $state_element.removeClass('text-secondary');
+        switch (state) {
+          case states.running:
+            $state_element.addClass('text-success');
+            break;
+          case states.starting:
+            $state_element.addClass('text-info');
+            break;
+          case states.failing:
+            $state_element.addClass('text-warning');
+            break;
+          case states.failed:
+            $state_element.addClass('text-danger');
+            break;
+          default:
+            $state_element.addClass('text-secondary');
+        }
+      }
+      
     });
 
  </script>
