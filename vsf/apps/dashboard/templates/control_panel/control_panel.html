@@ -83,14 +83,19 @@
         failed    : '{{states.FAILED}}',
       };
 
-      // Check for the the state of every asynchronous process
+      /*
+        Set a function to update the state of the process rendered 
+        in the html.
+      */
       window.setInterval(function(){
+        // If there's a request on its way here, wait until it arrives
         if (responding)
           return
 
+        // Get fp state-showing element
         let fp_update_name = $("#update-fastpath").data("process-name")
 
-        //console.log(fp_update_name);
+        // send an array with the process whose state we are trying to check
         let data = {
           'process' : [fp_update_name],
           'csrfmiddlewaretoken' : '{{csrf_token}}'
@@ -104,7 +109,8 @@
             responding = false;
             let status = Object.entries(data.process_status);
             status.forEach(proc => {
-              $("#" + proc[0]).text(proc[1])
+              // $("#" + proc[0]).text(proc[1])
+              update_state($("#" + proc[0]), proc[1])
             });
           },
           error   : () => {console.log("error retrieving process state"); responding=false}
