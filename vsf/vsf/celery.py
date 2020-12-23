@@ -28,16 +28,11 @@ yesterday = now - timedelta(days=1)
 
 
 app.conf.beat_schedule = {
-    #'every-5-seconds':{
-    #    'task': 'apps.api.fp_tables_api.tasks.sum',
-    #    'schedule':5,
-    #    'args':(20,3)
-    #},
     # fp update to search for new recent measurements in the fast path
     'update-fastpath':{
         'task': 'apps.api.fp_tables_api.tasks.fp_update',
         'schedule':3600,
-        'args':()
+        'args':(None, None, False)
     },
     # measurement_update to check for complete measurements to download
     'update-measurements':{
