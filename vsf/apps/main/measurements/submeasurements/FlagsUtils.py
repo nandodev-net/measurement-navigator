@@ -220,12 +220,12 @@ def __bin_search_max(max_date : datetime, measurements : List[SubMeasurement], s
     """
     lo = start
     hi = end
-    mid = start + (end - start) // 2
-
+    
     # just a shortcut
     start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
 
     while lo < hi:
+        mid = lo + (hi - lo) // 2
 
         if start_time(measurements[mid]) > max_date:
             hi = mid
@@ -249,7 +249,6 @@ def select( measurements : List[SubMeasurement],
         and a time delta
     """
 
-
     # Measurement ammount, if not enough to fill a window or an interval, return an empty list
     n_meas : int = len(measurements)
 
@@ -263,30 +262,30 @@ def select( measurements : List[SubMeasurement],
     start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
     anomaly_count = lambda lo, hi : measurements[hi].previous_counter -\
                                     measurements[lo].previous_counter +\
-                                    measurements[lo].flag.flag != Flag.FlagType.OK
+                                    (measurements[lo].flag.flag != Flag.FlagType.OK)
 
     # Pointers to start and end positions in our measurement window
     lo : int = 0
-    hi : int = interval_size - 1
-    while n_meas - lo >= minimum_measurements:
+    hi : int = min(interval_size - 1, n_meas-1)
+    while n_meas - lo > minimum_measurements:
         # Search for anomaly measurements
         if measurements[lo].flag.flag == Flag.FlagType.OK:
             lo += 1
-            hi += 1
+            hi = min(hi+1, n_meas-1)
             continue
-
         max_in_date = __bin_search_max(start_time(measurements[lo]) + timedelta, measurements, lo, hi)
-
         n_anomalies = anomaly_count(lo, max_in_date)
         # If too many anomalies in this interval:
         if n_anomalies < minimum_measurements:
             lo += 1
-            hi += 1
+            hi = min(hi+1, n_meas-1)
             continue
 
         # If too many anomalies, start a selecting process.
         current_block : List[Measurement] = []
+
         while n_anomalies > 1:
+
             last_index = lo
             for i in range(lo, min(max_in_date + 1, n_meas)):
                 if measurements[i].flag.flag != Flag.FlagType.OK:
@@ -294,15 +293,14 @@ def select( measurements : List[SubMeasurement],
                     last_index = i
 
             lo = last_index
-            hi = lo + interval_size - 1
+            hi = min(lo + interval_size - 1, n_meas-1)
             # search for anomaly measurements whose start time is within the given window 
             max_in_date = __bin_search_max(
                                 start_time(measurements[last_index]), 
                                 measurements, 
                                 last_index, 
-                                last_index + interval_size - 1)
+                                min(last_index + interval_size - 1, n_meas-1))
             n_anomalies = anomaly_count(last_index, max_in_date)
-        print('HOLA')
         result.append(current_block)
         
 
