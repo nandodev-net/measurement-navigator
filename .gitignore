@@ -140,6 +140,7 @@ dmypy.json
 # Personal
 .vscode
 .jshintrc
+test.py
 
 # DJANGO IGNORED CONFIG FILES
 **/migrations/**

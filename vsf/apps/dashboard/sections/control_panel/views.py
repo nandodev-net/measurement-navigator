@@ -8,7 +8,7 @@ from django.http                    import JsonResponse
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 # Local imports
-from apps.api.fp_tables_api.tasks   import fp_update
+from vsf.tasks                      import fp_update
 from vsf.utils                      import ProcessState
 
 class ControlPanel(VSFLoginRequiredMixin, TemplateView):
