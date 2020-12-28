@@ -2,13 +2,13 @@
     This file is required by celery to perform the asynchronous process,
     add them in the schedule below.
 """
-# Third party imports
+
 from __future__ import absolute_import, unicode_literals
-from celery     import Celery
+
 import os
 
-# Local imports
-from .tasks     import VSF_TASK
+from datetime import datetime, timedelta
+from celery import Celery
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'vsf.settings.production')
@@ -21,16 +21,22 @@ app = Celery('vsf')
 #   should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+# day variable
+
+now = datetime.now()
+yesterday = now - timedelta(days=1)
+
+
 app.conf.beat_schedule = {
     # fp update to search for new recent measurements in the fast path
     'update-fastpath':{
-        'task': VSF_TASK.FP_UPDATE,
+        'task': 'apps.api.fp_tables_api.tasks.fp_update',
         'schedule':3600,
         'args':(None, None, False)
     },
     # measurement_update to check for complete measurements to download
     'update-measurements':{
-        'task':VSF_TASK.MEASUREMENT_UPDATE,
+        'task':'apps.api.fp_tables_api.tasks.measurement_update',
         'schedule':600,
         'args':()
     },
