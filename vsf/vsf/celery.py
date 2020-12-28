@@ -2,11 +2,9 @@
     This file is required by celery to perform the asynchronous process,
     add them in the schedule below.
 """
-
+# Third party imports
 from __future__ import absolute_import, unicode_literals
-
 import os
-
 from datetime import datetime, timedelta
 from celery import Celery
 
