@@ -8,7 +8,7 @@ from django.http                    import JsonResponse
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 # Local imports
-from vsf.tasks                      import fp_update
+from vsf.vsf_tasks                      import fp_update
 from vsf.utils                      import ProcessState
 
 class ControlPanel(VSFLoginRequiredMixin, TemplateView):
@@ -47,7 +47,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
 
         # Map from control panel options to function names
         process_names = {
-            self.CONTROL_TYPES.FASTPATH : fp_update.name,
+            self.CONTROL_TYPES.FASTPATH : fp_update.vsf_name, # vsf_name is a custom attribute that every vsf task should fill 
         }
 
         # Get request data 

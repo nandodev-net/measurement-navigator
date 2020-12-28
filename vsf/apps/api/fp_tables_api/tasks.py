@@ -10,23 +10,22 @@ from django.db.models import base
 # Local imports
 from .utils             import request_fp_data, update_measurement_table
 from vsf.utils          import VSFTask, ProcessState
-
-# @TODO Delete later, we use this to check whether the process are running
-@shared_task
-def sum (a,b):
-    time.sleep(2)
-    return a+b
     
-@shared_task(time_limit=3600, name="update-fastpath", base=VSFTask)
+class API_TASKS:
+    UPDATE_FASTPATH = "update-fastpath"
+    RECOVER_MEASUREMENTS = "recover-measurements"
+
+@shared_task(time_limit=3600, base=VSFTask, vsf_name = API_TASKS.UPDATE_FASTPATH)
 def fp_update(since : str = None, until : str = None, only_fastpath : bool = False):
     """
         Update the fast path table;
         This function will request fast path table to the ooni api
         from  yesterday until the currently running day.
     """
-    
+
+    name = API_TASKS.UPDATE_FASTPATH
     # Idempotency
-    state = cache.get("update-fastpath")
+    state = cache.get(name)
     if state == ProcessState.RUNNING:
         return
     date_format = "%Y-%m-%d"
@@ -36,7 +35,7 @@ def fp_update(since : str = None, until : str = None, only_fastpath : bool = Fal
     # but excluding "tomorrow".
     # [     interval      ]
     # | yesterday | today | tomorrow 
-    cache.set("update-fastpath", ProcessState.RUNNING)
+    cache.set(name, ProcessState.RUNNING)
     if until is None:
         until = datetime.now() + timedelta(days=1)
         until = datetime.strftime(until, date_format)
@@ -48,12 +47,12 @@ def fp_update(since : str = None, until : str = None, only_fastpath : bool = Fal
     
     try: 
         request_fp_data(since, until, only_fastpath)
-        cache.set("update-fastpath", ProcessState.IDLE)
+        cache.set(name, ProcessState.IDLE)
     except Exception as e:
-        cache.set("update-fastpath", ProcessState.FAILED + " : " + str(e) + f". Args: {since}, {until}")
+        cache.set(name, ProcessState.FAILED + " : " + str(e) + f". Args: {since}, {until}")
     
     
-@shared_task(time_limit=2000, name="recover-measurements")
+@shared_task(time_limit=2000, vsf_name=API_TASKS.RECOVER_MEASUREMENTS)
 def measurement_update():
     """
         Update Measurement table by requesting for new measurements availables
