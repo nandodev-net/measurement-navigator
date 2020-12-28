@@ -26,8 +26,8 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['update_fastpath'] = {
-                                    'name' : fp_update.name,
-                                    'state': cache.get(fp_update.name)
+                                    'name' : fp_update.vsf_name,
+                                    'state': cache.get(fp_update.vsf_name)
                                 }
 
         context['states'] = ProcessState.__dict__
