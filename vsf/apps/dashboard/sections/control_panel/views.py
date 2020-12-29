@@ -8,7 +8,7 @@ from django.http                    import JsonResponse
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 # Local imports
-from vsf.vsf_tasks                  import fp_update, measurement_update
+from vsf.vsf_tasks                  import fp_update, measurement_update, count_flags_submeasurements
 from vsf.utils                      import ProcessState
 
 class ControlPanel(VSFLoginRequiredMixin, TemplateView):
@@ -35,6 +35,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
             - control_types : dict with every possible control type string:
                         + FASTPATH = 'fastpath' (trigger a fetch for new measurements in ooni)
                         + MEASUREMENT_RECOVERY = 'measurement_recovery' (trigger a fetch for the missing part of incomplete measurements)
+                        + COUNT_FLAGS = 'count_flags' (trigger a flag counting process)
                         + UNKNOWN  = 'unknown'
 
             
@@ -58,6 +59,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
     class CONTROL_TYPES:
         FASTPATH = 'fastpath'
         MEASUREMENT_RECOVERY = 'measurement_recovery'
+        COUNT_FLAGS = 'count_flags'
         UNKNOWN  = 'unknown'
 
     def get_context_data(self, **kwargs):
@@ -69,6 +71,11 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
         context['measurement_recovery'] = {
             'name' : measurement_update.vsf_name,
             'state': cache.get(measurement_update.vsf_name)
+        }
+
+        context['count_flags'] = {
+            'name' : count_flags_submeasurements.vsf_name,
+            'state': cache.get(count_flags_submeasurements.vsf_name)
         }
 
         context['states'] = ProcessState.__dict__
@@ -103,6 +110,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
             return JsonResponse({"result" : RUNNING}) 
 
         # Perform different actions depending on the control triggered
+        # Fastpath update
         if control == ControlPanel.CONTROL_TYPES.FASTPATH:
 
             # Look since parameter
@@ -117,16 +125,21 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
                 # if until parameter is not provided, take "today at midnight" as until
                 until = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
 
+            # Get 'only_fastpath parameter', we just care if it is none or not
             only_fastpath = req.get('only_fastpath') is not None
-            print(f"Updating fastpath with since = {since}, until = {until}, only_fastpath = {only_fastpath}")
+
+            # run task
             fp_update.apply_async(kwargs = {'until' : until, 'since' : since, 'only_fastpath' : only_fastpath})
             return JsonResponse ( {"result" : OK} )
+        # Measurement recovery
         elif control == ControlPanel.CONTROL_TYPES.MEASUREMENT_RECOVERY:
-            measurement_update.apply_async()
-            
-            print("\u001b[31mRecovering missing measurements\u001b[0m")
+            # Just run task
+            measurement_update.apply_async()            
             return JsonResponse( {"result" : OK} )
-
+        # Count flags
+        elif control == ControlPanel.CONTROL_TYPES.COUNT_FLAGS:
+            count_flags_submeasurements.apply_async()
+            return JsonResponse( {"result" : OK} )    
         return JsonResponse( {"result" : OK} )
 
     

@@ -33,43 +33,63 @@
  
  {% block content %}
  <div class="container">
-     <form action="#" id="request-fp-data-form" class="trigger-action-form" method="POST"> {% csrf_token %}
-        <div class="fp-data">
-            <h3> <strong> Request Fastpath Data </strong> </h3>
-            <small> Update our FastPath table and try to get some new measurements </small> <br>
+      <!-- Update fastpath table -->
+      <form action="#" id="request-fp-data-form" class="trigger-action-form" method="POST"> {% csrf_token %}
+          <div class="fp-data">
+              <h3> <strong> Request Fastpath Data </strong> </h3>
+              <small> Update our FastPath table and try to get some new measurements </small> <br>
+              <small>
+                  <strong> State for {{update_fastpath.name}}: </strong> 
+                  <div id="{{update_fastpath.name}}" class='process-state-show'> 
+                    {{update_fastpath.state}}
+                  </div> 
+              </small><br>
+              <label for="request-fp-data-since">Since</label>
+              <input type="date" name="since" id="request-fp-data-since" placeholder="yyyy-mm-dd"> <br>
+              <label for="request-fp-data-until">Until</label>
+              <input type="date" name="until" id="request-fp-data-until"> <br>
+              <label for="reqest-fp-data-from-fastpath">Only Fastpath?</label>
+              <input type="checkbox" name="only_fastpath" id="reqest-fp-data-from-fastpath">
+              <input type="text" value="{{control_types.FASTPATH}}" hidden name="control_type">
+          </div>
+          <button type="submit">Send</button>
+          <small id="fastpath-waiting" class="waiting-message" hidden>This may take a while...</small>
+      </form>
+      <!-- Update missing measurements -->
+      <form action="#" id="measurement-recovery-form" class="trigger-action-form" method="POST"> {% csrf_token %}
+        <div class="measurement-recovery">
+            <h3> <strong> Measurement Recovery </strong> </h3>
+            <small> Try to retrieve the missing data for every incomplete measurement </small> <br>
             <small>
-                <strong> State for {{update_fastpath.name}}: </strong> 
-                <div id="{{update_fastpath.name}}" class='process-state-show'> 
-                  {{update_fastpath.state}}
+                <strong> State for {{measurement_recovery.name}}: </strong> 
+                <div id="{{measurement_recovery.name}}" class='process-state-show'> 
+                  {{measurement_recovery.state}}
                 </div> 
             </small><br>
-            <label for="request-fp-data-since">Since</label>
-            <input type="date" name="since" id="request-fp-data-since" placeholder="yyyy-mm-dd"> <br>
-            <label for="request-fp-data-until">Until</label>
-            <input type="date" name="until" id="request-fp-data-until"> <br>
-            <label for="reqest-fp-data-from-fastpath">Only Fastpath?</label>
-            <input type="checkbox" name="only_fastpath" id="reqest-fp-data-from-fastpath">
-            <input type="text" value="{{control_types.FASTPATH}}" hidden name="control_type">
+            <input type="text" value="{{control_types.MEASUREMENT_RECOVERY}}" hidden name="control_type">
         </div>
         <button type="submit">Send</button>
-        <small id="fastpath-waiting" class="waiting-message" hidden>This may take a while...</small>
-     </form>
+        <small id="measurement-recovery-waiting" class="waiting-message" hidden>This may take a while...</small>
+      </form>
 
-     <form action="#" id="measurement-recovery-form" class="trigger-action-form" method="POST"> {% csrf_token %}
-      <div class="measurement-recovery">
-          <h3> <strong> Measurement Recovery </strong> </h3>
-          <small> Try to retrieve the missing data for every incomplete measurements </small> <br>
-          <small>
-              <strong> State for {{measurement_recovery.name}}: </strong> 
-              <div id="{{measurement_recovery.name}}" class='process-state-show'> 
-                {{measurement_recovery.state}}
-              </div> 
-          </small><br>
-          <input type="text" value="{{control_types.MEASUREMENT_RECOVERY}}" hidden name="control_type">
-      </div>
-      <button type="submit">Send</button>
-      <small id="measurement-recovery-waiting" class="waiting-message" hidden>This may take a while...</small>
-   </form>
+      <!-- Count flags -->
+      <form action="#" id="count-flags-form" class="trigger-action-form" method="POST"> {% csrf_token %}
+        <div class="count-flags">
+            <h3> <strong> Count Flags </strong> </h3>
+            <small> Update measurements counter so the hard flags can consider more precise information </small> <br>
+            <small>
+                <strong> State for {{count_flags.name}}: </strong> 
+                <div id="{{count_flags.name}}" class='process-state-show'> 
+                  {{count_flags.state}}
+                </div> 
+            </small><br>
+            <input type="text" value="{{control_types.COUNT_FLAGS}}" hidden name="control_type">
+        </div>
+        <button type="submit">Send</button>
+        <small id="count-flags-waiting" class="waiting-message" hidden>This may take a while...</small>
+      </form>
+
+
  </div>
 
 
