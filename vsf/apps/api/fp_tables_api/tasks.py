@@ -3,7 +3,6 @@ from celery             import shared_task
 # Django imports
 from django.core.cache  import cache
 # Third party imports 
-import time
 from datetime           import datetime, timedelta
 
 from django.db.models import base
@@ -60,6 +59,22 @@ def measurement_update():
         request a small ammount of them periodically rather than requesting them 
         all at the same time
     """
-    #note that there's currently infinite retrys, since we have a problem retrieving data from ooni
-    return update_measurement_table(200) 
+    name = API_TASKS.RECOVER_MEASUREMENTS
+    status = cache.get(name)
+
+    if status == ProcessState.RUNNING:
+        return
+
+    cache.set(name, ProcessState.RUNNING)
+
+    result = {}
+    try:
+        result['output'] = update_measurement_table(200)
+        result['state'] = 'ok'
+        cache.set(name, ProcessState.IDLE)
+
+    except Exception as e:
+        result['state'] = 'error'
+
+    return  result 
 
