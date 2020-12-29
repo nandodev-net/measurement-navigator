@@ -67,14 +67,14 @@ def measurement_update():
 
     cache.set(name, ProcessState.RUNNING)
 
-    result = {}
+    result = {'error' : None}
     try:
         result['output'] = update_measurement_table(200)
-        result['state'] = 'ok'
         cache.set(name, ProcessState.IDLE)
 
     except Exception as e:
-        result['state'] = 'error'
+        result['error'] = e
+        
 
     return  result 
 
