@@ -9,7 +9,7 @@ def SoftFlagMeasurements():
     return SoftFlag(limit=5000)
     
 
-@shared_task(time_limit=600)
+@shared_task(time_limit=3600)
 def count_flags_submeasurements():
     return count_flags_sql()
 
