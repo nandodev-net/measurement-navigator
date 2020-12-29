@@ -46,6 +46,7 @@ class ProcessState:
     IDLE    = "idle"    # process not running
     FAILING = "failing" # process shows some problems
     FAILED  = "failed"  # last time the process ran, it failed
+    UNKNOWN = "unknown"
 
 class VSFRequest(Request):
     """

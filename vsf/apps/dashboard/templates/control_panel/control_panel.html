@@ -33,13 +33,15 @@
  
  {% block content %}
  <div class="container">
-     <form action="#" id="request-fp-data-form" method="POST"> {% csrf_token %}
+     <form action="#" id="request-fp-data-form" class="trigger-action-form" method="POST"> {% csrf_token %}
         <div class="fp-data">
             <h3> <strong> Request Fastpath Data </strong> </h3>
             <small> Update our FastPath table and try to get some new measurements </small> <br>
             <small>
                 <strong> State for {{update_fastpath.name}}: </strong> 
-                <div id="update-fastpath" data-process-name="{{update_fastpath.name}}">{{update_fastpath.state}}</div> 
+                <div id="{{update_fastpath.name}}" class='process-state-show'> 
+                  {{update_fastpath.state}}
+                </div> 
             </small><br>
             <label for="request-fp-data-since">Since</label>
             <input type="date" name="since" id="request-fp-data-since" placeholder="yyyy-mm-dd"> <br>
@@ -47,12 +49,31 @@
             <input type="date" name="until" id="request-fp-data-until"> <br>
             <label for="reqest-fp-data-from-fastpath">Only Fastpath?</label>
             <input type="checkbox" name="only_fastpath" id="reqest-fp-data-from-fastpath">
-            <input type="text" value="fastpath" hidden name="control_type">
+            <input type="text" value="{{control_types.FASTPATH}}" hidden name="control_type">
         </div>
         <button type="submit">Send</button>
-        <small id="fastpath-waiting" hidden>This may take a while...</small>
+        <small id="fastpath-waiting" class="waiting-message" hidden>This may take a while...</small>
      </form>
+
+     <form action="#" id="measurement-recovery-form" class="trigger-action-form" method="POST"> {% csrf_token %}
+      <div class="measurement-recovery">
+          <h3> <strong> Measurement Recovery </strong> </h3>
+          <small> Try to retrieve the missing data for every incomplete measurements </small> <br>
+          <small>
+              <strong> State for {{measurement_recovery.name}}: </strong> 
+              <div id="{{measurement_recovery.name}}" class='process-state-show'> 
+                {{measurement_recovery.state}}
+              </div> 
+          </small><br>
+          <input type="text" value="{{control_types.MEASUREMENT_RECOVERY}}" hidden name="control_type">
+      </div>
+      <button type="submit">Send</button>
+      <small id="measurement-recovery-waiting" class="waiting-message" hidden>This may take a while...</small>
+   </form>
  </div>
+
+
+
  {% endblock content %}
  
  {% block custom_scripts %}
@@ -67,13 +88,12 @@
       the state is obteained, it is rendered in every state-showing
       element by printing the state name with a meaningfull color.
     */
-    
-    // Send a request to the server to update the fastpath table
     $(document).ready(function (){
 
       let responding = false;
       let control_types = {
-        fastpathUpdate : '{{control_types.FASTPATH}}'
+        fastpathUpdate : '{{control_types.FASTPATH}}',
+        measurementRecovery : '{{control_types.MEASUREMENT_RECOVERY}}'
       };
       let states = {
         starting  : '{{states.STARTING}}',
@@ -95,11 +115,17 @@
         // Get fp state-showing element
         let fp_update_name = $("#update-fastpath").data("process-name")
 
+        // Get every element name
+        let _process = $('.process-state-show').map((i, element) => element.id);
+        let process = []
+        for(const p of _process) process.push(p);
+
         // send an array with the process whose state we are trying to check
         let data = {
-          'process' : [fp_update_name],
+          'process' : process,
           'csrfmiddlewaretoken' : '{{csrf_token}}'
         }
+        console.log(data)
         responding = true;
         $.ajax({
           url : "{% url 'dashboard:control_panel:process_state' %}",
@@ -119,24 +145,29 @@
       }, 2000);
 
       // Update fastpath triggered
-      $("#request-fp-data-form").submit(function (e){
+      $(".trigger-action-form").submit(function (e){
           e.preventDefault(); // prevent the form to trigger
-          let waiting_message = document.getElementById('fastpath-waiting');
+          //let waiting_message = document.getElementById('fastpath-waiting');
+          let waiting_message = $("#" + e.target.id + " > .waiting-message")
           waiting_message.hidden = false;
 
           // show the waiting message
-
           // Send the request
           $.ajax({
               url : "{% url 'dashboard:control_panel:controls' %}",
-              data : $("#request-fp-data-form").serialize(),
+              data : $("#" + e.target.id).serialize(),
               type : 'POST',
               success : () => {alert("Everything ok"); waiting_message.hidden = true;},
-              error: () => {alert("There was an error"); waiting_message.hidden = true;}
+              error: () => {alert("There was an error"); waiting_message.hidden = false;}
           })        
       });
       
       // --- Aux functions --- //
+
+      /*
+        Format the provided html element depending on
+        the given state
+      */
       function update_state($state_element, state){
         $state_element.text(state);
         // Clear possible colors
