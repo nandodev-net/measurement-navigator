@@ -101,5 +101,5 @@ class VSFTask(Task):
     Request = VSFRequest
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        cache.set(self.name, ProcessState.IDLE)
+        cache.set(self.vsf_name, ProcessState.IDLE)
         return super().after_return(status, retval, task_id, args, kwargs, einfo)
