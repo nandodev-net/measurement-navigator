@@ -158,16 +158,15 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
 
             # Run task
             
-            # SoftFlagMeasurements.apply_async(
-            #         kwargs= {   
-            #                 'until':until, 
-            #                 'since' : since, 
-            #                 'limit' : limit, 
-            #                 'page_size' : page_size, 
-            #                 'absolute' : absolute
-            #             }
-            #     )
-            print(f"Applying soft flags with args since = {since}, until = {until}, limit = {limit}, page_size = {page_size}, absolute = {absolute}")
+            SoftFlagMeasurements.apply_async(
+                    kwargs= {   
+                            'until':until, 
+                            'since' : since, 
+                            'limit' : limit, 
+                            'page_size' : page_size, 
+                            'absolute' : absolute
+                        }
+                )
             return JsonResponse( {"result" : OK} )
 
         return JsonResponse( {"result" : OK} )
