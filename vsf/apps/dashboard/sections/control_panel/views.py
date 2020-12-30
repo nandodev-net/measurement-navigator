@@ -8,7 +8,7 @@ from django.http                    import JsonResponse
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 # Local imports
-from vsf.vsf_tasks                  import fp_update, measurement_update, count_flags_submeasurements
+from vsf.vsf_tasks                  import fp_update, measurement_update, count_flags_submeasurements, SoftFlagMeasurements
 from vsf.utils                      import ProcessState
 
 class ControlPanel(VSFLoginRequiredMixin, TemplateView):
@@ -60,6 +60,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
         FASTPATH = 'fastpath'
         MEASUREMENT_RECOVERY = 'measurement_recovery'
         COUNT_FLAGS = 'count_flags'
+        SOFT_FLAGS = 'soft_flags'
         UNKNOWN  = 'unknown'
 
     def get_context_data(self, **kwargs):
@@ -76,6 +77,11 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
         context['count_flags'] = {
             'name' : count_flags_submeasurements.vsf_name,
             'state': cache.get(count_flags_submeasurements.vsf_name)
+        }
+
+        context['soft_flags'] = {
+            'name' : SoftFlagMeasurements.vsf_name,
+            'state' : cache.get(SoftFlagMeasurements.vsf_name)
         }
 
         context['states'] = ProcessState.__dict__
@@ -119,7 +125,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
                 # If since parameters is not provided, take "today at 00:00" as since
                 since = datetime.now().strftime('%Y-%m-%d')
 
-            #look until parameter
+            # Look until parameter
             until = req.get('until')
             if not until:
                 # if until parameter is not provided, take "today at midnight" as until
@@ -140,6 +146,30 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
         elif control == ControlPanel.CONTROL_TYPES.COUNT_FLAGS:
             count_flags_submeasurements.apply_async()
             return JsonResponse( {"result" : OK} )    
+
+        # Soft flag
+        elif control == ControlPanel.CONTROL_TYPES.SOFT_FLAGS:
+            # peek parameters
+            since       = req.get('since')
+            until       = req.get('until')
+            limit       = req.get('limit')
+            page_size   = req.get('page_size')
+            absolute    = req.get('absolute') is not None
+
+            # Run task
+            
+            # SoftFlagMeasurements.apply_async(
+            #         kwargs= {   
+            #                 'until':until, 
+            #                 'since' : since, 
+            #                 'limit' : limit, 
+            #                 'page_size' : page_size, 
+            #                 'absolute' : absolute
+            #             }
+            #     )
+            print(f"Applying soft flags with args since = {since}, until = {until}, limit = {limit}, page_size = {page_size}, absolute = {absolute}")
+            return JsonResponse( {"result" : OK} )
+
         return JsonResponse( {"result" : OK} )
 
     
