@@ -152,8 +152,8 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
             # peek parameters
             since       = req.get('since')
             until       = req.get('until')
-            limit       = req.get('limit')
-            page_size   = req.get('page_size')
+            limit       = int(req.get('limit'))
+            page_size   = int(req.get('page_size'))
             absolute    = req.get('absolute') is not None
 
             # Run task
