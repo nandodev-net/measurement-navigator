@@ -89,6 +89,39 @@
         <small id="count-flags-waiting" class="waiting-message" hidden>This may take a while...</small>
       </form>
 
+      <!-- Soft Flag -->
+      <form action="#" id="soft-flags-form" class="trigger-action-form" method="POST"> {% csrf_token %}
+        <div class="soft-flags">
+            <h3> <strong> Soft Flags </strong> </h3>
+            <small> 
+              Flag every measurement that is not already flagged for some reason. Can be used to reset every measurement to soft flag or ok flag if needed, 
+             <strong> overriding every created flag so far. <div class="text-danger">Use absolute wisely.</div>  </strong>
+            </small> <br>
+            <small>
+                <strong> State for {{soft_flags.name}}: </strong> 
+                <div id="{{soft_flags.name}}" class='process-state-show'> 
+                  {{soft_flags.state}}
+                </div> 
+            </small><br>
+            <label for="soft-flag-since">Since</label>
+            <input type="date" name="since" id="soft-flag-since" placeholder="yyyy-mm-dd"> <br>
+            <label for="soft-flag-until">Until</label>
+            <input type="date" name="until" id="soft-flag-until"> <br>
+            <div class="text-danger">
+              <label for="soft-flag-absolute">Absolute?</label>
+              <input type="checkbox" name="absolute" id="soft-flag-absolute">
+            </div>
+            <input type="text" value="{{control_types.SOFT_FLAGS}}" hidden name="control_type">
+            <label for="soft-flag-limit">Limit</label>
+            <input type="number" name="limit" id="soft-flag-limit" value="5000">
+            <label for="soft-flag-page-size">Page Size</label>
+            <input type="number" name="page_size" id="soft-flag-page-size" value="1000">
+            
+        </div>
+        <button type="submit">Send</button>
+        <small id="soft-flags-waiting" class="waiting-message" hidden>This may take a while...</small>
+      </form>
+
 
  </div>
 
@@ -113,7 +146,9 @@
       let responding = false;
       let control_types = {
         fastpathUpdate : '{{control_types.FASTPATH}}',
-        measurementRecovery : '{{control_types.MEASUREMENT_RECOVERY}}'
+        measurementRecovery : '{{control_types.MEASUREMENT_RECOVERY}}',
+        countFlags : '{{control_types.COUNT_FLAGS}}',
+        softFlags  : '{{control_types.SOFT_FLAGS}}'
       };
       let states = {
         starting  : '{{states.STARTING}}',
