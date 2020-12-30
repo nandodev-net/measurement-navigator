@@ -51,7 +51,7 @@ def fp_update(since : str = None, until : str = None, only_fastpath : bool = Fal
         cache.set(name, ProcessState.FAILED + " : " + str(e) + f". Args: {since}, {until}")
     
     
-@shared_task(time_limit=2000, vsf_name=API_TASKS.RECOVER_MEASUREMENTS)
+@shared_task(time_limit=2000, vsf_name=API_TASKS.RECOVER_MEASUREMENTS, base=VSFTask)
 def measurement_update():
     """
         Update Measurement table by requesting for new measurements availables
