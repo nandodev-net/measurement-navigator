@@ -233,20 +233,37 @@
     });
 
     /*
-        =====================================
-        TRIGGERED WHEN A CUSTOM FILTER IS SELECTED
-        =====================================
-        */
+    =====================================
+    TRIGGERED WHEN A CUSTOM FILTER IS SELECTED
+    =====================================
+    */
     $(".additional-filter").change((e) => oTable.draw());
 
     /*
-        =====================================
-        REQUIRED TO PERFORM ROW SELECTION
-        =====================================
-        */
+    =====================================
+    REQUIRED TO PERFORM ROW SELECTION
+    =====================================
+    */
     oTable.on("select deselect", (e) => {
       let selectedRows = oTable.rows({ selected: true }).count();
       oTable.button(0).enable(selectedRows === 1);
+    });
+
+    /*
+    =====================================
+    URL TO DETAILED INFO MEASUREMENT
+    =====================================
+    */
+    $("#detailed-measurement-page").on("click", function ( event ) {
+      event.preventDefault();
+
+      let urlSearch = '/dashboard{% url "measurements:get_measurement" %}?id=';
+
+      let url = urlSearch + id;
+
+      let win = window.open(url, '_blank');
+
+      win.focus();
     });
   });
 </script>
