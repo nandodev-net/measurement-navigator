@@ -230,17 +230,17 @@
     });
 
     /*
-        =====================================
-        TRIGGERED WHEN A CUSTOM FILTER IS SELECTED
-        =====================================
-        */
+    =====================================
+    TRIGGERED WHEN A CUSTOM FILTER IS SELECTED
+    =====================================
+    */
     $(".additional-filter").change((e) => oTable.draw());
 
     /*
-        =====================================
-        REQUIRED TO PERFORM ROW SELECTION
-        =====================================
-        */
+    =====================================
+    REQUIRED TO PERFORM ROW SELECTION
+    =====================================
+    */
     oTable.on("select deselect", (e) => {
       let selectedRows = oTable.rows({ selected: true }).count();
       oTable.button(0).enable(selectedRows === 1);
