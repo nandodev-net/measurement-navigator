@@ -39,9 +39,8 @@
 
 {% block content %}
 
-<form id="urlForm" action="#">
-
-  <nav class="navbar navbar-light bg-light mb-5">
+<nav class="navbar navbar-light bg-light mb-5">
+  <form id="urlForm" action="#">
     <div class="container-fluid">
       <div class="row">
         <div class="col-3">
@@ -49,7 +48,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text">Since</span>
             </div>
-            <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}"/>
+            <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
           </div>
         </div>
 
@@ -58,7 +57,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text">Until</span>
             </div>
-            <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}"/>
+            <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
           </div>
         </div>
 
@@ -67,104 +66,140 @@
             <div class="input-group-prepend">
               <label class="input-group-text" for="asn">ASN</label>
             </div>
-            <select id="asn" class="custom-select additional-filter">
-              <option selected value="">Any ASN</option>
+            <select id="asn" class="custom-select additional-filter" name="asn">
+              <option value="">Any ASN</option>
               {% for asn in asns %}
-                    <option value="{{ asn.asn }}" >{{ asn.asn }} - {{ asn.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <div class="col-3 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="test-name">Test Type</label>
+                    <option 
+                    {% if asn.asn == prefill.asn %} selected {% endif %}
+                    value="{{ asn.asn }}" >{{ asn.asn }} - {{ asn.name }}
+                    </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              
+              <div class="col-3 mt-3">
+                <div class="input-group mr-2">
+                  <div class="input-group-prepend">
+                    <label class="input-group-text" for="test-name">Test Type</label>
+                  </div>
+                  <select id="test-name" class="custom-select additional-filter" name="test_name">
+                    <option selected value="">Choose Test Type</option>
+                    {% for test in test_types %}
+                    <option
+                    {% if prefill.test_name == test.value %} selected {% endif %}
+                    value="{{ test.value }}"
+                    >
+                    {{ test.name }}
+                  </option>
+                  {% endfor %}
+                </select>
+              </div>
             </div>
-            <select id="test-name" class="custom-select additional-filter">
-              <option selected value="">Choose Test Type</option>
-              {% for test in test_types %}
-              <option
-                {% if prefill.test_name == test.value %} selected {% endif %}
-                value="{{ test.value }}"
-              >
-                {{ test.name }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <div class="col-3 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="anomaly-state">Anomaly</label>
+            
+            <div class="col-3 mt-3">
+              <div class="input-group mr-2">
+                <div class="input-group-prepend">
+                  <label class="input-group-text" for="anomaly-state">Anomaly</label>
+                </div>
+                <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
+                  <option selected value="">Any</option>
+                  <option {% if prefill.anomaly == 'false' %} selected {% endif %}              
+                  value="false">Anomaly False</option>
+                  <option 
+                  {% if prefill.anomaly == 'true' %} selected {% endif %}
+                  value="true">Anomaly True</option>
+                </select>
+              </div>
             </div>
-            <select id="anomaly-state" class="custom-select additional-filter">
-              <option selected value="">Any</option>
-              <option value="false">Anomaly False</option>
-              <option value="true">Anomaly True</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="col-3 mt-3">
-          <input
-            id="input"
-            class="form-control mr-2 additional-filter"
-            type="search"
-            placeholder="URL"
-            aria-label="Search URL"
-            value="{{ prefill.input }}"
-          />
-        </div>
-
-        <div class="col-3 mt-3">
-          <div class="input-group mr-sm-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="site">Site</label>
+            
+            <div class="col-3 mt-3">
+              <input
+              id="input"
+              class="form-control mr-2 additional-filter"
+              type="search"
+              placeholder="URL"
+              aria-label="Search URL"
+              value="{{ prefill.input }}"
+              name="input"
+              />
             </div>
-            <select class="custom-select additional-filter" id="site">
-              <option selected value="">Any Site</option>
-              {% for site in sites %}
-              <option
-                value="{{ site.id }}"
-                title="{{ site.description }}"
-                {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}
-              >
-                {{ site.name }}
-              </option>
-              {% endfor %}
-            </select>
+            
+            <div class="col-3 mt-3">
+              <div class="input-group mr-sm-2">
+                <div class="input-group-prepend">
+                  <label class="input-group-text" for="site">Site</label>
+                </div>
+                <select class="custom-select additional-filter" id="site" name="site">
+                  <option selected value="">Any Site</option>
+                  {% for site in sites %}
+                  <option
+                  value="{{ site.id }}"
+                  title="{{ site.description }}"
+                  {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}
+                  >
+                  {{ site.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
         </div>
+      </div>    
+  </form>
+  <div class="col-12 mt-3">
+    <div class="input-group">
+      <div class="input-group-prepend">
+        <p class="input-group-text">Search Url</p>
+      </div>
+      <input 
+      class="form-control" 
+      type="text" 
+      name="copy-search-url" 
+      id="copy-search-url" 
+      readonly value="asdadasd"
+      >
+      <div class="input-group-append">
+        <a id="copy-search-url-btn" href="#" class="btn btn-info"><i class="fas fa-copy"></i></a>
       </div>
     </div>
-  </nav>
-  <h4><strong>Last Measurement from:</strong> {{last_measurement_date}} </h4>
-  <table class="table table-striped mt-5 datatable" id="my-table">
-    <thead>
-      <tr>
-        <th class="text-center" scope="col">input</th>
-        <th class="text-center" scope="col">Type</th>
-        <th class="text-center" scope="col">Start Time</th>
-        <th class="text-center" scope="col">ASN</th>
-        <th class="text-center" scope="col">country</th>
-        <th class="text-center" scope="col">Site</th>
-        <th class="text-center" scope="col">Anomaly</th>
-      </tr>
-    </thead>
+  </div>
 
-    <tbody>
-    </tbody>
+  <div class="col-12 container mt-3 rounded alert-success p-2 " id="copy-clipboard-success" hidden>
+      Succesfully copied to clipboard!
+      <i class="fas fa-check"></i>
+  </div>
 
-    <tfoot>
-    </tfoot>
+  <div class="col-12 container mt-3 rounded alert-danger p-2 " id="copy-clipboard-error" hidden>
+    Error copying to clipboard!
+    <i class="fas fa-exclamation-triangle"></i>
+  </div>
+</nav>
 
-  </table>
-</form>
+<h4><strong>Last Measurement from:</strong> {{last_measurement_date}} </h4>
+<table class="table table-striped mt-5 datatable" id="my-table">
+  <thead>
+    <tr>
+      <th class="text-center" scope="col">input</th>
+      <th class="text-center" scope="col">Type</th>
+      <th class="text-center" scope="col">Start Time</th>
+      <th class="text-center" scope="col">ASN</th>
+      <th class="text-center" scope="col">country</th>
+      <th class="text-center" scope="col">Site</th>
+      <th class="text-center" scope="col">Anomaly</th>
+    </tr>
+  </thead>
+  
+  <tbody>
+  </tbody>
+  
+  <tfoot>
+  </tfoot>
+  
+</table>
 
 {% include "includes/measurements-includes/detailed-info-modal.html" %}
+
 {% endblock content %}
 
 {% block custom_scripts %}
@@ -174,4 +209,84 @@
 ></script>
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
 {% include "includes/js/measurements-includes-js/list-ms-dt-js.html" %}
+<!-- Move later to its own script so it can be included in any required template -->
+<script>
+  $(document).ready(function(){
+    'use strict';
+
+    // Set up copy search url
+    updateSearchUrl();
+
+    // Whenever you change some field in search form, update search url
+    $('.additional-filter').change(updateSearchUrl);
+
+    // When click in copy url btn, copy to clip board
+    $('#copy-search-url-btn').click(function (e){
+      e.preventDefault();
+      // Get the text element whose value is going to get copied into clipboard
+      let $textArea = $('#copy-search-url');
+
+      const messageTimeToShow = 5000; // how long success-error messages will show up
+
+      // Focus and select such field
+      $textArea.focus();
+      $textArea.select();
+
+      // Status messages
+      let $successMessage = $('#copy-clipboard-success');
+      let $errorMessage = $('#copy-clipboard-error');
+
+      // Try to copy into clipboard
+      try {
+        var success = document.execCommand('copy');
+
+        // If everything ok, show a success message and 
+        // remove it after a few seconds
+        if (success) {
+          $successMessage.attr("hidden",false);
+          setTimeout(function (){
+            $successMessage.attr("hidden",true);
+          }, messageTimeToShow);
+        }
+
+        else{
+          $errorMessage.attr("hidden", false);
+          setTimeout(function (){
+            $errorMessage.attr("hidden", true);
+          }, messageTimeToShow);
+        }
+
+      } catch (err) {
+        alert("there was an error: " + err);
+      }
+
+    })
+
+
+    // Callback function called on init or when some filter field changed:
+    function updateSearchUrl() {
+      // base url
+      //let url = '{% url "dashboard:measurements:list_measurements" %}?'
+      let url = '{{request.build_absolute_uri}}?'
+      
+      // Get params by name and value
+      let params = {}
+      let $filters = $('.additional-filter');
+      for(var i = 0; i < $filters.length; i++) {
+        let filter = $filters[i];
+        // If they have no value, don't include them in resulting url
+        if (filter.value) 
+          params[filter.name] = filter.value;
+      }
+
+      // Serialize object into query string
+      let args = $.param(params);
+
+      // Update field value
+      $('#copy-search-url').val(url + args);
+    }
+
+  });
+</script>
+<!--------------------------------------------------------------------------------->
 {% endblock custom_scripts %}

@@ -86,7 +86,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         if test_name:
             prefill['test_name'] = test_name
 
-        # Get the most recent measurement:
+        # Get most recent measurement:
         last_measurement_date = MeasModels\
                                 .Measurement\
                                 .objects.all()\
@@ -206,12 +206,10 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
                 - tcp  : A list (possibly empty) with tcp submeasurements
                 - http : A list (possibly empty) with http submeasurements
             + error : a string specifying an error type
-                - id_not_specified : unable to find an 'id' atribute in the get request
+                - id_not_provided  : unable to find an 'id' atribute in the get request
                 - not_found        : there's no measurement with the provided id
                 - null             : Everything ok
-        Possible error:
-
-
+        
     """
     template_name = "measurements-templates/detailed-info-url.html"
 
