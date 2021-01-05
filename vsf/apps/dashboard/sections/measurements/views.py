@@ -93,7 +93,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
                                 .order_by("-raw_measurement__measurement_start_time")\
                                 .values("raw_measurement__measurement_start_time")\
                                 .first()
-                                
+
         #   If there is no measurements, result is going to be none, cover that case.
         if last_measurement_date is None:
             last_measurement_date = "No measurements yet"
@@ -206,7 +206,7 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
                 - tcp  : A list (possibly empty) with tcp submeasurements
                 - http : A list (possibly empty) with http submeasurements
             + error : a string specifying an error type
-                - id_not_specified : unable to find an 'id' atribute in the get request
+                - id_not_specified : unable to find an 'id' attribute in the get request
                 - not_found        : there's no measurement with the provided id
                 - null             : Everything ok
         Possible error:
@@ -228,7 +228,7 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
         if id is None:
             context['error'] = 'id_not_provided'
             return context
-        
+
         # Raise 404 if id cannot be found or if such id is an invalid one
         try:
             measurement = MeasModels.Measurement.objects.get(id=id)
@@ -237,8 +237,8 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
             return context
 
         # List the models, so it is easy to change when adding new submeasurement models
-        models : List[(SubMModels.SubMeasurement, str)] = [ (SubMModels.DNS, 'dns'), 
-                                                            (SubMModels.TCP, 'tcp'), 
+        models : List[(SubMModels.SubMeasurement, str)] = [ (SubMModels.DNS, 'dns'),
+                                                            (SubMModels.TCP, 'tcp'),
                                                             (SubMModels.HTTP, 'http')
                                                         ]
 

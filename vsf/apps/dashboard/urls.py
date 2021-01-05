@@ -25,7 +25,7 @@ from apps.dashboard.sections.cases                          import views as case
 from apps.dashboard.sections.sites                          import views as sites_views
 from apps.dashboard.sections.measurements                   import views as measurements_views
 from apps.dashboard.sections.measurements.submeasurements   import views as submeasurements_views
-from apps.dashboard.sections.control_panel                  import views as control_panel_views                
+from apps.dashboard.sections.control_panel                  import views as control_panel_views
 
 
 app_name = 'dashboard'
@@ -92,7 +92,7 @@ urlpatterns = [
     path('muted_Inputs',                    events_views.ListMutedInputs.as_view(),    name="list_muted_inputs"),
     path('probes',                          views.ListProbes.as_view(),         name="list_probes"),
     path(
-        'control_panel/', 
+        'control_panel/',
         include(
             'apps.dashboard.sections.control_panel.urls',
             namespace='control_panel'

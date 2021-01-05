@@ -36,13 +36,13 @@ class ListDNSTemplate(VSFLoginRequiredMixin, TemplateView):
                                 .order_by("-measurement__raw_measurement__measurement_start_time")\
                                 .values("measurement__raw_measurement__measurement_start_time")\
                                 .first()
-                                
+
         #   If there is no measurements, result is going to be none, cover that case.
         if last_measurement_date is None:
             last_measurement_date = "No measurements yet"
         else:
             last_measurement_date = datetime.strftime(
-                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"], 
+                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"],
                                                 "%Y-%m-%d %H:%M:%S"
                                             )
 
@@ -97,7 +97,7 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         ]
 
     def get_initial_queryset(self):
-        # alternativa: 
+        # alternativa:
         # select dns.id from submeasurements_dns dns join measurements_measurement ms on dns.measurement_id=ms.id join measurements_rawmeasurement rms on ms.raw_measurement_id=rms.id join (select url, sites.name as site_name from sites_url urls left join sites_site sites on urls.site_id=sites.id) as urls on input=urls.url order by rms.measurement_start_time limit 10;
         # Time for this query to end: 189.96 seconds
         # time for the raw version: 1.89 seconds
@@ -195,13 +195,13 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
                                 .order_by("-measurement__raw_measurement__measurement_start_time")\
                                 .values("measurement__raw_measurement__measurement_start_time")\
                                 .first()
-                                
+
         #   If there is no measurements, result is going to be none, cover that case.
         if last_measurement_date is None:
             last_measurement_date = "No measurements yet"
         else:
             last_measurement_date = datetime.strftime(
-                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"], 
+                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"],
                                                 "%Y-%m-%d %H:%M:%S"
                                             )
 
@@ -261,7 +261,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             'body_proportion'
         ]
 
-    
+
     def get_initial_queryset(self):
         urls = URL\
                 .objects\
@@ -302,12 +302,12 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             body_proportion_min = float(body_proportion_min)
         except:
             body_proportion_min = 0
-        
+
         try:
             body_proportion_max = float(body_proportion_max)
         except:
             body_proportion_max = 1
-        
+
         if input:
             qs = qs.filter(measurement__raw_measurement__input__contains=input)
         if since:
@@ -329,11 +329,11 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         if body_length_match:
             qs = qs.filter(body_length_match= body_length_match.lower() == 'true')
         # avoid filtering border values since they add no information to the filter
-        if body_proportion_max != 1: 
+        if body_proportion_max != 1:
             qs = qs.filter(body_proportion__lt=body_proportion_max)
         if body_proportion_min != 0:
             qs = qs.filter(body_proportion__lt=body_proportion_min)
-        
+
 
         return qs
 
@@ -378,13 +378,13 @@ class ListTCPTemplate(VSFLoginRequiredMixin, TemplateView):
                                 .order_by("-measurement__raw_measurement__measurement_start_time")\
                                 .values("measurement__raw_measurement__measurement_start_time")\
                                 .first()
-                                
+
         #   If there is no measurements, result is going to be none, cover that case.
         if last_measurement_date is None:
             last_measurement_date = "No measurements yet"
         else:
             last_measurement_date = datetime.strftime(
-                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"], 
+                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"],
                                                 "%Y-%m-%d %H:%M:%S"
                                             )
 
@@ -460,7 +460,7 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         status_failure = get.get('status_failure')
         status_success = get.get('status_success')
         ip             = get.get('ip')
-        
+
         if input:
             qs = qs.filter(measurement__raw_measurement__input__contains=input)
         if since:
@@ -481,10 +481,10 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(status_failure__contains= status_failure)
         if status_success:
             qs = qs.filter(status_success= status_success.lower() == 'true')
-        if ip: 
+        if ip:
             qs = qs.filter(ip__contains=ip)
-        
-        
+
+
 
         return qs
 
