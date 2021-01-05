@@ -260,7 +260,7 @@
     $("#detailed-measurement-page").on("click", function ( event ) {
       event.preventDefault();
 
-      let urlSearch = '/dashboard{% url "measurements:get_measurement" %}?id=';
+      let urlSearch = '{% url "dashboard:measurement:details" %}?id=';
 
       let url = urlSearch + id;
 

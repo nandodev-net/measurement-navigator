@@ -248,5 +248,21 @@
       let selectedRows = oTable.rows({ selected: true }).count();
       oTable.button(0).enable(selectedRows === 1);
     });
+    /*
+    =====================================
+    URL TO DETAILED INFO MEASUREMENT
+    =====================================
+    */
+    $("#detailed-measurement-page").on("click", function ( event ) {
+      event.preventDefault();
+
+      let urlSearch = '{% url "dashboard:measurement:details" %}?id=';
+
+      let url = urlSearch + id;
+
+      let win = window.open(url, '_blank');
+
+      win.focus();
+    });
   });
 </script>
