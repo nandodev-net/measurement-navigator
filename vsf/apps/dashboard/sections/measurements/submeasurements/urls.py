@@ -7,33 +7,33 @@ app_name = 'submeasurements'
 urlpatterns = [
 
     path(
-        'dns/',                
-        ListDNSTemplate.as_view(),           
+        'dns/',
+        ListDNSTemplate.as_view(),
         name='list_dns'
     ),
     path(
-        'dns_data/',           
-        ListDNSBackEnd.as_view(),           
+        'dns_data/',
+        ListDNSBackEnd.as_view(),
         name='list_dns_data'
     ),
     path(
-        'http/',               
-        ListHTTPTemplate.as_view(),          
+        'http/',
+        ListHTTPTemplate.as_view(),
         name='list_http'
     ),
     path(
-        'http_data/',          
-        ListHTTPBackEnd.as_view(),           
+        'http_data/',
+        ListHTTPBackEnd.as_view(),
         name='list_http_data'
     ),
     path(
-        'tcp/',                
-        ListTCPTemplate.as_view(),            
+        'tcp/',
+        ListTCPTemplate.as_view(),
         name='list_tcp'
     ),
     path(
-        'tcp_data/',           
-        ListTCPBackEnd.as_view(),             
+        'tcp_data/',
+        ListTCPBackEnd.as_view(),
         name='list_tcp_data'
     ),
 

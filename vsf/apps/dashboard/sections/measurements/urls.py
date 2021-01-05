@@ -7,14 +7,14 @@ app_name = 'measurements'
 urlpatterns = [
 
     path(
-        'measurements_data/',               
-        ListMeasurementsBackEnd.as_view(),   
+        'measurements_data/',
+        ListMeasurementsBackEnd.as_view(),
         name="list_measurements_data"
     ),
 
     path(
-        'list_measurements/',                    
-        ListMeasurementsTemplate.as_view(),  
+        'list_measurements/',
+        ListMeasurementsTemplate.as_view(),
         name="list_measurements"),
 
     path(
