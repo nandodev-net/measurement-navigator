@@ -15,7 +15,8 @@ urlpatterns = [
     path(
         'list_measurements/',                    
         ListMeasurementsTemplate.as_view(),  
-        name="list_measurements"),
+        name="list_measurements"
+    ),
 
     path(
         'measurement',
