@@ -171,7 +171,8 @@
                 console.log(measurementData);
 
                 $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
-                  collapsed: true
+                  collapsed: true,
+                  rootCollapsable: false
                 });
                 $("#bucket-date-detailed").text(measurementData["bucket_date"]);
                 $("#data-format-version-detailed").text(
@@ -196,10 +197,12 @@
                   measurementData["software_version"]
                 );
                 $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
-                  collapsed: true
+                  collapsed: true,
+                  rootCollapsable: false
                 });
                 $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
-                  collapsed: true
+                  collapsed: true,
+                  rootCollapsable: false
                 });
                 $("#test-name-detailed").text(measurementData["test_name"]);
                 $("#test-runtime-detailed").text(
