@@ -7,7 +7,7 @@ from django.db.models               import OuterRef, Subquery
 from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
-from datetime                                   import datetime
+from datetime                                   import datetime, timedelta
 # Local imports
 from apps.main.sites.models                     import URL, Site
 from apps.main.asns                             import models as AsnModels
@@ -54,8 +54,7 @@ class ListDNSTemplate(VSFLoginRequiredMixin, TemplateView):
             prefill['input'] = inpt
 
         since = get.get("since")
-        if since:
-            prefill['since'] = since
+        prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
 
         until = get.get("until")
         if until:
@@ -246,8 +245,8 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
             prefill['input'] = inpt
 
         since = get.get("since")
-        if since:
-            prefill['since'] = since
+        prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+
 
         until = get.get("until")
         if until:
@@ -476,8 +475,7 @@ class ListTCPTemplate(VSFLoginRequiredMixin, TemplateView):
             prefill['input'] = inpt
 
         since = get.get("since")
-        if since:
-            prefill['since'] = since
+        prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
 
         until = get.get("until")
         if until:
