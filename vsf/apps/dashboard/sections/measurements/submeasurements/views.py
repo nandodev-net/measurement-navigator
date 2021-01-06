@@ -46,11 +46,44 @@ class ListDNSTemplate(VSFLoginRequiredMixin, TemplateView):
                                                 "%Y-%m-%d %H:%M:%S"
                                             )
 
+        # Compute prefill 
+        get = self.request.GET or {}
+        prefill = {}
+        inpt = get.get("input")
+        if inpt:
+            prefill['input'] = inpt
+
+        since = get.get("since")
+        if since:
+            prefill['since'] = since
+
+        until = get.get("until")
+        if until:
+            prefill['until'] = until
+
+        site = get.get("site")
+        if site:
+            prefill['site'] = site
+
+        anomaly = get.get("anomaly")
+        if anomaly:
+            prefill['anomaly'] = anomaly
+
+        asn = get.get("asn")
+        if asn:
+            prefill['asn'] = asn
+
+        consistency = get.get('consistency')
+        if consistency:
+            prefill['consistency'] = consistency
+
         context =  super().get_context_data()
         context['test_types'] = test_types
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
         context['last_measurement_date'] = last_measurement_date
+        context['prefill'] = prefill
+
         return context
 
 class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
