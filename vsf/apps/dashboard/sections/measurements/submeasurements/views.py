@@ -238,7 +238,54 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
                                                 "%Y-%m-%d %H:%M:%S"
                                             )
 
+        # Compute prefill 
+        get = self.request.GET or {}
+        prefill = {}
+        inpt = get.get("input")
+        if inpt:
+            prefill['input'] = inpt
+
+        since = get.get("since")
+        if since:
+            prefill['since'] = since
+
+        until = get.get("until")
+        if until:
+            prefill['until'] = until
+
+        site = get.get("site")
+        if site:
+            prefill['site'] = site
+
+        anomaly = get.get("anomaly")
+        if anomaly:
+            prefill['anomaly'] = anomaly
+
+        asn = get.get("asn")
+        if asn:
+            prefill['asn'] = asn
+
+        status_code_match = get.get("status_code_match")
+        if status_code_match:
+            prefill['status_code_match'] = status_code_match
+
+        headers_match = get.get("headers_match")
+        if headers_match:
+            prefill['headers_match'] = headers_match
+        
+        body_length_match = get.get("body_length_match")
+        if body_length_match:
+            prefill['body_length_match'] = body_length_match
+
+        body_proportion_min = get.get("body_proportion_min") or 0
+        prefill['body_proportion_min'] = body_proportion_min
+
+        body_proportion_max = get.get("body_proportion_max")
+        prefill['body_proportion_max'] = body_proportion_max or 1
+
+
         context =  super().get_context_data()
+        context['prefill'] = prefill
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
         context['last_measurement_date'] = last_measurement_date
