@@ -71,7 +71,9 @@
               {% for asn in asns %}
                     <option 
                     {% if asn.asn == prefill.asn %} selected {% endif %}
-                    value="{{ asn.asn }}" >{{ asn.asn }} - {{ asn.name }}
+                    value="{{ asn.asn }}" 
+                    >
+                    {{ asn.asn }} - {{ asn.name }}
                     </option>
                     {% endfor %}
                   </select>
