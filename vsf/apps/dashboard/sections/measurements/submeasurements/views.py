@@ -468,7 +468,51 @@ class ListTCPTemplate(VSFLoginRequiredMixin, TemplateView):
                                                 "%Y-%m-%d %H:%M:%S"
                                             )
 
+        # Compute prefill 
+        get = self.request.GET or {}
+        prefill = {}
+        inpt = get.get("input")
+        if inpt:
+            prefill['input'] = inpt
+
+        since = get.get("since")
+        if since:
+            prefill['since'] = since
+
+        until = get.get("until")
+        if until:
+            prefill['until'] = until
+
+        site = get.get("site")
+        if site:
+            prefill['site'] = site
+
+        anomaly = get.get("anomaly")
+        if anomaly:
+            prefill['anomaly'] = anomaly
+
+        asn = get.get("asn")
+        if asn:
+            prefill['asn'] = asn
+        
+        blocked = get.get('status_blocked')
+        if blocked:
+            prefill['status_blocked'] = blocked
+        
+        status_failure = get.get('status_failure')
+        if status_failure:
+            prefill['status_failure'] = status_failure
+        
+        success = get.get('status_success')
+        if success:
+            prefill['status_success'] = success
+        
+        ip = get.get('ip')
+        if ip:
+            prefill['ip'] = ip
+        
         context =  super().get_context_data()
+        context['prefill'] = prefill
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
         context['last_measurement_date'] = last_measurement_date
