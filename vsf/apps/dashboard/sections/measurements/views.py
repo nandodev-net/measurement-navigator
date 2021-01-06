@@ -7,7 +7,7 @@ from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from typing                                     import List
-from datetime                                   import datetime
+from datetime                                   import datetime, timedelta
 #Utils import
 from vsf.utils                                  import MeasurementXRawMeasurementXSite
 from apps.main.measurements.utils               import search_measurement_by_queryset, search_measurement
@@ -63,8 +63,8 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             prefill['input'] = inpt
 
         since = get.get("since")
-        if since:
-            prefill['since'] = since
+        prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+
 
         until = get.get("until")
         if until:
