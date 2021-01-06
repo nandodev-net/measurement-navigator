@@ -147,33 +147,7 @@
         </div>
       </div>    
   </form>
-  <div class="col-12 mt-3">
-    <div class="input-group">
-      <div class="input-group-prepend">
-        <p class="input-group-text">Search Url</p>
-      </div>
-      <input 
-      class="form-control" 
-      type="text" 
-      name="copy-search-url" 
-      id="copy-search-url" 
-      readonly value="asdadasd"
-      >
-      <div class="input-group-append">
-        <a id="copy-search-url-btn" href="#" class="btn btn-info"><i class="fas fa-copy"></i></a>
-      </div>
-    </div>
-  </div>
-
-  <div class="col-12 container mt-3 rounded alert-success p-2 " id="copy-clipboard-success" hidden>
-      Succesfully copied to clipboard!
-      <i class="fas fa-check"></i>
-  </div>
-
-  <div class="col-12 container mt-3 rounded alert-danger p-2 " id="copy-clipboard-error" hidden>
-    Error copying to clipboard!
-    <i class="fas fa-exclamation-triangle"></i>
-  </div>
+  {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
 </nav>
 
 <h4><strong>Last Measurement from:</strong> {{last_measurement_date}} </h4>
@@ -208,85 +182,9 @@
   src="https://cdn.datatables.net/v/bs4/dt-1.10.22/b-1.6.5/sl-1.3.1/datatables.min.js"
 ></script>
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<!-- measurement table js controller -->
 {% include "includes/js/measurements-includes-js/list-ms-dt-js.html" %}
-<!-- Move later to its own script so it can be included in any required template -->
-<script>
-  $(document).ready(function(){
-    'use strict';
+<!-- Copy to clipboard text area controller -->
+{% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 
-    // Set up copy search url
-    updateSearchUrl();
-
-    // Whenever you change some field in search form, update search url
-    $('.additional-filter').change(updateSearchUrl);
-
-    // When click in copy url btn, copy to clip board
-    $('#copy-search-url-btn').click(function (e){
-      e.preventDefault();
-      // Get the text element whose value is going to get copied into clipboard
-      let $textArea = $('#copy-search-url');
-
-      const messageTimeToShow = 5000; // how long success-error messages will show up
-
-      // Focus and select such field
-      $textArea.focus();
-      $textArea.select();
-
-      // Status messages
-      let $successMessage = $('#copy-clipboard-success');
-      let $errorMessage = $('#copy-clipboard-error');
-
-      // Try to copy into clipboard
-      try {
-        var success = document.execCommand('copy');
-
-        // If everything ok, show a success message and 
-        // remove it after a few seconds
-        if (success) {
-          $successMessage.attr("hidden",false);
-          setTimeout(function (){
-            $successMessage.attr("hidden",true);
-          }, messageTimeToShow);
-        }
-
-        else{
-          $errorMessage.attr("hidden", false);
-          setTimeout(function (){
-            $errorMessage.attr("hidden", true);
-          }, messageTimeToShow);
-        }
-
-      } catch (err) {
-        alert("there was an error: " + err);
-      }
-
-    })
-
-
-    // Callback function called on init or when some filter field changed:
-    function updateSearchUrl() {
-      // base url
-      //let url = '{% url "dashboard:measurements:list_measurements" %}?'
-      let url = '{{request.build_absolute_uri}}?'
-      
-      // Get params by name and value
-      let params = {}
-      let $filters = $('.additional-filter');
-      for(var i = 0; i < $filters.length; i++) {
-        let filter = $filters[i];
-        // If they have no value, don't include them in resulting url
-        if (filter.value) 
-          params[filter.name] = filter.value;
-      }
-
-      // Serialize object into query string
-      let args = $.param(params);
-
-      // Update field value
-      $('#copy-search-url').val(url + args);
-    }
-
-  });
-</script>
-<!--------------------------------------------------------------------------------->
 {% endblock custom_scripts %}
