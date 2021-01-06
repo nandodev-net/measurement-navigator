@@ -35,8 +35,8 @@
 {% endblock route %}
 
 {% block content %}
-<form id="urlForm">
-  <nav class="navbar navbar-light bg-light mb-5">
+<nav class="navbar navbar-light bg-light mb-5">
+    <form id="urlForm">
     <div class="container-fluid">
       <div class="row">
         <div class="col-3">
@@ -48,6 +48,8 @@
               id="since"
               class="form-control mr-2 additional-filter"
               type="date"
+              name="since"
+              value="{{prefill.since}}"
             />
           </div>
         </div>
@@ -61,6 +63,8 @@
               id="until"
               class="form-control mr-2 additional-filter"
               type="date"
+              name="until"
+              value="{{prefill.until}}"
             />
           </div>
         </div>
@@ -70,10 +74,12 @@
             <div class="input-group-prepend">
               <label class="input-group-text" for="asn">ASN</label>
             </div>
-            <select id="asn" class="custom-select additional-filter">
-              <option selected value="">Any ASN</option>
+            <select id="asn" class="custom-select additional-filter" name="asn">
+              <option value="">Any ASN</option>
               {% for asn in asns %}
-              <option value="{{ asn.asn }}">
+              <option  
+                {% if asn.asn == prefill.asn %} selected {% endif %}
+                value="{{ asn.asn }}">
                 {{ asn.asn }} - {{ asn.name }}
               </option>
               {% endfor %}
@@ -89,6 +95,8 @@
               type="search"
               placeholder="Consistency"
               aria-label="Consistency Search"
+              name="consistency"
+              value="{{prefill.consistency}}"
             />
           </div>
         </div>
@@ -100,10 +108,14 @@
                 >Anomaly</label
               >
             </div>
-            <select id="anomaly-state" class="custom-select additional-filter">
+            <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
               <option selected value="">Any</option>
-              <option value="false">Anomaly False</option>
-              <option value="true">Anomaly True</option>
+              <option 
+              {% if prefill.anomaly == 'false' %} selected {% endif %}
+              value="false">Anomaly False</option>
+              <option 
+              {% if prefill.anomaly == 'true' %} selected {% endif %}
+              value="true">Anomaly True</option>
             </select>
           </div>
         </div>
@@ -115,6 +127,8 @@
             type="search"
             placeholder="URL"
             aria-label="Search URL"
+            name="input"
+            value="{{prefill.input}}"
           />
         </div>
 
@@ -123,10 +137,14 @@
             <div class="input-group-prepend">
               <label class="input-group-text" for="site">Site</label>
             </div>
-            <select class="custom-select additional-filter" id="site">
+            <select class="custom-select additional-filter" id="site" name="site">
               <option selected value="">Any Site</option>
               {% for site in sites %}
-              <option value="{{ site.id }}" title="{{ site.description }}">
+              <option  
+                value="{{ site.id }}" 
+                title="{{ site.description }}"
+                {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}
+                >
                 {{ site.name }}
               </option>
               {% endfor %}
@@ -135,7 +153,9 @@
         </div>
       </div>
     </div>
-  </nav>
+  </form>
+  {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+</nav>
 
   <h4><strong>Last DNS Measurement from:</strong> {{last_measurement_date}} </h4>
   <div class="w-100 overflow-auto">
@@ -165,7 +185,6 @@
       <tfoot></tfoot>
     </table>
   </div>
-</form>
 
 {% include "includes/measurements-includes/detailed-info-modal.html" %}
 {% endblock content %}
@@ -177,4 +196,5 @@
 ></script>
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
 {% include "includes/js/measurements-includes-js/list-dns-dt-js.html" %}
+{% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 {% endblock custom_scripts %}
