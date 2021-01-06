@@ -69,16 +69,16 @@
             <select id="asn" class="custom-select additional-filter" name="asn">
               <option value="">Any ASN</option>
               {% for asn in asns %}
-                    <option 
-                    {% if asn.asn == prefill.asn %} selected {% endif %}
-                    value="{{ asn.asn }}" 
-                    >
-                    {{ asn.asn }} - {{ asn.name }}
-                    </option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </div>
+                <option 
+                {% if asn.asn == prefill.asn %} selected {% endif %}
+                value="{{ asn.asn }}" 
+                >
+                {{ asn.asn }} - {{ asn.name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
               
               <div class="col-3 mt-3">
                 <div class="input-group mr-2">
