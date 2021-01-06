@@ -2,7 +2,7 @@
   ========================================
   MAIN HTTP LISTING
   ========================================
- -->
+-->
 
 {% extends 'extends/base.html' %}
 
@@ -35,8 +35,8 @@
 {% endblock route %}
 
 {% block content %}
-<form id="urlForm">
-  <nav class="navbar navbar-light bg-light mb-5">
+<nav class="navbar navbar-light bg-light mb-5">
+  <form id="urlForm">
     <div class="container-fluid">
       <div class="row">
         <div class="col-3">
@@ -48,6 +48,8 @@
               id="since"
               class="form-control mr-2 additional-filter"
               type="date"
+              name="since"
+              value="{{prefill.since}}"
             />
           </div>
         </div>
@@ -61,6 +63,8 @@
               id="until"
               class="form-control mr-2 additional-filter"
               type="date"
+              name="until"
+              value="{{prefill.until}}"
             />
           </div>
         </div>
@@ -70,10 +74,13 @@
             <div class="input-group-prepend">
               <label class="input-group-text" for="asn">ASN</label>
             </div>
-            <select id="asn" class="custom-select additional-filter">
+            <select id="asn" class="custom-select additional-filter" name="asn">
               <option selected value="">Any ASN</option>
               {% for asn in asns %}
-              <option value="{{ asn.asn }}">
+              <option 
+                {% if asn.asn == prefill.asn %} selected {% endif %}
+                value="{{ asn.asn }}"
+                >
                 {{ asn.asn }} - {{ asn.name }}
               </option>
               {% endfor %}
@@ -88,10 +95,12 @@
                 >Anomaly</label
               >
             </div>
-            <select id="anomaly-state" class="custom-select additional-filter">
+            <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
               <option selected value="">Any</option>
-              <option value="false">Anomaly False</option>
-              <option value="true">Anomaly True</option>
+              <option {% if prefill.anomaly == 'false' %} selected {% endif %}
+              value="false">Anomaly False</option>
+              <option {% if prefill.anomaly == 'true'  %} selected {% endif %}
+              value="true">Anomaly True</option>
             </select>
           </div>
         </div>
@@ -103,6 +112,8 @@
             type="search"
             placeholder="URL"
             aria-label="Search URL"
+            name="input"
+            value="{{prefill.input}}"
           />
         </div>
 
@@ -111,10 +122,14 @@
             <div class="input-group-prepend">
               <label class="input-group-text" for="site">Site</label>
             </div>
-            <select class="custom-select additional-filter" id="site">
+            <select class="custom-select additional-filter" id="site" name="site">
               <option selected value="">Any Site</option>
               {% for site in sites %}
-              <option value="{{ site.id }}" title="{{ site.description }}">
+              <option 
+              value="{{ site.id }}" 
+              title="{{ site.description }}"
+              {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}
+              >
                 {{ site.name }}
               </option>
               {% endfor %}
@@ -133,10 +148,14 @@
             <select
               id="status-code-match"
               class="custom-select additional-filter"
+              name="status_code_match"
+              
             >
               <option selected value="">Any</option>
-              <option value="false">Don't Match</option>
-              <option value="true">Match</option>
+              <option {% if prefill.status_code_match == 'false' %} selected {% endif %}
+              value="false">Don't Match</option>
+              <option {% if prefill.status_code_match == 'true'  %} selected {% endif %}
+              value="true">Match</option>
             </select>
           </div>
         </div>
@@ -149,10 +168,13 @@
                 >Headers</label
               >
             </div>
-            <select id="headers-match" class="custom-select additional-filter">
-              <option selected value="">Any</option>
-              <option value="false">Don't Match</option>
-              <option value="true">Match</option>
+            <select id="headers-match" class="custom-select additional-filter" name="headers_match">
+              <option 
+              selected value="">Any</option>
+              <option {% if prefill.headers_match == 'false' %} selected {% endif %}
+              value="false">Don't Match</option>
+              <option {% if prefill.headers_match == 'true'  %} selected {% endif %}
+              value="true">Match</option>
             </select>
           </div>
         </div>
@@ -168,10 +190,13 @@
             <select
               id="body-length-match"
               class="custom-select additional-filter"
+              name="body_length_match"
             >
               <option selected value="">Any</option>
-              <option value="false">Don't Match</option>
-              <option value="true">Match</option>
+              <option {% if prefill.body_length_match == 'false' %} selected {% endif %}
+              value="false">Don't Match</option>
+              <option {% if prefill.body_length_match == 'true'  %} selected {% endif %}
+              value="true">Match</option>
             </select>
           </div>
         </div>
@@ -191,7 +216,8 @@
               min="0"
               max="1"
               step="0.01"
-              value="0"
+              value="{{prefill.body_proportion_min}}"
+              name="body_proportion_min"
             />
           </div>
         </div>
@@ -211,13 +237,17 @@
               min="0"
               max="1"
               step="0.01"
-              value="1"
+              value="{{prefill.body_proportion_max}}"
+              name="body_proportion_max"
             />
           </div>
         </div>
       </div>
     </div>
-  </nav>
+  </form>
+  <!-- copy-to-clipboard component for search fields -->
+  {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+</nav>
 
   <h4><strong>Last HTTP Measurement from:</strong> {{last_measurement_date}} </h4>
   <div class="w-100 overflow-auto">
@@ -249,7 +279,6 @@
       <tfoot></tfoot>
     </table>
   </div>
-</form>
 
 {% include "includes/measurements-includes/detailed-info-modal.html" %}
 {% endblock content %}
@@ -260,5 +289,9 @@
   src="https://cdn.datatables.net/v/bs4/dt-1.10.22/b-1.6.5/sl-1.3.1/datatables.min.js"
 ></script>
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<!-- measurement table js controller -->
 {% include "includes/js/measurements-includes-js/list-http-dt-js.html" %}
+<!-- Copy to clipboard text area controller -->
+{% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
+
 {% endblock custom_scripts %}
