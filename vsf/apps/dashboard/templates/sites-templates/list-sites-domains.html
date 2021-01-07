@@ -1,0 +1,268 @@
+<!--
+  ========================================
+  MAIN LISTING PAGES
+  ========================================
+-->
+
+{% extends 'extends/base.html' %}
+
+{% load static %}
+{% with home='dashboard:home' %}
+{% block tab_title %} VSF - Domains {% endblock tab_title %}
+{% block title %} Domains {% endblock title %}
+{% block sub_title %} List of all available domains and their corresponding sites. You can also create sites from here {% endblock sub_title %}
+{% block route %}
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:site:list_domains' %}">Home</a>
+</li>
+<li class="breadcrumb-item active">Domains</li>
+{% endblock route %}
+
+{% block content %}
+<form id="sitesForm">
+  <nav class="navbar navbar-light bg-light">
+    <div class="input-group mb-3">
+      <input
+        id="site-search-input"
+        type="search"
+        class="form-control"
+        placeholder="Search"
+        aria-label="Search"
+        aria-describedby="button-domain-search"
+        value="{{ domain_substr }}"
+      />
+      <div class="input-group-append">
+        <button
+          class="btn btn-outline-success"
+          type="submit"
+          id="button-domain-search"
+        >
+          Search
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <table class="table table-striped mt-5">
+    <thead>
+      <tr>
+        <th scope="col">Associate</th>
+        <th scope="col">Domain</th>
+        <th scope="col">Site</th>
+        <th scope="col">Measurements Quantity</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for domain in domains %}
+      <tr>
+        <td>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input
+                name="associated-values"
+                type="checkbox"
+                value="checkedValue"
+                aria-label="Group of associated domains"
+                id="{{ domain.id }}"
+                class="associate-page"
+                data-vsf-domain="{{ domain.domain }}"
+              />
+            </label>
+          </div>
+        </td>
+        <td>
+          <a
+            class="text-info"
+            href="{% url 'dashboard:measurement:list_measurements'%}?input={{ domain.domain }}"
+          >
+            {{ domain.domain }}
+          </a>
+        </td>
+        <td>
+          {% if domain.site_id != -1 %}
+          <a
+            class="text-info"
+            href="{% url 'dashboard:sites:site_details' id=domain.site_id %}"
+          >
+            {{ domain.site_name }}</a
+          >
+          {% else %}
+          <a class="text-info" href="#"> {{ domain.site_name }}</a>
+          {% endif %}
+        </td>
+        <td>{{ domain.measurement_count }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td class="text-center" colspan="4">
+          <div class="alert alert-danger" role="alert">No domains to show!</div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="form-group row mt-5 mb-3">
+    <div class="col-6 d-flex justify-content-end align-items-center">
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#associateUrl"
+      >
+        Create Site
+      </button>
+    </div>
+    <div class="col-6 d-flex justify-content-start align-items-center">
+      <button
+        type="button"
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#submitConfirmationModal"
+      >
+        Add to Site
+      </button>
+    </div>
+  </div>
+
+  <nav
+    class="d-flex justify-content-center align-items-center"
+    aria-label="Pagination Sites"
+  >
+    <ul class="pagination mt-5 justify-content-center">
+      {% if domains_paginator.has_previous %}
+      <li class="page-item">
+        <button id="page-one" class="page-link">&laquo; First</button>
+      </li>
+      <li class="page-item">
+        <button id="page-previous" class="page-link">Previous</button>
+      </li>
+      {% endif %}
+
+      <li class="page-item">
+        <a class="page-link" href="#">
+          Page {{ domains_paginator.number }} of {{ domains_paginator.paginator.num_pages }}
+        </a>
+      </li>
+
+      {% if domains_paginator.has_next %}
+      <li class="page-item">
+        <button id="page-next" class="page-link">Next</button>
+      </li>
+      <li class="page-item">
+        <button id="page-last" class="page-link">last &raquo;</button>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+</form>
+
+{% include "includes/sites-includes/create-sites-modal.html" with site_creation_form=site_creation_form %}
+{% include "includes/sites-includes/submit-sites-modal.html" %}
+{% endblock content %}
+
+{% block custom_scripts %}
+<script>
+  $("#submitConfirmationModal").on("show.bs.modal", function ( event ) {
+    $("#associateUrl").modal("hide");
+  });
+</script>
+
+<script>
+  'use strict';
+
+  let urlSearch = '{% url "dashboard:site:list_domains" %}?';
+  let site = "";
+  let data = {};
+
+   /*
+  ========================================
+  INIT THE DATA OBJECT WITH THE CURRENT PAGE AND THE CURRENT
+  INPUT FIELD
+  ========================================
+  */
+  data.page = '{ {domains_paginator.index }}'
+  data.domain_substr = $("#site-search-input").val();
+
+  $("#sitesForm").on("submit", function ( event ) {
+    event.preventDefault();
+
+    /*
+    ========================================
+    GET THE domain_substr VALUE
+    ========================================
+    */
+    site = $("#site-search-input").val();
+
+    /*
+    ========================================
+    DON'T RELOAD IF ITS VALUE IS THE SAME AS BEFORE
+    ========================================
+    */
+    if ( site == data.domain_substr )
+      return;
+
+    /*
+    ========================================
+    IF UNDEFINED OR NONE FOR SOME REASON, SET TO EMPTY STRING
+    ========================================
+    */
+    if ( !site )
+      site = ""
+
+    data.domain_substr = site
+    data.page=1
+
+    /*
+    ========================================
+    RELOAD PAGE
+    ========================================
+    */
+    window.location.href = urlSearch + $.param(data);
+  });
+
+  $("#page-one").on("click", function ( event ) {
+    event.preventDefault();
+
+    data.page = 1;
+
+    let url = urlSearch + $.param(data);
+
+    window.location.href = url;
+  });
+
+  $("#page-previous").on("click", function ( event ) {
+    event.preventDefault();
+
+    data.page = "{% if domains_paginator.has_previous %}{{ domains_paginator.previous_page_number }}{% else %}1{% endif %}";
+
+    let url = urlSearch + $.param(data);
+
+    window.location.href = url;
+  });
+
+  $("#page-next").on("click", function (event) {
+    event.preventDefault();
+
+    data.page = "{% if domains_paginator.has_next %}{{ domains_paginator.next_page_number }}{% else %}{{domains_paginator.paginator.num_pages }} {% endif %}";
+
+    let url = urlSearch + $.param(data);
+
+    window.location.href = url;
+  });
+
+  $("#page-last").on("click", function ( event ) {
+    event.preventDefault();
+
+    data.page = "{{ domains_paginator.paginator.num_pages }}";
+
+    let url = urlSearch + $.param(data);
+
+    window.location.href = url;
+  });
+</script>
+
+{% include "includes/js/sites-includes-js/create-sites-modal-js.html" %}
+{% include "includes/js/sites-includes-js/submit-sites-modal-js.html" %}
+{% endblock custom_scripts %}
+{% endwith %}
