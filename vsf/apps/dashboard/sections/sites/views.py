@@ -109,10 +109,10 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
         """
             This function expects the request to have 2 arguments:
             site: A string with the site id to be related to a set of urls
-            urls: an array of string, each representing the id of a single
-            url
+            domains: an array of id, each representing the id of a single
+            domain
 
-            Every url given by the request will be associated to the given page
+            Every domain given by the request will be associated to the given site
             if it exists.
 
             This view could return an error in the following cases:
@@ -124,16 +124,16 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
                 error: null | Error,     # If something went wrong, An object describing the error, null otherwise
             }
             Error: {
-                type: 'invalid_site' | 'url_already_added_to_a_site',
-                url: null | String          # The url string that's inducing some error
+                type: 'invalid_site' | 'domain_already_added_to_a_site',
+                domain: null | id          # The domain string that's inducing some error
             }
         """
         post = dict(request.POST)
         site = post.get('site')
-        urls = post.get('urls[]')
+        domains = post.get('domains[]')
 
         # Check the consistensy of the request
-        if urls == None or site == None:
+        if domains == None or site == None:
             return HttpResponseBadRequest()
 
         # Query dict returns a list of string, we're concerned just with one site
@@ -141,34 +141,35 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
 
         # Check that the ids are all integers
         try:
-            urls = map(lambda urlid : int(urlid), urls)
+            domains = map(lambda urlid : int(urlid), domains)
         except:
             return HttpResponseBadRequest()
 
         # Try to get the element
         try:
-            dbSite = Site.objects.get(id=site)
+            db_site = Site.objects.get(id=site)
         except Site.DoesNotExist:
             return JsonResponse(
-                {'error':
-                        { 'type': 'unvalid_site', 'url' : None }
-                })
+                    {'error':
+                            { 'type': 'unvalid_site', 'url' : None }
+                    }
+                )
 
         # Try to add this site for every url in the given url list
-        dbUrls = URL.objects.all().filter(id__in=urls)
+        db_domains = Domain.objects.all().filter(id__in=domains)
 
-        # Check the urls first
-        for url in dbUrls:
-            if url.site != None:
+        # Check the domains first
+        for domain in db_domains:
+            if domain.site != None:
                 return JsonResponse({
                     'error' :
-                        {'type': 'url_already_added_to_a_site', 'url':url.url }
+                        {'type': 'domain_already_added_to_a_site', 'domain': domain.domain_name }
                 })
 
         # Add the site to each url:
-        for url in dbUrls:
-            url.site = dbSite
-            url.save()
+        for domain in db_domains:
+            domain.site = db_site
+            domain.save()
 
         return JsonResponse({'error' : None})
 
@@ -179,6 +180,7 @@ class SiteDetailView(VSFLoginRequiredMixin, VSFListPaginate):
 
         Expected GET arguments:
             id = id of the site whose details are to be retrieved
+            error = None | id_not_provided | invalid_id
     """
     template_name = "sites-templates/site-details.html"
 
@@ -187,26 +189,36 @@ class SiteDetailView(VSFLoginRequiredMixin, VSFListPaginate):
 
         id = kwargs.get('id')
 
+        # Declare error strings
+        ID_NOT_PROVIDED_ERROR = "id_not_provided"
+        INVALID_ID = "invalid_id"
+
+        if id is None:
+            context['error'] = ID_NOT_PROVIDED_ERROR
+            return context
+
         # Check consistency, if the id is not provided or if it's not an int,
         # return a bad request
         try:
             id = int(id)
         except:
+            context['error'] = INVALID_ID
             return context
 
         # Check if the provided site exists
         try:
             site = Site.objects.get(id=id)
         except:
+            context['error'] = INVALID_ID
             return context
 
         # Now that we have the site, find the urls related to this site
-        urls = URL.objects.filter(site=site)
+        urls = Domain.objects.filter(site=site).order_by("domain_name")
 
         # Paginate the urls
         current_page = self._paginate(urls)
 
         # Return the current page and the site in the context
         context['site'] = site
-        context['urls'] = current_page
+        context['domains'] = current_page
         return context

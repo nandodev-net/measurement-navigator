@@ -20,7 +20,7 @@
     // GET EVERY SELECTED URL
     let pages = $('[class="associate-page"]:checked')
       .toArray()
-      .map( ( checkBox ) => ( { url: checkBox.dataset.vsfurl, id: checkBox.id } ) );
+      .map( ( checkBox ) => ( { url: checkBox.dataset.vsfDomain, id: checkBox.id } ) );
 
     // GET THE MODAL TABLE
     let $table = $("#vsf-grouped-sites");
@@ -81,8 +81,8 @@
 
     // DATA TO SEND WITH AJAX
     let data = {
-      urls               : pagesIds,
-      site               : site,
+      domains               : pagesIds,
+      site                  : site,
       csrfmiddlewaretoken: "{{ csrf_token }}"
     };
 

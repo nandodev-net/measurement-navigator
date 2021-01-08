@@ -130,7 +130,7 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             'raw_measurement__measurement_start_time',
             'raw_measurement__probe_asn',
             'raw_measurement__probe_cc',
-            'site_name',
+            'domain__site__name',
             'anomaly'
         ]
 
@@ -140,12 +140,15 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             'raw_measurement__measurement_start_time',
             'raw_measurement__probe_asn',
             'raw_measurement__probe_cc',
-            'site_name',
+            'domain__site__name',
             'anomaly'
         ]
 
     def get_initial_queryset(self):
-        return MeasurementXRawMeasurementXSite()
+        return MeasModels.Measurement.objects.all()\
+                                        .select_related('raw_measurement')\
+                                        .select_related('domain')\
+                                        .select_related('domain__site')\
 
     def filter_queryset(self, qs):
         # Get request params
@@ -190,8 +193,8 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'raw_measurement__input':item.raw_measurement.input,
                 'raw_measurement__test_name':item.raw_measurement.test_name,
                 'id' : item.id,
-                'site' : item.site,
-                'site_name' : item.site_name or "(no site)",
+                'site' : item.domain.site.id if item.domain and item.domain.site else -1,
+                'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
                 'anomaly' : item.anomaly
             })
         return json_data
@@ -227,7 +230,6 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
             context['error'] = 'id_not_provided'
             return context
 
-        # Raise 404 if id cannot be found or if such id is an invalid one
         try:
             measurement = MeasModels.Measurement.objects.get(id=id)
         except:
