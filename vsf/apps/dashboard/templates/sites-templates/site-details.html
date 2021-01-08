@@ -9,7 +9,7 @@
 
 {% with home='dashboard:home' %}
 
-{% block tab_title %} VSF - Domains {% endblock tab_title %}
+{% block tab_title %} VSF - Sites {% endblock tab_title %}
 {% block title %} {{ site.name }} {% endblock title %}
 {% block sub_title %} {{ site.description }} {% endblock sub_title %}
 
@@ -41,26 +41,26 @@
         <table class="table table-striped mt-5">
           <thead>
             <tr>
-              <th scope="col">URL</th>
+              <th scope="col">Domain</th>
               <th scope="col">Remove from site</th>
             </tr>
           </thead>
           <tbody>
-            {% for url in urls %}
+            {% for domain in domains %}
             <tr>
               <td>
                 <a
-                  href="{% url 'dashboard:measurement:list_measurements'%}?input={{ url.url }}"
+                  href="{% url 'dashboard:measurement:list_measurements'%}?input={{ domain.domain_name }}"
                   title="Measurements for this url"
                 >
-                  {{ url.url }}
+                  {{ domain.domain_name }}
                 </a>
               </td>
               <td>
                 <button
                   type="button"
                   class="btn btn-danger delete-site"
-                  id="{{ url.url }}"
+                  id="{{ domain.domain_name }}"
                 >Remove
               </button>
               </td>

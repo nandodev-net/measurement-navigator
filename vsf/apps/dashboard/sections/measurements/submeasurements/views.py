@@ -133,21 +133,12 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         # select dns.id from submeasurements_dns dns join measurements_measurement ms on dns.measurement_id=ms.id join measurements_rawmeasurement rms on ms.raw_measurement_id=rms.id join (select url, sites.name as site_name from sites_url urls left join sites_site sites on urls.site_id=sites.id) as urls on input=urls.url order by rms.measurement_start_time limit 10;
         # Time for this query to end: 189.96 seconds
         # time for the raw version: 1.89 seconds
-        import time
-
-        urls = URL\
-                .objects\
-                .all()\
-                .select_related('site')\
-                .filter( url=OuterRef('measurement__raw_measurement__input') )
 
         qs   = SubMeasModels.DNS.objects.all()\
                 .select_related('measurement')\
                 .select_related('measurement__raw_measurement')\
-                .annotate(
-                        site=Subquery(urls.values('site')),
-                        site_name=Subquery(urls.values('site__name')),
-                    )
+                .select_related('measurement__domain')\
+                .select_related('measurement__domain__site')\
 
         return qs
 
@@ -179,7 +170,7 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         if consistency:
             qs = qs.filter(dns_consistency__contains=consistency)
         if site:
-            qs = qs.filter(site=site)
+            qs = qs.filter(measurement__domain__site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
 
@@ -196,8 +187,8 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
                 'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
                 'measurement__id' : item.measurement.id,
-                'site' : item.site,
-                'site_name' : item.site_name if item.site_name else "(no site)",
+                'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
+                'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
                 'jsons__answers' : item.jsons.answers,
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
@@ -247,7 +238,6 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
         since = get.get("since")
         prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
 
-
         until = get.get("until")
         if until:
             prefill['until'] = until
@@ -290,23 +280,6 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
         context['last_measurement_date'] = last_measurement_date
         return context
 
-def query():
-    urls = URL\
-            .objects\
-            .all()\
-            .select_related('site')\
-            .filter( url=OuterRef('measurement__raw_measurement__input') )
-
-    qs   = SubMeasModels.DNS.objects.all()\
-            .select_related('measurement', 'flag')\
-            .select_related('measurement__raw_measurement')\
-            .annotate(
-                    site=Subquery(urls.values('site')),
-                    site_name=Subquery(urls.values('site__name')),
-                    client_resolver=RawSQL("measurements_rawmeasurement.test_keys->'client_resolver'", ())
-                ).order_by('measurement__raw_measurement__input')[:10j]
-    return qs
-
 class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
     """
         This is the back end for the HTTP submeasurement table. The dynamic
@@ -342,19 +315,12 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
 
 
     def get_initial_queryset(self):
-        urls = URL\
-                .objects\
-                .all()\
-                .select_related('site')\
-                .filter( url=OuterRef('measurement__raw_measurement__input') )
-
         qs   = SubMeasModels.HTTP.objects.all()\
                 .select_related('measurement','flag')\
                 .select_related('measurement__raw_measurement')\
-                .annotate(
-                        site=Subquery(urls.values('site')),
-                        site_name=Subquery(urls.values('site__name'))
-                    )
+                .select_related('measurement__domain')\
+                .select_related('measurement__domain__site')
+                
         return qs
 
     def filter_queryset(self, qs):
@@ -362,7 +328,6 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         get = self.request.GET or {}
 
         # Get filter data
-
         input       = get.get('input')
         since       = get.get('since')
         ASN         = get.get('asn')
@@ -398,7 +363,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         if until:
             qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
         if site:
-            qs = qs.filter(site=site)
+            qs = qs.filter(measurement__domain__site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
         if status_code_match:
@@ -427,8 +392,8 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
                 'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
                 'measurement__id' : item.measurement.id,
-                'site' : item.site,
-                'site_name' : item.site_name if item.site_name else "(no site)",
+                'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
+                'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
                 'flag__flag'           : item.flag.flag if item.flag else "no flag",
                 'status_code_match' : item.status_code_match,
@@ -550,19 +515,12 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         ]
 
     def get_initial_queryset(self):
-        urls = URL\
-                .objects\
-                .all()\
-                .select_related('site')\
-                .filter( url=OuterRef('measurement__raw_measurement__input') )
-
         qs   = SubMeasModels.TCP.objects.all()\
                 .select_related('measurement', 'flag')\
                 .select_related('measurement__raw_measurement')\
-                .annotate(
-                        site=Subquery(urls.values('site')),
-                        site_name=Subquery(urls.values('site__name'))
-                    )
+                .select_related('measurement__domain')\
+                .select_related('measurement__domain__site')
+                
         return qs
 
     def filter_queryset(self, qs):
@@ -594,7 +552,7 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         if until:
             qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
         if site:
-            qs = qs.filter(site=site)
+            qs = qs.filter(measurement__domain__site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
         if status_blocked:
@@ -621,8 +579,8 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
                 'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
                 'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
                 'measurement__id' : item.measurement.id,
-                'site' : item.site,
-                'site_name' : item.site_name if item.site_name else "(no site)",
+                'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
+                'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
                 'flag__flag'           : item.flag.flag if item.flag else "no flag",
                 'status_blocked' : item.status_blocked,
