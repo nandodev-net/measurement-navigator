@@ -9,6 +9,7 @@ from django.core.cache      import cache
 # Third party imports
 from celery.worker.request  import Request
 from celery.app.task        import Task
+from urllib.parse           import urlparse
 
 # Local imports
 from apps.main.measurements.models  import Measurement, RawMeasurement
@@ -34,6 +35,20 @@ def MeasurementXRawMeasurementXSite() -> QuerySet:
 
     return qs
 
+# --- URL helpers --- #
+
+def get_domain(url : str) -> str:
+    """
+    Summary: Get the domain dame from an URL. For example:
+        >>> get_domain("https://www.google.com/some_search")
+        'www.google.com'
+
+    params:
+        url : str = URL whose domain we want
+    return:
+        str = Domain corresponding to provided url
+    """
+    return urlparse(url).netloc
 
 # --- Process management --- # 
 
@@ -103,3 +118,18 @@ class VSFTask(Task):
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
         cache.set(self.vsf_name, ProcessState.IDLE)
         return super().after_return(status, retval, task_id, args, kwargs, einfo)
+
+# --- MISC --- #
+class COLORS:
+    """
+        This is an enum describing a few ascii scape colors,
+        very useful for printing messages into the terminal
+    """
+    RESET   = '\u001b[0m'
+    RED     = '\u001b[31m'
+    GREEN   = '\u001b[32m'
+    YELLOW  = '\u001b[33m' 
+    BLUE    = '\u001b[34m'
+    MAGENTA = '\u001b[35m'
+    CYAN    = '\u001b[36m'
+    WHITE   = '\u001b[37m'

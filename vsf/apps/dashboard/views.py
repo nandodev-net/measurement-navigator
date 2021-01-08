@@ -24,7 +24,7 @@ class VSFListPaginate(TemplateView):
             + page = page index to retrieve
             + page_size = number of items per page
     """
-    def _paginate(self, querySet : QuerySet ) -> Page:
+    def _paginate(self, query_set : QuerySet ) -> Page:
         get = self.request.GET or {}
 
         page = get.get('page')
@@ -41,7 +41,7 @@ class VSFListPaginate(TemplateView):
             raise AttributeError('"page_size" GET request argument is not a valid number. Given: ', page_size)
 
 
-        return Paginator(querySet, page_size).get_page(page)
+        return Paginator(query_set, page_size).get_page(page)
 
 
 
