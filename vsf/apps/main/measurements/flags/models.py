@@ -9,6 +9,7 @@ from django.utils                   import timezone
 import uuid
 
 # Application imports
+from apps.main.events.models import Event
 
 class Flag(models.Model):
     """
@@ -27,22 +28,46 @@ class Flag(models.Model):
         SOFT 	     = "soft"   # The measurement has some problem
         HARD         = "hard"   # this measurement is grouped with other measurements as they have a common problem
         MUTED		 = "muted"  # ignore this measurement
+        MANUAL       = "manual" # The measurement has set as it has a possible problem
 
     
     uuid = models.UUIDField(
-        default=uuid.uuid4, unique=True, editable=False, db_index=True
+        default=uuid.uuid4, 
+        unique=True, 
+        editable=False, 
+        db_index=True
     )
     
     # Flag type
     flag = models.CharField(
-        max_length=10, null=False, choices=FlagType.choices, default=FlagType.OK
+        max_length=10, 
+        null=False, 
+        choices=FlagType.choices, 
+        default=FlagType.OK
+    )
+
+    event = models.ForeignKey(
+        to=Event, 
+        null=True,
+        blank=True, 
+        on_delete=models.SET_NULL
+    )
+
+    confirmed = models.BooleanField(
+        default = False,
+        verbose_name = 'confirmed?'
     )
  
     # Date when this flag was created
-    creation_date = models.DateTimeField(editable=False, auto_now_add=True)
+    creation_date = models.DateTimeField(
+        editable=False, 
+        auto_now_add=True
+        )
 
     # Update date:
-    update_date = models.DateTimeField(auto_now=True)
+    update_date = models.DateTimeField(
+        auto_now=True
+        )
 
 
     def __str__(self):

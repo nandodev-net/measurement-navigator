@@ -34,12 +34,13 @@ class SubMeasurement(models.Model):
         # We import this here so we can avoid circular imports
         from .utils import check_submeasurement   
         
-        should_flag = check_submeasurement(self)
-        flag_type = Flag.FlagType.SOFT if should_flag else Flag.FlagType.OK
-        try:
-            self.flag = Flag.objects.create(flag=flag_type)
-        except:
-            pass
+        if self.pk is None:
+            should_flag = check_submeasurement(self)
+            flag_type = Flag.FlagType.SOFT if should_flag else Flag.FlagType.OK
+            try:
+                self.flag = Flag.objects.create(flag=flag_type)
+            except:
+                pass
 
         return super().save(force_insert, force_update, using, update_fields)
 
