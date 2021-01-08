@@ -25,13 +25,10 @@ def MeasurementXRawMeasurementXSite() -> QuerySet:
         qs[0].site == foreign key to a site if it exist, None otherwise
     """
 
-    urls = URL.objects.all().select_related('site').filter(url=OuterRef('raw_measurement__input'))
     qs   = Measurement.objects.all()\
                 .select_related('raw_measurement')\
-                .annotate(
-                        site=Subquery(urls.values('site')),
-                        site_name=Subquery(urls.values('site__name'))
-                    )
+                .select_related('domain')\
+                .select_related('domain__site')\
 
     return qs
 
