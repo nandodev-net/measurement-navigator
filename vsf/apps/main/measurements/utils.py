@@ -76,7 +76,7 @@ def search_measurement_by_queryset(
     measurements.site = None
     if site != None and site != "":
         try:
-            measurements = measurements.filter(site=site)
+            measurements = measurements.filter(domain__site=site)
         except FieldError:
             pass
 
