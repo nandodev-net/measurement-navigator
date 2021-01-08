@@ -1,11 +1,13 @@
 #Django imports
 from django.views.generic           import TemplateView
+from django.http                    import HttpResponseBadRequest, JsonResponse
+from requests.models                import CONTENT_CHUNK_SIZE
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 from apps.dashboard.views           import VSFListPaginate
 # Local imports
-from apps.main.sites.forms                      import SiteForm
-from apps.main.sites.models                     import URL, Site
+from apps.main.sites.forms          import SiteForm
+from apps.main.sites.models         import Domain, URL, Site
 
 
 # --- SITES VIEWS --- #
@@ -36,19 +38,25 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
         This view Will handle listing and linking between sites
         and urls.
         This view can handle the following arguments for GET requests:
-            url_substr : str = a string that should be contained by
+            domain_substr : str = a string that should be contained by
                                 an url name string
 
             page : int = Page index to show
 
             page_size : int = number of entries per page
+
+            error : str = 
+                | None if everthing went ok
+                | missing_arg
     """
-    template_name = "sites-templates/list-sites-urls.html"
+    template_name = "sites-templates/list-sites-domains.html"
 
     def get_context_data(self, **kwargs):
-        # Return a list of all available urls, a form for creating
-        # a new linking between a site and a set of urls, and
+        # Return a list of all available domains, a form for creating
+        # a new linking between a site and a set of domains, and
         # a list of sites to link with
+
+        MISSING_ARG_ERROR = "missing_args"
 
         # Get current context
         context = super().get_context_data()
@@ -57,31 +65,28 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
         get = self.request.GET or {}
 
         # Get search parameters
-        url_substr = get.get('url_substr', "")
+        domain_substr = get.get('domain_substr', "")
 
         # Ask for the urls with their site, or put None if they have no site
-        urls = URL.objects.select_related("site")
-        if url_substr != None and url_substr != "":
-            urls = urls.filter(url__contains=url_substr)
-
-        urls.order_by('url')
+        domains = Domain.objects.select_related("site").order_by('domain_name')
+        if domain_substr:
+            domains = domains.filter(domain_name__contains=domain_substr)
 
         # Apply pagination:
         try:
-            current_page = self._paginate(urls)
+            current_page = self._paginate(domains)
         except AttributeError:
-            return HttpResponseBadRequest()
+            context['error'] = MISSING_ARG_ERROR
+            return context
 
         # Get all url objects
-        urls = [ {  'url'              : url.url,
-                    'id'               : url.id,
-                    'site_name'        : url.site.name if url.site != None else "(No site)" ,
-                    'site_id'          : url.site.id   if url.site != None else -1,
-                    'measurement_count':
-                        len(url.reports['reports']) if url.reports.get('reports') != None else 0
-                } for url in current_page ]
+        domains = [ {'domain'          : domain.domain_name,
+                    'id'               : domain.id,
+                    'site_name'        : domain.site.name if domain.site != None else "(No site)" ,
+                    'site_id'          : domain.site.id   if domain.site != None else -1,
+                } for domain in current_page ]
 
-        urls.sort(key=lambda u: u['url'])
+        domains.sort(key=lambda u: u['domain'])
 
         # Generate the site form
         siteForm = SiteForm()
@@ -90,12 +95,13 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
         sites = Site.objects.all().order_by('name')
 
         # Return the context
-        context['urls']                 = urls
+        context['domains']              = domains
         context['site_creation_form']   = siteForm
         context['sites']                = sites
-        context['urls_paginator']       = current_page
+        context['domains_paginator']    = current_page
         context['search_params']        = get
-        context['url_substr']           = url_substr
+        context['domain_substr']        = domain_substr
+        context['error']                = None
 
         return context
 

@@ -47,3 +47,21 @@ class URL(models.Model):
     # This json contains a list with the references to the reports related to this url
     # The format for this json should be { "references" : [FastPath.tid] }
     fp_references = JSONField(default=dict)
+
+class Domain(models.Model):
+    """
+    A domain is used to group multiple measurements to its corresponding 
+    domain.
+
+    For example, if we got the following url:
+        https://www.google.com/some_search
+
+        It's domain_name value will be:
+            www.google.com
+    """
+    domain_name = models.TextField(unique=True)
+    site = models.ForeignKey(
+        to=Site,
+        null=True,
+        on_delete=models.SET_NULL
+    )
