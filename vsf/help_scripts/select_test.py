@@ -42,4 +42,7 @@ for SM in submeasurements:
 
             print(elapsed_time)
             print(result)
+
+            merge(result)
+
             

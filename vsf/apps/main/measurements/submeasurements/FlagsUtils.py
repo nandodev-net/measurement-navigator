@@ -12,11 +12,13 @@ from datetime import datetime, time, timedelta
 # Local imports
 from .models                                import DNS, TCP, HTTP, SubMeasurement
 from apps.main.measurements.flags.models    import Flag
+from apps.main.events.models                import Event
 from apps.configs.models                    import Config
 from apps.main.measurements.models          import Measurement, RawMeasurement
 
 
 from time import time
+from datetime import datetime
 
 
 def count_flags_sql():
@@ -305,3 +307,43 @@ def select( measurements : List[SubMeasurement],
         
 
     return result
+
+
+def sug_event_creator(classname):
+    if classname == 'DNS':
+        issue_type = Event.IssueType.DNS
+    if classname == 'HTTP':
+        issue_type = Event.IssueType.HTTP
+    if classname == 'TCP':
+        issue_type = Event.IssueType.TCP
+
+    new_event = Event.objects.create(
+        identification = classname + ' ISSUE AT '+ datetime.now().strftime('%Y-%m-%d %H:%M'),
+        issue_type = issue_type
+    )
+    return new_event
+
+
+def merge(select_groups):
+
+    if select_groups:
+        for group in select_groups:
+            new_sug_event = sug_event_creator(str(group[0][0].__class__.__name__).upper())
+            new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
+            print('HardFlag creada: ', new_hard_flag.id)
+            for submeas in group:
+                print('Submedicion: ', submeas.id)
+                print('DeadFlag: ', submeas.flag.id)
+                dead_flag = Flag.objects.get(id=submeas.flag.id)
+                if dead_flag.flag == 'soft':
+                    dead_flag.delete()
+                submeas.flag=new_hard_flag
+                print('HardFlag asignada: ', submeas.flag.id)
+                submeas.save()
+
+
+                print(submeas.id,' ',submeas.flag.id,' ',submeas.flag)
+
+
+
+
