@@ -47,9 +47,8 @@ celery_queue = Queue(
 #   Register queues
 app.conf.task_queues = (celery_queue, transient_queue)
 
-# ---------------------------------------- #
 
-
+# --------- Celery Beat config: Set up periodic tasks --------- #
 app.conf.beat_schedule = {
     # fp update to search for new recent measurements in the fast path
     'update-fastpath':{
