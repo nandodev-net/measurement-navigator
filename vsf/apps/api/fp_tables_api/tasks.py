@@ -25,7 +25,7 @@ def fp_update(since : str = None, until : str = None, only_fastpath : bool = Fal
     name = API_TASKS.UPDATE_FASTPATH
     # Idempotency
     state = cache.get(name)
-    if state == ProcessState.RUNNING:
+    if state == ProcessState.RUNNING or state == ProcessState.STARTING:
         return
 
     # This task actually ran 
@@ -66,8 +66,10 @@ def measurement_update():
     name = API_TASKS.RECOVER_MEASUREMENTS
     status = cache.get(name)
 
-    if status == ProcessState.RUNNING:
+    if status == ProcessState.RUNNING or status == ProcessState.STARTING:
         return
+
+    self.ran = True
 
     cache.set(name, ProcessState.RUNNING)
 

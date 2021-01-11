@@ -20,9 +20,9 @@ def SoftFlagMeasurements(since : str = None, until : str = None, limit : int = 5
 
     name = SUBMEASUREMENTS_TASKS.SOFT_FLAGS
     state = cache.get(name)
-    if state == ProcessState.RUNNING:
+    if state == ProcessState.RUNNING or state == ProcessState.STARTING:
         return
-
+    self.ran = True
     cache.set(name, ProcessState.RUNNING)
 
     result = {'error' : None}
@@ -36,9 +36,10 @@ def SoftFlagMeasurements(since : str = None, until : str = None, limit : int = 5
 @shared_task(time_limit=3600, vsf_name=SUBMEASUREMENTS_TASKS.COUNT_FLAGS, base=VSFTask)
 def count_flags_submeasurements():
     state = cache.get(SUBMEASUREMENTS_TASKS.COUNT_FLAGS)
-    if state == ProcessState.RUNNING:
+    if state == ProcessState.RUNNING or state == ProcessState.STARTING:
         return
 
+    self.ran = True
     cache.set(SUBMEASUREMENTS_TASKS.COUNT_FLAGS, ProcessState.RUNNING)
     result = {'error' : None}
     try: 
