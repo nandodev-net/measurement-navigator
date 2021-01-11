@@ -27,6 +27,10 @@ def fp_update(since : str = None, until : str = None, only_fastpath : bool = Fal
     state = cache.get(name)
     if state == ProcessState.RUNNING:
         return
+
+    # This task actually ran 
+    self.ran = True
+
     date_format = "%Y-%m-%d"
     # note that we use "now" as tomorrow, because the request truncates 
     # the "time" part of the datetime, so the ooni query will search

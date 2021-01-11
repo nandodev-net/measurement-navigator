@@ -15,23 +15,6 @@ from urllib.parse           import urlparse
 from apps.main.measurements.models  import Measurement, RawMeasurement
 from apps.main.sites.models         import Site, URL
 
-def MeasurementXRawMeasurementXSite() -> QuerySet:
-    """
-        Join measurement with raw measurement and its corresponding site.
-        The site member it's available with the 'site' name.
-
-        example:
-        qs = MeasurementXRawMeasurementXSite()
-        qs[0].site == foreign key to a site if it exist, None otherwise
-    """
-
-    qs   = Measurement.objects.all()\
-                .select_related('raw_measurement')\
-                .select_related('domain')\
-                .select_related('domain__site')\
-
-    return qs
-
 # --- URL helpers --- #
 
 def get_domain(url : str) -> str:
@@ -67,10 +50,12 @@ class VSFRequest(Request):
         crashes, gets tle etc.
 
         For now, the custom behavior is to setup a cached variable defining the process state,
-        defined by the ProcessState enum
+        defined by the ProcessState enum.
+
+        Note that this class is coupled with VSFTask Class, they should be used together.
     """
     def on_timeout(self, soft, timeout):
-        name = self.task_name() 
+        name = self.task.vsf_name
 
         # If for some reason this task's name is not registered, register it
         if cache.get(name) is None:
@@ -86,8 +71,7 @@ class VSFRequest(Request):
         return super().on_timeout(soft, timeout)
 
     def on_failure(self, exc_info, send_failed_event, return_ok):
-        name = self.task_name() 
-
+        name = self.task.vsf_name
         # If for some reason this task's name is not registered, register it
         if cache.get(name) is None:
             cache.set(name, ProcessState.RUNNING)
@@ -98,11 +82,11 @@ class VSFRequest(Request):
         return super().on_failure(exc_info, send_failed_event=send_failed_event, return_ok=return_ok)
 
     def on_accepted(self, pid, time_accepted):
-        cache.set(self.task_name, ProcessState.STARTING)
+        cache.set(self.task.vsf_name, ProcessState.STARTING)
         return super().on_accepted(pid, time_accepted)
 
     def on_success(self, failed__retval__runtime, **kwargs):
-        cache.set(self.task_name, ProcessState.IDLE)
+        cache.set(self.task.vsf_name, ProcessState.IDLE)
         return super().on_success(failed__retval__runtime, **kwargs)
 
 class VSFTask(Task):
@@ -111,15 +95,20 @@ class VSFTask(Task):
         cache so we can query if it is running at any time
     """
     Request = VSFRequest
+    # Id for us to do status checking
+    vsf_name = ""
+    # If the process actually ran or just realized that it was already running
+    ran = False
 
     def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        cache.set(self.vsf_name, ProcessState.IDLE)
+        if self.ran:
+            cache.set(self.vsf_name, ProcessState.IDLE)
         return super().after_return(status, retval, task_id, args, kwargs, einfo)
 
 # --- MISC --- #
-class COLORS:
+class Colors:
     """
-        This is an enum describing a few ascii scape colors,
+        This is a class for printing colored strings,
         very useful for printing messages into the terminal
     """
     RESET   = '\u001b[0m'
@@ -130,3 +119,106 @@ class COLORS:
     MAGENTA = '\u001b[35m'
     CYAN    = '\u001b[36m'
     WHITE   = '\u001b[37m'
+
+    @staticmethod
+    def color(string : str, color : str) -> str:
+        """
+            Summary:
+                Color the string 'string' with color 'color' (which is defined in this class)
+            Params:
+                string : str = string to return colored
+                color  : str = Color of the output string, defined by one of the color fields of Colors class
+            Return:
+                A colored string
+        """
+        return f"{color}{string}{Colors.RESET}"
+    
+    @staticmethod
+    def red(string : str) -> str:
+        """
+            Summary:
+                Return a red-colored version of string 'string'
+            Params:
+                string : str = string to color
+            Return:
+                str = colored string
+        """
+        return Colors.color(string, Colors.RED)
+    
+    @staticmethod
+    def green(string : str) -> str:
+        """
+            Summary:
+                Return a green-colored version of string 'string'
+            Params:
+                string : str = string to color
+            Return:
+                str = colored string
+        """
+        return Colors.color(string, Colors.GREEN)
+
+    @staticmethod
+    def yellow(string : str) -> str:
+        """
+            Summary:
+                Return a yellow-colored version of string 'string'
+            Params:
+                string : str = string to color
+            Return:
+                str = colored string
+        """
+        return Colors.color(string, Colors.YELLOW)
+
+    @staticmethod
+    def blue(string : str) -> str:
+        """
+            Summary:
+                Return a blue-colored version of string 'string'
+            Params:
+                string : str = string to color
+            Return:
+                str = colored string
+        """
+        return Colors.color(string, Colors.BLUE)
+
+    @staticmethod
+    def magenta(string : str) -> str:
+        """
+            Summary:
+                Return a magenta-colored version of string 'string'
+            Params:
+                string : str = string to color
+            Return:
+                str = colored string
+        """
+        return Colors.color(string, Colors.MAGENTA)
+
+    @staticmethod
+    def cyan(string : str) -> str:
+        """
+            Summary:
+                Return a cyan-colored version of string 'string'
+            Params:
+                string : str = string to color
+            Return:
+                str = colored string
+        """
+        return Colors.color(string, Colors.CYAN)
+
+    @staticmethod
+    def white(string : str) -> str:
+        """
+            Summary:
+                Return a white-colored version of string 'string'
+            Params:
+                string : str = string to color
+            Return:
+                str = colored string
+        """
+        return Colors.color(string, Colors.WHITE)
+    
+    
+    
+    
+    
+    
