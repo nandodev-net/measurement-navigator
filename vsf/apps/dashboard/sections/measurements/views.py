@@ -9,7 +9,6 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 from typing                                     import List
 from datetime                                   import datetime, timedelta
 #Utils import
-from vsf.utils                                  import MeasurementXRawMeasurementXSite
 from apps.main.measurements.utils               import search_measurement_by_queryset, search_measurement
 #Local imports
 from apps.main.sites.models                     import Site
