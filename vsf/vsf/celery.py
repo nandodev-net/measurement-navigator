@@ -25,9 +25,7 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 #   Priorities:
 USER_TASK_PRIORITY = 6
 DEFAULT_PRIORITY   = 5
-TASK_MAX_PRIORITY       = 10
-app.conf.task_queue_max_priority = TASK_MAX_PRIORITY
-app.conf.task_default_priority   = DEFAULT_PRIORITY
+TASK_MAX_PRIORITY  = 10
 
 #   Transient queue: Used for non-persistent tasks (almost every task)
 transient_queue_name    = 'transient'
@@ -62,7 +60,6 @@ celery_routing_key = 'celery'
 celery_queue = Queue(
                         celery_queue_name, 
                         routing_key=celery_routing_key,
-                        queue_arguments={'x-max-priority': TASK_MAX_PRIORITY}
                     )
 
 #   Register queues
