@@ -43,6 +43,7 @@ class ProcessState:
     FAILED  = "failed"  # last time the process ran, it failed
     UNKNOWN = "unknown"
 
+# Im about to deprecate this and only rely in VSFTask an its callbacks
 class VSFRequest(Request):
     """
         This kind of request allows us to customize the process behavior. 
@@ -94,16 +95,21 @@ class VSFTask(Task):
         Every task inheriting this class will report itself to 
         cache so we can query if it is running at any time
     """
-    Request = VSFRequest
+    # Request = VSFRequest
     # Id for us to do status checking
     vsf_name = ""
     # If the process actually ran or just realized that it was already running
     ran = False
 
-    def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        if self.ran:
-            cache.set(self.vsf_name, ProcessState.IDLE)
-        return super().after_return(status, retval, task_id, args, kwargs, einfo)
+    def on_success(self, retval, task_id, args, kwargs):
+        # Set this process as idle
+        cache.set(self.vsf_name, ProcessState.IDLE)
+        return super().on_success(retval, task_id, args, kwargs)
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        # Set this process as a failure
+        cache.set(self.vsf_name, ProcessState.FAILED)
+        return super().on_failure(exc, task_id, args, kwargs, einfo)
 
 # --- MISC --- #
 class Colors:
