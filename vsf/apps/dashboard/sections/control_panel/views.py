@@ -10,6 +10,7 @@ from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 # Local imports
 from vsf.vsf_tasks                  import fp_update, measurement_update, count_flags_submeasurements, SoftFlagMeasurements
 from vsf.utils                      import ProcessState
+from vsf.celery                     import transient_queue_name, USER_TASK_PRIORITY
 
 class ControlPanel(VSFLoginRequiredMixin, TemplateView):
     """
@@ -135,16 +136,22 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
             only_fastpath = req.get('only_fastpath') is not None
 
             # run task
-            fp_update.apply_async(kwargs = {'until' : until, 'since' : since, 'only_fastpath' : only_fastpath})
+            fp_update.apply_async(
+                                kwargs = {  'until' : until, 
+                                            'since' : since, 
+                                            'only_fastpath' : only_fastpath
+                                        }, 
+                                queue=transient_queue_name, 
+                                priority=USER_TASK_PRIORITY)
             return JsonResponse ( {"result" : OK} )
         # Measurement recovery
         elif control == ControlPanel.CONTROL_TYPES.MEASUREMENT_RECOVERY:
             # Just run task
-            measurement_update.apply_async()            
+            measurement_update.apply_async( queue=transient_queue_name, priority=USER_TASK_PRIORITY)            
             return JsonResponse( {"result" : OK} )
         # Count flags
         elif control == ControlPanel.CONTROL_TYPES.COUNT_FLAGS:
-            count_flags_submeasurements.apply_async()
+            count_flags_submeasurements.apply_async( queue=transient_queue_name, priority=USER_TASK_PRIORITY )
             return JsonResponse( {"result" : OK} )    
 
         # Soft flag
@@ -165,7 +172,9 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
                             'limit' : limit, 
                             'page_size' : page_size, 
                             'absolute' : absolute
-                        }
+                        },
+                    queue=transient_queue_name,
+                    priority=USER_TASK_PRIORITY
                 )
             return JsonResponse( {"result" : OK} )
 
