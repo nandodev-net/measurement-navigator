@@ -22,14 +22,14 @@ def fp_update(since : str = None, until : str = None, only_fastpath : bool = Fal
         from  yesterday until the currently running day.
     """
 
+    ret = { 'ran' : False } # Required by VSFTask base task class
     name = API_TASKS.UPDATE_FASTPATH
     # Idempotency
     state = cache.get(name)
     if state == ProcessState.RUNNING or state == ProcessState.STARTING:
-        return
+        return ret
 
     # This task actually ran 
-    self.ran = True
 
     date_format = "%Y-%m-%d"
     # note that we use "now" as tomorrow, because the request truncates 
@@ -49,10 +49,15 @@ def fp_update(since : str = None, until : str = None, only_fastpath : bool = Fal
         since = datetime.strftime(since, date_format)
     
     try: 
-        request_fp_data(since, until, only_fastpath)
+        ret['output'] = request_fp_data(since, until, only_fastpath)
         cache.set(name, ProcessState.IDLE)
     except Exception as e:
-        cache.set(name, ProcessState.FAILED + " : " + str(e) + f". Args: {since}, {until}")
+        cache.set(name, ProcessState.FAILED)
+        ret['error'] = str(e)
+
+    ret['ran'] = True
+    return ret
+    
     
     
 @shared_task(time_limit=2000, vsf_name=API_TASKS.RECOVER_MEASUREMENTS, base=VSFTask)
@@ -65,22 +70,25 @@ def measurement_update():
     """
     name = API_TASKS.RECOVER_MEASUREMENTS
     status = cache.get(name)
+    result = {'error' : None, 'ran' : False}
 
+    # Check if should run
     if status == ProcessState.RUNNING or status == ProcessState.STARTING:
-        return
+        return result
 
-    self.ran = True
-
+    # Set running state properly
     cache.set(name, ProcessState.RUNNING)
 
-    result = {'error' : None}
     try:
         result['output'] = update_measurement_table(200)
         cache.set(name, ProcessState.IDLE)
 
     except Exception as e:
-        result['error'] = e
-        
+        cache.set(name, ProcessState.FAILED)
+        result['error'] = str(e)
+
+    # This task actually ran    
+    result['ran'] = True
 
     return  result 
 
