@@ -296,7 +296,7 @@
                 data-parent="#sidenavMenu"
               >
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url 'dashboard:sites:list_domains' %}">  Domain List </a>
+                  <a class="nav-link" href="{% url 'dashboard:sites:list_domains' %}">  Domains </a>
                   <a class="nav-link" href="{% url 'dashboard:site:list_sites' %}">
                     Sites
                   </a>
@@ -304,6 +304,7 @@
               </div>
             </li>
 
+            <!-- Measurements -->
             <li id="headingMeasurements" class="nav-item w-100">
               <a
                 class="nav-link collapsed"
@@ -328,10 +329,40 @@
                 data-parent="#sidenavMenu"
               >
                 <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url 'dashboard:measurement:list_measurements' %}"> Measurement List </a>
-                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_dns' %}"> DNS List </a>
-                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_http' %}"> HTTP List </a>
-                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_tcp' %}"> TCP List </a>
+                  <a class="nav-link" href="{% url 'dashboard:measurement:list_measurements' %}"> Measurements </a>
+                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_dns' %}"> DNS </a>
+                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_http' %}"> HTTP </a>
+                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_tcp' %}"> TCP </a>
+                </nav>
+              </div>
+            </li>
+
+            <!-- Control panel -->
+            <li id="headingControlPanel" class="nav-item w-100">
+              <a
+                class="nav-link collapsed"
+                href="#"
+                data-toggle="collapse"
+                data-target="#collapseControlPanel"
+                aria-expanded="false"
+                aria-controls="collapseControlPanel"
+              >
+                <div class="sb-nav-link-icon">
+                  <i class="fas fa-toolbox"></i>
+                </div>
+                Control Panel
+                <div class="sb-sidenav-collapse-arrow">
+                  <i class="fas fa-angle-down"></i>
+                </div>
+              </a>
+              <div
+                class="collapse"
+                id="collapseControlPanel"
+                aria-labelledby="headingControlPanel"
+                data-parent="#sidenavMenu"
+              >
+                <nav class="sb-sidenav-menu-nested nav">
+                  <a class="nav-link" href="{% url 'dashboard:control_panel:controls' %}">  Controls </a>
                 </nav>
               </div>
             </li>
