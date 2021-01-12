@@ -97,7 +97,10 @@ class VSFTask(Task):
         Note that every VSFTask should return a dict object, 
         and the only mandatory field is "ran", a boolean field
         telling if the function actually ran or just closed on received.
-        If not provided or return is not a dict, ran = False will be assumed
+        If not provided or return is not a dict, ran = False will be assumed.
+        An 'error' field is also required to check execution correctness. 
+        A value of error = None is assumed as correct execution, otherwise 
+        is a failed execution
     """
     # Request = VSFRequest
     # Id for us to do status checking
@@ -111,10 +114,16 @@ class VSFTask(Task):
         except:
             ran = False
 
+        try:
+            execution_ok = retval.get("error") is None
+        except:
+            execution_ok = True
+
         name = self.vsf_name
 
         if ran:
-            cache.set(name, ProcessState.IDLE)
+            state = ProcessState.IDLE if execution_ok else ProcessState.FAILED
+            cache.set(name, state)
             
         return super().on_success(retval, task_id, args, kwargs)
 
