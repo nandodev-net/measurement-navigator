@@ -39,7 +39,8 @@ transient_exchange      = Exchange(transient_exchange_name, delivery_mode=1) # D
 transient_queue = Queue(    transient_queue_name, 
                             transient_exchange, 
                             routing_key=transient_routing_key, 
-                            durable=False
+                            durable=False,
+                            queue_arguments={'x-max-priority': TASK_MAX_PRIORITY}
                         )
 
 #   Transient user queue: Used for non-persistent user-requested tasks, they have higher priority than
@@ -50,7 +51,8 @@ user_transient_routing_key   = 'user_transient'
 user_transient_queue = Queue(   user_transient_queue_name,
                                 transient_exchange,
                                 routing_key=user_transient_routing_key,
-                                durable=False
+                                durable=False,
+                                queue_arguments={'x-max-priority': TASK_MAX_PRIORITY}
                             )
 
 #   Default queue: Celery queue
@@ -59,7 +61,8 @@ celery_routing_key = 'celery'
 
 celery_queue = Queue(
                         celery_queue_name, 
-                        routing_key=celery_routing_key
+                        routing_key=celery_routing_key,
+                        queue_arguments={'x-max-priority': TASK_MAX_PRIORITY}
                     )
 
 #   Register queues
