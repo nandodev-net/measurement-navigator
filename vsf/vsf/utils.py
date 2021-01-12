@@ -93,17 +93,29 @@ class VSFRequest(Request):
 class VSFTask(Task):
     """
         Every task inheriting this class will report itself to 
-        cache so we can query if it is running at any time
+        cache so we can query if it is running at any time.
+        Note that every VSFTask should return a dict object, 
+        and the only mandatory field is "ran", a boolean field
+        telling if the function actually ran or just closed on received.
+        If not provided or return is not a dict, ran = False will be assumed
     """
     # Request = VSFRequest
     # Id for us to do status checking
     vsf_name = ""
-    # If the process actually ran or just realized that it was already running
-    ran = False
 
     def on_success(self, retval, task_id, args, kwargs):
         # Set this process as idle
-        cache.set(self.vsf_name, ProcessState.IDLE)
+        try:
+            ran = retval.get("ran")
+            assert ran != None
+        except:
+            ran = False
+
+        name = self.vsf_name
+
+        if ran:
+            cache.set(name, ProcessState.IDLE)
+            
         return super().on_success(retval, task_id, args, kwargs)
 
     def on_failure(self, exc, task_id, args, kwargs, einfo):
