@@ -2,6 +2,7 @@ from apps.main.measurements.submeasurements.FlagsUtils import *
 
 
 submeasurements = [DNS, TCP, HTTP]
+counting = {}
 
 # Iterate over the submeasurements types:
 for SM in submeasurements:
@@ -35,6 +36,7 @@ for SM in submeasurements:
         
         groups = Grouper(meas, lambda m: m.group_id)
 
+
         for group in groups:
             start_time = time()
             result = select(group)
@@ -42,7 +44,15 @@ for SM in submeasurements:
 
             print(elapsed_time)
             print(result)
+            if result:
+                for submess in result:
+                    for submes in submess:
+                        if submes in counting:
+                            counting[submes]+=1
+                        else:
+                            counting[submes] =1
 
-            merge(result)
+print(counting)
+            #merge(result)
 
             

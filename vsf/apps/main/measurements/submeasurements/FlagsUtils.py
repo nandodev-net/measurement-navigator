@@ -304,7 +304,6 @@ def select( measurements : List[SubMeasurement],
                                 min(last_index + interval_size - 1, n_meas-1))
             n_anomalies = anomaly_count(last_index, max_in_date)
         result.append(current_block)
-        
 
     return result
 
@@ -328,18 +327,32 @@ def merge(select_groups):
 
     if select_groups:
         for group in select_groups:
-            new_sug_event = sug_event_creator(str(group[0][0].__class__.__name__).upper())
-            new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
+            new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
+            new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD)
             print('HardFlag creada: ', new_hard_flag.id)
-            for submeas in group:
-                print('Submedicion: ', submeas.id)
-                print('DeadFlag: ', submeas.flag.id)
-                dead_flag = Flag.objects.get(id=submeas.flag.id)
-                if dead_flag.flag == 'soft':
-                    dead_flag.delete()
-                submeas.flag=new_hard_flag
-                print('HardFlag asignada: ', submeas.flag.id)
-                submeas.save()
+
+            if group[0].flag.flag == 'soft'and group[1].flag.flag == 'soft':
+
+                for submeas in group:
+                    print('Submedicion: ', submeas.id)
+                    print('DeadFlag: ', submeas.flag.id)
+                    dead_flag = Flag.objects.get(id=submeas.flag.id)
+                    if dead_flag.flag == 'soft':
+                        dead_flag.delete()
+                    submeas.flag=new_hard_flag
+                    print('HardFlag asignada: ', submeas.flag.id)
+                    submeas.save()
+
+            elif group[0].flag.flag == 'hard' and group[1].flag.flag == 'hard':
+                
+                for submeas in group:
+                    print('Submedicion Hf: ', submeas.id)
+                    print('DeadFlag Hf: ', submeas.flag.id)
+                    Event.objects.get(id=submeas.flag.event.id).delete()
+                    Flag.objects.get(id=submeas.flag.id).delete()
+                    submeas.flag=new_hard_flag
+                    print('HardFlag asignada Hf: ', submeas.flag.id)
+                    submeas.save()
 
 
                 print(submeas.id,' ',submeas.flag.id,' ',submeas.flag)
