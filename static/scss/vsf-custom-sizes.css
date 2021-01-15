@@ -1,3 +1,9 @@
+/*
+=====================================
+THIS IS THE SCSS FILE FOR CUSTOM RULES THAT
+FIXES SOME SIZES ON THE TEMPLATE
+=====================================
+*/
 .pt-fix {
   padding-top: 56px;
 }
