@@ -1,6 +1,7 @@
 #Django imports
 from django.http.response import Http404
 from django.views.generic           import TemplateView
+from apps.main import measurements
 from apps.main.measurements import submeasurements
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -8,6 +9,7 @@ from vsf.views                      import VSFLoginRequiredMixin
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from typing                                     import List
 from datetime                                   import datetime, timedelta
+import json
 #Utils import
 from apps.main.measurements.utils               import search_measurement_by_queryset, search_measurement
 #Local imports
@@ -245,6 +247,9 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
         context['submeasurements'] = {}
         for (Model, label) in models:
             context['submeasurements'][label] = Model.objects.filter(measurement=measurement)
+
+        #Test-keys in json string format
+        context['test_keys_string'] = json.dumps(measurement.raw_measurement.test_keys)
 
         # Return the context
         context['measurement'] = measurement
