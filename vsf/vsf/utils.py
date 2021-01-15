@@ -43,7 +43,6 @@ class ProcessState:
     FAILED  = "failed"  # last time the process ran, it failed
     UNKNOWN = "unknown"
 
-# Im about to deprecate this and only rely in VSFTask an its callbacks
 class VSFRequest(Request):
     """
         This kind of request allows us to customize the process behavior. 
@@ -82,13 +81,6 @@ class VSFRequest(Request):
 
         return super().on_failure(exc_info, send_failed_event=send_failed_event, return_ok=return_ok)
 
-    def on_accepted(self, pid, time_accepted):
-        cache.set(self.task.vsf_name, ProcessState.STARTING)
-        return super().on_accepted(pid, time_accepted)
-
-    def on_success(self, failed__retval__runtime, **kwargs):
-        cache.set(self.task.vsf_name, ProcessState.IDLE)
-        return super().on_success(failed__retval__runtime, **kwargs)
 
 class VSFTask(Task):
     """
@@ -102,7 +94,7 @@ class VSFTask(Task):
         A value of error = None is assumed as correct execution, otherwise 
         is a failed execution
     """
-    # Request = VSFRequest
+    Request = VSFRequest
     # Id for us to do status checking
     vsf_name = ""
 
