@@ -2,13 +2,15 @@
   $(document).ready(function () {
     "use strict";
 
+    let id;
+
     let oTable = $(".datatable").DataTable({
       order: [[1, "desc"]],
       columns: [
         /*
-            =====================================
-            ROW DESCRIPTIONS
-            =====================================
+        =====================================
+        ROW DESCRIPTIONS
+        =====================================
         */
         {
           data: "measurement__raw_measurement__input",
@@ -88,17 +90,17 @@
       dom: "Blrtip",
       ajax: {
         /*
-                =====================================
-                CONFIGURATION FOR THE AJAX REQUEST TO THE SERVER
-                =====================================
-                */
+        =====================================
+        CONFIGURATION FOR THE AJAX REQUEST TO THE SERVER
+        =====================================
+        */
         url: '{% url "dashboard:submeasurement:list_http_data" %}',
         data: function (data) {
           /*
-                        =====================================
-                        ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
-                        =====================================
-                    */
+          =====================================
+          ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
+          =====================================
+          */
 
           let site = $("#site").val();
           let since = $("#since").val();
@@ -151,10 +153,10 @@
           text: "Get Measurement Data",
           action: function (e, dt, node, config) {
             /*
-                    =====================================
-                    THIS FUNCTION IS CALLED WHENEVER THE 'GET MEASUREMENT DATA' BUTTON IS TRIGGERED
-                    =====================================
-                    */
+            =====================================
+            THIS FUNCTION IS CALLED WHENEVER THE 'GET MEASUREMENT DATA' BUTTON IS TRIGGERED
+            =====================================
+            */
             let data = dt.rows({ selected: true }).data();
 
             if (data.length === 0) {
@@ -168,7 +170,7 @@
               return;
             }
 
-            let id = data[0].measurement__id;
+            id = data[0].measurement__id;
 
             $.ajax({
               type: "GET",

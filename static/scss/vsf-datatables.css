@@ -1,3 +1,12 @@
+@charset "UTF-8";
+/*
+=====================================
+THIS IS SCSS FILE THAT APPLIES SOME CUSTOMIZATIONS
+TO THE DATATABLE´S VIEW
+
+`!DEFAULT` ALLOWS OVERRIDING VARIABLES THAT ARE DEFINED BEFORE @IMPORT
+=====================================
+*/
 /*
  * Table styles
  */

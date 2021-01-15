@@ -1,6 +1,8 @@
-/**************************************
- * THIS IS THE MAIN FILE FOR SCSS RULES
- **************************************/
+/*
+=====================================
+THIS IS THE MAIN FILE FOR SCSS RULES
+=====================================
+*/
 
 @import "customized-template-base.scss";
 
@@ -9,3 +11,5 @@
 @import "vsf-utilities.scss";
 
 @import "vsf-datatables.scss";
+
+@import "vsf-loader.scss";
