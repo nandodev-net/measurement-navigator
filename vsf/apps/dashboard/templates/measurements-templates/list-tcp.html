@@ -138,6 +138,26 @@
           </div>
         </div>
 
+        <!-- Flag -->
+        <div class="col-3 mt-3">
+          <div class="input-group mr-2">
+              <div class="input-group-prepend">
+                <label class="input-group-text" for="test-name">Flag Type</label>
+              </div>
+              <select id="flag" class="custom-select additional-filter" name="flag">
+                <option selected value="">Any</option>
+                {% for flag in flags %}
+                <option
+                {% if prefill.flag == flag.value %} selected {% endif %}
+                value="{{ flag.value }}"
+                >
+                {{ flag.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
         <!-- Status Blocked -->
         <div class="col-4 mt-3">
           <div class="input-group mr-2">

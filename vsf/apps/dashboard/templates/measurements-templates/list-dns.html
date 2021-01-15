@@ -39,6 +39,8 @@
     <form id="urlForm">
     <div class="container-fluid">
       <div class="row">
+
+        <!-- Since -->
         <div class="col-3">
           <div class="input-group">
             <div class="input-group-prepend">
@@ -54,6 +56,7 @@
           </div>
         </div>
 
+        <!-- Until -->
         <div class="col-3">
           <div class="input-group">
             <div class="input-group-prepend">
@@ -69,6 +72,7 @@
           </div>
         </div>
 
+        <!-- ASN -->
         <div class="col-6">
           <div class="input-group mr-2">
             <div class="input-group-prepend">
@@ -87,6 +91,7 @@
           </div>
         </div>
 
+        <!-- Consistency -->
         <div class="col-3 mt-3">
           <div class="input-group mr-2">
             <input
@@ -101,6 +106,7 @@
           </div>
         </div>
 
+        <!-- Anomaly -->
         <div class="col-3 mt-3">
           <div class="input-group mr-2">
             <div class="input-group-prepend">
@@ -120,6 +126,7 @@
           </div>
         </div>
 
+        <!-- Input -->
         <div class="col-3 mt-3">
           <input
             id="input"
@@ -132,6 +139,7 @@
           />
         </div>
 
+        <!-- Site -->
         <div class="col-3 mt-3">
           <div class="input-group mr-sm-2">
             <div class="input-group-prepend">
@@ -151,6 +159,27 @@
             </select>
           </div>
         </div>
+
+      <!-- Flag Type -->
+        <div class="col-3 mt-3">
+          <div class="input-group mr-2">
+              <div class="input-group-prepend">
+                <label class="input-group-text" for="test-name">Flag Type</label>
+              </div>
+              <select id="flag" class="custom-select additional-filter" name="flag">
+                <option selected value="">Any</option>
+                {% for flag in flags %}
+                <option
+                {% if prefill.flag == flag.value %} selected {% endif %}
+                value="{{ flag.value }}"
+                >
+                {{ flag.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
       </div>
     </div>
   </form>

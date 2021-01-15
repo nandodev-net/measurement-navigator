@@ -106,6 +106,7 @@
           let input = $("#input").val();
           let asn = $("#asn").val();
           let anomaly = $("#anomaly-state").val();
+          let flag    = $("#flag").val();
           let country = "";
           let status_blocked = $("#status-blocked").val();
           let status_failure = $("#status-failure").val();
@@ -123,6 +124,8 @@
           if (asn) data.asn = asn;
 
           if (anomaly) data.anomaly = anomaly;
+
+          if (flag) data.flag = flag;
 
           if (country) data.country = country;
 
