@@ -1,88 +1,82 @@
 <script>
-    /*
-
+  /*
         Summary: provides logic for copy-url component, replaces its value whenever you apply some change
         to search fields, copy to clipboard when clicking the corresponding button and shows an error-success
         message when needed
-        
+
         This js requires:
             + Every search field named the same as in the backend (name = backend name)
             + Every search field to be linked into the url must be part of the class "additional-filter"
-            + Template including this file should include also "copy-clipboard-search-url.html" somewhere            
+            + Template including this file should include also "copy-clipboard-search-url.html" somewhere
     */
-    $(document).ready(function(){
-      'use strict';
-  
-      // Set up copy search url
-      updateSearchUrl();
-  
-      // Whenever you change some field in search form, update search url
-      $('.additional-filter').change(updateSearchUrl);
-  
-      // When click in copy url btn, copy to clip board
-      $('#copy-search-url-btn').click(function (e){
-        e.preventDefault();
-        // Get the text element whose value is going to get copied into clipboard
-        let $textArea = $('#copy-search-url');
-  
-        const messageTimeToShow = 5000; // how long success-error messages will show up
-  
-        // Focus and select such field
-        $textArea.focus();
-        $textArea.select();
-  
-        // Status messages
-        let $successMessage = $('#copy-clipboard-success');
-        let $errorMessage = $('#copy-clipboard-error');
-  
-        // Try to copy into clipboard
-        try {
-          var success = document.execCommand('copy');
-  
-          // If everything ok, show a success message and 
-          // remove it after a few seconds
-          if (success) {
-            $successMessage.attr("hidden",false);
-            setTimeout(function (){
-              $successMessage.attr("hidden",true);
-            }, messageTimeToShow);
-          }
-          // If something went wrong, show an error message for a few seconds
-          else{
-            $errorMessage.attr("hidden", false);
-            setTimeout(function (){
-              $errorMessage.attr("hidden", true);
-            }, messageTimeToShow);
-          }
-  
-        } catch (err) {
-          alert("there was an error: " + err);
+  $(document).ready(function () {
+    "use strict";
+
+    // Set up copy search url
+    updateSearchUrl();
+
+    // Whenever you change some field in search form, update search url
+    $(".additional-filter").change(updateSearchUrl);
+
+    // When click in copy url btn, copy to clip board
+    $("#copy-search-url-btn").click(function (e) {
+      e.preventDefault();
+      // Get the text element whose value is going to get copied into clipboard
+      let $textArea = $("#copy-search-url");
+
+      const messageTimeToShow = 5000; // how long success-error messages will show up
+
+      // Focus and select such field
+      $textArea.focus();
+      $textArea.select();
+
+      // Status messages
+      let $successMessage = $("#copy-clipboard-success");
+      let $errorMessage = $("#copy-clipboard-error");
+
+      // Try to copy into clipboard
+      try {
+        var success = document.execCommand("copy");
+
+        // If everything ok, show a success message and
+        // remove it after a few seconds
+        if (success) {
+          $successMessage.attr("hidden", false);
+          setTimeout(function () {
+            $successMessage.attr("hidden", true);
+          }, messageTimeToShow);
         }
-  
-      })
-  
-  
-      // Callback function called on init or when some filter field changed:
-      function updateSearchUrl() {
-        // base url
-        let url = '{{request.build_absolute_uri}}?'
-        
-        // Get params by name and value
-        let params = {}
-        let $filters = $('.additional-filter');
-        for(var i = 0; i < $filters.length; i++) {
-          let filter = $filters[i];
-          // If they have no value, don't include them in resulting url
-          if (filter.value) 
-            params[filter.name] = filter.value;
+        // If something went wrong, show an error message for a few seconds
+        else {
+          $errorMessage.attr("hidden", false);
+          setTimeout(function () {
+            $errorMessage.attr("hidden", true);
+          }, messageTimeToShow);
         }
-  
-        // Serialize object into query string
-        let args = $.param(params);
-  
-        // Update field value
-        $('#copy-search-url').val(url + args);
+      } catch (err) {
+        alert("there was an error: " + err);
       }
-  
     });
+
+    // Callback function called on init or when some filter field changed:
+    function updateSearchUrl() {
+      // base url
+      let url = "{{request.build_absolute_uri}}?";
+
+      // Get params by name and value
+      let params = {};
+      let $filters = $(".additional-filter");
+      for (var i = 0; i < $filters.length; i++) {
+        let filter = $filters[i];
+        // If they have no value, don't include them in resulting url
+        if (filter.value) params[filter.name] = filter.value;
+      }
+
+      // Serialize object into query string
+      let args = $.param(params);
+
+      // Update field value
+      $("#copy-search-url").val(url + args);
+    }
+  });
 </script>

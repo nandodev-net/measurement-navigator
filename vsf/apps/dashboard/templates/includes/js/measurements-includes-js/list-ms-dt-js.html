@@ -2,6 +2,8 @@
   $(document).ready(function () {
     "use strict";
 
+    let id;
+
     let oTable = $(".datatable").DataTable({
       order: [[2, "desc"]],
       columns: [
@@ -138,7 +140,7 @@
               return;
             }
 
-            let id = data[0].id;
+            id = data[0].id;
 
             $.ajax({
               type: "GET",
