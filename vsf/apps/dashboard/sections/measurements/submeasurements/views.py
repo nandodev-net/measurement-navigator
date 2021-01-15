@@ -1,7 +1,9 @@
 #Django imports
+from django.http import request
 from django.views.generic           import TemplateView
 from django.db.models.expressions   import RawSQL
 from django.db.models               import OuterRef, Subquery
+from apps.main.measurements import flags
 
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -13,25 +15,21 @@ from apps.main.sites.models                     import URL, Site
 from apps.main.asns                             import models as AsnModels
 from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMeasModels
+from apps.main.measurements.flags               import models as FlagModels
 
-
-class ListDNSTemplate(VSFLoginRequiredMixin, TemplateView):
+class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
     """
-        This is the template view that renders the html with the dynamic table
+        Base class for submeasurement template listing, it wont work
+        if you dont provide a "Submeasurement" object
     """
-    template_name = "measurements-templates/list-dns.html"
-
+    SubMeasurement : SubMeasModels.SubMeasurement = None
     def get_context_data(self, **kwargs):
         # Return the site list so we can perform some
         # filtering based on the site
-
-        test_types = MeasModels.RawMeasurement.TestTypes.choices
-        test_types = list(map(lambda m: {'name':m[1], 'value':m[0]}, test_types))
         sites = Site.objects.all()
 
         # Get the most recent measurement:
-        last_measurement_date = SubMeasModels\
-                                .DNS\
+        last_measurement_date = self.SubMeasurement\
                                 .objects.all()\
                                 .order_by("-measurement__raw_measurement__measurement_start_time")\
                                 .values("measurement__raw_measurement__measurement_start_time")\
@@ -45,6 +43,11 @@ class ListDNSTemplate(VSFLoginRequiredMixin, TemplateView):
                                                 last_measurement_date["measurement__raw_measurement__measurement_start_time"],
                                                 "%Y-%m-%d %H:%M:%S"
                                             )
+
+        # Compute flag types
+        flag_types = []
+        for value, name in FlagModels.Flag.FlagType.choices:
+            flag_types.append({'name' : name, 'value':value})
 
         # Compute prefill 
         get = self.request.GET or {}
@@ -72,15 +75,37 @@ class ListDNSTemplate(VSFLoginRequiredMixin, TemplateView):
         if asn:
             prefill['asn'] = asn
 
-        consistency = get.get('consistency')
-        if consistency:
-            prefill['consistency'] = consistency
+        flag = get.get('flag')
+        if flag:
+            prefill['flag'] = flag
 
         context =  super().get_context_data()
-        context['test_types'] = test_types
+        context['flags'] = flag_types
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
         context['last_measurement_date'] = last_measurement_date
+        context['prefill'] = prefill
+
+        return context
+        
+
+class ListDNSTemplate(ListSubMeasurementTemplate):
+    """
+        This is the template view that renders the html with the dynamic table
+    """
+    template_name = "measurements-templates/list-dns.html"
+    SubMeasurement = SubMeasModels.DNS
+
+    def get_context_data(self, **kwargs):
+        context =  super().get_context_data()
+        prefill = context['prefill']
+        get = self.request.GET or {}
+
+        consistency = get.get('consistency')
+
+        if consistency:
+            prefill['consistency'] = consistency
+
         context['prefill'] = prefill
 
         return context
@@ -156,7 +181,7 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         anomaly     = get.get('anomaly')
         until       = get.get('until')
         site        = get.get('site')
-
+        flag        = get.get('flag') 
         if input:
             qs = qs.filter(measurement__raw_measurement__input__contains=input)
         if since:
@@ -173,6 +198,8 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
+        if flag:
+            qs = qs.filter(flag__flag=flag)
 
         return qs
 
@@ -198,61 +225,17 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             })
         return json_data
 
-class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
+class ListHTTPTemplate(ListSubMeasurementTemplate):
     """
         This is the front-end view for showing the HTTP submeasurement
         table. Note that this view is coupled to the ListDNSBackEnd view.
     """
     template_name = "measurements-templates/list-http.html"
-
+    SubMeasurement = SubMeasModels.HTTP
     def get_context_data(self, **kwargs):
-        # Return the site list so we can perform some
-        # filtering based on the site
-
-        sites = Site.objects.all()
-
-        # Get the most recent measurement:
-        last_measurement_date = SubMeasModels\
-                                .HTTP\
-                                .objects.all()\
-                                .order_by("-measurement__raw_measurement__measurement_start_time")\
-                                .values("measurement__raw_measurement__measurement_start_time")\
-                                .first()
-
-        #   If there is no measurements, result is going to be none, cover that case.
-        if last_measurement_date is None:
-            last_measurement_date = "No measurements yet"
-        else:
-            last_measurement_date = datetime.strftime(
-                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"],
-                                                "%Y-%m-%d %H:%M:%S"
-                                            )
-
-        # Compute prefill 
+        context =  super().get_context_data()
         get = self.request.GET or {}
-        prefill = {}
-        inpt = get.get("input")
-        if inpt:
-            prefill['input'] = inpt
-
-        since = get.get("since")
-        prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-
-        until = get.get("until")
-        if until:
-            prefill['until'] = until
-
-        site = get.get("site")
-        if site:
-            prefill['site'] = site
-
-        anomaly = get.get("anomaly")
-        if anomaly:
-            prefill['anomaly'] = anomaly
-
-        asn = get.get("asn")
-        if asn:
-            prefill['asn'] = asn
+        prefill = context['prefill']
 
         status_code_match = get.get("status_code_match")
         if status_code_match:
@@ -273,11 +256,7 @@ class ListHTTPTemplate(VSFLoginRequiredMixin, TemplateView):
         prefill['body_proportion_max'] = body_proportion_max or 1
 
 
-        context =  super().get_context_data()
         context['prefill'] = prefill
-        context['sites'] = sites
-        context['asns'] = AsnModels.ASN.objects.all()
-        context['last_measurement_date'] = last_measurement_date
         return context
 
 class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
@@ -335,6 +314,7 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         anomaly     = get.get('anomaly')
         until       = get.get('until')
         site        = get.get('site')
+        flag        = get.get('flag')
         body_proportion_min = get.get('body_proportion_min')
         body_proportion_max = get.get('body_proportion_max')
         status_code_match   = get.get('status_code_match')
@@ -366,6 +346,8 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
+        if flag:
+            qs = qs.filter(flag__flag=flag)
         if status_code_match:
             qs = qs.filter(status_code_match= status_code_match.lower() == 'true')
         if headers_match:
@@ -403,60 +385,18 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             })
         return json_data
 
-class ListTCPTemplate(VSFLoginRequiredMixin, TemplateView):
+class ListTCPTemplate(ListSubMeasurementTemplate):
     """
         This is the front-end view for showing the HTTP submeasurement
         table. Note that this view is coupled to the ListDNSBackEnd view.
     """
     template_name = "measurements-templates/list-tcp.html"
+    SubMeasurement = SubMeasModels.TCP
     def get_context_data(self, **kwargs):
-        # Return the site list so we can perform some
-        # filtering based on the site
-
-        sites = Site.objects.all()
-
-        # Get the most recent measurement:
-        last_measurement_date = SubMeasModels\
-                                .TCP\
-                                .objects.all()\
-                                .order_by("-measurement__raw_measurement__measurement_start_time")\
-                                .values("measurement__raw_measurement__measurement_start_time")\
-                                .first()
-
-        #   If there is no measurements, result is going to be none, cover that case.
-        if last_measurement_date is None:
-            last_measurement_date = "No measurements yet"
-        else:
-            last_measurement_date = datetime.strftime(
-                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"],
-                                                "%Y-%m-%d %H:%M:%S"
-                                            )
-
-        # Compute prefill 
+        
+        context =  super().get_context_data()
+        prefill = context['prefill']
         get = self.request.GET or {}
-        prefill = {}
-        inpt = get.get("input")
-        if inpt:
-            prefill['input'] = inpt
-
-        since = get.get("since")
-        prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-
-        until = get.get("until")
-        if until:
-            prefill['until'] = until
-
-        site = get.get("site")
-        if site:
-            prefill['site'] = site
-
-        anomaly = get.get("anomaly")
-        if anomaly:
-            prefill['anomaly'] = anomaly
-
-        asn = get.get("asn")
-        if asn:
-            prefill['asn'] = asn
         
         blocked = get.get('status_blocked')
         if blocked:
@@ -474,11 +414,11 @@ class ListTCPTemplate(VSFLoginRequiredMixin, TemplateView):
         if ip:
             prefill['ip'] = ip
         
-        context =  super().get_context_data()
+        flag = get.get('flag')
+        if flag:
+            prefill['flag'] = flag
+        
         context['prefill'] = prefill
-        context['sites'] = sites
-        context['asns'] = AsnModels.ASN.objects.all()
-        context['last_measurement_date'] = last_measurement_date
         return context
 
 class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
@@ -536,6 +476,7 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         anomaly     = get.get('anomaly')
         until       = get.get('until')
         site        = get.get('site')
+        flag        = get.get('flag')
         status_blocked = get.get('status_blocked')
         status_failure = get.get('status_failure')
         status_success = get.get('status_success')
@@ -555,6 +496,8 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
+        if flag:
+            qs = qs.filter(flag__flag= flag)
         if status_blocked:
             qs = qs.filter(status_blocked= status_blocked.lower() == 'true')
         if status_failure:
@@ -563,8 +506,6 @@ class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(status_success= status_success.lower() == 'true')
         if ip:
             qs = qs.filter(ip__contains=ip)
-
-
 
         return qs
 
