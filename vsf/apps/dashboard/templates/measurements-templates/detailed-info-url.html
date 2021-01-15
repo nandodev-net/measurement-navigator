@@ -219,6 +219,52 @@
 
 {% block custom_scripts %}
 <script>
+  console.log("{{ measurement.raw_measurement.test_keys }}");
+
+  $("#annotations-detailed").jsonViewer("{{ measurement.raw_measurement.annotations }}", {
+    collapsed: true,
+    rootCollapsable: false
+  });
+  $("#bucket-date-detailed").text("{{ measurement.raw_measurement.bucket_date }}");
+  $("#data-format-version-detailed").text(
+    "{{ measurement.raw_measurement.data_format_version }}"
+  );
+  $("#input-detailed").text("{{ measurement.raw_measurement.input }}");
+  $("#measurement-start-time-detailed").text(
+    "{{ measurement.raw_measurement.measurement_start_time }}"
+  );
+  $("#options-detailed").text("{{ measurement.raw_measurement.options }}");
+  $("#probe-asn-detailed").text("{{ measurement.raw_measurement.probe_asn }}");
+  $("#probe-cc-detailed").text("{{ measurement.raw_measurement.probe_cc }}");
+  $("#probe-ip-detailed").text("{{ measurement.raw_measurement.probe_ip }}");
+  $("#report-filename-detailed").text(
+    "{{ measurement.raw_measurement.report_filename }}"
+  );
+  $("#report-id-detailed").text("{{ measurement.raw_measurement.report_id }}");
+  $("#software-name-detailed").text(
+    "{{ measurement.raw_measurement.software_name }}"
+  );
+  $("#software-version-detailed").text(
+    "{{ measurement.raw_measurement.software_version }}"
+  );
+  $("#test-helpers-detailed").jsonViewer("{{ measurement.raw_measurement.bucket_date }}", {
+    collapsed: true,
+    rootCollapsable: false
+  });
+  $("#test-keys-detailed").jsonViewer("{{ measurement.raw_measurement.test_keys }}", {
+    collapsed: true,
+    rootCollapsable: false
+  });
+  $("#test-name-detailed").text("{{ measurement.raw_measurement.test_name }}");
+  $("#test-runtime-detailed").text(
+    "{{ measurement.raw_measurement.test_runtime }}"
+  );
+  $("#test-start-time-detailed").text(
+    "{{ measurement.raw_measurement.test_start_time }}"
+  );
+  $("#test-version-detailed").text(
+    "{{ measurement.raw_measurement.test_version }}"
+  );
 </script>
 {% endblock custom_scripts %}
 
