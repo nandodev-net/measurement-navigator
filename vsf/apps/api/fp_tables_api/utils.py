@@ -190,8 +190,8 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
             continue
 
 
-        data = req.json()
         try:
+            data = req.json()
             RawMeasurement.objects.create(
                 input=data['input'],
                 report_id= data['report_id'],

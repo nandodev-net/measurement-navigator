@@ -81,29 +81,48 @@ class VSFRequest(Request):
 
         return super().on_failure(exc_info, send_failed_event=send_failed_event, return_ok=return_ok)
 
-    def on_accepted(self, pid, time_accepted):
-        cache.set(self.task.vsf_name, ProcessState.STARTING)
-        return super().on_accepted(pid, time_accepted)
-
-    def on_success(self, failed__retval__runtime, **kwargs):
-        cache.set(self.task.vsf_name, ProcessState.IDLE)
-        return super().on_success(failed__retval__runtime, **kwargs)
 
 class VSFTask(Task):
     """
         Every task inheriting this class will report itself to 
-        cache so we can query if it is running at any time
+        cache so we can query if it is running at any time.
+        Note that every VSFTask should return a dict object, 
+        and the only mandatory field is "ran", a boolean field
+        telling if the function actually ran or just closed on received.
+        If not provided or return is not a dict, ran = False will be assumed.
+        An 'error' field is also required to check execution correctness. 
+        A value of error = None is assumed as correct execution, otherwise 
+        is a failed execution
     """
     Request = VSFRequest
     # Id for us to do status checking
     vsf_name = ""
-    # If the process actually ran or just realized that it was already running
-    ran = False
 
-    def after_return(self, status, retval, task_id, args, kwargs, einfo):
-        if self.ran:
-            cache.set(self.vsf_name, ProcessState.IDLE)
-        return super().after_return(status, retval, task_id, args, kwargs, einfo)
+    def on_success(self, retval, task_id, args, kwargs):
+        # Set this process as idle
+        try:
+            ran = retval.get("ran")
+            assert ran != None
+        except:
+            ran = False
+
+        try:
+            execution_ok = retval.get("error") is None
+        except:
+            execution_ok = True
+
+        name = self.vsf_name
+
+        if ran:
+            state = ProcessState.IDLE if execution_ok else ProcessState.FAILED
+            cache.set(name, state)
+            
+        return super().on_success(retval, task_id, args, kwargs)
+
+    def on_failure(self, exc, task_id, args, kwargs, einfo):
+        # Set this process as a failure
+        cache.set(self.vsf_name, ProcessState.FAILED)
+        return super().on_failure(exc, task_id, args, kwargs, einfo)
 
 # --- MISC --- #
 class Colors:

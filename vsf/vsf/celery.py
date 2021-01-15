@@ -22,6 +22,11 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 
 # --------- Create custom queues --------- #
+#   Priorities:
+USER_TASK_PRIORITY = 6
+DEFAULT_PRIORITY   = 5
+TASK_MAX_PRIORITY  = 10
+
 #   Transient queue: Used for non-persistent tasks (almost every task)
 transient_queue_name    = 'transient'
 transient_routing_key   = 'transient'
@@ -32,8 +37,21 @@ transient_exchange      = Exchange(transient_exchange_name, delivery_mode=1) # D
 transient_queue = Queue(    transient_queue_name, 
                             transient_exchange, 
                             routing_key=transient_routing_key, 
-                            durable=False
+                            durable=False,
+                            queue_arguments={'x-max-priority': TASK_MAX_PRIORITY}
                         )
+
+#   Transient user queue: Used for non-persistent user-requested tasks, they have higher priority than
+#   automated tasks  
+user_transient_queue_name    = 'user_transient'
+user_transient_routing_key   = 'user_transient'
+
+user_transient_queue = Queue(   user_transient_queue_name,
+                                transient_exchange,
+                                routing_key=user_transient_routing_key,
+                                durable=False,
+                                queue_arguments={'x-max-priority': TASK_MAX_PRIORITY}
+                            )
 
 #   Default queue: Celery queue
 celery_queue_name  = 'celery' # default one
@@ -41,11 +59,12 @@ celery_routing_key = 'celery'
 
 celery_queue = Queue(
                         celery_queue_name, 
-                        routing_key=celery_routing_key
+                        routing_key=celery_routing_key,
                     )
 
 #   Register queues
-app.conf.task_queues = (celery_queue, transient_queue)
+app.conf.task_queues = (transient_queue, user_transient_queue, celery_queue)
+
 
 
 # --------- Celery Beat config: Set up periodic tasks --------- #
