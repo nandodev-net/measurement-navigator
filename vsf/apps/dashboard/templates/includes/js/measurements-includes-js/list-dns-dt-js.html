@@ -8,9 +8,9 @@
       order: [[1, "desc"]],
       columns: [
         /*
-            =====================================
-            ROW DESCRIPTIONS
-            =====================================
+        =====================================
+        ROW DESCRIPTIONS
+        =====================================
         */
         {
           data: "measurement__raw_measurement__input",
@@ -96,17 +96,17 @@
       dom: "Blrtip",
       ajax: {
         /*
-            =====================================
-            CONFIGURATION FOR THE AJAX REQUEST TO THE SERVER
-            =====================================
-            */
+        =====================================
+        CONFIGURATION FOR THE AJAX REQUEST TO THE SERVER
+        =====================================
+        */
         url: '{% url "dashboard:submeasurement:list_dns_data" %}',
         data: function (data) {
           /*
-                =====================================
-                ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
-                =====================================
-            */
+          =====================================
+          ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
+          =====================================
+          */
 
           let site        = $("#site").val();
           let since       = $("#since").val();
@@ -140,26 +140,26 @@
       },
       initComplete: function () {
         /*
-            =====================================
-            THIS FUNCTION COLLECTS THE DATA IN THE ROWS INPUT FIELDS
-            WHENEVER ONE OF THEM CHANGES
-            =====================================
+        =====================================
+        THIS FUNCTION COLLECTS THE DATA IN THE ROWS INPUT FIELDS
+        WHENEVER ONE OF THEM CHANGES
+        =====================================
 
-            this.api()
-            .columns()
-            .every(function () {
+        this.api()
+        .columns()
+        .every(function () {
 
-                let that = this;
+            let that = this;
 
-                $(".filter-input", this.footer()).on("change clear", function () {
+            $(".filter-input", this.footer()).on("change clear", function () {
 
-                if ( that.search() !== this.value ) {
+            if ( that.search() !== this.value ) {
 
-                    that.search( this.value ).draw();
-                }
-                });
+                that.search( this.value ).draw();
+            }
             });
-            */
+        });
+        */
       },
       select: true,
       buttons: [
@@ -167,10 +167,10 @@
           text: "Get Measurement Data",
           action: function (e, dt, node, config) {
             /*
-                =====================================
-                THIS FUNCTION IS CALLED WHENEVER THE 'GET MEASUREMENT DATA' BUTTON IS TRIGGERED
-                =====================================
-                */
+            =====================================
+            THIS FUNCTION IS CALLED WHENEVER THE 'GET MEASUREMENT DATA' BUTTON IS TRIGGERED
+            =====================================
+            */
             let data = dt.rows({ selected: true }).data();
 
             if (data.length === 0) {
@@ -282,9 +282,9 @@
 
       console.log(url);
 
-      //let win = window.open(url, '_blank');
+      let win = window.open(url, '_blank');
 
-      //win.focus();
+      win.focus();
     });
   });
 </script>
