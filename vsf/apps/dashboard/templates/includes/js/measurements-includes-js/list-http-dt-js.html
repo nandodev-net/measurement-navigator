@@ -85,6 +85,9 @@
       ],
       searching: true,
       processing: true,
+      language: {
+        processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>'
+      },
       serverSide: true,
       rowId: "measurement__id",
       dom: "Blrtip",
@@ -271,6 +274,82 @@
       let win = window.open(url, '_blank');
 
       win.focus();
+    });
+
+    /*
+    =====================================
+    DISPLAY MODAL WITH DOUBLE CLICK
+    =====================================
+    */
+    $( '#my-table' ).on('dblclick', 'tbody tr', function() {
+
+      console.log('test');
+
+      id = $( this ).attr( 'id' );
+
+      $.ajax({
+        type: "GET",
+        url: '{% url "measurements:get_measurement" %}',
+        data: { id: id },
+        success: function (measurementData) {
+          console.log(measurementData);
+
+          $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#bucket-date-detailed").text(measurementData["bucket_date"]);
+          $("#data-format-version-detailed").text(
+            measurementData["data_format_version"]
+          );
+          $("#input-detailed").text(measurementData["input"]);
+          $("#measurement-start-time-detailed").text(
+            measurementData["measurement_start_time"]
+          );
+          $("#options-detailed").text(measurementData["options"]);
+          $("#probe-asn-detailed").text(measurementData["probe_asn"]);
+          $("#probe-cc-detailed").text(measurementData["probe_cc"]);
+          $("#probe-ip-detailed").text(measurementData["probe_ip"]);
+          $("#report-filename-detailed").text(
+            measurementData["report_filename"]
+          );
+          $("#report-id-detailed").text(measurementData["report_id"]);
+          $("#software-name-detailed").text(
+            measurementData["software_name"]
+          );
+          $("#software-version-detailed").text(
+            measurementData["software_version"]
+          );
+          $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#test-name-detailed").text(measurementData["test_name"]);
+          $("#test-runtime-detailed").text(
+            measurementData["test_runtime"]
+          );
+          $("#test-start-time-detailed").text(
+            measurementData["test_start_time"]
+          );
+          $("#test-version-detailed").text(
+            measurementData["test_version"]
+          );
+
+          $("#modalMeasurementInfo").modal("show");
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          Swal.fire({
+            icon: "warning",
+            title: "There is an error in the inputs!",
+            confirmButtonColor: "#28a745",
+            confirmButtonText: "Continue",
+          });
+        },
+      });
     });
   });
 </script>
