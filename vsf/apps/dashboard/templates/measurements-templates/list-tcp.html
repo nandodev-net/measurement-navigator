@@ -78,9 +78,9 @@
             <select id="asn" class="custom-select additional-filter" name="asn">
               <option selected value="">Any</option>
               {% for asn in asns %}
-                <option 
+                <option
                 {% if asn.asn == prefill.asn %} selected {% endif %}
-                value="{{ asn.asn }}" 
+                value="{{ asn.asn }}"
                 >
                 {{ asn.asn }} - {{ asn.name }}
                 </option>
@@ -100,7 +100,7 @@
               <option selected value="">Any</option>
               <option {% if prefill.anomaly == 'false' %} selected {% endif %}
               value="false">Anomaly False</option>
-              <option {% if prefill.anomaly == 'true'  %} selected {% endif %}              
+              <option {% if prefill.anomaly == 'true'  %} selected {% endif %}
               value="true">Anomaly True</option>
             </select>
           </div>
@@ -126,8 +126,8 @@
             <select class="custom-select additional-filter" id="site" name="site">
               <option selected value="">Any Site</option>
               {% for site in sites %}
-              <option 
-              value="{{ site.id }}" 
+              <option
+              value="{{ site.id }}"
               title="{{ site.description }}"
               {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}
               >
