@@ -5,30 +5,41 @@
   include, it should be included in the same template as this one
 -->
 
-<div class="col-12 mt-3">
-    <div class="input-group">
-      <div class="input-group-prepend">
-        <p class="input-group-text">Search Url</p>
-      </div>
-      <input
+<div class="w-100 gutter-padding mt-3">
+  <div class="input-group">
+    <div class="input-group-prepend">
+      <p class="input-group-text">Search Url</p>
+    </div>
+    <input
       class="form-control"
       type="text"
       name="copy-search-url"
       id="copy-search-url"
-      readonly value="asdadasd"
-      >
-      <div class="input-group-append">
-        <a id="copy-search-url-btn" href="#" class="btn btn-info"><i class="fas fa-copy"></i></a>
-      </div>
+      readonly
+      value="asdadasd"
+    />
+    <div class="input-group-append">
+      <a id="copy-search-url-btn" href="#" class="btn btn-info"
+        ><i class="fas fa-copy"></i
+      ></a>
     </div>
   </div>
+</div>
 
-  <div class="col-12 container mt-3 rounded alert-success p-2 " id="copy-clipboard-success" hidden>
-      Succesfully copied to clipboard!
-      <i class="fas fa-check"></i>
-  </div>
+<div
+  class="w-100 gutter-padding mt-3 rounded alert-success p-2"
+  id="copy-clipboard-success"
+  hidden
+>
+  Succesfully copied to clipboard!
+  <i class="fas fa-check"></i>
+</div>
 
-  <div class="col-12 container mt-3 rounded alert-danger p-2 " id="copy-clipboard-error" hidden>
-    Error copying to clipboard!
-    <i class="fas fa-exclamation-triangle"></i>
+<div
+  class="w-100 gutter-padding mt-3 rounded alert-danger p-2"
+  id="copy-clipboard-error"
+  hidden
+>
+  Error copying to clipboard!
+  <i class="fas fa-exclamation-triangle"></i>
 </div>
