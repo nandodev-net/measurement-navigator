@@ -215,7 +215,8 @@ textarea.vsf-form-control {
 }
 
 .gutter-padding {
-  padding: 0 15px;
+  padding-left: 15px !important;
+  padding-right: 15px !important;
 }
 
 /*
