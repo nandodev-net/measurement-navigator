@@ -1,9 +1,0 @@
-{
-    "version": 3,
-    "mappings": "AAAA;;;;;EAKE;AAEF,AAAA,OAAO,CAAC;EACN,WAAW,EAAE,IAAI;CAClB;;AAED,AAAA,cAAc,CAAC;EACb,MAAM,EAAE,kBAAkB;CAC3B;;AAED,AAAA,aAAa,CAAC;EACZ,UAAU,EAAE,iBAAiB;EAC7B,UAAU,EAAE,kBAAkB;CAC/B;;AAED,AAAA,iBAAiB,CAAC;EAChB,KAAK,EAAE,YAAY;CACpB;;AAED,AAAA,eAAe,CAAC;EACd,UAAU,EAAE,IAAI;CACjB;;AAED,AAAA,oBAAoB,CAAC;EACnB,SAAS,EAAE,CAAC;CACb",
-    "sources": [
-        "vsf-custom-sizes.scss"
-    ],
-    "names": [],
-    "file": "vsf-custom-sizes.css"
-}
