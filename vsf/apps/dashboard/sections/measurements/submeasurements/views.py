@@ -27,6 +27,21 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
     """
     SubMeasurement : SubMeasModels.SubMeasurement = None
     def get_context_data(self, **kwargs):
+        """
+            Returned by context:
+                + flags: [{'name': str, 'value' : str}] = List of flag-type objects, each object provides a name (human readable) and a database value
+                + sites: [Site] = List of all sites
+                + asns : [ASN]  = List of all asn's
+                + last_measurement_date: str = Date of last measurement (in a string)
+                + prefill : possible default values for table filtering. Supported:
+                    - input
+                    - since
+                    - until
+                    - site
+                    - anomaly
+                    - asn
+                    - flag
+        """
         # Return the site list so we can perform some
         # filtering based on the site
         sites = Site.objects.all()
@@ -98,7 +113,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
             + Append additional ordering columns to "order_columns" if needed
             + Set a SubMeasurement class (class inheriting SubMeasurement class) [REQUIRED]
             + Define a prepare_results function                                  [REQUIRED]
-            + Override o re-filter filter_queryset method                        [REQUIRED]
+            + Override o re-filter filter_queryset method ir order to add new filters if needed                        
     """
     # Columns to be shown
     columns = [
@@ -176,6 +191,12 @@ class ListDNSTemplate(ListSubMeasurementTemplate):
     SubMeasurement = SubMeasModels.DNS
     
     def get_context_data(self, **kwargs):
+        """
+            Besides of the data provided by 'ListSubMeasurementTemplate' parent class, 
+            this class provides additional fields:
+                + in prefill, add a new field:
+                    - consistency
+        """
         context =  super().get_context_data()
         prefill = context['prefill']
         get = self.request.GET or {}
@@ -193,18 +214,6 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
     """
         This is the backend that talks to the template to perform
         the server-side data processing operations for the List DNS view
-        Columns
-
-            * Sitio
-            * Dominio
-            * fecha
-            * ISP
-            * Respuesta
-            * repsuesta de control
-            * Resolver ip
-            * Bloqueado por IP?
-            * Resultado de bloqueado (medicion general) ? - Evaluar si genera impacto de desempeño
-            * Para que sepan, a futuro: Botón para ver medicion completa en un modal
     """
     columns = ListSubMeasurementBackend.columns + [ 'dns_consistency',
                                                     'jsons__answers',
@@ -215,6 +224,12 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
     SubMeasurement = SubMeasModels.DNS
 
     def filter_queryset(self, qs):
+        """
+            Besides of the data provided by 'ListSubMeasurementTemplate' parent class, 
+            this class provides additional filtering:
+                + in prefill, add a new field:
+                    - consistency
+        """
         get = self.request.GET or {}
         qs = super().filter_queryset(qs)
         print(c.yellow(str(qs)))
