@@ -108,30 +108,33 @@
           =====================================
           */
 
-          let site = $("#site").val();
-          let since = $("#since").val();
-          let until = $("#until").val();
+          let site        = $("#site").val();
+          let since       = $("#since").val();
+          let until       = $("#until").val();
           let consistency = $("#consistency").val();
-          let input = $("#input").val();
-          let asn = $("#asn").val();
-          let anomaly = $("#anomaly-state").val();
+          let input       = $("#input").val();
+          let asn         = $("#asn").val();
+          let anomaly     = $("#anomaly-state").val();
+          let flag        = $('#flag').val();
           let country = "";
 
-          if (site) data.site = site;
+          if (site)     data.site = site;
 
-          if (since) data.since = since;
+          if (since)    data.since = since;
 
-          if (until) data.until = until;
+          if (until)    data.until = until;
 
           if (consistency) data.consistency = consistency;
 
-          if (input) data.input = input;
+          if (input)    data.input = input;
 
-          if (asn) data.asn = asn;
+          if (asn)      data.asn = asn;
 
-          if (anomaly) data.anomaly = anomaly;
+          if (anomaly)  data.anomaly = anomaly;
 
-          if (country) data.country = country;
+          if (country)  data.country = country;
+
+          if (flag)     data.flag = flag;
         },
         type: "GET",
       },
