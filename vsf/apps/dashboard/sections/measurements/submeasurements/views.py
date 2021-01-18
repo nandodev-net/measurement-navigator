@@ -17,6 +17,9 @@ from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMeasModels
 from apps.main.measurements.flags               import models as FlagModels
 
+# DELETE LATER, DEBUG ONLY @TODO
+from vsf.utils                                  import Colors as c
+
 class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
     """
         Base class for submeasurement template listing, it wont work
@@ -87,7 +90,83 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         context['prefill'] = prefill
 
         return context
+    
+class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
+    """
+        Base class for backend listing in submeasurement tables. To use this class you should:
+            + Append additional columns to "columns" variable
+            + Append additional ordering columns to "order_columns" if needed
+            + Set a SubMeasurement class (class inheriting SubMeasurement class) [REQUIRED]
+            + Define a prepare_results function                                  [REQUIRED]
+            + Override o re-filter filter_queryset method                        [REQUIRED]
+    """
+    # Columns to be shown
+    columns = [
+            'measurement__raw_measurement__input',
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__probe_cc',
+            'site_name',
+            'measurement__anomaly',
+            'flag__flag'
+        ]
+
+    # Columns to be ordered
+    order_columns = [
+            'measurement__raw_measurement__input',
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__probe_cc',
+            'site_name',
+            'measurement__anomaly',
+            'flag__flag'
+        ]
+    
+    # SubMeasurement class to use (class inheriting SubMeasurement)
+    SubMeasurement = None
+
+    def get_initial_queryset(self):
+        qs = self.SubMeasurement.objects.all()\
+                .select_related('measurement', 'flag')\
+                .select_related('measurement__raw_measurement')\
+                .select_related('measurement__domain')\
+                .select_related('measurement__domain__site')
         
+        return qs
+
+    def filter_queryset(self, qs):
+        get = self.request.GET or {}
+
+        # Get filter data
+
+        input       = get.get('input')
+        since       = get.get('since')
+        asn         = get.get('asn')
+        country     = get.get('country')
+        anomaly     = get.get('anomaly')
+        until       = get.get('until')
+        site        = get.get('site')
+        flag        = get.get('flag') 
+        if input:
+            qs = qs.filter(measurement__raw_measurement__input__contains=input)
+        if since:
+            qs = qs.filter(measurement__raw_measurement__measurement_start_time__gte=since)
+        if asn:
+            qs = qs.filter(measurement__raw_measurement__probe_asn=asn)
+        if country:
+            qs = qs.filter(measurement__raw_measurement__probe_cc=country)
+        if until:
+            qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
+        if site:
+            qs = qs.filter(measurement__domain__site=site)
+        if anomaly:
+            qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
+        if flag:
+            qs = qs.filter(flag__flag=flag)
+
+
+        return qs
+
 
 class ListDNSTemplate(ListSubMeasurementTemplate):
     """
@@ -95,7 +174,7 @@ class ListDNSTemplate(ListSubMeasurementTemplate):
     """
     template_name = "measurements-templates/list-dns.html"
     SubMeasurement = SubMeasModels.DNS
-
+    
     def get_context_data(self, **kwargs):
         context =  super().get_context_data()
         prefill = context['prefill']
@@ -110,7 +189,7 @@ class ListDNSTemplate(ListSubMeasurementTemplate):
 
         return context
 
-class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
+class ListDNSBackEnd(ListSubMeasurementBackend):
     """
         This is the backend that talks to the template to perform
         the server-side data processing operations for the List DNS view
@@ -127,79 +206,21 @@ class ListDNSBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             * Resultado de bloqueado (medicion general) ? - Evaluar si genera impacto de desempeño
             * Para que sepan, a futuro: Botón para ver medicion completa en un modal
     """
-    columns = [
-            'measurement__raw_measurement__input',
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__probe_cc',
-            'site_name',
-            'measurement__anomaly',
-            'flag__flag'
-            'dns_consistency',
-            'jsons__answers',
-            'jsons__control_answers',
-            'control_resolver_hostname',
-            'hostname',
-
-        ]
-
-    order_columns = [
-            'measurement__raw_measurement__input',
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__probe_cc',
-            'site_name',
-            'measurement__anomaly',
-            'flag__flag'
-        ]
-
-    def get_initial_queryset(self):
-        # alternativa:
-        # select dns.id from submeasurements_dns dns join measurements_measurement ms on dns.measurement_id=ms.id join measurements_rawmeasurement rms on ms.raw_measurement_id=rms.id join (select url, sites.name as site_name from sites_url urls left join sites_site sites on urls.site_id=sites.id) as urls on input=urls.url order by rms.measurement_start_time limit 10;
-        # Time for this query to end: 189.96 seconds
-        # time for the raw version: 1.89 seconds
-
-        qs   = SubMeasModels.DNS.objects.all()\
-                .select_related('measurement')\
-                .select_related('measurement__raw_measurement')\
-                .select_related('measurement__domain')\
-                .select_related('measurement__domain__site')\
-
-        return qs
+    columns = ListSubMeasurementBackend.columns + [ 'dns_consistency',
+                                                    'jsons__answers',
+                                                    'jsons__control_answers',
+                                                    'control_resolver_hostname',
+                                                    'hostname'
+                                                ]
+    SubMeasurement = SubMeasModels.DNS
 
     def filter_queryset(self, qs):
-
         get = self.request.GET or {}
-
-        # Get filter data
-
-        input       = get.get('input')
-        since       = get.get('since')
-        ASN         = get.get('asn')
+        qs = super().filter_queryset(qs)
+        print(c.yellow(str(qs)))
         consistency = get.get('consistency')
-        country     = get.get('country')
-        anomaly     = get.get('anomaly')
-        until       = get.get('until')
-        site        = get.get('site')
-        flag        = get.get('flag') 
-        if input:
-            qs = qs.filter(measurement__raw_measurement__input__contains=input)
-        if since:
-            qs = qs.filter(measurement__raw_measurement__measurement_start_time__gte=since)
-        if ASN:
-            qs = qs.filter(measurement__raw_measurement__probe_asn=ASN)
-        if country:
-            qs = qs.filter(measurement__raw_measurement__probe_cc=country)
-        if until:
-            qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
         if consistency:
             qs = qs.filter(dns_consistency__contains=consistency)
-        if site:
-            qs = qs.filter(measurement__domain__site=site)
-        if anomaly:
-            qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
-        if flag:
-            qs = qs.filter(flag__flag=flag)
 
         return qs
 
@@ -255,73 +276,39 @@ class ListHTTPTemplate(ListSubMeasurementTemplate):
         body_proportion_max = get.get("body_proportion_max")
         prefill['body_proportion_max'] = body_proportion_max or 1
 
-
         context['prefill'] = prefill
         return context
 
-class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
+class ListHTTPBackEnd(ListSubMeasurementBackend):
     """
         This is the back end for the HTTP submeasurement table. The dynamic
         table in "ListHTTPTemplate" talks to this view
     """
-    columns = [
-            'measurement__raw_measurement__input',
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__probe_cc',
-            'site_name',
-            'measurement__anomaly',
-            'flag__flag'
-            'status_code_match',
-            'headers_match',
-            'body_length_match',
-            'body_proportion'
-        ]
+    columns = ListSubMeasurementBackend.columns +  ['status_code_match',
+                                                    'headers_match',
+                                                    'body_length_match',
+                                                    'body_proportion'
+                                                   ]
 
-    order_columns = [
-            'measurement__raw_measurement__input',
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__probe_cc',
-            'site_name',
-            'measurement__anomaly',
-            'flag__flag'
-            'status_code_match',
-            'headers_match',
-            'body_length_match',
-            'body_proportion'
-        ]
+    order_columns = ListSubMeasurementBackend.columns+ ['status_code_match',
+                                                        'headers_match',
+                                                        'body_length_match',
+                                                        'body_proportion'
+                                                       ]
 
-
-    def get_initial_queryset(self):
-        qs   = SubMeasModels.HTTP.objects.all()\
-                .select_related('measurement','flag')\
-                .select_related('measurement__raw_measurement')\
-                .select_related('measurement__domain')\
-                .select_related('measurement__domain__site')
-                
-        return qs
+    SubMeasurement = SubMeasModels.HTTP
 
     def filter_queryset(self, qs):
-
+        qs = super().filter_queryset(qs)
         get = self.request.GET or {}
 
-        # Get filter data
-        input       = get.get('input')
-        since       = get.get('since')
-        ASN         = get.get('asn')
-        country     = get.get('country')
-        anomaly     = get.get('anomaly')
-        until       = get.get('until')
-        site        = get.get('site')
-        flag        = get.get('flag')
         body_proportion_min = get.get('body_proportion_min')
         body_proportion_max = get.get('body_proportion_max')
         status_code_match   = get.get('status_code_match')
         headers_match       = get.get('headers_match')
         body_length_match   = get.get('body_length_match')
 
-        # Try to parse float values
+         # Try to parse float values
         try:
             body_proportion_min = float(body_proportion_min)
         except:
@@ -332,22 +319,6 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         except:
             body_proportion_max = 1
 
-        if input:
-            qs = qs.filter(measurement__raw_measurement__input__contains=input)
-        if since:
-            qs = qs.filter(measurement__raw_measurement__measurement_start_time__gte=since)
-        if ASN:
-            qs = qs.filter(measurement__raw_measurement__probe_asn=ASN)
-        if country:
-            qs = qs.filter(measurement__raw_measurement__probe_cc=country)
-        if until:
-            qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
-        if site:
-            qs = qs.filter(measurement__domain__site=site)
-        if anomaly:
-            qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
-        if flag:
-            qs = qs.filter(flag__flag=flag)
         if status_code_match:
             qs = qs.filter(status_code_match= status_code_match.lower() == 'true')
         if headers_match:
@@ -359,7 +330,6 @@ class ListHTTPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(body_proportion__lt=body_proportion_max)
         if body_proportion_min != 0:
             qs = qs.filter(body_proportion__lt=body_proportion_min)
-
 
         return qs
 
@@ -421,83 +391,34 @@ class ListTCPTemplate(ListSubMeasurementTemplate):
         context['prefill'] = prefill
         return context
 
-class ListTCPBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
+class ListTCPBackEnd(ListSubMeasurementBackend):
     """
         This is the back end for the HTTP submeasurement table. The dynamic
         table in "ListHTTPTemplate" talks to this view
     """
-    columns = [
-            'measurement__raw_measurement__input',
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__probe_cc',
-            'site_name',
-            'measurement__anomaly',
-            'flag__flag'
-            'status_blocking',
-            'status_failure',
-            'status_success',
-            'ip'
-        ]
+    columns = ListSubMeasurementBackend.columns +  ['status_blocking',
+                                                    'status_failure',
+                                                    'status_success',
+                                                    'ip'
+                                                    ]
 
-    order_columns = [
-            'measurement__raw_measurement__input',
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__probe_cc',
-            'site_name',
-            'measurement__anomaly',
-            'flag__flag',
-            'status_blocking',
-            'status_failure',
-            'status_success',
-            'ip'
-        ]
+    order_columns = ListSubMeasurementBackend.order_columns + [ 'status_blocking',
+                                                                'status_failure',
+                                                                'status_success',
+                                                                'ip'
+                                                              ]
 
-    def get_initial_queryset(self):
-        qs   = SubMeasModels.TCP.objects.all()\
-                .select_related('measurement', 'flag')\
-                .select_related('measurement__raw_measurement')\
-                .select_related('measurement__domain')\
-                .select_related('measurement__domain__site')
-                
-        return qs
+    SubMeasurement = SubMeasModels.TCP
 
     def filter_queryset(self, qs):
-
+        qs = super().filter_queryset(qs)
         get = self.request.GET or {}
 
-        # Get filter data
-
-        input       = get.get('input')
-        since       = get.get('since')
-        ASN         = get.get('asn')
-        country     = get.get('country')
-        anomaly     = get.get('anomaly')
-        until       = get.get('until')
-        site        = get.get('site')
-        flag        = get.get('flag')
         status_blocked = get.get('status_blocked')
         status_failure = get.get('status_failure')
         status_success = get.get('status_success')
         ip             = get.get('ip')
 
-        if input:
-            qs = qs.filter(measurement__raw_measurement__input__contains=input)
-        if since:
-            qs = qs.filter(measurement__raw_measurement__measurement_start_time__gte=since)
-        if ASN:
-            qs = qs.filter(measurement__raw_measurement__probe_asn=ASN)
-        if country:
-            qs = qs.filter(measurement__raw_measurement__probe_cc=country)
-        if until:
-            qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
-        if site:
-            qs = qs.filter(measurement__domain__site=site)
-        if anomaly:
-            qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
-        if flag:
-            qs = qs.filter(flag__flag= flag)
         if status_blocked:
             qs = qs.filter(status_blocked= status_blocked.lower() == 'true')
         if status_failure:
