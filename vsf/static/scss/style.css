@@ -212,6 +212,10 @@ textarea.vsf-form-control {
   width: 49.98888888%;
 }
 
+.gutter-padding {
+  padding: 0 15px;
+}
+
 /*
  * Table styles
  */
