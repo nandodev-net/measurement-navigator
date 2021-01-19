@@ -329,13 +329,15 @@ def sug_event_creator(classname):
 
 def merge(select_groups):
 
+    target_list = []
+
     if select_groups:
         for group in select_groups:
-            new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
-            new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
-            print('HardFlag creada: ', new_hard_flag.id)
 
             if group[0].flag.flag == 'soft':
+                new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
+                new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
+                print('HardFlag creada: ', new_hard_flag.id)
 
                 for submeas in group:
                     print('Submedicion: ', submeas.id)
@@ -345,8 +347,16 @@ def merge(select_groups):
                     print('HardFlag asignada: ', submeas.flag.id)
                     submeas.save()
 
-            elif group[0].flag.flag == 'hard':
-                
+            elif group[0].flag.flag == 'hard' and not group[0].flag.confirmed:
+                target_list.append(group)
+
+
+        if target_list:
+            new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
+            new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
+            print('HardFlagHF creada: ', new_hard_flag.id)
+
+            for group in target_list:
                 for submeas in group:
                     print('Submedicion Hf: ', submeas.id)
                     print('DeadFlag Hf: ', submeas.flag.id)
@@ -363,8 +373,9 @@ def merge(select_groups):
                     print('HardFlag asignada Hf: ', submeas.flag.id)
                     submeas.save()
 
+            
 
-                print(submeas.id,' ',submeas.flag.id,' ',submeas.flag)
+
 
 
 
