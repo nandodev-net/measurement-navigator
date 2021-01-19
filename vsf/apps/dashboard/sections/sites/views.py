@@ -19,6 +19,11 @@ class ListSites(VSFLoginRequiredMixin, TemplateView):
     template_name = "sites-templates/list-existent-sites.html"
 
     def get_context_data(self, **kwargs):
+        """
+            Included in context:
+                + site_creation_form : form object to create a site
+                + sites : all site objects
+        """
         # Return a list of sites sorted by name
         sites = Site.objects.all().order_by('name')
 
@@ -52,6 +57,23 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
     template_name = "sites-templates/list-sites-domains.html"
 
     def get_context_data(self, **kwargs):
+        """
+            In context:
+                + domains : list of domain dict objects with the following fields:
+                    - domain    =  domain name 
+                    - id        =  domain id
+                    - site_name = site name if this domain is related to a site
+                    - site_id   = site id for the site pointed by this domain
+                + site_creation_form : a form object for creating sites
+                + sites : list with every site object, ordered by name
+                + domains_paginator : paginator object used to get current page and so
+                + search_params : get request received by this view
+                + domain_substr : substring that should be contained by every domain_name listed here
+                + error: possible values = 
+                    - missing_args : missing arguments in get request
+                    - None: everything ok
+                                       
+        """
         # Return a list of all available domains, a form for creating
         # a new linking between a site and a set of domains, and
         # a list of sites to link with
@@ -180,11 +202,18 @@ class SiteDetailView(VSFLoginRequiredMixin, VSFListPaginate):
 
         Expected GET arguments:
             id = id of the site whose details are to be retrieved
-            error = None | id_not_provided | invalid_id
+        
+            
     """
     template_name = "sites-templates/site-details.html"
 
     def get_context_data(self, **kwargs):
+        """
+            In Context:
+                + site : requested site object
+                + domains: list of domain objects ordered by domain_name
+                + error = None | id_not_provided | invalid_id
+        """
         context = super().get_context_data()
 
         id = kwargs.get('id')
