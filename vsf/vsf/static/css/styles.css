@@ -219,6 +219,11 @@ textarea.vsf-form-control {
   padding-right: 15px !important;
 }
 
+.gutter-margin {
+  margin-left: 15px !important;
+  margin-right: 15px !important;
+}
+
 /*
 =====================================
 THIS IS SCSS FILE THAT APPLIES SOME CUSTOMIZATIONS
