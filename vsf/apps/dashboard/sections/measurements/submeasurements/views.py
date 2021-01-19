@@ -269,6 +269,16 @@ class ListHTTPTemplate(ListSubMeasurementTemplate):
     template_name = "measurements-templates/list-http.html"
     SubMeasurement = SubMeasModels.HTTP
     def get_context_data(self, **kwargs):
+        """
+            Besides of the data provided by 'ListSubMeasurementTemplate' parent class, 
+            this class provides additional fields:
+                + in prefill, add a new field:
+                    - status_code_match
+                    - headers_match
+                    - body_length_match
+                    - body_proportion_min
+                    - body_proportion_max
+        """
         context =  super().get_context_data()
         get = self.request.GET or {}
         prefill = context['prefill']
@@ -378,7 +388,15 @@ class ListTCPTemplate(ListSubMeasurementTemplate):
     template_name = "measurements-templates/list-tcp.html"
     SubMeasurement = SubMeasModels.TCP
     def get_context_data(self, **kwargs):
-        
+        """
+            Besides of the data provided by 'ListSubMeasurementTemplate' parent class, 
+            this class provides additional fields:
+                + in prefill, add a new field:
+                    - status_blocked
+                    - status_failure
+                    - status_success
+                    - ip
+        """
         context =  super().get_context_data()
         prefill = context['prefill']
         get = self.request.GET or {}
@@ -398,10 +416,6 @@ class ListTCPTemplate(ListSubMeasurementTemplate):
         ip = get.get('ip')
         if ip:
             prefill['ip'] = ip
-        
-        flag = get.get('flag')
-        if flag:
-            prefill['flag'] = flag
         
         context['prefill'] = prefill
         return context

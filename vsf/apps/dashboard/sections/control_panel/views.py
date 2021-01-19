@@ -1,6 +1,7 @@
 #Django imports
 from datetime import datetime, timedelta
 from celery.app import shared_task
+from celery.local import COMPAT_MODULES
 from django.core.cache import cache
 from django.http.response import HttpResponseBadRequest
 from django.views.generic           import TemplateView, View
@@ -26,6 +27,8 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
                     And the possible values of P:
                         + 'update_fastpath'
                         + 'measurement_recovery'
+                        + 'count_flags'
+                        + 'soft_flags'
 
             - states : a dict with every possible state string
                         + STARTING = "starting"
@@ -38,6 +41,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
                         + MEASUREMENT_RECOVERY = 'measurement_recovery' (trigger a fetch for the missing part of incomplete measurements)
                         + COUNT_FLAGS = 'count_flags' (trigger a flag counting process)
                         + UNKNOWN  = 'unknown'
+                These are the only valid strings to be send in post request to request an action
 
             
         Also, you can perform POST requests to this view, these are the expected 
@@ -104,6 +108,8 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
         process_names = {
             self.CONTROL_TYPES.FASTPATH : fp_update.vsf_name, # vsf_name is a custom attribute that every vsf task should fill 
             self.CONTROL_TYPES.MEASUREMENT_RECOVERY : measurement_update.vsf_name,
+            self.CONTROL_TYPES.COUNT_FLAGS : count_flags_submeasurements.vsf_name,
+            self.CONTROL_TYPES.SOFT_FLAGS  : SoftFlagMeasurements.vsf_name
         }   
 
         # Get request data 
@@ -111,7 +117,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
         control = req.get('control_type')
 
         # Check the state; if process is not running and not failed, then it is busy right now, 
-        # try not to run int
+        # try not to run it
         state = cache.get(process_names.get(control, self.CONTROL_TYPES.UNKNOWN), ProcessState.UNKNOWN)
         if state != ProcessState.IDLE and state != ProcessState.FAILED and state != ProcessState.UNKNOWN:
             return JsonResponse({"result" : RUNNING}) 
@@ -180,18 +186,19 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
 
         return JsonResponse( {"result" : OK} )
 
-    
-    #def update_fastpath(self, since, until, only_fastpath):
-    #    (status, returned) = request_fp_data(since, until, only_fastpath)
-    #    if status != 200:
-    #        return JsonResponse({"error" : "No se pudo contactar con ooni", "results" : None})
-#
-    #    return JsonResponse({"error" : None, "results" : returned})
-
 def get_process_state(request):
     """
         Given a list of process names within a post request, return 
         a dict with each process name related to its state 
+        This view will reject non-post requests. Expected arguments:
+            + process : [str] = a list of process whose state you want to know, they should match 
+                                their corresponding vsf_name attribute
+        
+        returns:
+            + process_stats : {process : status} = a dict that maps from process to their current status.
+                Note that "process" is as specified in the request, and "status" could be one of the values
+                specified in ProcessState in vsf.utils. If a process is actually unknown by the system, 
+                'ProcessStatus.UNKNOWN' will be returned for this process
     """
     if not request.POST:
         return HttpResponseBadRequest()
@@ -200,6 +207,6 @@ def get_process_state(request):
     process_list = list(req.getlist('process[]'))
     ans = {}
     for process in process_list:
-        ans[process] = cache.get(process) or "unknown state"
+        ans[process] = cache.get(process, ProcessState.UNKNOWN)
     return JsonResponse({ "process_status" : ans })
     

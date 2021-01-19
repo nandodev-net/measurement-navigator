@@ -42,9 +42,21 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         """
             Return in the context:
-                test_types: The list of available test types
-                sites: Site objects describing a site by id, name and description
-                pre-fill: additional searching values to pre-fill the search parameters
+                + test_types: The list of available test types, each described by dict with 
+                the following format:
+                    - name : str = human readable name
+                    - value : str = actual name in the database
+                + sites: Site objects describing a site by id, name and description
+                + asns: List of ASN Objects
+                + prefill: additional searching values to pre-fill the search parameters:
+                    - input
+                    - since
+                    - until
+                    - site
+                    - anomaly
+                    - asn
+                    - test_name
+                    
         """
         # Note that the 'choices' member in a textchoice returns a
         # list of pairs [(s1, s2)] where s2 is the human readable (label) of the choice
@@ -65,7 +77,6 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
 
         since = get.get("since")
         prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-
 
         until = get.get("until")
         if until:
@@ -113,13 +124,6 @@ class ListMeasurementsBackEnd(BaseDatatableView):
     """
         This is the backend view for the ListMeasurementsDataTable view, who
         just renders the template
-
-        List All Measurements based on the following columns:
-            * Input
-            * TestName
-            * ASN
-            * Country Code
-            * Site
 
         This View requires datatables to send server-side
         paginated data to the front, and it's highly coupled
@@ -202,13 +206,15 @@ class ListMeasurementsBackEnd(BaseDatatableView):
 
 class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
     """
-        Given the uuid "id" for some measurement, return a page with the following
-        data passed within context:
+        Given the uuid "id" for some measurement through a GET request, 
+        return a page with the following data passed within context:
+
             + measurement: The simple measurement object itself
             + submeasurements: A dict object with the following fields:
                 - dns  : A list (possibly empty) with dns submeasurements
                 - tcp  : A list (possibly empty) with tcp submeasurements
                 - http : A list (possibly empty) with http submeasurements
+            + test_keys_string : test_keys json object but as string instead of object
             + error : a string specifying an error type
                 - id_not_provided  : unable to find an 'id' atribute in the get request
                 - not_found        : there's no measurement with the provided id
