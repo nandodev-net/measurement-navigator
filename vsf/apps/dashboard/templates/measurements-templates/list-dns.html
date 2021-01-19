@@ -81,7 +81,7 @@
             <select id="asn" class="custom-select additional-filter" name="asn">
               <option value="">Any ASN</option>
               {% for asn in asns %}
-              <option  
+              <option
                 {% if asn.asn == prefill.asn %} selected {% endif %}
                 value="{{ asn.asn }}">
                 {{ asn.asn }} - {{ asn.name }}
@@ -116,27 +116,14 @@
             </div>
             <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
               <option selected value="">Any</option>
-              <option 
+              <option
               {% if prefill.anomaly == 'false' %} selected {% endif %}
               value="false">Anomaly False</option>
-              <option 
+              <option
               {% if prefill.anomaly == 'true' %} selected {% endif %}
               value="true">Anomaly True</option>
             </select>
           </div>
-        </div>
-
-        <!-- Input -->
-        <div class="col-3 mt-3">
-          <input
-            id="input"
-            class="form-control mr-2 additional-filter"
-            type="search"
-            placeholder="URL"
-            aria-label="Search URL"
-            name="input"
-            value="{{prefill.input}}"
-          />
         </div>
 
         <!-- Site -->
@@ -148,8 +135,8 @@
             <select class="custom-select additional-filter" id="site" name="site">
               <option selected value="">Any Site</option>
               {% for site in sites %}
-              <option  
-                value="{{ site.id }}" 
+              <option
+                value="{{ site.id }}"
                 title="{{ site.description }}"
                 {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}
                 >
@@ -179,8 +166,20 @@
             </select>
           </div>
         </div>
-
       </div>
+    </div>
+
+    <!-- Input -->
+    <div class="col-12 mt-3">
+      <input
+        id="input"
+        class="form-control mr-2 additional-filter"
+        type="search"
+        placeholder="URL"
+        aria-label="Search URL"
+        name="input"
+        value="{{prefill.input}}"
+      />
     </div>
   </form>
   {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
