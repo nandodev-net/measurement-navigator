@@ -2,23 +2,20 @@
 # directly. Instead, import utils.py so you can have a public api for this functions
 
 # Django imports:
-from typing import List
-from django.db.models   import Min, Max
 from django.db          import connection
+from django.core.cache  import cache
 
 # Third party imports:
+from typing import List
 from datetime import datetime, time, timedelta
 
 # Local imports
 from .models                                import DNS, TCP, HTTP, SubMeasurement
 from apps.main.measurements.flags.models    import Flag
 from apps.main.events.models                import Event
-from apps.configs.models                    import Config
-from apps.main.measurements.models          import Measurement, RawMeasurement
+from apps.main.measurements.models          import Measurement
+from vsf.utils                              import CachedData, Colors as c
 
-
-from time import time
-from datetime import datetime
 
 
 def count_flags_sql():
@@ -29,6 +26,13 @@ def count_flags_sql():
     """
 
     submeasurements = ['dns','http','tcp']
+    try:
+        date = datetime.strftime(cache.get(CachedData.EARLIEST_ADDED_MEASUREMENT_DATE), "%Y-%m-%d %H:%M:%S")
+        print(c.cyan(f"Using initial date: {date}"))
+    except:
+        date = "2000-01-01 00:00:00"
+        print(c.yellow("Using default date: {date}"))
+
     with connection.cursor() as cursor:
         for subm in submeasurements:
             cursor.execute(
@@ -41,6 +45,7 @@ def count_flags_sql():
                             "submeasurements_{submsmnt} {submsmnt} JOIN measurements_measurement ms ON ms.id = {submsmnt}.measurement_id " +
                                                     "JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id " +
                                                     "JOIN flags_flag f ON f.id = {submsmnt}.flag_id " +
+                        "WHERE rms.measurement_start_time >= %s" +
                         ") " +
                     "UPDATE submeasurements_{submsmnt} {submsmnt} " +
                         "SET  " +
@@ -48,7 +53,7 @@ def count_flags_sql():
                         "FROM sq " +
                         "WHERE {submsmnt}.id = sq.{submsmnt}_id; "
                 ).format(submsmnt=subm)
-            )
+            , [date])
 
 # HARD FLAG LOGIC
 def count_flags():
