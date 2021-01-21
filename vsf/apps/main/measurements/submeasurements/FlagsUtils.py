@@ -27,7 +27,7 @@ def count_flags_sql():
 
     submeasurements = ['dns','http','tcp']
     try:
-        date = datetime.strftime(cache.get(CachedData.EARLIEST_ADDED_MEASUREMENT_DATE), "%Y-%m-%d %H:%M:%S")
+        date = datetime.strftime(cache.get(CachedData.EARLIEST_ADDED_MEASUREMENT_DATE) - timedelta(days=1), "%Y-%m-%d %H:%M:%S")
         print(c.cyan(f"Using initial date: {date}"))
     except:
         date = "2000-01-01 00:00:00"
@@ -336,49 +336,50 @@ def merge(select_groups):
 
     target_list = []
 
-    if select_groups:
-        for group in select_groups:
+    if not select_groups: return
 
-            if group[0].flag.flag == 'soft':
-                new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
-                new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
-                print('HardFlag creada: ', new_hard_flag.id)
+    for group in select_groups:
 
-                for submeas in group:
-                    print('Submedicion: ', submeas.id)
-                    print('DeadFlag: ', submeas.flag.id)
-                    Flag.objects.get(id=submeas.flag.id).delete()
-                    submeas.flag=new_hard_flag
-                    print('HardFlag asignada: ', submeas.flag.id)
-                    submeas.save()
-
-            elif group[0].flag.flag == 'hard' and not group[0].flag.confirmed:
-                target_list.append(group)
-
-
-        if target_list:
+        if group[0].flag.flag == 'soft':
             new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
             new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
-            print('HardFlagHF creada: ', new_hard_flag.id)
+            print('HardFlag creada: ', new_hard_flag.id)
 
-            for group in target_list:
-                for submeas in group:
-                    print('Submedicion Hf: ', submeas.id)
-                    print('DeadFlag Hf: ', submeas.flag.id)
-                    try:
-                        Event.objects.get(id=submeas.flag.event.id).delete()
-                    except:
-                        pass
+            for submeas in group:
+                print('Submedicion: ', submeas.id)
+                print('DeadFlag: ', submeas.flag.id)
+                Flag.objects.get(id=submeas.flag.id).delete()
+                submeas.flag=new_hard_flag
+                print('HardFlag asignada: ', submeas.flag.id)
+                submeas.save()
 
-                    try:
-                        Flag.objects.get(id=submeas.flag.id).delete()
-                    except:
-                        pass
-                    submeas.flag=new_hard_flag
-                    print('HardFlag asignada Hf: ', submeas.flag.id)
-                    submeas.save()
+        elif group[0].flag.flag == 'hard' and not group[0].flag.confirmed:
+            target_list.append(group)
 
-            
+
+    if target_list:
+        new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
+        new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
+        print('HardFlagHF creada: ', new_hard_flag.id)
+
+        for group in target_list:
+            for submeas in group:
+                print('Submedicion Hf: ', submeas.id)
+                print('DeadFlag Hf: ', submeas.flag.id)
+                try:
+                    Event.objects.get(id=submeas.flag.event.id).delete()
+                except:
+                    pass
+
+                try:
+                    Flag.objects.get(id=submeas.flag.id).delete()
+                except:
+                    pass
+                submeas.flag=new_hard_flag
+                print('HardFlag asignada Hf: ', submeas.flag.id)
+                submeas.save()
+
+        
 
 
 
