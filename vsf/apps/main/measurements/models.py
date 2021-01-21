@@ -65,7 +65,7 @@ class RawMeasurement(models.Model):
     test_start_time = models.DateTimeField(null=True)
     measurement_start_time = models.DateTimeField(db_index=True)
     test_runtime = models.FloatField(null=True)
-    test_helpers = models.TextField(null=True)
+    test_helpers = JSONField(blank=True, null=True)
     software_name = models.CharField(max_length=30)
     software_version = models.CharField(max_length=100)
     test_version = models.CharField(max_length=100)
