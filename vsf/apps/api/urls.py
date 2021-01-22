@@ -15,6 +15,11 @@ urlpatterns = [
         include('apps.api.cases_api.urls', namespace='cases'),
         ),
 
+    path(
+        'events/',
+        include('apps.api.events_api.urls', namespace='events'),
+        ),       
+
         path(
         'api-token-auth/', 
         obtain_auth_token, name='api_token_auth'),
