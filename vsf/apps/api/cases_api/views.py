@@ -22,7 +22,7 @@ class ListCases(generics.GenericAPIView):
         return Response(cases_json.data, status=status.HTTP_200_OK)
 
 
-class CasesDetail(generics.GenericAPIView):
+class CaseDetail(generics.GenericAPIView):
     """
         class created to provide response to endpoint 
         returning one case instance by id 

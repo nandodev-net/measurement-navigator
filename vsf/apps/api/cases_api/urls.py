@@ -13,7 +13,7 @@ urlpatterns = [
 
     path(
         '<int:id>', 
-        views.CasesDetail.as_view(), 
+        views.CaseDetail.as_view(), 
         name='case_detail'),
 
 ]
