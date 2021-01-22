@@ -1,7 +1,7 @@
--- This query can update the previous_counter for dns submeasurements
+-- This query will update the previous_counter for dns submeasurements
 WITH 
-    measurements as (
-        SELECT 
+    measurements as (           -- This subquery will build a table with all the data we need, nothing magic here, just more 
+        SELECT                  -- joins than i would like and some sorting
             dns.id as dns_id, 
             rms.measurement_start_time as start_time,
             f.flag as flag,
@@ -13,12 +13,29 @@ WITH
                                         JOIN flags_flag f ON f.id = dns.flag_id
         ORDER BY input, start_time, prev_counter, dns_id
     ),
-    ms_to_update as (
-        SELECT DISTINCT ms.input 
+    ms_to_update as (               -- Builds a list with every input such that there's at the least 1 measurement for this input whose "counted" field
+        SELECT DISTINCT ms.input    -- is false
         FROM measurements ms 
         WHERE NOT ms.counted
     ),
     sq as (
+        /*
+            Here's the hard thing. First we join measurements with the input list (which is as described above),
+            so we can filter out measurmeent partitions that does not require a previous_counter update.
+
+            Then, we sum up flag!=ok for every measurement in each partition, so that the accumulate value
+            at each row corresponds to the number of issued measurements in the previous rows + if the current 
+            row has an issued measurement.
+            for example:
+            input | flag | previous
+            --------------------
+            a     |  ok  | later_previous + flag!=ok = 0
+            a     | soft | later_previous + flag!=ok = 1
+            a     | soft | later_previous + flag!=ok = 2
+            a     | soft | later_previous + flag!=ok = 3
+            b     | soft | later_previous + flag!=ok = 1
+            b     |  ok  | later_previous + flag!=ok = 1
+        */
         SELECT 
             ms.dns_id as id, 
             ms.input  as input, 
@@ -26,10 +43,11 @@ WITH
             SUM(CAST(ms.flag<>'ok' AS INT)) OVER (PARTITION BY ms.input ORDER BY ms.start_time, ms.prev_counter, ms.dns_id) as prev_counter
         FROM measurements ms JOIN ms_to_update on ms_to_update.input = ms.input
     )
--- SELECT * FROM sq;
 
 UPDATE submeasurements_dns dns
     SET 
+        -- Simple update, set the new prev_counter value to its new value
+        -- and the counted field to true
         previous_counter = sq.prev_counter,
         counted = CAST(1 as BOOLEAN)
     FROM sq
