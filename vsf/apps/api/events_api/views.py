@@ -37,5 +37,6 @@ class EventDetail(generics.GenericAPIView):
     
     def get(self, request, id):
         event = self.get_object(id)
+        #print(event.flag_set.all())
         event_json = EventDetailDataSerializer(event)
         return Response(event_json.data, status=status.HTTP_200_OK)
