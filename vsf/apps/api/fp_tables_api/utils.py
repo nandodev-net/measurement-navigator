@@ -171,7 +171,6 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
                 test_name= result['test_name'],
             )
             URL.objects.get_or_create(url=fp.input)
-            ASN.objects.get_or_create(asn=fp.probe_asn)
             objects.append(fp)
 
 

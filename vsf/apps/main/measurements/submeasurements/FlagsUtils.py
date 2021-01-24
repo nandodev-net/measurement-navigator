@@ -317,7 +317,7 @@ def select( measurements : List[SubMeasurement],
     return result
 
 
-def sug_event_creator(classname):
+def sug_event_creator(classname, target, asn):
     if classname == 'DNS':
         issue_type = Event.IssueType.DNS
     if classname == 'HTTP':
@@ -327,7 +327,9 @@ def sug_event_creator(classname):
 
     new_event = Event.objects.create(
         identification = classname + ' ISSUE AT '+ datetime.now().strftime('%Y-%m-%d %H:%M'),
-        issue_type = issue_type
+        issue_type = issue_type,
+        domain = target,
+        asn = asn,
     )
     return new_event
 
@@ -341,7 +343,9 @@ def merge(select_groups):
     for group in select_groups:
 
         if group[0].flag.flag == 'soft':
-            new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
+            target = group[0].measurement.domain
+            asn = target_list[0][0].measurement.asn
+            new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper(), target, asn)
             new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
             print('HardFlag creada: ', new_hard_flag.id)
 
@@ -358,7 +362,10 @@ def merge(select_groups):
 
 
     if target_list:
-        new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper())
+
+        target = target_list[0][0].measurement.domain
+        asn = target_list[0][0].measurement.asn
+        new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper(), target, asn)
         new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
         print('HardFlagHF creada: ', new_hard_flag.id)
 
