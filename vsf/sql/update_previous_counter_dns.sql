@@ -5,16 +5,17 @@ WITH
             dns.id as dns_id, 
             rms.measurement_start_time as start_time,
             f.flag as flag,
-            rms.input as input,
+            ms.domain_id as domain,
             dns.counted as counted,
+            rms.probe_asn as asn,
             dns.previous_counter as prev_counter
         FROM submeasurements_dns dns    JOIN measurements_measurement ms ON ms.id = dns.measurement_id
                                         JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id
                                         JOIN flags_flag f ON f.id = dns.flag_id
-        ORDER BY input, start_time, prev_counter, dns_id
+        ORDER BY domain, asn, start_time, prev_counter, dns_id
     ),
     ms_to_update as (               -- Builds a list with every input such that there's at the least 1 measurement for this input whose "counted" field
-        SELECT DISTINCT ms.input    -- is false
+        SELECT DISTINCT ms.domain    -- is false
         FROM measurements ms 
         WHERE NOT ms.counted
     ),
@@ -37,13 +38,14 @@ WITH
             b     |  ok  | later_previous + flag!=ok = 1
         */
         SELECT 
-            ms.dns_id as id, 
-            ms.input  as input, 
-            ms.flag   as flag, 
-            SUM(CAST(ms.flag<>'ok' AS INT)) OVER (PARTITION BY ms.input ORDER BY ms.start_time, ms.prev_counter, ms.dns_id) as prev_counter
-        FROM measurements ms JOIN ms_to_update on ms_to_update.input = ms.input
+            ms.dns_id   as id, 
+            ms.domain   as domain, 
+            ms.flag     as flag, 
+            -- ms.asn      as asn, --debug
+            SUM(CAST(ms.flag<>'ok' AS INT)) OVER (PARTITION BY ms.domain, ms.asn ORDER BY ms.start_time, ms.prev_counter, ms.dns_id) as prev_counter
+        FROM measurements ms JOIN ms_to_update on ms_to_update.domain = ms.domain
     )
-
+-- select * from sq;
 UPDATE submeasurements_dns dns
     SET 
         -- Simple update, set the new prev_counter value to its new value
@@ -51,4 +53,4 @@ UPDATE submeasurements_dns dns
         previous_counter = sq.prev_counter,
         counted = CAST(1 as BOOLEAN)
     FROM sq
-    WHERE dns.id = sq.id;
+    WHERE dns.id = sq.id AND (NOT counted OR dns.previous_counter<>sq.prev_counter);
