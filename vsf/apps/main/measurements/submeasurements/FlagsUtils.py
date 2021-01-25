@@ -26,34 +26,44 @@ def count_flags_sql():
     """
 
     submeasurements = ['dns','http','tcp']
-    try:
-        date = datetime.strftime(cache.get(CachedData.EARLIEST_ADDED_MEASUREMENT_DATE) - timedelta(days=1), "%Y-%m-%d %H:%M:%S")
-        print(c.cyan(f"Using initial date: {date}"))
-    except:
-        date = "2000-01-01 00:00:00"
-        print(c.yellow("Using default date: {date}"))
-
     with connection.cursor() as cursor:
         for subm in submeasurements:
             cursor.execute(
                 (
-                    "WITH sq as ( " +
-                        "SELECT  " +
-                                "{submsmnt}.id as {submsmnt}_id,  " +
-                                "sum(CAST(f.flag='soft' AS INT)) OVER (PARTITION BY rms.input ORDER BY rms.measurement_start_time, {submsmnt}.id ASC) as previous " +
-                        "FROM " +
-                            "submeasurements_{submsmnt} {submsmnt} JOIN measurements_measurement ms ON ms.id = {submsmnt}.measurement_id " +
-                                                    "JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id " +
-                                                    "JOIN flags_flag f ON f.id = {submsmnt}.flag_id " +
-                        "WHERE rms.measurement_start_time >= %s" +
-                        ") " +
-                    "UPDATE submeasurements_{submsmnt} {submsmnt} " +
-                        "SET  " +
-                            "previous_counter = sq.previous " +
-                        "FROM sq " +
-                        "WHERE {submsmnt}.id = sq.{submsmnt}_id; "
-                ).format(submsmnt=subm)
-            , [date])
+                    "WITH \
+                        measurements as ( \
+                            SELECT \
+                                {submsmnt}.id as {submsmnt}_id, \
+                                rms.measurement_start_time as start_time,\
+                                f.flag as flag,\
+                                rms.input as input,\
+                                {submsmnt}.counted as counted,\
+                                {submsmnt}.previous_counter as prev_counter\
+                            FROM submeasurements_{submsmnt} {submsmnt}    JOIN measurements_measurement ms ON ms.id = {submsmnt}.measurement_id\
+                                                            JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id\
+                                                            JOIN flags_flag f ON f.id = {submsmnt}.flag_id\
+                            ORDER BY input, start_time, prev_counter, {submsmnt}_id\
+                        ),\
+                        ms_to_update as (\
+                            SELECT DISTINCT ms.input \
+                            FROM measurements ms \
+                            WHERE NOT ms.counted\
+                        ),\
+                        sq as (\
+                            SELECT \
+                                ms.{submsmnt}_id as id, \
+                                ms.input  as input, \
+                                ms.flag   as flag, \
+                                SUM(CAST(ms.flag<>'ok' AS INT)) OVER (PARTITION BY ms.input ORDER BY ms.start_time, ms.prev_counter, ms.{submsmnt}_id) as prev_counter\
+                            FROM measurements ms JOIN ms_to_update on ms_to_update.input = ms.input\
+                        )\
+                    UPDATE submeasurements_{submsmnt} {submsmnt}\
+                    SET \
+                        previous_counter = sq.prev_counter,\
+                        counted = CAST(1 as BOOLEAN)\
+                    FROM sq\
+                    WHERE {submsmnt}.id = sq.id;"
+                ).format(submsmnt=subm))
 
 # HARD FLAG LOGIC
 def count_flags():
@@ -324,7 +334,7 @@ def sug_event_creator(classname):
         issue_type = Event.IssueType.HTTP
     if classname == 'TCP':
         issue_type = Event.IssueType.TCP
-
+    
     new_event = Event.objects.create(
         identification = classname + ' ISSUE AT '+ datetime.now().strftime('%Y-%m-%d %H:%M'),
         issue_type = issue_type
