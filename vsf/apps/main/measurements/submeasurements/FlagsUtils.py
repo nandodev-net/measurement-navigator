@@ -31,38 +31,39 @@ def count_flags_sql():
             cursor.execute(
                 (
                     "WITH \
-                        measurements as ( \
-                            SELECT \
+                        measurements as (\
+                            SELECT                  \
                                 {submsmnt}.id as {submsmnt}_id, \
                                 rms.measurement_start_time as start_time,\
                                 f.flag as flag,\
-                                rms.input as input,\
+                                ms.domain_id as domain,\
                                 {submsmnt}.counted as counted,\
+                                rms.probe_asn as asn,\
                                 {submsmnt}.previous_counter as prev_counter\
                             FROM submeasurements_{submsmnt} {submsmnt}    JOIN measurements_measurement ms ON ms.id = {submsmnt}.measurement_id\
                                                             JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id\
                                                             JOIN flags_flag f ON f.id = {submsmnt}.flag_id\
-                            ORDER BY input, start_time, prev_counter, {submsmnt}_id\
+                            ORDER BY domain, asn, start_time, prev_counter, {submsmnt}_id\
                         ),\
-                        ms_to_update as (\
-                            SELECT DISTINCT ms.input \
+                        ms_to_update as (               \
+                            SELECT DISTINCT ms.domain    \
                             FROM measurements ms \
                             WHERE NOT ms.counted\
                         ),\
                         sq as (\
                             SELECT \
-                                ms.{submsmnt}_id as id, \
-                                ms.input  as input, \
-                                ms.flag   as flag, \
-                                SUM(CAST(ms.flag<>'ok' AS INT)) OVER (PARTITION BY ms.input ORDER BY ms.start_time, ms.prev_counter, ms.{submsmnt}_id) as prev_counter\
-                            FROM measurements ms JOIN ms_to_update on ms_to_update.input = ms.input\
+                                ms.{submsmnt}_id   as id, \
+                                ms.domain   as domain, \
+                                ms.flag     as flag, \
+                                SUM(CAST(ms.flag<>'ok' AS INT)) OVER (PARTITION BY ms.domain, ms.asn ORDER BY ms.start_time, ms.prev_counter, ms.{submsmnt}_id) as prev_counter\
+                            FROM measurements ms JOIN ms_to_update on ms_to_update.domain = ms.domain\
                         )\
                     UPDATE submeasurements_{submsmnt} {submsmnt}\
                     SET \
                         previous_counter = sq.prev_counter,\
                         counted = CAST(1 as BOOLEAN)\
                     FROM sq\
-                    WHERE {submsmnt}.id = sq.id;"
+                    WHERE {submsmnt}.id = sq.id AND (NOT counted OR {submsmnt}.previous_counter<>sq.prev_counter);"
                 ).format(submsmnt=subm))
 
 # HARD FLAG LOGIC
@@ -343,8 +344,18 @@ def sug_event_creator(classname, target, asn):
     )
     return new_event
 
+def merge(selected_groups : List[List[SubMeasurement]]):
+    """
+        Given the output of "select", a list of list of submeasurements whose
+        are to be merged together in the lowest ammount of hard flags possible, merge
+        them by the following rules:
+            1) all soft flags are merged together into a single open hard flag
+            2) all hard flags are merged into a single hard flag, the earliest one
+            3) closed hard flags are skiped from the logic: They are never merged to anything
+    """
 
-def merge(select_groups):
+
+def merge_old(select_groups):
 
     target_list = []
 
