@@ -17,7 +17,7 @@ class Event(models.Model):
 
     class IssueType(models.TextChoices):
         """
-        	Every kind of possible issue
+        	Every type of issue
         """
         TCP     =   'tcp'
         DNS     =   'dns'
@@ -25,20 +25,24 @@ class Event(models.Model):
         NDT     =   'ndt'
         NONE    =   'none'
 
+    # Issue name
     identification = models.CharField(
         max_length=200
     )
 
+    # Confirmed by an human
     confirmed = models.BooleanField(
         default = False,
         verbose_name = 'confirmed?'
     )
 
+    # First Measurement date
     start_date = models.DateTimeField(
         auto_now_add=True, 
         blank=True
     )
 
+    # Last measurement date
     end_date = models.DateTimeField(
         null=True, 
         blank=True
@@ -54,6 +58,7 @@ class Event(models.Model):
         blank=True
     )
 
+    # Type of issue
     issue_type = models.CharField(
         max_length=10, 
         null=False, 
@@ -72,6 +77,9 @@ class Event(models.Model):
                             null=True,
                             on_delete=SET_NULL
                             ) 
-                            
+
+    # If true, then this event won't register new measurements
+    closed = models.BooleanField(default=False) 
+
     def __str__(self):
         return u"%s" % self.identification
