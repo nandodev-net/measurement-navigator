@@ -38,3 +38,8 @@ class CaseDetailDataSerializer(serializers.ModelSerializer):
             'events',
             'twitter_search',
             ]
+
+class CaseActiveNumberSerializer(serializers.Serializer):
+    total_cases = serializers.IntegerField()
+    active_cases = serializers.IntegerField()
+    inactive_cases = serializers.IntegerField()

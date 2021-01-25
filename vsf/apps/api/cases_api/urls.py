@@ -16,4 +16,9 @@ urlpatterns = [
         views.CaseDetail.as_view(), 
         name='case_detail'),
 
+    path(
+        'num-active', 
+        views.CaseActiveNumber.as_view(), 
+        name='case_active_num'),
+
 ]

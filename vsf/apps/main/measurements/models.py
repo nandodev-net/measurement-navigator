@@ -13,7 +13,8 @@ import uuid
 import sys
 
 # local imports
-from apps.main.sites.models                              import Domain 
+from apps.main.sites.models         import Domain 
+from apps.main.asns.models          import ASN
 
 
 class RawMeasurement(models.Model):
@@ -128,8 +129,15 @@ class Measurement(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True)
 
     anomaly = models.BooleanField(default=False)
+
     domain  = models.ForeignKey(
                             to=Domain,
+                            null=True,
+                            on_delete=SET_NULL
+                            ) 
+    
+    asn = models.ForeignKey(
+                            to=ASN,
                             null=True,
                             on_delete=SET_NULL
                             ) 
@@ -147,6 +155,14 @@ class Measurement(models.Model):
             except Exception as e:
                 # If could not create this object, don't discard entire measurement, it's still important
                 print(f"Could not create domain for the following url: {url}. Error: {str(e)}", file=sys.stderr)
+
+        asn = self.raw_measurement.probe_asn
+        if asn is not None:
+            try:
+                asn,_ = ASN.objects.get_or_create(asn=str(asn))
+                self.asn = asn
+            except Exception as e:
+                print(f"Could not create asn for the following code: {asn}. Error: {str(e)}", file=sys.stderr)
 
         return super(Measurement,self).save(*args, **kwargs)
 

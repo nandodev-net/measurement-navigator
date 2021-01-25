@@ -30,3 +30,19 @@ class EventDetailDataSerializer(serializers.ModelSerializer):
             'issue_type',
 
         ]
+
+
+class EventActiveNumberSerializer(serializers.Serializer):
+    total_events = serializers.IntegerField()
+    active_events = serializers.IntegerField()
+    inactive_events = serializers.IntegerField()
+
+
+class EventAsnNumberSerializer(serializers.Serializer):
+    total_events = serializers.IntegerField()
+    data = serializers.JSONField()
+
+
+class EventTypeNumberSerializer(serializers.Serializer):
+    total_events = serializers.IntegerField()
+    data = serializers.JSONField()

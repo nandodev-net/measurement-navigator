@@ -8,6 +8,11 @@ from __future__ import unicode_literals
 from django.db import models
 from datetime import datetime  
 
+from django.db.models.deletion import SET_NULL
+
+from apps.main.sites.models     import Domain 
+from apps.main.asns.models      import ASN
+
 class Event(models.Model):
 
     class IssueType(models.TextChoices):
@@ -56,6 +61,17 @@ class Event(models.Model):
         default = IssueType.NONE
     )
 
+    domain  = models.ForeignKey(
+                            to=Domain,
+                            null=True,
+                            on_delete=SET_NULL
+                            ) 
 
+    asn = models.ForeignKey(
+                            to=ASN,
+                            null=True,
+                            on_delete=SET_NULL
+                            ) 
+                            
     def __str__(self):
         return u"%s" % self.identification
