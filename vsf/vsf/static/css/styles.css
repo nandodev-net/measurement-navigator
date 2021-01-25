@@ -57,7 +57,7 @@ h1, h2, h3, h4, h5, h6, p, label {
   font-size:14px;
 }
 
-.modal-content > label.highlight {
+.modal-content > label.highlight, .modal-body {
 	color: white;
 }
 
