@@ -11,14 +11,7 @@
 {% load widget_tweaks %}
 
 <!-- Modal -->
-<div
-  class="modal fade"
-  id="associateUrl"
-  tabindex="-1"
-  role="dialog"
-  aria-labelledby="associateUrlLabel"
-  aria-hidden="true"
->
+<div class="modal fade" id="associateUrl" tabindex="-1" role="dialog" aria-labelledby="associateUrlLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -35,82 +28,67 @@
 
       <div class="modal-body">
         <div class="container-fluid">
-          <div class="row">
-            <form
-              class="col-12"
-              id="site-creation-form"
-              action="#"
-              method="POST"
-            >
-              {% csrf_token %}
 
-              <div class="form-group">
-                {% for hidden in site_creation_form.hidden_fields %} {{ hidden }} {% endfor %}
-              </div>
+          <form id="site-creation-form" action="#" method="POST">
+            {% csrf_token %}
 
-              <div class="form-group">
-                <div class="input-group input-group-default mb-3">
-                  <div class="input-group-prepend w-25">
-                    <span
-                      class="input-group-text vsf-flex-grow-1"
-                      id="inputGroup-sizing-default"
-                    >
-                      Site
-                    </span>
-                  </div>
-                  {% render_field site_creation_form.name id="vsf-sites-input" class='form-control w-75' type='text' required="true" %}
+            <div class="form-group">
+              {% for hidden in site_creation_form.hidden_fields %} {{ hidden }} {% endfor %}
+            </div>
+
+            <div class="form-group">
+              <div class="input-group input-group-default mb-1">
+                <div class="field-wrap">
+                  <label class="create-sites-labels">
+                    Site url
+                  </label>
+                  {% render_field site_creation_form.name id="vsf-sites-input" class='form-control rounded' type='text' required="true" %}
                 </div>
               </div>
+            </div>
 
-              <div>
-                {% for error in site_creation_form.name.errors %} {{ error }} {% endfor %}
-              </div>
+            <div>
+              {% for error in site_creation_form.name.errors %} {{ error }} {% endfor %}
+            </div>
 
-              <div class="form-group">
-                <div class="input-group">
-                  <div class="input-group-prepend w-25">
-                    <span class="input-group-text vsf-flex-grow-1"
-                      >Description</span
-                    >
-                  </div>
-                  {% render_field site_creation_form.description_spa id="vsf-description-input" class='form-control vsf-form-control w-75' aria-label="With textarea" required="true" %}
+            <div class="form-group">
+              <div class="input-group input-group-default mb-1">
+                <div class="field-wrap">
+                  <label class="create-sites-labels">
+                    Description
+                  </label>
+                  {% render_field site_creation_form.description_spa id="vsf-description-input" class='form-control vsf-form-control rounded' aria-label="With textarea" required="true" %}
                 </div>
               </div>
+            </div>
 
-              <div class="form-group">
-                <div class="input-group">
-                  <div class="input-group-prepend w-25">
-                    <span class="input-group-text vsf-flex-grow-1"
-                      >Description Eng</span
-                    >
-                  </div>
-                  {% render_field site_creation_form.description_eng id="vsf-description-eng-input" class='form-control vsf-form-control w-75' aria-label="With textarea" %}
+            <div class="form-group">
+              <div class="input-group input-group-default mb-1">
+              
+                <div class="field-wrap">
+                  <label class="create-sites-labels">
+                    Description in English
+                  </label>
+                  {% render_field site_creation_form.description_eng id="vsf-description-eng-input" class='form-control vsf-form-control rounded' aria-label="With textarea" %}
                 </div>
+              
               </div>
+            </div>
 
-              <div class="form-group">
-                {% for error in site_creation_form.description.errors %} {{ error }} {% endfor %}
-              </div>
+            <div class="form-group">
+              {% for error in site_creation_form.description.errors %} {{ error }} {% endfor %}
+            </div>
 
-              <div class="form-group">
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  data-dismiss="modal"
-                >
-                  Close
-                </button>
-                <button
-                  id="create-sites-btn"
-                  type="button"
-                  class="btn btn-primary"
-                  disabled
-                >
-                  Save changes
-                </button>
-              </div>
-            </form>
-          </div>
+            <div class="form-group buttons-modal">
+              <button type="button" class="btn btn-danger" data-dismiss="modal" >
+                Close
+              </button>
+              <button id="create-sites-btn" type="button" class="btn btn-info" disabled >
+                Save changes
+              </button>
+            </div>
+          </form>
+          
         </div>
       </div>
     </div>
