@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.shortcuts import render
 
 from apps.main.cases.models import Case, Category
-from .serializers import CaseDataSerializer, CaseDetailDataSerializer
+from .serializers import CaseDataSerializer, CaseDetailDataSerializer, CaseActiveNumberSerializer
 
 class ListCases(generics.GenericAPIView):
     """
@@ -39,3 +39,23 @@ class CaseDetail(generics.GenericAPIView):
         case = self.get_object(id)
         case_json = CaseDetailDataSerializer(case)
         return Response(case_json.data, status=status.HTTP_200_OK)
+
+
+class CaseActiveNumber(generics.GenericAPIView):
+    """
+        class created to provide response to endpoint 
+        returning total number of active cases 
+    """
+    queryset = Case.objects.all()
+
+    def get(self, request):
+        total_cases = Case.objects.count()
+        active_cases = Case.objects.filter(end_date=None).count()
+
+        cases_json = {
+            'total_cases' : total_cases,
+            'active_cases' : active_cases,
+            'inactive_cases' : total_cases - active_cases
+        }
+        cases_json = CaseActiveNumberSerializer(cases_json)
+        return Response(cases_json.data, status=status.HTTP_200_OK)

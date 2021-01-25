@@ -33,11 +33,12 @@ for (SM, label) in submeasurements:
 
 
     for group in groups:
-        start_time = time()
+        #start_time = time()
+        #print(group)
         result = select(group)
-        elapsed_time = time() - start_time
+        #elapsed_time = time() - start_time
 
-        print(elapsed_time)
+        #print(elapsed_time)
         print(result)
 
         merge(result)
