@@ -6,6 +6,16 @@ from rest_framework import serializers
 from apps.main.cases.models import Case, Category
 from apps.api.events_api.serializers import EventDataSerializer
 
+
+class CategoryDataSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = [
+            'id',
+            'name',
+            'display_name',
+        ]
+
 class CaseDataSerializer(serializers.ModelSerializer):
     """
         class created to define the format of
