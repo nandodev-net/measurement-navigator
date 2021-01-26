@@ -415,7 +415,7 @@ def merge_old(select_groups):
 
         if group[0].flag.flag == 'soft':
             target = group[0].measurement.domain
-            asn = target_list[0][0].measurement.asn
+            asn = group[0].measurement.asn
             new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper(), target, asn)
             new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
             print('HardFlag creada: ', new_hard_flag.id)
