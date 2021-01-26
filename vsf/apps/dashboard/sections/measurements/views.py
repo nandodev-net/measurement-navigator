@@ -112,7 +112,11 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         else:
             last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
 
+        # Compute measurements:
+        measurements = MeasModels.Measurement.objects.all().select_related('raw_measurement')
+
         context = super().get_context_data()
+        context['measurements'] = measurements
         context['test_types'] = test_types
         context['sites'] = sites
         context['prefill'] = prefill
