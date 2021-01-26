@@ -17,6 +17,16 @@ urlpatterns = [
         name='event_detail'),
 
     path(
+        'asn/<str:asn>', 
+        views.ListEventsByASN.as_view(), 
+        name='list_event_by_asn'),
+
+    path(
+        'type/<str:type>', 
+        views.ListEventsByType.as_view(), 
+        name='list_event_by_type'),
+
+    path(
         'num-active', 
         views.EventActiveNumber.as_view(), 
         name='event_active_num'),

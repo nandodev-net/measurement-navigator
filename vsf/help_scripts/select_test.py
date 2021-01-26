@@ -41,6 +41,6 @@ for (SM, label) in submeasurements:
         #print(elapsed_time)
         print(result)
 
-        merge(result)
+        merge_old(result)
 
         

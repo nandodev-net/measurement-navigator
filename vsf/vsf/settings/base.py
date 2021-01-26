@@ -61,6 +61,7 @@ INSTALLED_APPS = [
 ]
 
 API_APPS = [
+    'apps.api.asns_api.apps.AsnsAPIConfig',
     'apps.api.fp_tables_api.apps.FpTablesAPIConfig',
     'apps.api.cases_api.apps.CasesAPIConfig',
     'apps.api.events_api.apps.EventsAPIConfig',
