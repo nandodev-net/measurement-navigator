@@ -1,5 +1,6 @@
 from apps.main.measurements.models import Measurement
 from apps.main.sites.models        import Domain
+from apps.main.asns.models         import ASN
 from vsf.utils                     import get_domain
 
 
@@ -10,4 +11,10 @@ for q in qs:
         continue
     domain, _ = Domain.objects.get_or_create(domain_name = get_domain(q.raw_measurement.input), defaults={'site':None})
     q.domain = domain
+    q.save()
+
+    if q.raw_measurement.probe_asn is None:
+        continue
+    asn, _ = ASN.objects.get_or_create(asn = str(q.raw_measurement.probe_asn))
+    q.asn = asn
     q.save()

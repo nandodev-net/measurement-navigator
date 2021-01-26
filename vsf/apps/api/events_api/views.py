@@ -51,6 +51,32 @@ class EventDetail(generics.GenericAPIView):
         return Response(event_json.data, status=status.HTTP_200_OK)
 
 
+class ListEventsByASN(generics.GenericAPIView):
+    """
+        class created to provide response to endpoint listing
+        all event instances by ASN
+    """
+    serializer_class = EventDataSerializer
+
+    def get(self, request, asn):
+        events = Event.objects.filter(asn__asn = asn)
+        events_json = EventDataSerializer(events, many=True)
+        return Response(events_json.data, status=status.HTTP_200_OK)
+
+
+class ListEventsByType(generics.GenericAPIView):
+    """
+        class created to provide response to endpoint listing
+        all event instances by Type
+    """
+    serializer_class = EventDataSerializer
+
+    def get(self, request, type):
+        events = Event.objects.filter(issue_type = type)
+        events_json = EventDataSerializer(events, many=True)
+        return Response(events_json.data, status=status.HTTP_200_OK)
+
+
 class EventActiveNumber(generics.GenericAPIView):
     """
         class created to provide response to endpoint 

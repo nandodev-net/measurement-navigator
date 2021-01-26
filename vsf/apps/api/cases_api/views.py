@@ -6,7 +6,22 @@ from rest_framework.response import Response
 from django.shortcuts import render
 
 from apps.main.cases.models import Case, Category
-from .serializers import CaseDataSerializer, CaseDetailDataSerializer, CaseActiveNumberSerializer
+from .serializers import CategoryDataSerializer, CaseDataSerializer, CaseDetailDataSerializer, CaseActiveNumberSerializer
+
+
+class ListCategories(generics.GenericAPIView):
+    """
+        class created to provide response to endpoint listing
+        all category instances in the database
+    """
+    serializer_class = CategoryDataSerializer
+    queryset = Category.objects.all()
+
+    def get(self, request):
+        categories = Category.objects.all()
+        categories_json = CategoryDataSerializer(categories, many=True)
+        return Response(categories_json.data, status=status.HTTP_200_OK)
+
 
 class ListCases(generics.GenericAPIView):
     """
@@ -39,6 +54,20 @@ class CaseDetail(generics.GenericAPIView):
         case = self.get_object(id)
         case_json = CaseDetailDataSerializer(case)
         return Response(case_json.data, status=status.HTTP_200_OK)
+
+
+class ListCasesByCategory(generics.GenericAPIView):
+    """
+        class created to provide response to endpoint listing
+        all case instances by category
+    """
+    serializer_class = CaseDataSerializer
+    queryset = Case.objects.all()
+
+    def get(self, request, cat_id):
+        cases = Case.objects.filter(category__id = cat_id)
+        cases_json = CaseDataSerializer(cases, many=True)
+        return Response(cases_json.data, status=status.HTTP_200_OK)
 
 
 class CaseActiveNumber(generics.GenericAPIView):
