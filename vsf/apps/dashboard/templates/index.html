@@ -6,6 +6,10 @@
 
 {% extends 'extends/base.html' %}
 {% load static %}
+{% block custom_stylesheet %}
+    <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+{% endblock custom_stylesheet %} 
+
 {% block tab_title %} VSF - Fastpath {% endblock tab_title %}
 {% block title %} Fastpath {% endblock title %}
 {% block sub_title %} List of all available measurements {% endblock sub_title %}
@@ -19,255 +23,240 @@
 
 {% block content %}
 <form id="urlForm">
-  <nav class="navbar navbar-light bg-light">
+  <nav class="navbar navbar-light bg-light rounded p-4">
     <div class="container-fluid">
       <div class="row">
         <div class="col-3">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">Since</span>
+          <div class="row align-items-center rounded p-2 bg-info">
+            <div class="col-3 mx-auto">
+              <label class='font-weight-bold text-white'>
+                Since
+              </label>
             </div>
-            <input id="since" class="form-control mr-2" type="date" />
+            <div class="col-9 mx-auto">
+              <input id="since" class="form-control mr-2" type="date" />
+            </div>
+          </div>            
+        </div>
+        <div class="col-3">
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-3 mx-auto">
+              <label class='font-weight-bold text-white'>
+                Until
+              </label>
+            </div>
+            <div class="col-9 mx-auto">
+              <input id="until" class="form-control mr-2" type="date" />
+            </div>
+          </div>
+        </div>
+        <div class="col-3">
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-3 mx-auto">
+              <label class="font-weight-bold text-white" for="asn">ASN</label>
+            </div>
+            <div class="col-9 mx-auto">
+              <select class="custom-select" id="asn">
+                <option selected value="">Any ASN</option>
+                {% for asn in asns %}
+                      <option value="{{ asn.asn }}" >{{ asn.asn }} - {{ asn.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
         </div>
 
         <div class="col-3">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">Until</span>
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-6 mx-auto">
+              <label class="font-weight-bold text-white" for="data-ready">Data Ready</label>
             </div>
-            <input id="until" class="form-control mr-2" type="date" />
-          </div>
-        </div>
-
-        <div class="col-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="asn">ASN</label>
+            <div class="col-6 mx-auto">
+              <select class="custom-select" id="data-ready">
+                <option selected value="">Any</option>
+                <option value="ready">Ready</option>
+                <option value="not_ready">Not Ready</option>
+                <option value="undetermined">Undetermined</option>
+                <option value="dead">Dead</option>
+              </select>
             </div>
-            <select class="custom-select" id="asn">
-              <option selected value="">Any ASN</option>
-              {% for asn in asns %}
-                    <option value="{{ asn.asn }}" >{{ asn.asn }} - {{ asn.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <div class="col-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="data-ready">Data Ready</label>
-            </div>
-            <select class="custom-select" id="data-ready">
-              <option selected value="">Any</option>
-              <option value="ready">Ready</option>
-              <option value="not_ready">Not Ready</option>
-              <option value="undetermined">Undetermined</option>
-              <option value="dead">Dead</option>
-            </select>
           </div>
         </div>
 
         <div class="col-4 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="test-name">Test Type</label>
+          <div class="row align-items-center rounded p-2 bg-info">
+            <div class="col-4 mx-auto">
+              <label class="font-weight-bold text-white" for="test-name">Test Type</label>
             </div>
-            <select class="custom-select" id="test-name">
-              <option selected value="">Choose Test Type</option>
-              <option value="web_connectivity">Web Connectivity</option>
-              <option value="http_requests">HTTP Requests</option>
-              <option value="dns_consistency">DNS Consistency</option>
-              <option value="http_invalid_request_line">
-                HTTP Invalid Request Line
-              </option>
-              <option value="bridge_reachability">Bridgr Reachability</option>
-              <option value="http_header_field_manipulation">
-                HTTP Header Field Manipulation
-              </option>
-              <option value="multi_protocol_traceroute">
-                Multi Protocol Traceroute
-              </option>
-              <option value="meek_fronted_requests_test">
-                Meek Fronted Request Test
-              </option>
-              <option value="whatsapp">WhatsApp</option>
-              <option value="facebook_messenger">Facebook Messenger</option>
-              <option value="ndt">NTD</option>
-              <option value="dash">Dash</option>
-              <option value="telegram">Telegram</option>
-              <option value="psiphon">Psiphon</option>
-              <option value="tor">Tor</option>
-              <option value="unknown">Unknown</option>
-            </select>
+            <div class="col-8 mx-auto">
+              <select class="custom-select" id="test-name">
+                <option selected value="">Choose Test Type</option>
+                <option value="web_connectivity">Web Connectivity</option>
+                <option value="http_requests">HTTP Requests</option>
+                <option value="dns_consistency">DNS Consistency</option>
+                <option value="http_invalid_request_line">
+                  HTTP Invalid Request Line
+                </option>
+                <option value="bridge_reachability">Bridgr Reachability</option>
+                <option value="http_header_field_manipulation">
+                  HTTP Header Field Manipulation
+                </option>
+                <option value="multi_protocol_traceroute">
+                  Multi Protocol Traceroute
+                </option>
+                <option value="meek_fronted_requests_test">
+                  Meek Fronted Request Test
+                </option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="facebook_messenger">Facebook Messenger</option>
+                <option value="ndt">NTD</option>
+                <option value="dash">Dash</option>
+                <option value="telegram">Telegram</option>
+                <option value="psiphon">Psiphon</option>
+                <option value="tor">Tor</option>
+                <option value="unknown">Unknown</option>
+              </select>
+            </div>
           </div>
         </div>
 
         <div class="col-3 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="anomaly-state">Anomaly</label>
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-5 mx-auto">
+              <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
             </div>
-            <select class="custom-select" id="anomaly-state">
-              <option selected value="">Any</option>
-              <option value="false">Anomaly False</option>
-              <option value="true">Anomaly True</option>
-            </select>
+            <div class="col-7 mx-auto">
+              <select class="custom-select" id="anomaly-state">
+                <option selected value="">Any</option>
+                <option value="false">Anomaly False</option>
+                <option value="true">Anomaly True</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        <div class="col-3 mt-3">
+        <div class="col-3 mt-3 p-2">
           <input
             id="input"
-            class="form-control mr-2"
+            class="form-control mr-2 border-top-0 border-left-0 border-right-0 bg-transparent"
             type="search"
             placeholder="URL"
             aria-label="Search URL"
           />
         </div>
-
-        <div class="col-2 mt-3">
+        <div class="col-2 mt-3 p-2">
           <button
             id="url-form-button"
-            class="btn btn-primary btn-block"
+            class="btn btn-outline-info btn-block"
             type="submit"
           >
-            Search
+            <i class="fa fa-search"></i>
           </button>
         </div>
       </div>
     </div>
   </nav>
+  <div class="card rounded p-3 mt-4">
+    <table class="table table-striped mt-5" id="fastpath-table">
+      <thead>
+        <tr>
+          <th class="text-center" scope="col">URL</th>
+          <th class="text-center" scope="col">Data Ready</th>
+          <th class="text-center" scope="col">Test Type</th>
+          <th class="text-center" scope="col">Anomaly</th>
+          <th class="text-center" scope="col">ASN</th>
+          <th class="text-center" scope="col">Date</th>
+          <th class="text-center" scope="col">Detailed Info</th>
+        </tr>
+      </thead>
 
-  <table class="table table-striped mt-5">
-    <thead>
-      <tr>
-        <th class="text-center" scope="col">URL</th>
-        <th class="text-center" scope="col">Data Ready</th>
-        <th class="text-center" scope="col">Test Type</th>
-        <th class="text-center" scope="col">Anomaly</th>
-        <th class="text-center" scope="col">ASN</th>
-        <th class="text-center" scope="col">Date</th>
-        <th class="text-center" scope="col">Detailed Info</th>
-      </tr>
-    </thead>
+      <tbody>
+        {% for measurement in inbox_measurements %}
+        <tr>
+          <!-- INPUT -->
+          <td>
+            {{ measurement.input }}
+          </td>
 
-    <tbody>
-      {% for measurement in inbox_measurements %}
-      <tr>
-        <!-- INPUT -->
-        <td>
-          {{ measurement.input }}
+          <!-- STATE -->
+          {% if measurement.data_ready == 'ready' %}
+          <td class="text-center">
+            <i class="far fa-check-circle text-success" title="Report Stored"></i>
+          </td>
+          {% elif measurement.data_ready == 'not_ready' %}
+          <td class="text-center" title="Report Not Available Yet">
+            <i class="fas fa-ban text-danger"></i>
+          </td>
+          {% elif measurement.data_ready == 'undetermined' %}
+          <td class="text-center" title="Missing report">
+            <i class="fas fa-exclamation-triangle text-warning"></i>
+          </td>
+          {% else %}
+          <td class="text-center" title="Ignored Measurement" >
+            <i class="fas fa-skull-crossbones text-disabled"></i>
+          </td>
+          {% endif %}
+
+          <!-- TEST NAME -->
+          <td class="text-center">{{ measurement.test_name }}</td>
+
+          <!-- ANOMALY -->
+          {% if measurement.anomaly %}
+          <td class="text-center">
+            <i class="fas fa-exclamation-circle text-warning"></i>
+          </td>
+          {% else %}
+          <td class="text-center">N/A</td>
+          {% endif %}
+
+          <!-- ASN -->
+          <td class="text-center">
+            {{ measurement.probe_asn }}
+          </td>
+
+          <!-- TODO: necesitamos algún tipo de "mapeo" al nombre real -->
+
+          <!-- DATE -->
+          <td class="text-center">
+            {{ measurement.measurement_start_time }}
+          </td>
+
+          <!-- MODAL BUTTON -->
+          <td class="text-center">
+            <!-- BUTTON TRIGGER MODAL -->
+            <button
+              id="{{ measurement.id }}"
+              type="button"
+              class="btn btn-dark detail-btn"
+              data-toggle="modal"
+              data-target="#modalCompleteInfo"
+              aria-label="modalDetailedInfo"
+            >
+              Expand
+            </button>
+          </td>
+        </tr>
+        {% empty %}
+        <td colspan="7" class="text-center">
+          <div class="alert alert-danger" role="alert">
+            No sites to show!
+          </div>
         </td>
-
-        <!-- STATE -->
-        {% if measurement.data_ready == 'ready' %}
-        <td class="text-center">
-          <i class="far fa-check-circle text-success" title="Report Stored"></i>
-        </td>
-        {% elif measurement.data_ready == 'not_ready' %}
-        <td class="text-center" title="Report Not Available Yet">
-          <i class="fas fa-ban text-danger"></i>
-        </td>
-        {% elif measurement.data_ready == 'undetermined' %}
-        <td class="text-center" title="Missing report">
-          <i class="fas fa-exclamation-triangle text-warning"></i>
-        </td>
-        {% else %}
-        <td class="text-center" title="Ignored Measurement" >
-          <i class="fas fa-skull-crossbones text-disabled"></i>
-        </td>
-        {% endif %}
-
-        <!-- TEST NAME -->
-        <td class="text-center">{{ measurement.test_name }}</td>
-
-        <!-- ANOMALY -->
-        {% if measurement.anomaly %}
-        <td class="text-center">
-          <i class="fas fa-exclamation-circle text-warning"></i>
-        </td>
-        {% else %}
-        <td class="text-center">N/A</td>
-        {% endif %}
-
-        <!-- ASN -->
-        <td class="text-center">
-          {{ measurement.probe_asn }}
-        </td>
-
-        <!-- TODO: necesitamos algún tipo de "mapeo" al nombre real -->
-
-        <!-- DATE -->
-        <td class="text-center">
-          {{ measurement.measurement_start_time }}
-        </td>
-
-        <!-- MODAL BUTTON -->
-        <td class="text-center">
-          <!-- BUTTON TRIGGER MODAL -->
-          <button
-            id="{{ measurement.id }}"
-            type="button"
-            class="btn btn-dark detail-btn"
-            data-toggle="modal"
-            data-target="#modalCompleteInfo"
-            aria-label="modalDetailedInfo"
-          >
-            Expand
-          </button>
-        </td>
-      </tr>
-      {% empty %}
-      <td colspan="7" class="text-center">
-        <div class="alert alert-danger" role="alert">
-          No sites to show!
-        </div>
-      </td>
-      {% endfor %}
-    </tbody>
-  </table>
-
-  <nav
-    class="d-flex justify-content-center align-items-center"
-    aria-label="Pagination FastPath"
-  >
-    <ul class="pagination mt-5 justify-content-center">
-      {% if inbox_measurements.has_previous %}
-      <li class="page-item">
-        <button id="page-one" class="page-link">&laquo; First</button>
-      </li>
-
-      <li class="page-item">
-        <button id="page-previous" class="page-link">Previous</button>
-      </li>
-      {% endif %}
-
-      <li class="page-item">
-        <a class="page-link" href="#">
-          Page {{ inbox_measurements.number }} of {{ inbox_measurements.paginator.num_pages }}
-        </a>
-      </li>
-
-      {% if inbox_measurements.has_next %}
-      <li class="page-item">
-        <button id="page-next" class="page-link">Next</button>
-      </li>
-
-      <li class="page-item">
-        <button id="page-last" class="page-link">last &raquo;</button>
-      </li>
-      {% endif %}
-    </ul>
-  </nav>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </form>
 
 {% include "includes/fastpath-includes/detailed-info-modal.html" %}
 {% endblock content %}
 
 {% block custom_scripts %}
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script>
+  
+  $('#fastpath-table').DataTable();
+
   let urlSearch;
   let data = {
     page    : 1,
