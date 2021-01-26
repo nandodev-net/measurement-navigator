@@ -263,6 +263,9 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             3) closed hard flags are skiped from the logic: They are never merged to anything
     """
 
+    # If there's no measurements, we have nothing to do here
+    if not measurements_with_flags: return 
+
     soft_flags : List[SubMeasurement] = [] # Measurements with soft flag
     hard_flags : List[SubMeasurement] = [] # Measurements with hard flag 
     soft = Flag.FlagType.SOFT
@@ -368,9 +371,10 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                         'previous_counter',
                         'id')
 
+
         groups = filter(
                         lambda l:len(l) >= minimum_measurements,
-                        Grouper(meas, lambda m: (m.measurement.domain.id, m.measurement.raw_measurement.probe_asn)) #group by domain and asn
+                        Grouper(meas.iterator(), lambda m: (m.measurement.domain.id, m.measurement.raw_measurement.probe_asn)) #group by domain and asn
                     )
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
