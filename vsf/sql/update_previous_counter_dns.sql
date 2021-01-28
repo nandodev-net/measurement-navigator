@@ -6,16 +6,18 @@ WITH
             rms.measurement_start_time as start_time,
             f.flag as flag,
             ms.domain_id as domain,
-            asn.id       as asn,
             dns.counted as counted,
+            rms.probe_asn as asn,
             dns.previous_counter as prev_counter
         FROM submeasurements_dns dns    JOIN measurements_measurement ms ON ms.id = dns.measurement_id
                                         JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id
                                         JOIN flags_flag f ON f.id = dns.flag_id
-                                        JOIN asns_asn asn ON ms.asn_id = asn.id
-                                        JOIN sites_domain doms ON ms.domain_id = doms.id
-        WHERE doms.recently_updated AND asn.recently_updated
         ORDER BY domain, asn, start_time, prev_counter, dns_id
+    ),
+    ms_to_update as (               -- Builds a list with every input such that there's at the least 1 measurement for this input whose "counted" field
+        SELECT DISTINCT ms.domain    -- is false
+        FROM measurements ms 
+        WHERE NOT ms.counted
     ),
     sq as (
         /*
@@ -38,32 +40,17 @@ WITH
         SELECT 
             ms.dns_id   as id, 
             ms.domain   as domain, 
-            ms.flag     as flag,
-            ms.asn      as asn, 
+            ms.flag     as flag, 
             -- ms.asn      as asn, --debug
             SUM(CAST(ms.flag<>'ok' AS INT)) OVER (PARTITION BY ms.domain, ms.asn ORDER BY ms.start_time, ms.prev_counter, ms.dns_id) as prev_counter
-        FROM measurements ms
-    ),
-    update_asns as (
-        UPDATE asns_asn asns
-        SET
-            recently_updated = CAST(0 as BOOLEAN)
-        FROM (select distinct asn from measurements) measurements 
-        WHERE 
-            asns.id=measurements.asn AND NOT recently_updated
-    ),
-    updated_domains as (
-        UPDATE sites_domain doms
-        SET 
-            recently_updated = CAST(0 AS BOOLEAN)
-        FROM (select distinct domain from measurements) measurements
-        WHERE
-            doms.id = measurements.domain AND NOT recently_updated
+        FROM measurements ms JOIN ms_to_update on ms_to_update.domain = ms.domain
     )
+-- select * from sq;
 UPDATE submeasurements_dns dns
     SET 
-    -- Simple update, set the new prev_counter value to its new value
-    -- and the counted field to true
-    previous_counter = sq.prev_counter
+        -- Simple update, set the new prev_counter value to its new value
+        -- and the counted field to true
+        previous_counter = sq.prev_counter,
+        counted = CAST(1 as BOOLEAN)
     FROM sq
-    WHERE dns.id = sq.id AND (dns.previous_counter<>sq.prev_counter)
+    WHERE dns.id = sq.id AND (NOT counted OR dns.previous_counter<>sq.prev_counter);

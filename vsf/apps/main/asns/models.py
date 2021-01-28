@@ -21,7 +21,3 @@ class ASN(models.Model):
                 max_length=100
             )
 
-    # We use this field to check whether there are new measurements 
-    # with this ASN, so we can now which measurements take when
-    # counting or updating flags
-    recently_updated = models.BooleanField(default=True)
