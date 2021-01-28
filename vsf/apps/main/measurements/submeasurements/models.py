@@ -26,8 +26,12 @@ class SubMeasurement(models.Model):
     #   * m.measurement.raw_measurement.input == self.measurement.raw_measurement.input
     previous_counter = models.IntegerField(default=0)
 
+    # Required for flag logic, tells if this submeasurement was recently updated
+    flagged = models.BooleanField(default=False)
+
     # If this measurement was counted 
     counted = models.BooleanField(default=False)
+    
     def save(   self, 
                 force_insert=False, 
                 force_update=False, 
