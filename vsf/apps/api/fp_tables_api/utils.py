@@ -19,6 +19,7 @@ import django.utils.timezone    as timezone
 import django.utils.dateparse   as dateparse
 from   django.shortcuts         import render
 from   rest_framework.views     import APIView
+from   django.core.cache        import cache
 
 # Third party imports
 import time
@@ -34,6 +35,7 @@ from apps.main.asns.models              import ASN
 from .                                  import utils
 from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
+from vsf.utils                          import CachedData
 
 def checkPostData(data) -> bool:
         """
@@ -118,12 +120,18 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
     # Perform a get request from Ooni
     next_url = 'https://api.ooni.io/api/v1/measurements?' + urlencode(data)
 
+    # We store the earliest measurement so we can update just what needs to be updated 
+    # when computing hard flags and updating measurement count
+    cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
+
     objects = [] # List of measurement objects obtained
+    status_code = 200
     while next_url != None:
         try:
             # If it wasn't able to get the next page data, just store the currently added data
             # @TODO we have to think what to do in this cases
             req = requests.get(next_url)
+            status_code = req.status_code
             assert(req.status_code == 200)
         except:
             break
@@ -163,7 +171,6 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
                 test_name= result['test_name'],
             )
             URL.objects.get_or_create(url=fp.input)
-            ASN.objects.get_or_create(asn=fp.probe_asn)
             objects.append(fp)
 
 
@@ -171,18 +178,19 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
     saved_measurements = []
     for fp in objects:
         try:
-            FastPath.objects.get(
+            fp_old = FastPath.objects.get(
                         measurement_start_time=fp.measurement_start_time,
                         input=fp.input,
                         report_id=fp.report_id,
                         test_name=fp.test_name)
             continue
-        except:
+        except FastPath.DoesNotExist:
             pass
 
         #Since this measurement is not yet stored, try to recover its complete data if possible
         try:
             req = requests.get(fp.measurement_url)
+            status_code = req.status_code
             assert req.status_code == 200
         except:
             fp.save()
@@ -190,9 +198,11 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
             continue
 
 
+        from vsf.utils import Colors as c
         try:
+            print(c.magenta("Creating a new measurement"))
             data = req.json()
-            RawMeasurement.objects.create(
+            ms = RawMeasurement.objects.create(
                 input=data['input'],
                 report_id= data['report_id'],
                 report_filename= data.get('report_filename','NO_AVAILABLE'), #
@@ -215,7 +225,14 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
             )
             fp.report_ready = True
             data_state = FastPath.DataReady.READY
-        except:
+            start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
+            print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+            if start_time_datetime < cache_min_date:
+                cache_min_date = start_time_datetime
+                print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+                cache.set(CachedData.EARLIEST_ADDED_MEASUREMENT_DATE, cache_min_date)
+
+        except Exception as e:
             fp.report_ready = False
             data_state = FastPath.DataReady.UNDETERMINED
 
@@ -226,7 +243,8 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
         if limit and (len(saved_measurements) >= limit):
             break
 
-    return (req.status_code, saved_measurements)
+
+    return (status_code, saved_measurements)
 
 
 def update_measurement_table(

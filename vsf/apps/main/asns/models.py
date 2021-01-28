@@ -21,17 +21,7 @@ class ASN(models.Model):
                 max_length=100
             )
 
-    # This json contains a list with the references to the reports related to this url
-    # The format for this json should be { "reports" : [measurement.tid] }
-    reports = JSONField(
-                unique=True,
-                null=True, 
-                blank=True
-            )     
-    # This json contains a list with the references to the reports related to this url
-    # The format for this json should be { "references" : [FastPath.tid] }
-    fp_references = JSONField(
-                unique=True,
-                null=True, 
-                blank=True
-            )
+    # We use this field to check whether there are new measurements 
+    # with this ASN, so we can now which measurements take when
+    # counting or updating flags
+    recently_updated = models.BooleanField(default=True)

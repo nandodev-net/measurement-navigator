@@ -26,6 +26,8 @@ class SubMeasurement(models.Model):
     #   * m.measurement.raw_measurement.input == self.measurement.raw_measurement.input
     previous_counter = models.IntegerField(default=0)
 
+    # If this measurement was counted 
+    counted = models.BooleanField(default=False)
     def save(   self, 
                 force_insert=False, 
                 force_update=False, 

@@ -5,7 +5,7 @@
 from rest_framework import serializers
 from apps.main.fp_tables.models import FastPath
 
-class FastPathDataSerializer(serializers.Serializer):
+class FastPathDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = FastPath
         fields = '__all__'

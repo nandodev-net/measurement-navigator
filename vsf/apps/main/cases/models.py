@@ -8,8 +8,11 @@ from django.urls    import reverse
 from django.conf    import settings
 from datetime       import date as d
 
+from django.db.models.deletion import SET_NULL
+
 # Project imports
 from apps.main.events.models import Event
+from apps.main.sites.models import Domain 
 
 
 class Category(models.Model):
@@ -50,6 +53,12 @@ class Case(models.Model):
     events = models.ManyToManyField(Event, related_name="cases")
     twitter_search = models.CharField(max_length=400, null=True, blank=True)
 
+    domain  = models.ForeignKey(
+                            to=Domain,
+                            null=True,
+                            on_delete=SET_NULL
+                            ) 
+                            
     def __str__(self):
         return self.title
 
