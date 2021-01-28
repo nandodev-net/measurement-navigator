@@ -341,6 +341,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
 
     # Delete irrelevant flags
     for flag in flags_to_delete: 
+
         if flag.event:
             flag.event.delete()
         flag.delete()
@@ -360,21 +361,44 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
     # For every submeasurement type...
     for (SM, label) in submeasurements:
 
-        
-        meas = SM.objects.all()\
-                    .select_related('measurement', 'measurement__raw_measurement', 'flag')\
-                    .exclude(flag__flag=Flag.FlagType.OK)\
-                    .order_by(
-                        'measurement__domain', 
-                        'measurement__raw_measurement__probe_asn', 
-                        'measurement__raw_measurement__measurement_start_time',
-                        'previous_counter',
-                        'id')
-
-
+        # select every submeasurement such that partitioned by domain,
+        # there's at the least one measurement in its partition that's 
+        # not flagged.
+        # (so we can avoid run the logic over elements not recently updated)
+        meas = SM.objects.raw(  f"WITH \
+                                    measurements as (\
+                                        SELECT  \
+                                            domain_id,\
+                                            subms.id as id,\
+                                            flagged,\
+                                            probe_asn\
+                                        FROM    \
+                                            measurements_measurement ms JOIN  submeasurements_{label} subms ON ms.id=subms.measurement_id\
+                                                                        JOIN  measurements_rawmeasurement rms ON ms.raw_measurement_id=rms.id        \
+                                    ),\
+                                    dom_to_update as (\
+                                        SELECT DISTINCT ms.domain_id as domain  \
+                                        FROM measurements ms \
+                                        WHERE NOT flagged\
+                                    ), \
+                                    valid_subms as (\
+                                        SELECT id, probe_asn, domain_id \
+                                        FROM \
+                                            measurements ms JOIN dom_to_update ON dom_to_update.domain = ms.domain_id\
+                                    )\
+                                SELECT \
+                                    submeasurements_{label}.id, \
+                                    submeasurements_{label}.flagged, \
+                                    submeasurements_{label}.measurement_id,  \
+                                    submeasurements_{label}.flag_id,\
+                                    domain_id,\
+                                    probe_asn \
+                                FROM \
+                                    submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id\
+                                ORDER BY domain_id, probe_asn;")
         groups = filter(
                         lambda l:len(l) >= minimum_measurements,
-                        Grouper(meas.iterator(), lambda m: (m.measurement.domain.id, m.measurement.raw_measurement.probe_asn)) #group by domain and asn
+                        Grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
                     )
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
@@ -382,11 +406,9 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
             weird_measurements = select(group, time_window,minimum_measurements)
             for sub_group in weird_measurements:
                 merge(sub_group)
-
-    return
+        
+        SM.objects.filter(flagged=False).update(flagged=True)
             
-
-
 def sug_event_creator(classname, target, asn):
     if classname == 'DNS':
         issue_type = Event.IssueType.DNS
@@ -402,8 +424,6 @@ def sug_event_creator(classname, target, asn):
         asn = asn,
     )
     return new_event
-
-
 
 def merge_old(select_groups):
 
