@@ -39,13 +39,14 @@ def SoftFlagMeasurements(since : str = None, until : str = None, limit : int = 5
     
 @shared_task(time_limit=3600, vsf_name=SUBMEASUREMENTS_TASKS.COUNT_FLAGS, base=VSFTask)
 def count_flags_submeasurements():
-    state = cache.get(SUBMEASUREMENTS_TASKS.COUNT_FLAGS)
+    name = SUBMEASUREMENTS_TASKS.COUNT_FLAGS
+    state = cache.get(name)
     result = {'error' : None, 'ran' : False}
 
     if state == ProcessState.RUNNING or state == ProcessState.STARTING:
         return result
 
-    cache.set(SUBMEASUREMENTS_TASKS.COUNT_FLAGS, ProcessState.RUNNING)
+    cache.set(name, ProcessState.RUNNING)
     try: 
         result['result'] = count_flags_sql()
     except Exception as e:
@@ -56,40 +57,19 @@ def count_flags_submeasurements():
 
 @shared_task(time_limit=3600, vsf_name = SUBMEASUREMENTS_TASKS.HARD_FLAGS, base=VSFTask)
 def hard_flag_task():
-    # Get the data we need, all the submeasurements ordered by input, and by date
-    submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns')]
+    name = SUBMEASUREMENTS_TASKS.HARD_FLAGS
+    state = cache.get(name)
+    result = {'error' : None, 'ran' : False}
 
-    # just a shortcut
-    start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
+    if state == ProcessState.RUNNING or state == ProcessState.STARTING:
+        return result
 
-    result = {'hard_tagged':[]}
-    # For every submeasurement type...
-    for (SM, label) in submeasurements:
+    cache.set(name, ProcessState.RUNNING)
 
-        meas = SM.objects.raw(
-            (   "SELECT " +
-                "submeasurements_{label}.id, " +
-                "previous_counter, " +
-                "rms.measurement_start_time, " +
-                "dense_rank() OVER (order by rms.input) as group_id " +
+    try:
+        result['result'] = hard_flag()
+    except Exception as e:
+        result['error'] = str(e)
 
-                "FROM " +
-                "submeasurements_{label} JOIN measurements_measurement ms ON ms.id = submeasurements_{label}.measurement_id " +
-                                        "JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id " +
-                                        "JOIN flags_flag f ON f.id = submeasurements_{label}.flag_id " +
-                "WHERE " +
-                "f.flag<>'ok' " +
-                "ORDER BY rms.input, rms.measurement_start_time, previous_counter; "
-            ).format(label=label)
-        )
-        
-        groups = Grouper(meas, lambda m: m.group_id)
-
-
-        for group in groups:
-            start_time = time()
-            result = select(group)
-            elapsed_time = time() - start_time
-            print(elapsed_time)
-            print(result)
-            merge(result)
+    result['ran'] = True
+    return result
