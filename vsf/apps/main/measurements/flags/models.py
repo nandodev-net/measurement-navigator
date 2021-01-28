@@ -69,7 +69,6 @@ class Flag(models.Model):
         auto_now=True
         )
 
-
     def __str__(self):
         return str(self.flag) + " : " + str(self.creation_date)
 

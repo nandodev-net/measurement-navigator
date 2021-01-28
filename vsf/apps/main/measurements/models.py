@@ -13,7 +13,8 @@ import uuid
 import sys
 
 # local imports
-from apps.main.sites.models                              import Domain 
+from apps.main.sites.models         import Domain 
+from apps.main.asns.models          import ASN
 
 
 class RawMeasurement(models.Model):
@@ -128,8 +129,15 @@ class Measurement(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True)
 
     anomaly = models.BooleanField(default=False)
+
     domain  = models.ForeignKey(
                             to=Domain,
+                            null=True,
+                            on_delete=SET_NULL
+                            ) 
+    
+    asn = models.ForeignKey(
+                            to=ASN,
                             null=True,
                             on_delete=SET_NULL
                             ) 
@@ -138,15 +146,27 @@ class Measurement(models.Model):
 
         # Get the url and check whether it is None or not
         url = self.raw_measurement.input
-        if url is not None:
+        if url is not None and self.id is None:
             # If not none, then get the domain and save it
             try: 
                 from vsf.utils import get_domain
                 domain, _ = Domain.objects.get_or_create(domain_name=get_domain(url), defaults={'site' : None})
                 self.domain = domain
+                domain.recently_updated = True
+                domain.save()
             except Exception as e:
                 # If could not create this object, don't discard entire measurement, it's still important
                 print(f"Could not create domain for the following url: {url}. Error: {str(e)}", file=sys.stderr)
+
+        asn = self.raw_measurement.probe_asn
+        if asn is not None and self.id is None:
+            try:
+                asn,_ = ASN.objects.get_or_create(asn=str(asn))
+                self.asn = asn
+                asn.recently_updated = True
+                asn.save()
+            except Exception as e:
+                print(f"Could not create asn for the following code: {asn}. Error: {str(e)}", file=sys.stderr)
 
         return super(Measurement,self).save(*args, **kwargs)
 

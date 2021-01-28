@@ -42,6 +42,7 @@ DJANGO_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 
@@ -57,7 +58,15 @@ INSTALLED_APPS = [
     'apps.main.sites.apps.SitesConfig',
     'apps.main.asns.apps.AsnsConfig',
     'apps.dashboard.apps.DashboardConfig',
+]
+
+API_APPS = [
+    'apps.api.asns_api.apps.AsnsAPIConfig',
     'apps.api.fp_tables_api.apps.FpTablesAPIConfig',
+    'apps.api.cases_api.apps.CasesAPIConfig',
+    'apps.api.events_api.apps.EventsAPIConfig',
+    'apps.api.measurements_api.apps.MeasurementsAPIConfig',
+
 ]
 
 THIRD_PARTY_APPS = [
@@ -69,7 +78,7 @@ THIRD_PARTY_APPS = [
 ]
 
 
-INSTALLED_APPS = INSTALLED_APPS + DJANGO_APPS + THIRD_PARTY_APPS
+INSTALLED_APPS = INSTALLED_APPS + DJANGO_APPS + API_APPS + THIRD_PARTY_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
