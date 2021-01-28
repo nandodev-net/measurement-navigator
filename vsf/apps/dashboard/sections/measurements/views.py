@@ -126,9 +126,12 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
 
         measurements = map(lambda m: {
             "measurement" : m,
-            "raw_measurement" : m.raw_measurement,
-            "domain" : m.domain,
-            "asn" : m.asn
+            "input" : m.raw_measurement.input,
+            "test_type" : m.raw_measurement.test_name,
+            "measurement_start_time" : m.raw_measurement.measurement_start_time,
+            "probe_cc" : m.raw_measurement.probe_cc,
+            "probe_asn" : m.raw_measurement.probe_asn,
+            "site" : m.domain.site
         } , measurements)
 
         context = super().get_context_data()
