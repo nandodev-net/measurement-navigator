@@ -67,36 +67,48 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         # Now the available sites:
         sites = Site.objects.all().values('name', 'description_spa', 'description_eng', 'id')
 
-        # Get the pre-fill search fields
+        # Get the pre-fill search fields and filter results:
         get = self.request.GET or {}
         prefill = {}
+
+        measurements = MeasModels.Measurement.objects.all()\
+                                        .select_related('raw_measurement')\
+                                        .select_related('domain')\
+                                        .select_related('domain__site')
 
         inpt = get.get("input")
         if inpt:
             prefill['input'] = inpt
+            measurements = measurements.filter(raw_measurement__input__contains=inpt)
 
-        since = get.get("since")
-        prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        since = get.get("since") or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        prefill['since'] = since 
+        measurements = measurements.filter(raw_measurement__measurement_start_time__gte=since)
 
         until = get.get("until")
         if until:
             prefill['until'] = until
+            measurements = measurements.filter(raw_measurement__measurement_start_time__lte=until)
 
         site = get.get("site")
         if site:
             prefill['site'] = site
+            measurements = measurements.filter(domain__site=site)
 
         anomaly = get.get("anomaly")
         if anomaly:
             prefill['anomaly'] = anomaly
+            measurements = measurements.filter(anomaly=True)
 
         asn = get.get("asn")
         if asn:
             prefill['asn'] = asn
+            measurements = measurements.filter(raw_measurement__probe_asn=asn)
 
         test_name = get.get('test_name')
         if test_name:
             prefill['test_name'] = test_name
+            measurements = measurements.filter(raw_measurement__test_name=test_name)
 
         # Get most recent measurement:
         last_measurement_date = MeasModels\
@@ -112,8 +124,6 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         else:
             last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
 
-        # Compute measurements:
-        measurements = MeasModels.Measurement.objects.all().select_related('raw_measurement')
 
         context = super().get_context_data()
         context['measurements'] = measurements
@@ -157,7 +167,7 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         return MeasModels.Measurement.objects.all()\
                                         .select_related('raw_measurement')\
                                         .select_related('domain')\
-                                        .select_related('domain__site')\
+                                        .select_related('domain__site')
 
     def filter_queryset(self, qs):
         # Get request params
