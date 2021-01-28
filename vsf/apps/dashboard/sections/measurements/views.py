@@ -124,6 +124,12 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         else:
             last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
 
+        measurements = map(lambda m: {
+            "measurement" : m,
+            "raw_measurement" : m.raw_measurement,
+            "domain" : m.domain,
+            "asn" : m.asn
+        } , measurements)
 
         context = super().get_context_data()
         context['measurements'] = measurements
