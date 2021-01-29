@@ -40,63 +40,60 @@
     <div class="container-fluid">
       <div class="row">
 
-        <!-- Since -->
         <div class="col-3">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">Since</span>
+          <div class="row align-items-center rounded p-2 bg-info">
+            <div class="col-3 mx-auto">
+              <label class='font-weight-bold text-white'>
+                Since
+              </label>
             </div>
-            <input
-              id="since"
-              class="form-control mr-2 additional-filter"
-              type="date"
-              name="since"
-              value="{{prefill.since}}"
-            />
-          </div>
+            <div class="col-9 mx-auto">
+              <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
+            </div>
+          </div> 
         </div>
 
-        <!-- Until -->
         <div class="col-3">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">Until</span>
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-3 mx-auto">
+              <label class='font-weight-bold text-white'>
+                Until
+              </label>
             </div>
-            <input
-              id="until"
-              class="form-control mr-2 additional-filter"
-              type="date"
-              name="until"
-              value="{{prefill.until}}"
-            />
-          </div>
+            <div class="col-9 mx-auto">
+              <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
+            </div>
+          </div> 
         </div>
 
-        <!-- ASN -->
         <div class="col-6">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="asn">ASN</label>
+          <div class="row align-items-center rounded p-2 bg-info ml-1 ">
+            <div class="col-3 mx-auto">
+              <label class='font-weight-bold text-white' for="asn">
+                ASN
+              </label>
             </div>
-            <select id="asn" class="custom-select additional-filter" name="asn">
-              <option value="">Any ASN</option>
-              {% for asn in asns %}
-              <option
-                {% if asn.asn == prefill.asn %} selected {% endif %}
-                value="{{ asn.asn }}">
-                {{ asn.asn }} - {{ asn.name }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
+            <div class="col-9 mx-auto">
+              <select id="asn" class="custom-select additional-filter" name="asn">
+                <option value="">Any ASN</option>
+                {% for asn in asns %}
+                  <option 
+                  {% if asn.asn == prefill.asn %} selected {% endif %}
+                  value="{{ asn.asn }}" 
+                  >
+                  {{ asn.asn }} - {{ asn.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div> 
         </div>
 
-        <!-- Consistency -->
         <div class="col-3 mt-3">
           <div class="input-group mr-2">
             <input
               id="consistency"
-              class="form-control mr-2 additional-filter"
+              class="form-control mr-2 additional-filter w-100 border-top-0 border-left-0 border-right-0 bg-transparent"
               type="search"
               placeholder="Consistency"
               aria-label="Consistency Search"
@@ -106,53 +103,51 @@
           </div>
         </div>
 
-        <!-- Anomaly -->
         <div class="col-3 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="anomaly-state"
-                >Anomaly</label
-              >
+          <div class="row align-items-center rounded p-2 bg-info">
+            <div class="col-5 mx-auto">
+              <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
             </div>
-            <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
-              <option selected value="">Any</option>
-              <option
-              {% if prefill.anomaly == 'false' %} selected {% endif %}
-              value="false">Anomaly False</option>
-              <option
-              {% if prefill.anomaly == 'true' %} selected {% endif %}
-              value="true">Anomaly True</option>
-            </select>
-          </div>
+            <div class="col-7 mx-auto">
+              <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
+                <option selected value="">Any</option>
+                <option
+                {% if prefill.anomaly == 'false' %} selected {% endif %}
+                value="false">Anomaly False</option>
+                <option
+                {% if prefill.anomaly == 'true' %} selected {% endif %}
+                value="true">Anomaly True</option>
+              </select>
+            </div>
+          </div> 
         </div>
 
-        <!-- Site -->
         <div class="col-3 mt-3">
-          <div class="input-group mr-sm-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="site">Site</label>
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-4 mx-auto">
+              <label class="font-weight-bold text-white" for="site">Site</label>
             </div>
-            <select class="custom-select additional-filter" id="site" name="site">
-              <option selected value="">Any Site</option>
-              {% for site in sites %}
-              <option
-                value="{{ site.id }}"
-                title="{{ site.description }}"
-                {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}
-                >
-                {{ site.name }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
+            <div class="col-8 mx-auto">
+              <select class="custom-select additional-filter" id="site" name="site">
+                <option selected value="">
+                  Any Site
+                </option>
+                {% for site in sites %}
+                  <option value="{{ site.id }}" title="{{ site.description }}" {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}>
+                    {{ site.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>   
         </div>
-
-      <!-- Flag Type -->
+      
         <div class="col-3 mt-3">
-          <div class="input-group mr-2">
-              <div class="input-group-prepend">
-                <label class="input-group-text" for="test-name">Flag Type</label>
-              </div>
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-5 mx-auto">
+              <label class="font-weight-bold text-white" for="test-name">Flag Type</label>
+            </div>
+            <div class="col-7 mx-auto">
               <select id="flag" class="custom-select additional-filter" name="flag">
                 <option selected value="">Any</option>
                 {% for flag in flags %}
@@ -164,22 +159,23 @@
               </option>
               {% endfor %}
             </select>
-          </div>
+            </div>
+          </div> 
         </div>
-      </div>
-    </div>
 
-    <!-- Input -->
-    <div class="col-12 mt-3">
-      <input
-        id="input"
-        class="form-control mr-2 additional-filter"
-        type="search"
-        placeholder="URL"
-        aria-label="Search URL"
-        name="input"
-        value="{{prefill.input}}"
-      />
+      </div>
+
+      <div class="col-12 mt-3">
+        <input
+          id="input"
+          class="form-control mr-2 additional-filter w-100 border-top-0 border-left-0 border-right-0 bg-transparent"
+          type="search"
+          placeholder="URL"
+          aria-label="Search URL"
+          name="input"
+          value="{{prefill.input}}"
+        />
+      </div>
     </div>
   </form>
   {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}

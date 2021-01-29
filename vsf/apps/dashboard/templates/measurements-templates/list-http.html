@@ -40,75 +40,75 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-3">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">Since</span>
+          <div class="row align-items-center rounded p-2 bg-info">
+            <div class="col-3 mx-auto">
+              <label class='font-weight-bold text-white'>
+                Since
+              </label>
             </div>
-            <input
-              id="since"
-              class="form-control mr-2 additional-filter"
-              type="date"
-              name="since"
-              value="{{prefill.since}}"
-            />
-          </div>
+            <div class="col-9 mx-auto">
+              <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
+            </div>
+          </div> 
         </div>
 
         <div class="col-3">
-          <div class="input-group">
-            <div class="input-group-prepend">
-              <span class="input-group-text">Until</span>
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-3 mx-auto">
+              <label class='font-weight-bold text-white'>
+                Until
+              </label>
             </div>
-            <input
-              id="until"
-              class="form-control mr-2 additional-filter"
-              type="date"
-              name="until"
-              value="{{prefill.until}}"
-            />
-          </div>
+            <div class="col-9 mx-auto">
+              <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
+            </div>
+          </div> 
         </div>
 
         <div class="col-6">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="asn">ASN</label>
+          <div class="row align-items-center rounded p-2 bg-info ml-1 w-100">
+            <div class="col-3 mx-auto">
+              <label class='font-weight-bold text-white' for="asn">
+                ASN
+              </label>
             </div>
-            <select id="asn" class="custom-select additional-filter" name="asn">
-              <option selected value="">Any ASN</option>
-              {% for asn in asns %}
-              <option 
-                {% if asn.asn == prefill.asn %} selected {% endif %}
-                value="{{ asn.asn }}"
-                >
-                {{ asn.asn }} - {{ asn.name }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
+            <div class="col-9 mx-auto">
+              <select id="asn" class="custom-select additional-filter" name="asn">
+                <option value="">Any ASN</option>
+                {% for asn in asns %}
+                  <option 
+                  {% if asn.asn == prefill.asn %} selected {% endif %}
+                  value="{{ asn.asn }}" 
+                  >
+                  {{ asn.asn }} - {{ asn.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div> 
         </div>
 
         <div class="col-3 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="anomaly-state"
-                >Anomaly</label
-              >
+          <div class="row align-items-center rounded p-2 bg-info">
+            <div class="col-3 mx-auto">
+              <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
             </div>
-            <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
-              <option selected value="">Any</option>
-              <option {% if prefill.anomaly == 'false' %} selected {% endif %}
-              value="false">Anomaly False</option>
-              <option {% if prefill.anomaly == 'true'  %} selected {% endif %}
-              value="true">Anomaly True</option>
-            </select>
-          </div>
+            <div class="col-9 mx-auto">
+              <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
+                <option selected value="">Any</option>
+                <option {% if prefill.anomaly == 'false' %} selected {% endif %}
+                value="false">Anomaly False</option>
+                <option {% if prefill.anomaly == 'true'  %} selected {% endif %}
+                value="true">Anomaly True</option>
+              </select>
+            </div>
+          </div> 
         </div>
 
         <div class="col-6 mt-3">
           <input
             id="input"
-            class="form-control mr-2 additional-filter"
+            class="form-control additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
             type="search"
             placeholder="URL"
             aria-label="Search URL"
@@ -117,152 +117,136 @@
           />
         </div>
 
-        <!-- Site -->
         <div class="col-3 mt-3">
-          <div class="input-group mr-sm-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="site">Site</label>
+          <div class="row align-items-center rounded p-2 bg-info mr-1">
+            <div class="col-4 mx-auto">
+              <label class="font-weight-bold text-white" for="site">Site</label>
             </div>
-            <select class="custom-select additional-filter" id="site" name="site">
-              <option selected value="">Any Site</option>
-              {% for site in sites %}
-              <option 
-              value="{{ site.id }}" 
-              title="{{ site.description }}"
-              {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}
-              >
-                {{ site.name }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
+            <div class="col-8 mx-auto">
+              <select class="custom-select additional-filter" id="site" name="site">
+                <option selected value="">
+                  Any Site
+                </option>
+                {% for site in sites %}
+                  <option value="{{ site.id }}" title="{{ site.description }}" {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}>
+                    {{ site.name }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>   
         </div>
 
-        <!-- Flag -->
         <div class="col-3 mt-3">
-          <div class="input-group mr-2">
-              <div class="input-group-prepend">
-                <label class="input-group-text" for="test-name">Flag Type</label>
-              </div>
+          <div class="row align-items-center rounded p-2 bg-info">
+            <div class="col-4 mx-auto">
+              <label class="font-weight-bold text-white" for="test-name">Flag Type</label>
+            </div>
+            <div class="col-8 mx-auto">
               <select id="flag" class="custom-select additional-filter" name="flag">
                 <option selected value="">Any</option>
                 {% for flag in flags %}
-                <option
-                {% if prefill.flag == flag.value %} selected {% endif %}
-                value="{{ flag.value }}"
-                >
-                {{ flag.name }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
+                <option {% if prefill.flag == flag.value %} selected {% endif %} value="{{ flag.value }}">
+                  {{ flag.name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>   
         </div>
 
-        <!-- Status code match -->
         <div class="col-4 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="status-code-match"
-                >Status Code</label
-              >
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-4 mx-auto">
+              <label class="font-weight-bold text-white" for="status-code-match">Status Code</label>
             </div>
-            <select
-              id="status-code-match"
-              class="custom-select additional-filter"
-              name="status_code_match"
-              
-            >
-              <option selected value="">Any</option>
-              <option {% if prefill.status_code_match == 'false' %} selected {% endif %}
-              value="false">Don't Match</option>
-              <option {% if prefill.status_code_match == 'true'  %} selected {% endif %}
-              value="true">Match</option>
-            </select>
-          </div>
+            <div class="col-8 mx-auto">
+              <select id="status-code-match" class="custom-select additional-filter" name="status_code_match">
+                <option selected value="">Any</option>
+                <option {% if prefill.status_code_match == 'false' %} selected {% endif %}
+                value="false">Don't Match</option>
+                <option {% if prefill.status_code_match == 'true'  %} selected {% endif %}
+                value="true">Match</option>
+              </select>
+            </div>
+          </div>   
         </div>
 
-        <!-- Headers match -->
         <div class="col-5 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="headers-match"
-                >Headers</label
-              >
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-4 mx-auto">
+              <label class="font-weight-bold text-white" for="headers-match">Headers</label>
             </div>
-            <select id="headers-match" class="custom-select additional-filter" name="headers_match">
-              <option 
-              selected value="">Any</option>
-              <option {% if prefill.headers_match == 'false' %} selected {% endif %}
-              value="false">Don't Match</option>
-              <option {% if prefill.headers_match == 'true'  %} selected {% endif %}
-              value="true">Match</option>
-            </select>
-          </div>
+            <div class="col-8 mx-auto">
+              <select id="headers-match" class="custom-select additional-filter" name="headers_match">
+                <option 
+                selected value="">Any</option>
+                <option {% if prefill.headers_match == 'false' %} selected {% endif %}
+                value="false">Don't Match</option>
+                <option {% if prefill.headers_match == 'true'  %} selected {% endif %}
+                value="true">Match</option>
+              </select>
+            </div>
+          </div>   
         </div>
 
-        <!-- Body length match -->
-        <div class="col-6 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend">
-              <label class="input-group-text" for="body-length-match"
-                >Body Length</label
-              >
+        <div class="col-4 mt-3">
+          <div class="row align-items-center rounded p-2 bg-info">
+            <div class="col-4 mx-auto">
+              <label class="font-weight-bold text-white" for="body-length-match">Body Length</label>
             </div>
-            <select
-              id="body-length-match"
-              class="custom-select additional-filter"
-              name="body_length_match"
-            >
-              <option selected value="">Any</option>
-              <option {% if prefill.body_length_match == 'false' %} selected {% endif %}
-              value="false">Don't Match</option>
-              <option {% if prefill.body_length_match == 'true'  %} selected {% endif %}
-              value="true">Match</option>
-            </select>
-          </div>
+            <div class="col-8 mx-auto">
+              <select id="body-length-match" class="custom-select additional-filter" name="body_length_match">
+                <option selected value="">Any</option>
+                <option {% if prefill.body_length_match == 'false' %} selected {% endif %}
+                value="false">Don't Match</option>
+                <option {% if prefill.body_length_match == 'true'  %} selected {% endif %}
+                value="true">Match</option>
+              </select>
+            </div>
+          </div>   
         </div>
 
-        <!-- Body proportion -->
-        <div class="col-6 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend mr-2">
-              <label class="input-group-text" for="body-proportion-min"
-                >Min. Body Proportion
-              </label>
+        <div class="col-4 mt-3">
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-6 mx-auto">
+              <label class="font-weight-bold text-white" for="body-proportion-min">Min. Body Proportion</label>
             </div>
-            <input
-              id="body-proportion-min"
-              class="vsf-append-input-range additional-filter"
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value="{{prefill.body_proportion_min}}"
-              name="body_proportion_min"
-            />
-          </div>
+            <div class="col-6 mx-auto">
+              <input
+                id="body-proportion-min"
+                class="additional-filter"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value="{{prefill.body_proportion_min}}"
+                name="body_proportion_min"
+              />
+            </div>
+          </div> 
         </div>
 
-        <!-- Body proportion -->
-        <div class="col-12 mt-3">
-          <div class="input-group mr-2">
-            <div class="input-group-prepend mr-2">
-              <label class="input-group-text" for="body-proportion-max"
-                >Max. Body Proportion
-              </label>
+        <div class="col-4 mt-3">
+          <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-6 mx-auto">
+              <label class="font-weight-bold text-white" for="body-proportion-max">Max. Body Proportion</label>
             </div>
-            <input
-              id="body-proportion-max"
-              class="vsf-append-input-range additional-filter"
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value="{{prefill.body_proportion_max}}"
-              name="body_proportion_max"
-            />
-          </div>
+            <div class="col-6 mx-auto">
+              <input
+                id="body-proportion-max"
+                class="additional-filter"
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value="{{prefill.body_proportion_max}}"
+                name="body_proportion_max"
+              />
+            </div>
+          </div> 
         </div>
+
       </div>
     </div>
   </form>
