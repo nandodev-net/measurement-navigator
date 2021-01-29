@@ -1,6 +1,6 @@
 #Django imports
 from django.http.response import Http404
-from django.views.generic           import TemplateView
+from django.views.generic           import TemplateView, DetailView
 from apps.main import measurements
 from apps.main.measurements import submeasurements
 #Inheritance imports
@@ -125,13 +125,14 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
 
         measurements = map(lambda m: {
-            "measurement" : m,
+            "id": m.raw_measurement.id,
+            "anomaly": m.anomaly,
             "input" : m.raw_measurement.input,
             "test_type" : m.raw_measurement.test_name,
             "measurement_start_time" : m.raw_measurement.measurement_start_time,
             "probe_cc" : m.raw_measurement.probe_cc,
             "probe_asn" : m.raw_measurement.probe_asn,
-            "site" : m.domain.site
+            "site" : m.domain.site.name if m.domain and m.domain.site  else ""
         } , measurements)
 
         context = super().get_context_data()
@@ -283,4 +284,13 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
         # Return the context
         context['measurement'] = measurement
         context['error'] = None
+        return context
+
+class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
+    template_name = 'measurements-templates/detail.html'
+    slug_field = 'pk'
+    model = MeasModels.Measurement
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         return context
