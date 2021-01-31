@@ -97,7 +97,44 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         if flag:
             prefill['flag'] = flag
 
+        submeasure = self.SubMeasurement.objects.all()\
+                .select_related('measurement', 'flag')\
+                .select_related('measurement__raw_measurement')\
+                .select_related('measurement__domain')\
+                .select_related('measurement__domain__site')
+        
+        submeasuresList = []
+        for measure in submeasure:
+            measureDict = {}
+            measureDict['id'] = measure.measurement.raw_measurement.id
+            measureDict['input'] = measure.measurement.raw_measurement.input
+            measureDict['start_time'] = measure.measurement.raw_measurement.measurement_start_time
+            measureDict['asn'] = measure.measurement.raw_measurement.probe_asn
+            measureDict['site'] = measure.measurement.domain.site.name if measure.measurement.domain and measure.measurement.domain.site else ""
+            measureDict['flag'] = measure.flag.flag 
+            measureDict['anomaly'] = measure.measurement.anomaly 
+            measureDict['country'] = measure.measurement.raw_measurement.probe_cc
+            if hasattr(measure, 'jsons'):
+                measureDict['answers'] = measure.jsons.answers 
+                measureDict['control_resolver_answers'] = measure.jsons.control_resolver_answers
+                measureDict['client_resolver'] = measure.client_resolver
+                measureDict['consistency'] = measure.dns_consistency
+            if hasattr(measure, 'status_code_match'):
+                measureDict['status_code_match'] = measure.status_code_match
+                measureDict['headers_match'] = measure.headers_match
+                measureDict['body_length_match'] = measure.body_length_match
+                measureDict['body_proportion'] = measure.body_proportion
+            if hasattr(measure, 'status_blocked'):
+                measureDict['status_blocked'] = measure.status_blocked
+                measureDict['status_failure'] = measure.status_failure
+                measureDict['status_success'] = measure.status_success
+                measureDict['ip'] = measure.ip
+
+            submeasuresList.append(measureDict)
+            
+
         context =  super().get_context_data()
+        context['submeasures'] = submeasuresList
         context['flags'] = flag_types
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
@@ -200,14 +237,14 @@ class ListDNSTemplate(ListSubMeasurementTemplate):
         context =  super().get_context_data()
         prefill = context['prefill']
         get = self.request.GET or {}
-
+    
         consistency = get.get('consistency')
 
         if consistency:
             prefill['consistency'] = consistency
 
         context['prefill'] = prefill
-
+        print(context.keys())
         return context
 
 class ListDNSBackEnd(ListSubMeasurementBackend):
