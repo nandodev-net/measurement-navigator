@@ -8,12 +8,9 @@
 {% load static %}
 
 {% block custom_stylesheet %}
-    <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
 
-<link
-  rel="stylesheet"
-  href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
-/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"/>
 
 {% endblock custom_stylesheet %}
 
@@ -175,101 +172,103 @@
   
 
   <div class="card rounded" id="domains-list-card">
-    <table class="table table-striped mt-5 datatable" id="measurements-list">
-      <thead>
-        <tr>
-          <th class="text-center" scope="col">Input</th>
-          <th class="text-center" scope="col">Type</th>
-          <th class="text-center" scope="col">Start Time</th>
-          <th class="text-center" scope="col">ASN</th>
-          <th class="text-center" scope="col">country</th>
-          <th class="text-center" scope="col">Site</th>
-          <th class="text-center" scope="col">Anomaly</th>
-          <th class="text-center" scope="col">Flags</th>
-        </tr>
-      </thead>
-      <tbody id='measurements-tbody'>
-        {% for measure in measurements %}
-        <tr id ='{{ measure.id }}'>
-          <td>
-            {{ measure.input }}
-          </td>
-          <td>
-            {{ measure.test_type }}
-          </td>
-          <td>
-            {{ measure.measurement_start_time }}
-          </td>
-          <td>
-            {{ measure.probe_asn }}
-          </td>
-          <td>
-            {{ measure.probe_cc }}
-          </td>
-          <td>
-            {{ measure.site }}
-          </td>
-          <td>
-            {{ measure.anomaly }}
-          </td>
-          <td>
-            <strong>DNS:</strong>
-              {% for dns in measure.flags_dns %}
-                {% if dns == 'ok' %}
-                  <span class="badge badge-pill badge-success">OK</span>
-                {% elif dns == 'soft' %}
-                  <span class="badge badge-pill badge-warning">SOFT</span>
-                {% elif dns == 'hard' %}
-                  <span class="badge badge-pill badge-danger">HARD</span>
-                {% elif dns == 'muted' %}
-                  <span class="badge badge-pill badge-secondary">MUTED</span>
-                {% else %}
-                  <span class="badge badge-pill badge-info">MANUAL</span>
-                {% endif %}
-              {% endfor %}
-            <br>
+    <div class="table-responsive"></div>
+      <table class="table table-striped mt-5 datatable" id="measurements-list">
+        <thead>
+          <tr>
+            <th class="text-center" scope="col">Input</th>
+            <th class="text-center" scope="col">Type</th>
+            <th class="text-center" scope="col">Start Time</th>
+            <th class="text-center" scope="col">ASN</th>
+            <th class="text-center" scope="col">Country</th>
+            <th class="text-center" scope="col">Site</th>
+            <th class="text-center" scope="col">Anomaly</th>
+            <th class="text-center" scope="col">Flags by Submeasure</th>
+          </tr>
+        </thead>
+        <tbody id='measurements-tbody'>
+          {% for measure in measurements %}
+          <tr id ='{{ measure.id }}'>
+            <td>
+              {{ measure.input }}
+            </td>
+            <td>
+              {{ measure.test_type }}
+            </td>
+            <td>
+              {{ measure.measurement_start_time }}
+            </td>
+            <td>
+              {{ measure.probe_asn }}
+            </td>
+            <td>
+              {{ measure.probe_cc }}
+            </td>
+            <td>
+              {{ measure.site }}
+            </td>
+            <td>
+              {{ measure.anomaly }}
+            </td>
+            <td>
+              <strong>DNS:</strong>
+                {% for dns in measure.flags_dns %}
+                  {% if dns == 'ok' %}
+                    <span class="badge badge-pill badge-success">OK</span>
+                  {% elif dns == 'soft' %}
+                    <span class="badge badge-pill badge-warning">SOFT</span>
+                  {% elif dns == 'hard' %}
+                    <span class="badge badge-pill badge-danger">HARD</span>
+                  {% elif dns == 'muted' %}
+                    <span class="badge badge-pill badge-secondary">MUTED</span>
+                  {% else %}
+                    <span class="badge badge-pill badge-info">MANUAL</span>
+                  {% endif %}
+                {% endfor %}
+              <br>
 
-            <strong>HTTP:</strong>
-              {% for http in measure.flags_http %}
-                {% if http == 'ok' %}
-                  <span class="badge badge-pill badge-success">OK</span>
-                {% elif http == 'soft' %}
-                  <span class="badge badge-pill badge-warning">SOFT</span>
-                {% elif http == 'hard' %}
-                  <span class="badge badge-pill badge-danger">HARD</span>
-                {% elif http == 'muted' %}
-                  <span class="badge badge-pill badge-secondary">MUTED</span>
-                {% else %}
-                  <span class="badge badge-pill badge-info">MANUAL</span>
-                {% endif %}
-              {% endfor %}
-            <br>
+              <strong>HTTP:</strong>
+                {% for http in measure.flags_http %}
+                  {% if http == 'ok' %}
+                    <span class="badge badge-pill badge-success">OK</span>
+                  {% elif http == 'soft' %}
+                    <span class="badge badge-pill badge-warning">SOFT</span>
+                  {% elif http == 'hard' %}
+                    <span class="badge badge-pill badge-danger">HARD</span>
+                  {% elif http == 'muted' %}
+                    <span class="badge badge-pill badge-secondary">MUTED</span>
+                  {% else %}
+                    <span class="badge badge-pill badge-info">MANUAL</span>
+                  {% endif %}
+                {% endfor %}
+              <br>
 
-            <strong>TCP:</strong>
-              {% for tcp in measure.flags_tcp %}
-                {% if tcp == 'ok' %}
-                  <span class="badge badge-pill badge-success">OK</span>
-                {% elif tcp == 'soft' %}
-                  <span class="badge badge-pill badge-warning">SOFT</span>
-                {% elif tcp == 'hard' %}
-                  <span class="badge badge-pill badge-danger">HARD</span>
-                {% elif tcp == 'muted' %}
-                  <span class="badge badge-pill badge-secondary">MUTED</span>
-                {% else %}
-                  <span class="badge badge-pill badge-info">MANUAL</span>
-                {% endif %}
-              {% endfor %}
-          </td>
+              <strong>TCP:</strong>
+                {% for tcp in measure.flags_tcp %}
+                  {% if tcp == 'ok' %}
+                    <span class="badge badge-pill badge-success">OK</span>
+                  {% elif tcp == 'soft' %}
+                    <span class="badge badge-pill badge-warning">SOFT</span>
+                  {% elif tcp == 'hard' %}
+                    <span class="badge badge-pill badge-danger">HARD</span>
+                  {% elif tcp == 'muted' %}
+                    <span class="badge badge-pill badge-secondary">MUTED</span>
+                  {% else %}
+                    <span class="badge badge-pill badge-info">MANUAL</span>
+                  {% endif %}
+                {% endfor %}
+            </td>
 
-        </tr>
-        {% endfor %}
-      
-      </tbody>
-      
-      <tfoot>
-      </tfoot>
-      
-    </table>
+          </tr>
+          {% endfor %}
+        
+        </tbody>
+        
+        <tfoot>
+        </tfoot>
+        
+      </table>
+    </div>
   </div>
 
 </form>
