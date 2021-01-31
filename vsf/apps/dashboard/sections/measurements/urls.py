@@ -1,16 +1,10 @@
 from django.conf.urls import include
 from django.urls import path
-from .views import ListMeasurementsTemplate, ListMeasurementsBackEnd, MeasurementDetails
+from .views import ListMeasurementsTemplate, MeasurementDetails, MeasurementDetailView
 
 app_name = 'measurements'
 
 urlpatterns = [
-
-    path(
-        'measurements_data/',
-        ListMeasurementsBackEnd.as_view(),
-        name="list_measurements_data"
-    ),
 
     path(
         'list_measurements/',                    
@@ -22,6 +16,12 @@ urlpatterns = [
         'measurement',
         MeasurementDetails.as_view(),
         name="details"
+    ),
+
+    path(
+        'detail/<uuid:pk>', 
+        MeasurementDetailView.as_view(),
+        name="detail"
     )
 
 ]

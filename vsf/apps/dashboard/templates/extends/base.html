@@ -371,12 +371,14 @@
 
         <div class="col-10 position-relative">
           <main class="p-3">
-            <div class="container mb-4 mx-0">
-              <h1 class="mt-4">{% block title %}Title{% endblock title %}</h1>
-              <small class="text-secondary px-2 mb-4">
+
+            <div class="card rounded mb-4 mx-0">
+              <h1 class="mt-3 ml-3">{% block title %}Title{% endblock title %}</h1>
+              <small class="text-secondary px-2 mb-4 ml-2">
                 {% block sub_title %}{% endblock sub_title %}
               </small>
             </div>
+
             {% block site_route %}
             <ol class="breadcrumb mb-4">
               {% block route %}

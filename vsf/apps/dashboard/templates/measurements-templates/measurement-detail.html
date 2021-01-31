@@ -1,0 +1,229 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+
+{% block custom_stylesheet %}
+<link rel=stylesheet
+  href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
+/>
+{% endblock custom_stylesheet %}
+
+
+{% block tab_title %} VSF - Measurement Detail {% endblock tab_title %}
+{% block title %} Measurement Detail {% endblock title %}
+{% block sub_title %} Specific details of the measurement with id: {{ rawmeasurement.id }}{% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+  <a href="{% url home %}">Home</a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements List</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'dashboard:measurement:detail' pk=rawmeasurement.id %}">Measurement Detail</a>
+</li>
+
+{% endblock route %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card rounded">
+                <div class="card-body p-5">
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Input: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.input}}</p>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Test name: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.test_name}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Start Time: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.measurement_start_time}}</p>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Probe ASN: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.probe_asn}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Test Keys: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <button
+                            class="btn btn-outline-info"
+                            type="button"
+                            data-toggle="collapse"
+                            data-target="#collapseTestKeys"
+                            aria-expanded="false"
+                            aria-controls="collapseTestKeys">
+                            Show Test Keys
+                            </button>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Annotations: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <pre id="annotations-detailed">{{ rawmeasurement.annotations }}</pre>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-12">
+                            <div class="collapse" id="collapseTestKeys">
+                                <div class="card card-body">
+                                  <pre id="test-keys-detailed">{{ rawmeasurement.test_keys }}</pre>
+                                </div>
+                              </div>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Bucket Date: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.bucket_date}}</p>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Data Format Version: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.data_format_version}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Options: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.options}}</p>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Probe CC: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.probe_cc}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Probe IP: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.probe_ip}}</p>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Report Filename: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.report_filename}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Report ID: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.report_id}}</p>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Software Name: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.software_name}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Software Version: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.software_version}}</p>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Test Runtime: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.test_runtime}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Test Start Time: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.test_start_time}}</p>
+                        </div>
+                        <div class="col-3">
+                            <h5 class="text-dark border border-dark rounded p-3">Test Version: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            <p class="">{{rawmeasurement.test_version}}</p>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Test Helpers: </h5>
+                        </div>
+                        <div class="col-9 mx-auto">
+                            <pre class="" id="test-helpers-detailed">{{ rawmeasurement.test_helpers }}</pre>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block custom_scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<script>
+
+    var test_keys = $('#test-keys-detailed').text();
+    $("#test-keys-detailed").jsonViewer(JSON.parse(test_keys), {
+        collapsed: true,
+        rootCollapsable: false
+    });
+
+    var annotations_detailed = $('#annotations-detailed').text();
+    $("#annotations-detailed").jsonViewer(JSON.parse(annotations_detailed), {
+        collapsed: true,
+        rootCollapsable: false
+    });
+
+    var test_helper = $('#test-helpers-detailed').text();
+    $("#test-helpers-detailed").jsonViewer(JSON.parse(test_helper), {
+        collapsed: true,
+        rootCollapsable: false
+    });
+</script>
+{% endblock custom_scripts %}
