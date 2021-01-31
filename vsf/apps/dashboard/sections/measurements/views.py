@@ -17,6 +17,7 @@ from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
 from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMModels
+from apps.main.measurements.flags.models                 import Flag
 
 
 # --- MEASUREMENTS VIEWS --- #
@@ -72,24 +73,24 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         prefill = {}
 
         measurements = MeasModels.Measurement.objects.all()\
-                                        .select_related('raw_measurement')\
-                                        .select_related('domain')\
-                                        .select_related('domain__site')
-
+            .select_related('raw_measurement').select_related('domain').select_related('domain__site')
+        
         inpt = get.get("input")
+
         if inpt:
             prefill['input'] = inpt
             measurements = measurements.filter(raw_measurement__input__contains=inpt)
 
         since = get.get("since") or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
         prefill['since'] = since 
-        measurements = measurements.filter(raw_measurement__measurement_start_time__gte=since)
+        
+        #measurements = measurements.filter(raw_measurement__measurement_start_time__gte=since)
 
         until = get.get("until")
         if until:
             prefill['until'] = until
             measurements = measurements.filter(raw_measurement__measurement_start_time__lte=until)
-
+        
         site = get.get("site")
         if site:
             prefill['site'] = site
@@ -123,110 +124,54 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             last_measurement_date = "No measurements yet"
         else:
             last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
+        
 
-        measurements = map(lambda m: {
-            "id": m.raw_measurement.id,
-            "anomaly": m.anomaly,
-            "input" : m.raw_measurement.input,
-            "test_type" : m.raw_measurement.test_name,
-            "measurement_start_time" : m.raw_measurement.measurement_start_time,
-            "probe_cc" : m.raw_measurement.probe_cc,
-            "probe_asn" : m.raw_measurement.probe_asn,
-            "site" : m.domain.site.name if m.domain and m.domain.site  else ""
-        } , measurements)
+        measurementsList = []
+        for measure in measurements:
 
+            measurementDict = {}
+            flagsDNS, flagsHTTP, flagsTCP = [], [], []
+
+            dns = SubMModels.DNS.objects.filter(measurement=measure.id)
+            http = SubMModels.HTTP.objects.filter(measurement=measure.id)
+            tcp = SubMModels.TCP.objects.filter(measurement=measure.id)
+            
+            for detailDNS in dns:
+                flag = Flag.objects.filter(id = detailDNS.flag_id)
+                flagsDNS.append(flag[0].flag)
+            
+            for detailHTTP in http:
+                flag = Flag.objects.filter(id = detailHTTP.flag_id)
+                flagsHTTP.append(flag[0].flag)
+
+            for detailTCP in tcp:
+                flag = Flag.objects.filter(id = detailTCP.flag_id)
+                flagsTCP.append(flag[0].flag)
+            
+            rawmeasurement = measure.raw_measurement
+            measurementDict['id'] = rawmeasurement.id 
+            measurementDict['anomaly'] = measure.anomaly 
+            measurementDict['input'] = rawmeasurement.input 
+            measurementDict['test_type'] = rawmeasurement.test_name 
+            measurementDict['measurement_start_time'] = rawmeasurement.measurement_start_time 
+            measurementDict['probe_cc'] = rawmeasurement.probe_cc 
+            measurementDict['probe_asn'] = rawmeasurement.probe_asn 
+            measurementDict['site'] = measure.domain.site.name if measure.domain and measure.domain.site else ""
+            measurementDict['flags_dns'] = flagsDNS 
+            measurementDict['flags_http'] = flagsHTTP
+            measurementDict['flags_tcp'] = flagsTCP
+
+            measurementsList.append(measurementDict)
+
+        
         context = super().get_context_data()
-        context['measurements'] = measurements
+        context['measurements'] = measurementsList
         context['test_types'] = test_types
         context['sites'] = sites
         context['prefill'] = prefill
         context['asns'] = AsnModels.ASN.objects.all()
         context['last_measurement_date'] = last_measurement_date
         return context
-
-class ListMeasurementsBackEnd(BaseDatatableView):
-    """
-        This is the backend view for the ListMeasurementsDataTable view, who
-        just renders the template
-
-        This View requires datatables to send server-side
-        paginated data to the front, and it's highly coupled
-        with its corresponding template.
-    """
-    columns = [
-            'raw_measurement__input',
-            'raw_measurement__test_name',
-            'raw_measurement__measurement_start_time',
-            'raw_measurement__probe_asn',
-            'raw_measurement__probe_cc',
-            'domain__site__name',
-            'anomaly'
-        ]
-
-    order_columns = [
-            'raw_measurement__input',
-            'raw_measurement__test_name',
-            'raw_measurement__measurement_start_time',
-            'raw_measurement__probe_asn',
-            'raw_measurement__probe_cc',
-            'domain__site__name',
-            'anomaly'
-        ]
-
-    def get_initial_queryset(self):
-        return MeasModels.Measurement.objects.all()\
-                                        .select_related('raw_measurement')\
-                                        .select_related('domain')\
-                                        .select_related('domain__site')
-
-    def filter_queryset(self, qs):
-        # Get request params
-        get = self.request.GET or {}
-
-        ## Ok this is the kind of solution that i don't like
-
-        # Parse the input data
-        input       = get.get('input')
-        test_name   = get.get('test_name')
-        since       = get.get('since')
-        ASN         = get.get('asn')
-        country     = get.get('country')
-        anomaly     = get.get('anomaly')
-        until       = get.get('until')
-        site        = get.get('site')
-
-        # Get desired measurements
-        measurements = search_measurement_by_queryset(
-            qs,
-            since=since,
-            test_name=test_name,
-            ASN=ASN,
-            input=input,
-            country=country,
-            until=until,
-            site=site,
-            anomaly= anomaly.lower() == "true" if anomaly != None else None
-        )
-
-        return measurements
-
-    def prepare_results(self, qs):
-        # prepare list with output column data
-        # queryset is already paginated here
-        json_data = []
-        for item in qs:
-            json_data.append({
-                'raw_measurement__measurement_start_time':item.raw_measurement.measurement_start_time,
-                'raw_measurement__probe_cc':item.raw_measurement.probe_cc,
-                'raw_measurement__probe_asn':item.raw_measurement.probe_asn,
-                'raw_measurement__input':item.raw_measurement.input,
-                'raw_measurement__test_name':item.raw_measurement.test_name,
-                'id' : item.id,
-                'site' : item.domain.site.id if item.domain and item.domain.site else -1,
-                'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
-                'anomaly' : item.anomaly
-            })
-        return json_data
 
 class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
     """
@@ -286,11 +231,12 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
         context['error'] = None
         return context
 
-class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
-    template_name = 'measurements-templates/detail.html'
+class MeasurementDetailView(DetailView):
+    template_name = 'measurements-templates/measurement-detail.html'
     slug_field = 'pk'
-    model = MeasModels.Measurement
+    model = MeasModels.RawMeasurement
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        print(context['rawmeasurement'].id)
         return context
