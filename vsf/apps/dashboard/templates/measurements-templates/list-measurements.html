@@ -27,10 +27,7 @@
   <a href="{% url home %}">Home</a>
 </li>
 <li class="breadcrumb-item">
-  <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements</a>
-</li>
-<li class="breadcrumb-item active">
-  Measurement's List
+  <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements List</a>
 </li>
 
 {% endblock route %}
@@ -181,13 +178,14 @@
     <table class="table table-striped mt-5 datatable" id="measurements-list">
       <thead>
         <tr>
-          <th class="text-center" scope="col">input</th>
+          <th class="text-center" scope="col">Input</th>
           <th class="text-center" scope="col">Type</th>
           <th class="text-center" scope="col">Start Time</th>
           <th class="text-center" scope="col">ASN</th>
           <th class="text-center" scope="col">country</th>
           <th class="text-center" scope="col">Site</th>
           <th class="text-center" scope="col">Anomaly</th>
+          <th class="text-center" scope="col">Flags</th>
         </tr>
       </thead>
       <tbody id='measurements-tbody'>
@@ -214,6 +212,55 @@
           <td>
             {{ measure.anomaly }}
           </td>
+          <td>
+            <strong>DNS:</strong>
+              {% for dns in measure.flags_dns %}
+                {% if dns == 'ok' %}
+                  <span class="badge badge-pill badge-success">OK</span>
+                {% elif dns == 'soft' %}
+                  <span class="badge badge-pill badge-warning">SOFT</span>
+                {% elif dns == 'hard' %}
+                  <span class="badge badge-pill badge-danger">HARD</span>
+                {% elif dns == 'muted' %}
+                  <span class="badge badge-pill badge-secondary">MUTED</span>
+                {% else %}
+                  <span class="badge badge-pill badge-info">MANUAL</span>
+                {% endif %}
+              {% endfor %}
+            <br>
+
+            <strong>HTTP:</strong>
+              {% for http in measure.flags_http %}
+                {% if http == 'ok' %}
+                  <span class="badge badge-pill badge-success">OK</span>
+                {% elif http == 'soft' %}
+                  <span class="badge badge-pill badge-warning">SOFT</span>
+                {% elif http == 'hard' %}
+                  <span class="badge badge-pill badge-danger">HARD</span>
+                {% elif http == 'muted' %}
+                  <span class="badge badge-pill badge-secondary">MUTED</span>
+                {% else %}
+                  <span class="badge badge-pill badge-info">MANUAL</span>
+                {% endif %}
+              {% endfor %}
+            <br>
+
+            <strong>TCP:</strong>
+              {% for tcp in measure.flags_tcp %}
+                {% if tcp == 'ok' %}
+                  <span class="badge badge-pill badge-success">OK</span>
+                {% elif tcp == 'soft' %}
+                  <span class="badge badge-pill badge-warning">SOFT</span>
+                {% elif tcp == 'hard' %}
+                  <span class="badge badge-pill badge-danger">HARD</span>
+                {% elif tcp == 'muted' %}
+                  <span class="badge badge-pill badge-secondary">MUTED</span>
+                {% else %}
+                  <span class="badge badge-pill badge-info">MANUAL</span>
+                {% endif %}
+              {% endfor %}
+          </td>
+
         </tr>
         {% endfor %}
       
@@ -227,28 +274,21 @@
 
 </form>
 
-{% include "includes/measurements-includes/detailed-info-modal.html" %}
-
 {% endblock content %}
 
 {% block custom_scripts %}
-
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
 {% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script>
   'use strict';
-
+  var selectedRows = []
   $(document).ready(function() {
 
       $('#info').attr('disabled','disabled');
       /* Creating datatables */
       var table = $('#measurements-list').DataTable();
-      
-
-      var selectedRows = []
-
       $('#measurements-tbody').on( 'click', 'tr', function () {
         $(this).toggleClass('selected');
         if (table.rows('.selected').data().length > 0) {
@@ -263,6 +303,8 @@
         } else {
           selectedRows.push(this.id);
         }
+
+        console.log(selectedRows)
       });
   })
 
