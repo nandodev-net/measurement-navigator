@@ -238,5 +238,8 @@ class MeasurementDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(context['rawmeasurement'].id)
+        context['rawmeasurement'].test_keys = json.dumps(context['rawmeasurement'].test_keys)
+        context['rawmeasurement'].annotations = json.dumps(context['rawmeasurement'].annotations)
+        context['rawmeasurement'].test_helpers = json.dumps(context['rawmeasurement'].test_helpers)
+        print(context['rawmeasurement'].test_keys)
         return context
