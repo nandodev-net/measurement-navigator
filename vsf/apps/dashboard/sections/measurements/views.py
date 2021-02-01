@@ -75,7 +75,8 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         measurements = MeasModels.Measurement.objects.all()\
                                                 .select_related('raw_measurement')\
                                                 .select_related('domain')\
-                                                .select_related('domain__site')
+                                                .select_related('domain__site')\
+                                                
         
         inpt = get.get("input")
 
@@ -113,42 +114,17 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             prefill['test_name'] = test_name
             measurements = measurements.filter(raw_measurement__test_name=test_name)
 
+        measurements.only(
+            "raw_measurement__measurement_start_time",
+            "raw_measurmenet__test_name",
+            "raw_measurement__input",
+            "raw_measurement__probe_cc",
+            "id",
+            "anomaly",
+            "site"
+            )
+
         measurementsList = []
-        #for measure in measurements:
-#
-        #    measurementDict = {}
-        #    flagsDNS, flagsHTTP, flagsTCP = [], [], []
-#
-        #    dns = SubMModels.DNS.objects.filter(measurement=measure.id)
-        #    http = SubMModels.HTTP.objects.filter(measurement=measure.id)
-        #    tcp = SubMModels.TCP.objects.filter(measurement=measure.id)
-        #    
-        #    for detailDNS in dns:
-        #        flag = Flag.objects.filter(id = detailDNS.flag_id)
-        #        flagsDNS.append(flag[0].flag)
-        #    
-        #    for detailHTTP in http:
-        #        flag = Flag.objects.filter(id = detailHTTP.flag_id)
-        #        flagsHTTP.append(flag[0].flag)
-#
-        #    for detailTCP in tcp:
-        #        flag = Flag.objects.filter(id = detailTCP.flag_id)
-        #        flagsTCP.append(flag[0].flag)
-        #    
-        #    rawmeasurement = measure.raw_measurement
-        #    measurementDict['id'] = rawmeasurement.id 
-        #    measurementDict['anomaly'] = measure.anomaly 
-        #    measurementDict['input'] = rawmeasurement.input 
-        #    measurementDict['test_type'] = rawmeasurement.test_name 
-        #    measurementDict['measurement_start_time'] = rawmeasurement.measurement_start_time 
-        #    measurementDict['probe_cc'] = rawmeasurement.probe_cc 
-        #    measurementDict['probe_asn'] = rawmeasurement.probe_asn 
-        #    measurementDict['site'] = measure.domain.site.name if measure.domain and measure.domain.site else ""
-        #    measurementDict['flags_dns'] = flagsDNS 
-        #    measurementDict['flags_http'] = flagsHTTP
-        #    measurementDict['flags_tcp'] = flagsTCP
-#
-        #    measurementsList.append(measurementDict)
         
         measurementsList = map(lambda m : {
             "id" : m.id,
@@ -162,6 +138,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             'flags_http' : m.http_set.all(),
             'flags_tcp' : m.tcp_set.all()
         }, measurements)
+
         # Get most recent measurement:
         last_measurement_date = MeasModels\
                                 .Measurement\
