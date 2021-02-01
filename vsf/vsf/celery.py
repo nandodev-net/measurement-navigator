@@ -79,17 +79,17 @@ app.conf.beat_schedule = {
     # measurement_update to check for complete measurements to download
     'update-measurements':{
         'task':'apps.api.fp_tables_api.tasks.measurement_update',
-        'schedule':600,
+        'schedule':1800,
         'args':(),
         'options' : {'queue' : transient_queue_name}
     },
     # SoftFlagMeasurement updates the possible flags for every sub measurement
-    'update-soft-flags':{
-        'task':'apps.main.measurements.submeasurements.tasks.SoftFlagMeasurements',
-        'schedule':3600,
-        'args':(),
-        'options' : {'queue' : transient_queue_name}
-    },
+    # 'update-soft-flags':{
+    #     'task':'apps.main.measurements.submeasurements.tasks.SoftFlagMeasurements',
+    #     'schedule':3600,
+    #     'args':(),
+    #     'options' : {'queue' : transient_queue_name}
+    # },
     # Count Flags submeasurements updates the value of previous_counter field in submeasurements
     # field
     'update-hf-counters':{
@@ -103,7 +103,7 @@ app.conf.beat_schedule = {
         'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
         'schedule':3600,
         'args':(),
-        'options' : {'queue' : transient_queue_name}
+        'options' : {'queue' : user_transient_queue_name}
     },
     
 }
