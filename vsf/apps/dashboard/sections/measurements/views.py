@@ -75,8 +75,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         measurements = MeasModels.Measurement.objects.all()\
                                                 .select_related('raw_measurement')\
                                                 .select_related('domain')\
-                                                .select_related('domain__site')\
-                                                
+                                                .select_related('domain__site')
         
         inpt = get.get("input")
 
