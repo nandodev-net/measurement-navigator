@@ -17,6 +17,11 @@ urlpatterns = [
         name='event_detail'),
 
     path(
+        '<int:id>/start/<str:start_date>/end/<str:end_date>', 
+        views.EventDateDetail.as_view(), 
+        name='event_detail_date'),
+
+    path(
         'asn/<str:asn>', 
         views.ListEventsByASN.as_view(), 
         name='list_event_by_asn'),
