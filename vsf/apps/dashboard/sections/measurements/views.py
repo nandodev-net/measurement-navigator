@@ -125,47 +125,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         else:
             last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
         
-
-        measurementsList = []
-        for measure in measurements:
-
-            measurementDict = {}
-            flagsDNS, flagsHTTP, flagsTCP = [], [], []
-
-            dns = SubMModels.DNS.objects.filter(measurement=measure.id)
-            http = SubMModels.HTTP.objects.filter(measurement=measure.id)
-            tcp = SubMModels.TCP.objects.filter(measurement=measure.id)
-            
-            for detailDNS in dns:
-                flag = Flag.objects.filter(id = detailDNS.flag_id)
-                flagsDNS.append(flag[0].flag)
-            
-            for detailHTTP in http:
-                flag = Flag.objects.filter(id = detailHTTP.flag_id)
-                flagsHTTP.append(flag[0].flag)
-
-            for detailTCP in tcp:
-                flag = Flag.objects.filter(id = detailTCP.flag_id)
-                flagsTCP.append(flag[0].flag)
-            
-            rawmeasurement = measure.raw_measurement
-            measurementDict['id'] = rawmeasurement.id 
-            measurementDict['anomaly'] = measure.anomaly 
-            measurementDict['input'] = rawmeasurement.input 
-            measurementDict['test_type'] = rawmeasurement.test_name 
-            measurementDict['measurement_start_time'] = rawmeasurement.measurement_start_time 
-            measurementDict['probe_cc'] = rawmeasurement.probe_cc 
-            measurementDict['probe_asn'] = rawmeasurement.probe_asn 
-            measurementDict['site'] = measure.domain.site.name if measure.domain and measure.domain.site else ""
-            measurementDict['flags_dns'] = flagsDNS 
-            measurementDict['flags_http'] = flagsHTTP
-            measurementDict['flags_tcp'] = flagsTCP
-
-            measurementsList.append(measurementDict)
-
-        
         context = super().get_context_data()
-        context['measurements'] = measurementsList
         context['test_types'] = test_types
         context['sites'] = sites
         context['prefill'] = prefill
@@ -312,6 +272,11 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         # queryset is already paginated here
         json_data = []
         for item in qs:
+
+            flagsDNS = [dns.flag.flag for dns in item.dns_set.all()]
+            flagsHTTP = [http.flag.flag for http in item.http_set.all()]
+            flagsTCP = [tcp.flag.flag for tcp in item.tcp_set.all()]
+            
             json_data.append({
                 'raw_measurement__measurement_start_time':item.raw_measurement.measurement_start_time,
                 'raw_measurement__probe_cc':item.raw_measurement.probe_cc,
@@ -321,6 +286,7 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'id' : item.id,
                 'site' : item.domain.site.id if item.domain and item.domain.site else -1,
                 'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
-                'anomaly' : item.anomaly
+                'anomaly' : item.anomaly,
+                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
             })
         return json_data
