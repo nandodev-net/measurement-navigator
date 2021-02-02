@@ -1,17 +1,8 @@
-<!--
-  ========================================
-  MAIN LISTING MEASUREMENTS
-  ========================================
--->
-
 {% extends 'extends/base.html' %}
 {% load static %}
-
 {% block custom_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
-
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"/>
-
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Measurements {% endblock tab_title %}
@@ -30,174 +21,175 @@
 {% endblock route %}
 
 {% block content %}
-<form id="measuraments-form">
-  <nav class="navbar navbar-light bg-light mb-5">
-    <form id="urlForm" action="#">
-      <div class="container-fluid">
-        <div class="row">
-          <div class="col-3">
-            <div class="row align-items-center rounded p-2 bg-info">
-              <div class="col-3 mx-auto">
-                <label class='font-weight-bold text-white'>
-                  Since
-                </label>
-              </div>
-              <div class="col-9 mx-auto">
-                <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
-              </div>
-            </div> 
-          </div>
 
-          <div class="col-3">
-            <div class="row align-items-center rounded p-2 bg-info ml-1">
-              <div class="col-3 mx-auto">
-                <label class='font-weight-bold text-white'>
-                  Until
-                </label>
-              </div>
-              <div class="col-9 mx-auto">
-                <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
-              </div>
-            </div> 
-          </div>
+    <nav class="navbar navbar-light bg-light mb-5">
+      <form id="urlForm" action="#"></form>
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-3">
+              <div class="row align-items-center rounded p-2 bg-info">
+                <div class="col-3 mx-auto">
+                  <label class='font-weight-bold text-white'>
+                    Since
+                  </label>
+                </div>
+                <div class="col-9 mx-auto">
+                  <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
+                </div>
+              </div> 
+            </div>
 
-          <div class="col-6">
-            <div class="row align-items-center rounded p-2 bg-info ml-1">
-              <div class="col-3 mx-auto">
-                <label class='font-weight-bold text-white' for="asn">
-                  ASN
-                </label>
-              </div>
-              <div class="col-9 mx-auto">
-                <select id="asn" class="custom-select additional-filter" name="asn">
-                  <option value="">Any ASN</option>
-                  {% for asn in asns %}
-                    <option 
-                    {% if asn.asn == prefill.asn %} selected {% endif %}
-                    value="{{ asn.asn }}" 
-                    >
-                    {{ asn.asn }} - {{ asn.name }}
+            <div class="col-3">
+              <div class="row align-items-center rounded p-2 bg-info ml-1">
+                <div class="col-3 mx-auto">
+                  <label class='font-weight-bold text-white'>
+                    Until
+                  </label>
+                </div>
+                <div class="col-9 mx-auto">
+                  <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
+                </div>
+              </div> 
+            </div>
+
+            <div class="col-6">
+              <div class="row align-items-center rounded p-2 bg-info ml-1">
+                <div class="col-3 mx-auto">
+                  <label class='font-weight-bold text-white' for="asn">
+                    ASN
+                  </label>
+                </div>
+                <div class="col-9 mx-auto">
+                  <select id="asn" class="custom-select additional-filter" name="asn">
+                    <option value="">Any ASN</option>
+                    {% for asn in asns %}
+                      <option 
+                      {% if asn.asn == prefill.asn %} selected {% endif %}
+                      value="{{ asn.asn }}" 
+                      >
+                      {{ asn.asn }} - {{ asn.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div> 
+            </div>
+            
+            <div class="col-3 mt-3">
+              <div class="row align-items-center rounded p-2 bg-info">
+                <div class="col-5 mx-auto">
+                  <label class="font-weight-bold text-white" for="test-name">Test Type</label>
+                </div>
+                <div class="col-7 mx-auto">
+                  <select id="test-name" class="custom-select additional-filter" name="test_name">
+                    <option selected value="">Choose Test Type</option>
+                    {% for test in test_types %}
+                      <option {% if prefill.test_name == test.value %} selected {% endif %} value="{{ test.value }}">
+                        {{ test.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div> 
+            </div>
+                
+            <div class="col-3 mt-3">
+              <div class="row align-items-center rounded p-2 bg-info ml-1">
+                <div class="col-4 mx-auto">
+                  <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
+                </div>
+                <div class="col-8 mx-auto">
+                  <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
+                    <option selected value="">Any</option>
+                    <option {% if prefill.anomaly == 'false' %} selected {% endif %} value="false">
+                      Anomaly False
                     </option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div> 
-          </div>
+                    <option {% if prefill.anomaly == 'true' %} selected {% endif %}value="true">
+                      Anomaly True
+                    </option>
+                  </select>
+                </div>
+              </div> 
+            </div>
+                
+            <div class="col-3 mt-3">
+              <input
+              id="input"
+              class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+              type="search"
+              placeholder="URL"
+              aria-label="Search URL"
+              value="{{ prefill.input }}"
+              name="input"
+              />
+            </div>
+                
+            <div class="col-3 mt-3">
+              <div class="row align-items-center rounded p-2 bg-info ml-1">
+                <div class="col-4 mx-auto">
+                  <label class="font-weight-bold text-white" for="site">Site</label>
+                </div>
+                <div class="col-8 mx-auto">
+                  <select class="custom-select additional-filter" id="site" name="site">
+                    <option selected value="">
+                      Any Site
+                    </option>
+                    {% for site in sites %}
+                      <option value="{{ site.id }}" title="{{ site.description }}" {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}>
+                        {{ site.name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>   
+            </div>
+
+          </div> 
+        </div>   
+      </form>
+      <!-- copy-to-clipboard component for search fields -->
+      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+    </nav>
+
+    <div class="row mb-3">
+      <div class="col-6">
+        <h4><strong>Last Measurement from:</strong> {{last_measurement_date}} </h4>
+      </div>
+      <div class="col-6">
+        <button type="button" class="btn btn-info rounded" id='info'>
+          <i class="fa fa-info-circle"></i> 
+        </button>
+      </div>
+    </div>
+    
+
+    <div class="card rounded" id="domains-list-card">
+      <div class="table-responsive">
+        <table class="table table-striped mt-5 datatable" id="measurements-list">
+          <thead>
+            <tr>
+              <th class="text-center" scope="col">Input</th>
+              <th class="text-center" scope="col">Type</th>
+              <th class="text-center" scope="col">Start Time</th>
+              <th class="text-center" scope="col">ASN</th>
+              <th class="text-center" scope="col">Country</th>
+              <th class="text-center" scope="col">Site</th>
+              <th class="text-center" scope="col">Anomaly</th>
+              <th class="text-center" scope="col">Flags by Submeasure</th>
+            </tr>
+          </thead>
+          <tbody id='measurements-tbody'>
+
+          </tbody>
           
-          <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-info">
-              <div class="col-5 mx-auto">
-                <label class="font-weight-bold text-white" for="test-name">Test Type</label>
-              </div>
-              <div class="col-7 mx-auto">
-                <select id="test-name" class="custom-select additional-filter" name="test_name">
-                  <option selected value="">Choose Test Type</option>
-                  {% for test in test_types %}
-                    <option {% if prefill.test_name == test.value %} selected {% endif %} value="{{ test.value }}">
-                      {{ test.name }}
-                    </option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div> 
-          </div>
-              
-          <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-info ml-1">
-              <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
-              </div>
-              <div class="col-8 mx-auto">
-                <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
-                  <option selected value="">Any</option>
-                  <option {% if prefill.anomaly == 'false' %} selected {% endif %} value="false">
-                    Anomaly False
-                  </option>
-                  <option {% if prefill.anomaly == 'true' %} selected {% endif %}value="true">
-                    Anomaly True
-                  </option>
-                </select>
-              </div>
-            </div> 
-          </div>
-              
-          <div class="col-3 mt-3">
-            <input
-            id="input"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="URL"
-            aria-label="Search URL"
-            value="{{ prefill.input }}"
-            name="input"
-            />
-          </div>
-              
-          <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-info ml-1">
-              <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="site">Site</label>
-              </div>
-              <div class="col-8 mx-auto">
-                <select class="custom-select additional-filter" id="site" name="site">
-                  <option selected value="">
-                    Any Site
-                  </option>
-                  {% for site in sites %}
-                    <option value="{{ site.id }}" title="{{ site.description }}" {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}>
-                      {{ site.name }}
-                    </option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>   
-          </div>
-
-        </div>    
-    </form>
-    <!-- copy-to-clipboard component for search fields -->
-    {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
-  </nav>
-
-  <div class="row mb-3">
-    <div class="col-6">
-      <h4><strong>Last Measurement from:</strong> {{last_measurement_date}} </h4>
+          <tfoot>
+          </tfoot>
+          
+        </table>
+      </div>
     </div>
-    <div class="col-6">
-      <button type="button" class="btn btn-info rounded" id='info'>
-        <i class="fa fa-info-circle"></i> 
-      </button>
-    </div>
-  </div>
-  
 
-  <div class="card rounded" id="domains-list-card">
-    <div class="table-responsive"></div>
-      <table class="table table-striped mt-5 datatable" id="measurements-list">
-        <thead>
-          <tr>
-            <th class="text-center" scope="col">Input</th>
-            <th class="text-center" scope="col">Type</th>
-            <th class="text-center" scope="col">Start Time</th>
-            <th class="text-center" scope="col">ASN</th>
-            <th class="text-center" scope="col">Country</th>
-            <th class="text-center" scope="col">Site</th>
-            <th class="text-center" scope="col">Anomaly</th>
-            <th class="text-center" scope="col">Flags by Submeasure</th>
-          </tr>
-        </thead>
-        <tbody id='measurements-tbody'>
 
-        </tbody>
-        
-        <tfoot>
-        </tfoot>
-        
-      </table>
-    </div>
-  </div>
-
-</form>
 
 {% endblock content %}
 
