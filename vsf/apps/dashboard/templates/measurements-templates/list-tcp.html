@@ -1,8 +1,3 @@
-<!--
-  ========================================
-  MAIN TCP LISTING
-  ========================================
- -->
 
 {% extends 'extends/base.html' %}
 
@@ -258,53 +253,6 @@
         </thead>
 
         <tbody id='tcp-tbody'>
-          {% for measure in submeasures %}
-            <tr id ='{{ measure.id }}'>
-              <td>
-                {{ measure.input }}
-              </td>
-              <td>
-                {{ measure.start_time }}
-              </td>
-              <td>
-                {{ measure.asn }}
-              </td>
-              <td>
-                {{ measure.country }}
-              </td>
-              <td>
-                {{ measure.site }}
-              </td>
-              <td>
-                {{ measure.anomaly }}
-              </td>
-              <td>
-                {% if measure.flag == 'ok' %}
-                <span class="text-success">
-                  <i class="far fa-thumbs-up"></i>
-                </span>
-                {% else %}
-                <span class="text-warning">
-                  <i class="far fa-flag"></i>
-                </span>
-                {% endif %}
-                
-              </td>
-              <td>
-                {{ measure.status_blocked }}
-              </td>
-              <td class="answers">
-                {{ measure.status_failure }}
-              </td>
-              <td class="control_resolver_answers">
-                {{ measure.status_success }}
-              </td>
-              <td>
-                {{ measure.ip }}
-              </td>
-            </tr>
-          {% endfor %}
-
         </tbody>
 
         <tfoot></tfoot>
@@ -312,22 +260,125 @@
     </div>
   </div>
 
-<!--{% include "includes/measurements-includes/detailed-info-modal.html" %}-->
 {% endblock content %}
 
 {% block custom_scripts %}
-
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
-<!-- measurement table js controller -->
-<!--{% include "includes/js/measurements-includes-js/list-tcp-dt-js.html" %}-->
-<!-- Copy to clipboard text area controller -->
 {% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 <script>
   'use strict';
   var selectedRows = []
   $(document).ready(function() {
+
+      /* Creating datatable */
+      var table = $("#tcp-list").DataTable({
+        order: [[1, "desc"]],
+        searching: true,
+        processing: true,
+        language: {
+        },
+        serverSide: true,
+        rowId: "measurement__id",
+        ajax: {
+          url: '{% url "dashboard:submeasurement:list_tcp_data" %}',
+          data: function (data) {
+            $('#urlForm *').filter(':input').each(function(){
+                if (this.id=='since') data.since = $(this).val();
+                if (this.id=='until') data.until = $(this).val();
+                if (this.id=='asn') data.asn = $(this).val();
+                if (this.id=='consistency') data.consistency = $(this).val();
+                if (this.id=='anomaly') data.anomaly = $(this).val();
+                if (this.id=='site') data.site = $(this).val();
+                if (this.id=='flag') data.flag = $(this).val();
+                if (this.id=='status-blocked') data.status_blocked = $(this).val();
+                if (this.id=='status-failure') data.status_failure = $(this).val();
+                if (this.id=='status-success') data.status_success = $(this).val();
+                if (this.id=='ip') data.ip = $(this).val();
+            });
+          },
+          contentType: "application/json; charset=utf-8",  
+          type: "GET",
+        },
+        columns: [
+          {
+            data: "measurement__raw_measurement__input",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__raw_measurement__measurement_start_time",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__raw_measurement__probe_asn",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__raw_measurement__probe_cc",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "site_name",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__anomaly",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "flag__flag",
+            orderable: true,
+            searchable: true,
+            render: function (data, type, row, meta) {
+              if (data === "ok") {
+                return `<div class="text-center text-success">
+                          <i title="OK" class="far fa-thumbs-up"></i>
+                        </div>`;
+              } else if (data === "hard") {
+                return `<div class="text-center text-danger">
+                          <i title="HARD" class="far fa-flag"></i>
+                        </div>`;
+              } else {
+                return `<div class="text-center text-warning">
+                          <i title="SOFT" class="far fa-flag"></i>
+                        </div>`;
+              }
+            },
+          },
+          {
+            data: "status_blocked",
+            orderable: true,
+            searchable: false,
+          },
+          {
+            data: "status_failure",
+            orderable: true,
+            searchable: false,
+          },
+          {
+            data: "status_success",
+            orderable: true,
+            searchable: false,
+          },
+          {
+            data: "ip",
+            orderable: true,
+            searchable: false,
+          },
+        ],
+        initComplete: function () {},
+        select: {
+          style: 'multi'
+        },
+        buttons: [],
+      });
+
 
       $('#info').attr('disabled','disabled');
       /* Creating datatables */

@@ -17,6 +17,7 @@ class SubMeasurement(models.Model):
                                     to=Measurement,
                                     on_delete=models.CASCADE,
                                     db_index=True)
+                                    
     flag = models.ForeignKey(to=Flag, null=True, on_delete=models.SET_NULL)
 
     # The following fields are required for the hard flag logic:

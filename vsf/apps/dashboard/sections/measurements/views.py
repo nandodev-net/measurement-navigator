@@ -154,11 +154,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         else:
             last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
         
-
-
-        
         context = super().get_context_data()
-        context['measurements'] = measurementsList
         context['test_types'] = test_types
         context['sites'] = sites
         context['prefill'] = prefill
@@ -231,5 +227,98 @@ class MeasurementDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(context['rawmeasurement'].id)
+        context['rawmeasurement'].test_keys = json.dumps(context['rawmeasurement'].test_keys)
+        context['rawmeasurement'].annotations = json.dumps(context['rawmeasurement'].annotations)
+        context['rawmeasurement'].test_helpers = json.dumps(context['rawmeasurement'].test_helpers)
+        print(context['rawmeasurement'].test_keys)
         return context
+
+
+class ListMeasurementsBackEnd(BaseDatatableView):
+    """
+        This is the backend view for the ListMeasurementsDataTable view, who
+        just renders the template
+        This View requires datatables to send server-side
+        paginated data to the front, and it's highly coupled
+        with its corresponding template.
+    """
+    columns = [
+            'raw_measurement__input',
+            'raw_measurement__test_name',
+            'raw_measurement__measurement_start_time',
+            'raw_measurement__probe_asn',
+            'raw_measurement__probe_cc',
+            'domain__site__name',
+            'anomaly'
+        ]
+
+    order_columns = [
+            'raw_measurement__input',
+            'raw_measurement__test_name',
+            'raw_measurement__measurement_start_time',
+            'raw_measurement__probe_asn',
+            'raw_measurement__probe_cc',
+            'domain__site__name',
+            'anomaly'
+        ]
+
+    def get_initial_queryset(self):
+        return MeasModels.Measurement.objects.all()\
+                                        .select_related('raw_measurement')\
+                                        .select_related('domain')\
+                                        .select_related('domain__site')\
+
+    def filter_queryset(self, qs):
+        # Get request params
+        get = self.request.GET or {}
+
+        ## Ok this is the kind of solution that i don't like
+
+        # Parse the input data
+        input       = get.get('input')
+        test_name   = get.get('test_name')
+        since       = get.get('since')
+        ASN         = get.get('asn')
+        country     = get.get('country')
+        anomaly     = get.get('anomaly')
+        until       = get.get('until')
+        site        = get.get('site')
+
+        # Get desired measurements
+        measurements = search_measurement_by_queryset(
+            qs,
+            since=since,
+            test_name=test_name,
+            ASN=ASN,
+            input=input,
+            country=country,
+            until=until,
+            site=site,
+            anomaly= anomaly.lower() == "true" if anomaly != None else None
+        )
+
+        return measurements
+
+    def prepare_results(self, qs):
+        # prepare list with output column data
+        # queryset is already paginated here
+        json_data = []
+        for item in qs:
+
+            flagsDNS = [dns.flag.flag for dns in item.dns_set.all()]
+            flagsHTTP = [http.flag.flag for http in item.http_set.all()]
+            flagsTCP = [tcp.flag.flag for tcp in item.tcp_set.all()]
+            
+            json_data.append({
+                'raw_measurement__measurement_start_time':item.raw_measurement.measurement_start_time,
+                'raw_measurement__probe_cc':item.raw_measurement.probe_cc,
+                'raw_measurement__probe_asn':item.raw_measurement.probe_asn,
+                'raw_measurement__input':item.raw_measurement.input,
+                'raw_measurement__test_name':item.raw_measurement.test_name,
+                'id' : item.raw_measurement.id,
+                'site' : item.domain.site.id if item.domain and item.domain.site else -1,
+                'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
+                'anomaly' : item.anomaly,
+                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
+            })
+        return json_data

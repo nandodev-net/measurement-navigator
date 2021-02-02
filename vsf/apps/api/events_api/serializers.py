@@ -4,6 +4,7 @@
 
 from rest_framework import serializers
 from apps.main.events.models import Event
+from apps.api.measurements_api.serializers import MeasurementListDataSerializer
 
 class EventDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,8 +29,11 @@ class EventDetailDataSerializer(serializers.ModelSerializer):
             'public_evidence',
             'private_evidence',
             'issue_type',
-
         ]
+
+class EventDetailSerializer(serializers.Serializer):
+    event = EventDetailDataSerializer()
+    measurements = MeasurementListDataSerializer(many=True, read_only=True)
 
 
 class EventActiveNumberSerializer(serializers.Serializer):
