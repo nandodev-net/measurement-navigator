@@ -286,7 +286,7 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'raw_measurement__probe_asn':item.raw_measurement.probe_asn,
                 'raw_measurement__input':item.raw_measurement.input,
                 'raw_measurement__test_name':item.raw_measurement.test_name,
-                'id' : item.id,
+                'id' : item.raw_measurement.id,
                 'site' : item.domain.site.id if item.domain and item.domain.site else -1,
                 'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
                 'anomaly' : item.anomaly,
