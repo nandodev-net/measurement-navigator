@@ -333,9 +333,11 @@
             },
           }
         ],
-      initComplete: function () {},
-        select: true,
+        initComplete: function () {},
         buttons: [],
+        select: {
+          style: 'multi'
+        },
       });
 
 
@@ -345,6 +347,8 @@
       var table = $('#measurements-list').DataTable();
       $('#measurements-tbody').on( 'click', 'tr', function () {
         $(this).toggleClass('selected');
+        var x = table.rows( { selected: true } ).data();
+        console.log(x);
         if (table.rows('.selected').data().length > 0) {
           $('#info').removeAttr('disabled');
         } else {
@@ -361,9 +365,10 @@
         console.log(selectedRows)
       });
   })
-
+  
   $("#info").click(function() {
     var urls = []
+    console.log(selectedRows);
     selectedRows.forEach(function(uuid){
       var url = "{% url 'dashboard:measurement:detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', uuid);
       urls.push(url);
