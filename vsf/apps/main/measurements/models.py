@@ -91,7 +91,7 @@ class RawMeasurement(models.Model):
 
 
         # To avoid circular imports, we need to import this here:
-        from .submeasurements.utils  import createSubMeasurements
+        from .submeasurements.utils  import create_sub_measurements
         from .utils import anomaly
         
         measurement = Measurement(raw_measurement=self, anomaly=anomaly(self))
@@ -103,9 +103,9 @@ class RawMeasurement(models.Model):
             for m in RawMeasurement.objects.all(id=self.id):
                 m.delete()
             return
-        subMeasurements = createSubMeasurements(self)
+        (sub_measurements,_) = create_sub_measurements(self)
 
-        for sb in subMeasurements:
+        for sb in sub_measurements:
             sb.measurement = measurement
             try:
                 sb.save()
@@ -141,6 +141,8 @@ class Measurement(models.Model):
                             null=True,
                             on_delete=SET_NULL
                             ) 
+
+
 
     def save(self,*args, **kwargs) -> None:
 

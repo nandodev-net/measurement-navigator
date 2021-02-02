@@ -5,6 +5,9 @@
 # Django imports 
 from django.core.paginator               import Paginator
 
+# Third party imports
+from typing import Dict, List, Tuple
+
 # Local imports
 from .models                             import DNS, DNSJsonFields, HTTP, TCP, SubMeasurement
 from apps.main.measurements.models       import RawMeasurement, Measurement
@@ -12,26 +15,42 @@ from apps.main.measurements.flags.models import Flag
 
 # -- SubMeasurement Creation -------------------------------------------------------+
 
-def createSubMeasurements(measurement : RawMeasurement) -> [SubMeasurement]:
+def create_sub_measurements(measurement : RawMeasurement) -> Tuple[List[SubMeasurement], Dict]:
     """
         Creates a new list of submeasurements based on a RawMeasurement
+        return:
+            a tuple (l, d) where:
+                l: Resulting list of measurements 
+                d: dict with the following format:
+                    {
+                        'dns' : int = ammount of dns  submeasurement,
+                        'http': int = ammount of http submeasurement,
+                        'tcp' : int = ammount of tcp  submeasurement
+                    }
     """
-
+    count = {
+        "dns"  : 0,
+        "http" : 0,
+        "tcp"  : 0
+    }
     if measurement.test_name == RawMeasurement.TestTypes.WEB_CONNECTIVITY :
-
-        dns  = [meas for meas in createDNSFromWebConn(measurement) if meas != None] 
-        tcp  = [meas for meas in createTCPFromWebCon(measurement) if meas != None]
-        http = createHTTPFromWebCon(measurement)
+        dns  = [meas for meas in create_dns_from_webconn(measurement) if meas != None] 
+        tcp  = [meas for meas in create_tcp_from_webconn(measurement) if meas != None]
+        http = create_http_from_web_conn(measurement)
         http = [http] if http != None else []
 
-        return dns + tcp + http
+        count['dns']  = len(dns)
+        count['tcp']  = len(tcp)
+        count['http'] = len(http)
+
+        return (dns + tcp + http, count)
         
     elif measurement.test_name == RawMeasurement.TestTypes.DNS_CONSISTENCY :
-        return createDNSFromDNSCons(measurement)
+        return (create_dns_from_dns_cons(measurement), count)
 
-    return []
+    return ([], count)
 
-def createDNSFromWebConn(web_con_measurement : RawMeasurement) -> [DNS]:
+def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
     """
         Each type of measurement requires a totally different way to create
         its sub measurements. This function creates a DNS submeasurement
@@ -90,7 +109,7 @@ def createDNSFromWebConn(web_con_measurement : RawMeasurement) -> [DNS]:
 
     return new_dns
 
-def createDNSFromDNSCons(measurement : RawMeasurement) -> [DNS]:
+def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
     """
         This function creates a DNS measurement based on a DNS consistency test
         PENDIENTE POR REVISAR:
@@ -106,7 +125,7 @@ def createDNSFromDNSCons(measurement : RawMeasurement) -> [DNS]:
     control_resolver    = test_keys['control']
     client_resolver     = test_keys.get('client_resolver')
 
-    new_dns : [DNS] = []
+    new_dns : List[DNS] = []
     # Control resolver ip addres:
     cr_ip = control_resolver.split(":")[0]
     # Control resolver data:
@@ -199,7 +218,7 @@ def createDNSFromDNSCons(measurement : RawMeasurement) -> [DNS]:
     return new_dns
 
 
-def createHTTPFromWebCon(measurement : RawMeasurement) -> HTTP:
+def create_http_from_web_conn(measurement : RawMeasurement) -> HTTP:
     """
         This function creates an HTTP submeasurement based
         on a measurement. This is necesary for creating the 
@@ -236,7 +255,7 @@ def createHTTPFromWebCon(measurement : RawMeasurement) -> HTTP:
     
     return None
 
-def createTCPFromWebCon(measurement : RawMeasurement) -> [TCP]:
+def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
     """
         Create a TCP test sub measurement from a web_connectivity measurement
     """
