@@ -1,10 +1,13 @@
 from django.http import Http404
+import datetime
 import json
+import pytz
 
 from rest_framework.views import APIView
 from rest_framework import status, generics
 from rest_framework.response import Response
 from django.shortcuts import render
+from apps.main.measurements.submeasurements.models import *
 
 from apps.main.events.models import Event
 from apps.main.asns.models import ASN
@@ -15,7 +18,10 @@ from .serializers import (
                         EventActiveNumberSerializer, 
                         EventAsnNumberSerializer, 
                         EventTypeNumberSerializer,
+                        EventDetailSerializer,
                         )
+
+utc=pytz.UTC
 
 class ListEvents(generics.GenericAPIView):
     """
@@ -29,6 +35,51 @@ class ListEvents(generics.GenericAPIView):
         events = Event.objects.all()
         events_json = EventDataSerializer(events, many=True)
         return Response(events_json.data, status=status.HTTP_200_OK)
+
+
+class EventDateDetail(generics.GenericAPIView):
+    """
+        class created to provide response to endpoint 
+        returning one event instance by id 
+    """
+    serializer_class = EventDetailDataSerializer
+
+    def get_object(self,id):
+        try:
+            return Event.objects.get(id=id)
+        except Event.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, id, start_date, end_date):
+        _inidate = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+        _enddate = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+
+        event = self.get_object(id)
+        flags = event.flags.all()
+
+        measurements = []
+        for flag in flags:
+            if event.issue_type == 'dns':
+                submeasurements = DNS.objects.filter(flag=flag)
+            elif event.issue_type == 'tcp':
+                submeasurements = TCP.objects.filter(flag=flag)
+            else:
+                submeasurements = HTTP.objects.filter(flag=flag)
+
+        if _inidate and _enddate:
+            for submeasurement in submeasurements:
+                if submeasurement.measurement.\
+                    raw_measurement.measurement_start_time.replace(tzinfo=utc) >=\
+                         _inidate.replace(tzinfo=utc) and submeasurement.measurement.\
+                    raw_measurement.measurement_start_time.replace(tzinfo=utc) <= \
+                        _enddate.replace(tzinfo=utc): 
+                    measurements.append(submeasurement.measurement)
+                else:
+                    measurements.append(submeasurement.measurement)
+
+        _event = {'event':event, 'measurements':measurements}
+        event_json = EventDetailSerializer(_event)
+        return Response(event_json.data, status=status.HTTP_200_OK)
 
 
 class EventDetail(generics.GenericAPIView):
@@ -46,10 +97,22 @@ class EventDetail(generics.GenericAPIView):
     
     def get(self, request, id):
         event = self.get_object(id)
-        #print(event.flag_set.all())
-        event_json = EventDetailDataSerializer(event)
-        return Response(event_json.data, status=status.HTTP_200_OK)
+        flags = event.flags.all()
 
+        measurements = []
+        for flag in flags:
+            if event.issue_type == 'dns':
+                submeasurements = DNS.objects.filter(flag=flag)
+            elif event.issue_type == 'tcp':
+                submeasurements = TCP.objects.filter(flag=flag)
+            else:
+                submeasurements = HTTP.objects.filter(flag=flag)
+
+        for submeasurement in submeasurements:
+            measurements.append(submeasurement.measurement)
+        _event = {'event':event, 'measurements':measurements}
+        event_json = EventDetailSerializer(_event)
+        return Response(event_json.data, status=status.HTTP_200_OK)
 
 class ListEventsByASN(generics.GenericAPIView):
     """

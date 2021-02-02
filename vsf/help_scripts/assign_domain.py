@@ -18,4 +18,3 @@ for q in qs.iterator():
         to_update = []
 
 if len(to_update) != 0: Measurement.objects.bulk_update(to_update, ['domain'])
-
