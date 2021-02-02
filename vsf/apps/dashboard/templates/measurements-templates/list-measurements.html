@@ -187,81 +187,7 @@
           </tr>
         </thead>
         <tbody id='measurements-tbody'>
-          {% for measure in measurements %}
-          <tr id ='{{ measure.id }}'>
-            <td>
-              {{ measure.input }}
-            </td>
-            <td>
-              {{ measure.test_type }}
-            </td>
-            <td>
-              {{ measure.measurement_start_time }}
-            </td>
-            <td>
-              {{ measure.probe_asn }}
-            </td>
-            <td>
-              {{ measure.probe_cc }}
-            </td>
-            <td>
-              {{ measure.site }}
-            </td>
-            <td>
-              {{ measure.anomaly }}
-            </td>
-            <td>
-              <strong>DNS:</strong>
-                {% for dns in measure.flags_dns %}
-                  {% if dns == 'ok' %}
-                    <span class="badge badge-pill badge-success">OK</span>
-                  {% elif dns == 'soft' %}
-                    <span class="badge badge-pill badge-warning">SOFT</span>
-                  {% elif dns == 'hard' %}
-                    <span class="badge badge-pill badge-danger">HARD</span>
-                  {% elif dns == 'muted' %}
-                    <span class="badge badge-pill badge-secondary">MUTED</span>
-                  {% else %}
-                    <span class="badge badge-pill badge-info">MANUAL</span>
-                  {% endif %}
-                {% endfor %}
-              <br>
 
-              <strong>HTTP:</strong>
-                {% for http in measure.flags_http %}
-                  {% if http == 'ok' %}
-                    <span class="badge badge-pill badge-success">OK</span>
-                  {% elif http == 'soft' %}
-                    <span class="badge badge-pill badge-warning">SOFT</span>
-                  {% elif http == 'hard' %}
-                    <span class="badge badge-pill badge-danger">HARD</span>
-                  {% elif http == 'muted' %}
-                    <span class="badge badge-pill badge-secondary">MUTED</span>
-                  {% else %}
-                    <span class="badge badge-pill badge-info">MANUAL</span>
-                  {% endif %}
-                {% endfor %}
-              <br>
-
-              <strong>TCP:</strong>
-                {% for tcp in measure.flags_tcp %}
-                  {% if tcp == 'ok' %}
-                    <span class="badge badge-pill badge-success">OK</span>
-                  {% elif tcp == 'soft' %}
-                    <span class="badge badge-pill badge-warning">SOFT</span>
-                  {% elif tcp == 'hard' %}
-                    <span class="badge badge-pill badge-danger">HARD</span>
-                  {% elif tcp == 'muted' %}
-                    <span class="badge badge-pill badge-secondary">MUTED</span>
-                  {% else %}
-                    <span class="badge badge-pill badge-info">MANUAL</span>
-                  {% endif %}
-                {% endfor %}
-            </td>
-
-          </tr>
-          {% endfor %}
-        
         </tbody>
         
         <tfoot>
@@ -284,6 +210,135 @@
   'use strict';
   var selectedRows = []
   $(document).ready(function() {
+
+      /* Creating datatable */
+      var table = $("#measurements-list").DataTable({
+        order: [[1, "desc"]],
+        searching: true,
+        processing: true,
+        language: {
+        },
+        serverSide: true,
+        rowId: "id",
+        ajax: {
+          url: '{% url "dashboard:measurement:list_measurements_data" %}',
+          data: function (data) {
+            $('#urlForm *').filter(':input').each(function(){
+                if (this.id=='since') data.since = $(this).val();
+                if (this.id=='until') data.until = $(this).val();
+                if (this.id=='test-name') data.test_name = $(this).val();
+                if (this.id=='asn') data.asn = $(this).val();
+                if (this.id=='anomaly') data.anomaly = $(this).val();
+                if (this.id=='input') data.site = $(this).val();
+            });
+          },
+          contentType: "application/json; charset=utf-8",  
+          type: "GET",
+        },
+        columns: [
+          {
+            data: "raw_measurement__input",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "raw_measurement__test_name",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "raw_measurement__measurement_start_time",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "raw_measurement__probe_asn",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "raw_measurement__probe_cc",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "site_name",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "anomaly",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "flags",
+            orderable: true,
+            searchable: true,
+            render: function (data, type, row, meta) {
+              var line = `<strong>DNS:</strong>`;
+              
+              if ( data['dns'] ) {
+                data['dns'].forEach(element => {
+                  if (element === 'ok') {
+                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
+                  } else if (element === 'soft') {
+                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
+                  } else if (element === 'hard') {
+                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
+                  } else if (element === 'muted') {
+                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
+                  } else {
+                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
+                  }
+                });
+              }
+
+              line = line + `<br><strong>HTTP:</strong>`;
+              if ( data['http'] ) {
+                data['http'].forEach(element => {
+                  if (element === 'ok') {
+                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
+                  } else if (element === 'soft') {
+                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
+                  } else if (element === 'hard') {
+                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
+                  } else if (element === 'muted') {
+                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
+                  } else {
+                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
+                  }
+                });
+              }
+
+              line = line + `<br><strong>TCP:</strong>`;
+              if ( data['tcp'] ) {
+                data['tcp'].forEach(element => {
+                  if (element === 'ok') {
+                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
+                  } else if (element === 'soft') {
+                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
+                  } else if (element === 'hard') {
+                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
+                  } else if (element === 'muted') {
+                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
+                  } else {
+                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
+                  }
+                });
+              }
+
+              return line;
+              
+            },
+          }
+        ],
+      initComplete: function () {},
+        select: true,
+        buttons: [],
+      });
+
+
 
       $('#info').attr('disabled','disabled');
       /* Creating datatables */
