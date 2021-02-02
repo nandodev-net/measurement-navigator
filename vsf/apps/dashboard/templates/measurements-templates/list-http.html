@@ -1,9 +1,3 @@
-<!--
-  ========================================
-  MAIN HTTP LISTING
-  ========================================
--->
-
 {% extends 'extends/base.html' %}
 
 {% load static %}
@@ -288,52 +282,7 @@
         </thead>
 
         <tbody id='http-tbody'>
-          {% for measure in submeasures %}
-            <tr id ='{{ measure.id }}'>
-              <td>
-                {{ measure.input }}
-              </td>
-              <td>
-                {{ measure.start_time }}
-              </td>
-              <td>
-                {{ measure.asn }}
-              </td>
-              <td>
-                {{ measure.country }}
-              </td>
-              <td>
-                {{ measure.site }}
-              </td>
-              <td>
-                {{ measure.anomaly }}
-              </td>
-              <td>
-                {% if measure.flag == 'ok' %}
-                <span class="text-success">
-                  <i class="far fa-thumbs-up"></i>
-                </span>
-                {% else %}
-                <span class="text-warning">
-                  <i class="far fa-flag"></i>
-                </span>
-                {% endif %}
-                
-              </td>
-              <td>
-                {{ measure.status_code_match }}
-              </td>
-              <td>
-                {{ measure.headers_match }}
-              </td>
-              <td>
-                {{ measure.body_length_match }}
-              </td>
-              <td>
-                {{ measure.body_proportion }}
-              </td>
-            </tr> 
-          {% endfor %}         
+       
         </tbody>
 
         <tfoot></tfoot>
@@ -341,16 +290,12 @@
     </div>
   </div>
 
-<!--{% include "includes/measurements-includes/detailed-info-modal.html" %}-->
+  
 {% endblock content %}
 
 {% block custom_scripts %}
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
-<!-- measurement table js controller -->
-<!-- {% include "includes/js/measurements-includes-js/list-http-dt-js.html" %} -->
-<!-- Copy to clipboard text area controller -->
 {% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 
 <script>
@@ -360,7 +305,117 @@
 
       $('#info').attr('disabled','disabled');
       /* Creating datatables */
-      var table = $('#http-list').DataTable();
+
+      var table = $("#http-list").DataTable({
+        order: [[1, "desc"]],
+        searching: true,
+        processing: true,
+        language: {
+        },
+        serverSide: true,
+        rowId: "measurement__id",
+        ajax: {
+          url: '{% url "dashboard:submeasurement:list_http_data" %}',
+          data: function (data) {
+            $('#urlForm *').filter(':input').each(function(){
+              if (this.id=='since') data.since = $(this).val();
+              if (this.id=='until') data.until = $(this).val();
+              if (this.id=='asn') data.asn = $(this).val();
+              if (this.id=='consistency') data.consistency = $(this).val();
+              if (this.id=='anomaly') data.anomaly = $(this).val();
+              if (this.id=='site') data.site = $(this).val();
+              if (this.id=='flag') data.flag = $(this).val();
+              if (this.id=='status_code_match') data.status_code_match = $(this).val();
+              if (this.id=='headers_match') data.headers_match = $(this).val();
+              if (this.id=='body_length_match') data.body_length_match = $(this).val();
+              if (this.id=='body_proportion_min') data.body_proportion_min = $(this).val();
+              if (this.id=='body_proportion_max') data.body_proportion_max = $(this).val();
+            });
+          },
+          contentType: "application/json; charset=utf-8",  
+          type: "GET",
+        },
+        columns: [
+          {
+            data: "measurement__raw_measurement__input",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__raw_measurement__measurement_start_time",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__raw_measurement__probe_asn",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__raw_measurement__probe_cc",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "site_name",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__anomaly",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "flag__flag",
+            orderable: true,
+            searchable: true,
+            render: function (data, type, row, meta) {
+              if (data === "ok") {
+                return `<div class="text-center text-success">
+                          <i title="OK" class="far fa-thumbs-up"></i>
+                        </div>`;
+              } else if (data === "hard") {
+                return `<div class="text-center text-danger">
+                          <i title="HARD" class="far fa-flag"></i>
+                        </div>`;
+              } else {
+                return `<div class="text-center text-warning">
+                          <i title="SOFT" class="far fa-flag"></i>
+                        </div>`;
+              }
+            },
+          },
+          {
+            data: "status_code_match",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "headers_match",
+            orderable: true,
+            searchable: false,
+          },
+          {
+            data: "body_length_match",
+            orderable: true,
+            searchable: false,
+          },
+          {
+            data: "body_proportion",
+            orderable: true,
+            searchable: false,
+          },
+        ],
+        initComplete: function () {},
+        select: true,
+        buttons: [],
+      });
+
+
+
+
+
       $('#http-tbody').on( 'click', 'tr', function () {
         $(this).toggleClass('selected');
         if (table.rows('.selected').data().length > 0) {
@@ -383,6 +438,7 @@
     var urls = []
     selectedRows.forEach(function(uuid){
       var url = "{% url 'dashboard:measurement:detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', uuid);
+      console.log(url);
       urls.push(url);
     });
 
