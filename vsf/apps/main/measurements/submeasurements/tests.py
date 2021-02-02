@@ -383,7 +383,7 @@ class TestCreateSubMeasurement(TestCase):
         """
 
         rmeas = RawMeasurement.objects.get(id="6333ce81-143b-47fe-a605-ec16de9fc847")
-        obtainedAns = createDNSFromWebConn(rmeas)
+        obtainedAns = create_dns_from_webconn(rmeas)
         desiredAns = DNS(
             measurement=None,
             flag=None,
@@ -429,7 +429,7 @@ class TestCreateSubMeasurement(TestCase):
         """
         rmeas = RawMeasurement.objects.get(id="6333ce81-143b-47fe-a605-ec16de9fc847")
 
-        obtainedAns = createHTTPFromWebCon(rmeas)
+        obtainedAns = create_http_from_web_conn(rmeas)
 
         assert(None == obtainedAns)
 
@@ -440,7 +440,7 @@ class TestCreateSubMeasurement(TestCase):
         """
         rmeas = RawMeasurement.objects.get(id="dfe85c88-c1ea-843b-2cfe-8f3b55016886")
 
-        obtainedAns = createHTTPFromWebCon(rmeas)
+        obtainedAns = create_http_from_web_conn(rmeas)
         desiredAns = HTTP(
             measurement=None,
             flag=None, 
@@ -455,7 +455,7 @@ class TestCreateSubMeasurement(TestCase):
     def testCreateTCPFromWebCon(self):
         rmeas = RawMeasurement.objects.get(id="dfe85c88-c1ea-843b-2cfe-8f3b55016886")
 
-        obtainedAns = createTCPFromWebCon(rmeas)
+        obtainedAns = create_tcp_from_webconn(rmeas)
         desiredAns = [
                 TCP(
                     measurement=None, 
