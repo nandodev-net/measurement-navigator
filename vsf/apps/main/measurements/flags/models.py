@@ -50,7 +50,8 @@ class Flag(models.Model):
         to=Event, 
         null=True,
         blank=True, 
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        related_name = 'flags'
     )
 
     confirmed = models.BooleanField(
