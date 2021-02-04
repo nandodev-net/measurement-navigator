@@ -51,3 +51,7 @@ def hard_flag_task():
 
     result['ran'] = True
     return result
+
+@shared_task(time_limit=10, vsf_name = "test_task", base=VSFTask)
+def test_task():
+    return "corrí"
