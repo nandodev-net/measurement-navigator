@@ -96,7 +96,7 @@ app.conf.beat_schedule = {
         'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
         'schedule':600,
         'args':(),
-        'options' : {'queue' : transient_queue_name}
+        'options' : {'queue' : user_transient_queue_name}
     },
     'test-task':{
         'task':'apps.main.measurements.submeasurements.tasks.test_task',
