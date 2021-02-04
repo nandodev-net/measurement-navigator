@@ -4,14 +4,13 @@ WITH
         SELECT                  -- joins than i would like and some sorting
             dns.id as dns_id, 
             rms.measurement_start_time as start_time,
-            f.flag as flag,
+            dns.flag_type as flag,
             ms.domain_id as domain,
             dns.counted as counted,
             rms.probe_asn as asn,
             dns.previous_counter as prev_counter
         FROM submeasurements_dns dns    JOIN measurements_measurement ms ON ms.id = dns.measurement_id
                                         JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id
-                                        JOIN flags_flag f ON f.id = dns.flag_id
         ORDER BY domain, asn, start_time, prev_counter, dns_id
     ),
     ms_to_update as (               -- Builds a list with every input such that there's at the least 1 measurement for this input whose "counted" field
