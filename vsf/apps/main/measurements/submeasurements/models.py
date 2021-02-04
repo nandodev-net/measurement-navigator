@@ -79,11 +79,7 @@ class SubMeasurement(models.Model):
         
         if self.pk is None:
             should_flag = check_submeasurement(self)
-            flag_type = Flag.FlagType.SOFT if should_flag else Flag.FlagType.OK
-            try:
-                self.flag = Flag.objects.create(flag=flag_type)
-            except:
-                pass
+            self.flag_type = SubMeasurement.FlagType.SOFT if should_flag else SubMeasurement.FlagType.OK
 
         return super().save(force_insert, force_update, using, update_fields)
 

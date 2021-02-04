@@ -11,7 +11,7 @@ from typing                                     import List
 from datetime                                   import datetime, timedelta
 import json
 #Utils import
-from apps.main.measurements.utils               import search_measurement_by_queryset, search_measurement
+from apps.main.measurements.utils               import search_measurement_by_queryset
 #Local imports
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels

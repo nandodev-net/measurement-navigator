@@ -9,7 +9,7 @@ from django.http                    import JsonResponse
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 # Local imports
-from vsf.vsf_tasks                  import fp_update, measurement_update, count_flags_submeasurements, SoftFlagMeasurements
+from vsf.vsf_tasks                  import fp_update, measurement_update, count_flags_submeasurements, soft_flag_measurements
 from vsf.utils                      import ProcessState
 from vsf.celery                     import transient_queue_name, USER_TASK_PRIORITY
 
@@ -85,8 +85,8 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
         }
 
         context['soft_flags'] = {
-            'name' : SoftFlagMeasurements.vsf_name,
-            'state' : cache.get(SoftFlagMeasurements.vsf_name)
+            'name' : soft_flag_measurements.vsf_name,
+            'state' : cache.get(soft_flag_measurements.vsf_name)
         }
 
         context['states'] = ProcessState.__dict__
@@ -109,7 +109,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
             self.CONTROL_TYPES.FASTPATH : fp_update.vsf_name, # vsf_name is a custom attribute that every vsf task should fill 
             self.CONTROL_TYPES.MEASUREMENT_RECOVERY : measurement_update.vsf_name,
             self.CONTROL_TYPES.COUNT_FLAGS : count_flags_submeasurements.vsf_name,
-            self.CONTROL_TYPES.SOFT_FLAGS  : SoftFlagMeasurements.vsf_name
+            self.CONTROL_TYPES.SOFT_FLAGS  : soft_flag_measurements.vsf_name
         }   
 
         # Get request data 
@@ -171,7 +171,7 @@ class ControlPanel(VSFLoginRequiredMixin, TemplateView):
 
             # Run task
             
-            SoftFlagMeasurements.apply_async(
+            soft_flag_measurements.apply_async(
                     kwargs= {   
                             'until':until, 
                             'since' : since, 
