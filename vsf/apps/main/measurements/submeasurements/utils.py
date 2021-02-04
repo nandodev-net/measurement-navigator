@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple
 
 # Local imports
 from .models                             import DNS, DNSJsonFields, HTTP, TCP, SubMeasurement
-from apps.main.measurements.models       import RawMeasurement, Measurement
+from apps.main.measurements.models       import RawMeasurement
 from apps.main.measurements.flags.models import Flag
 
 # -- SubMeasurement Creation -------------------------------------------------------+
@@ -283,7 +283,7 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
 
 # -- Flag Checking -------------------------------------------------------+
 
-def SoftFlag(since=None, until=None, limit : int = None, page_size : int = 1000, absolute : bool = False):
+def soft_flag(since=None, until=None, limit : int = None, page_size : int = 1000, absolute : bool = False):
     """
         This function Flags every measurement from the start time 
         "since" to "until".  if some of them is not provided, 

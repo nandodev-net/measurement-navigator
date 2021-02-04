@@ -3,7 +3,6 @@ from django.http import request
 from django.views.generic           import TemplateView
 from django.db.models.expressions   import RawSQL
 from django.db.models               import OuterRef, Subquery
-from apps.main.measurements import flags
 
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -11,9 +10,8 @@ from vsf.views                      import VSFLoginRequiredMixin
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from datetime                                   import datetime, timedelta
 # Local imports
-from apps.main.sites.models                     import URL, Site
+from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
-from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMeasModels
 from apps.main.measurements.flags               import models as FlagModels
 
@@ -97,14 +95,6 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         if flag:
             prefill['flag'] = flag
 
-        submeasure = self.SubMeasurement.objects.all()\
-                .select_related('measurement', 'flag')\
-                .select_related('measurement__raw_measurement')\
-                .select_related('measurement__domain')\
-                .select_related('measurement__domain__site')
-        
-
-
         context =  super().get_context_data()
         context['flags'] = flag_types
         context['sites'] = sites
@@ -185,8 +175,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
         if flag:
-            qs = qs.filter(flag__flag=flag)
-
+            qs = qs.filter(flag_type=flag)
 
         return qs
 
@@ -265,7 +254,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag__flag'      : item.flag.flag if item.flag else "no flag"
+                'flag__flag'      : item.flag_type if item.flag else "no flag"
             })
         return json_data
 
@@ -380,7 +369,7 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag.flag if item.flag else "no flag",
+                'flag__flag'           : item.flag_type if item.flag else "no flag",
                 'status_code_match' : item.status_code_match,
                 'headers_match' : item.headers_match,
                 'body_length_match' : item.body_length_match,
@@ -481,7 +470,7 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag.flag if item.flag else "no flag",
+                'flag__flag'           : item.flag_type if item.flag else "no flag",
                 'status_blocked' : item.status_blocked,
                 'status_failure' : item.status_failure or "N/A",
                 'status_success' : item.status_success,
