@@ -250,13 +250,27 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'jsons__answers' : item.jsons.answers,
+                'jsons__answers' : [self._get_answers(j) for j in item.jsons.answers],
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
                 'flag__flag'      : item.flag_type if item.flag else "no flag"
             })
         return json_data
+
+    def _get_answers(self, json : dict) -> dict:
+        """
+            Get just ipv4/ipv6 field from 'answers' field
+        """
+        type_of_answer = json.get('answer_type')
+        if type_of_answer == 'A':
+            return {'ipv4' : json.get('ipv4')}
+        elif type_of_answer == 'AAAA':
+            return {'ipv6' : json.get('ipv6')}
+        else:
+            return json
+
+
 
 class ListHTTPTemplate(ListSubMeasurementTemplate):
     """
