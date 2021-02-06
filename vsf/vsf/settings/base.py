@@ -49,6 +49,7 @@ DJANGO_APPS = [
 INSTALLED_APPS = [
     'apps.vsf_base.apps.VsfBaseConfig',
     'apps.configs.apps.ConfigsConfig',
+    'apps.main.users.apps.UsersConfig',
     'apps.main.events.apps.EventsConfig',
     'apps.main.cases.apps.CasesConfig',
     'apps.main.measurements.flags.apps.FlagsConfig',
@@ -80,6 +81,8 @@ THIRD_PARTY_APPS = [
 
 INSTALLED_APPS = INSTALLED_APPS + DJANGO_APPS + API_APPS + THIRD_PARTY_APPS
 
+AUTH_USER_MODEL = 'users.CustomUser'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -91,6 +94,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'vsf.urls'
+
+LOGIN_REDIRECT_URL = "dashboard"   # Route defined in app/urls.py
+LOGOUT_REDIRECT_URL = "dashboard"  # Route defined in app/urls.py
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 TEMPLATES = [
     {
