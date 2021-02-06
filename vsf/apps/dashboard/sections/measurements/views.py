@@ -223,14 +223,21 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
 class MeasurementDetailView(DetailView):
     template_name = 'measurements-templates/measurement-detail.html'
     slug_field = 'pk'
-    model = MeasModels.RawMeasurement
+    model = MeasModels.Measurement
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['rawmeasurement'].test_keys = json.dumps(context['rawmeasurement'].test_keys)
-        context['rawmeasurement'].annotations = json.dumps(context['rawmeasurement'].annotations)
-        context['rawmeasurement'].test_helpers = json.dumps(context['rawmeasurement'].test_helpers)
-        print(context['rawmeasurement'].test_keys)
+        print('----------------------------------------:')
+        raw = context['measurement'].raw_measurement.__dict__
+        print(raw)
+        #print(raw['test_keys']['dns_experiment_failure'])
+        #print(raw['test_keys']['http_experiment_failure'])
+        #print(raw['test_keys']['control_failure'])
+        #print(context['rawmeasurement'].__dict__)
+        #context['rawmeasurement'].test_keys = json.dumps(context['rawmeasurement'].test_keys)
+        #context['rawmeasurement'].annotations = json.dumps(context['rawmeasurement'].annotations)
+        #context['rawmeasurement'].test_helpers = json.dumps(context['rawmeasurement'].test_helpers)
+        # print(context['rawmeasurement'].test_keys)
         return context
 
 
@@ -315,7 +322,7 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'raw_measurement__probe_asn':item.raw_measurement.probe_asn,
                 'raw_measurement__input':item.raw_measurement.input,
                 'raw_measurement__test_name':item.raw_measurement.test_name,
-                'id' : item.raw_measurement.id,
+                'id' : item.id,
                 'site' : item.domain.site.id if item.domain and item.domain.site else -1,
                 'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
                 'anomaly' : item.anomaly,

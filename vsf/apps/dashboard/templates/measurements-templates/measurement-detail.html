@@ -2,212 +2,108 @@
 {% load static %}
 
 {% block custom_stylesheet %}
-<link rel=stylesheet
-  href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
-/>
+<link rel=stylesheet href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"/>
 {% endblock custom_stylesheet %}
 
-
-{% block tab_title %} VSF - Measurement Detail {% endblock tab_title %}
-{% block title %} Measurement Detail {% endblock title %}
-{% block sub_title %} Specific details of the measurement with id: {{ rawmeasurement.id }}{% endblock sub_title %}
-
-{% block route %}
-
-<li class="breadcrumb-item">
-  <a href="{% url home %}">Home</a>
-</li>
-<li class="breadcrumb-item">
-  <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements List</a>
-</li>
-<li class="breadcrumb-item">
-    <a href="{% url 'dashboard:measurement:detail' pk=rawmeasurement.id %}">Measurement Detail</a>
-</li>
-
-{% endblock route %}
-
 {% block content %}
-    <div class="row">
+<div class="card py-5 px-2" id='main-card'>
+    <!-- Measure Result -->
+    <div class="row mb-5">
         <div class="col-12">
-            <div class="card rounded">
-                <div class="card-body p-5">
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Input: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.input}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Test name: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.test_name}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Start Time: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.measurement_start_time}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Probe ASN: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.probe_asn}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Test Keys: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <button
-                            class="btn btn-outline-info"
-                            type="button"
-                            data-toggle="collapse"
-                            data-target="#collapseTestKeys"
-                            aria-expanded="false"
-                            aria-controls="collapseTestKeys">
-                            Show Test Keys
-                            </button>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Annotations: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <pre id="annotations-detailed">{{ rawmeasurement.annotations }}</pre>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-12">
-                            <div class="collapse" id="collapseTestKeys">
-                                <div class="card card-body">
-                                  <pre id="test-keys-detailed">{{ rawmeasurement.test_keys }}</pre>
-                                </div>
-                              </div>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Bucket Date: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.bucket_date}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Data Format Version: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.data_format_version}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Options: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.options}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Probe CC: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.probe_cc}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Probe IP: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.probe_ip}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Report Filename: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.report_filename}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Report ID: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.report_id}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Software Name: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.software_name}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Software Version: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.software_version}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Test Runtime: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.test_runtime}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Test Start Time: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.test_start_time}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Test Version: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.test_version}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Test Helpers: </h5>
-                        </div>
-                        <div class="col-9 mx-auto">
-                            <pre class="" id="test-helpers-detailed">{{ rawmeasurement.test_helpers }}</pre>
-                        </div>
-
-                    </div>
-
-                </div>
+            <div class="d-flex justify-content-center">
+                <i class="fas fa-check text-white fa-4x mr-1"></i>
+                {% if measurement.anomaly %}
+                    <h1 class="display-4 text-white text-center font-weight-bold">Anomaly</h1>
+                {% else %}
+                    <h1 class="display-4 text-white text-center font-weight-bold">Ok</h1>
+                {% endif %}
             </div>
+            <h1 class="text-white text-center">http://tuneloso.com/</h1>
         </div>
     </div>
+    <div class="row mt-5">
+        <div class="col-1"></div>
+        <div class="col-1">
+            <img src="{% static 'assets/img/ve.svg' %}" 
+                style="border:3px solid white;border-radius:50%;"
+                id='country' 
+            />
+        </div>
+        <div class="col-10"></div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-1"></div>
+        <div class="col-3">
+            {% if measurement.raw_measurement.probe_cc == 'VE' %}
+                <h2 class="text-white mt-2">Venezuela</h2>
+            {% else %}
+                <h2 class="text-white mt-2">{{  measurement.raw_measurement.probe_cc }}</h2>
+            {% endif %}
+            <h3 class="text-white font-weight-bold mt-2">Site</h3>
+        </div>
+        <div class="col-3">
+            <h2 class="text-white mt-2">{{  measurement.raw_measurement.probe_asn }}</h2>
+            <h3 class="text-white font-weight-bold mt-2">Network</h3>
+        </div>
+        <div class="col-4 ml-5">
+            <h2 class="text-white mt-2">{{  measurement.raw_measurement.measurement_start_time }}</h2>
+            <h3 class="text-white font-weight-bold mt-2">Date & Time</h3>
+        </div>
+        <div class="col-1"></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <h3 class="text-dark my-4 float-right"> Test Runtime: <strong> {{ measurement.raw_measurement.test_runtime }} </strong> </h3>
+    </div>
+</div>
 
+<div id="accordion">
+    <div class="card">
+      <div class="card-header" id="headingOne">
+        <h5 class="mb-0">
+          <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+            Failres
+          </button>
+        </h5>
+      </div>
+  
+      <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+        <div class="card-body">
+          Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+        </div>
+      </div>
+    </div>
+</div>
 {% endblock content %}
 
 {% block custom_scripts %}
-
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
 <script>
 
+    console.log("{% static 'assets/img' %}")
+    /* Removing default header and navigator from base*/
+    $( "#header" ).remove();
+    $( "#navigator" ).remove();
+
+    /* Changing the card background color depending on whether there are anomalies or not */
+    var card = $( '#main-card' );
+    let anomaly = {{ measurement.anomaly|yesno:"true,false" }};
+
+    if (anomaly) {
+        card.addClass('bg-warning');
+    } else {
+        card.addClass('bg-success');
+    }
+
+    /* Adding rounded flag image depending of country value passed with django template*/
+    countrysrc = "{% static 'assets/img' %}" + "/" + 
+        "{{ measurement.raw_measurement.probe_cc }}".toLowerCase() 
+        + ".svg";
+    console.log(countrysrc);
+    $( '#country' ).attr("src",countrysrc);
+
+    /*
     var test_keys = $('#test-keys-detailed').text();
     $("#test-keys-detailed").jsonViewer(JSON.parse(test_keys), {
         collapsed: true,
@@ -224,6 +120,6 @@
     $("#test-helpers-detailed").jsonViewer(JSON.parse(test_helper), {
         collapsed: true,
         rootCollapsable: false
-    });
+    });*/
 </script>
 {% endblock custom_scripts %}
