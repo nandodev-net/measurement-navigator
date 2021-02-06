@@ -47,7 +47,7 @@ class SubMeasurement(models.Model):
         to=Event, 
         null=True,
         blank=True, 
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
     )
 
     confirmed = models.BooleanField(
