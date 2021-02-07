@@ -83,13 +83,6 @@ app.conf.beat_schedule = {
         'args':(),
         'options' : {'queue' : transient_queue_name}
     },
-    # SoftFlagMeasurement updates the possible flags for every sub measurement
-    'update-soft-flags':{
-        'task':'apps.main.measurements.submeasurements.tasks.SoftFlagMeasurements',
-        'schedule':3600,
-        'args':(),
-        'options' : {'queue' : transient_queue_name}
-    },
     # Count Flags submeasurements updates the value of previous_counter field in submeasurements
     # field
     'update-hf-counters':{
@@ -101,11 +94,16 @@ app.conf.beat_schedule = {
     # Run the hard flag algorithm over all the measurements
     'update-hard-flags':{
         'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
-        'schedule':3600,
+        'schedule':600,
+        'args':(),
+        'options' : {'queue' : user_transient_queue_name}
+    },
+    'test-task':{
+        'task':'apps.main.measurements.submeasurements.tasks.test_task',
+        'schedule':30,
         'args':(),
         'options' : {'queue' : transient_queue_name}
-    },
-    
+    }
 }
 
 

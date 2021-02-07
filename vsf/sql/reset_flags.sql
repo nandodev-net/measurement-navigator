@@ -1,0 +1,34 @@
+update submeasurements_dns m
+set 
+    counted=cast(0 as BOOLEAN),
+    flagged=cast(0 as BOOLEAN),
+    previous_counter=0;
+    
+update submeasurements_tcp m
+set 
+    counted=cast(0 as BOOLEAN),
+    flagged=cast(0 as BOOLEAN),
+    previous_counter=0;
+update submeasurements_http m
+set 
+    counted=cast(0 as BOOLEAN),
+    flagged=cast(0 as BOOLEAN),
+    previous_counter=0;
+
+update submeasurements_dns 
+set 
+    flag_type='soft',
+    event_id=NULL
+WHERE flag_type='hard';
+
+update submeasurements_tcp 
+set 
+    flag_type='soft',
+    event_id=NULL
+WHERE flag_type='hard';
+
+update submeasurements_http 
+set 
+    flag_type='soft',
+    event_id=NULL
+WHERE flag_type='hard';
