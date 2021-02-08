@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'apps.main.ooni_fp.fp_tables.apps.FpTablesConfig',
     'apps.main.sites.apps.SitesConfig',
     'apps.main.asns.apps.AsnsConfig',
+    'apps.main.early_alerts.apps.EarlyAlertsConfig',
     'apps.dashboard.apps.DashboardConfig',
 ]
 
@@ -195,3 +196,6 @@ CACHES = {
         'TIMEOUT' : 86400
     }
 }
+
+# Url for the ooni api to get a set of measurements
+OONI_MEASUREMENTS_URL = "https://api.ooni.io/api/v1/measurements"
