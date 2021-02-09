@@ -23,6 +23,9 @@ h1, h2, h3, h4, h5, h6, p, label {
   padding: 5%
 }
 
+.modal {
+  overflow-y: auto !important;
+}
 
 .modal-content{
   box-shadow:0 4px 10px 4px rgba(#343a40d9,.3); 
