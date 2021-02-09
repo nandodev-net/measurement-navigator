@@ -81,7 +81,7 @@
 </div>
 
 
-{% include "includes/sites-includes/create-sites-modal.html" with site_creation_form=site_creation_form %} {% include "includes/sites-includes/submit-sites-modal.html" %} 
+{% include "includes/sites-includes/submit-sites-modal.html" %} 
 {% endblock content %} 
 
 {% block custom_scripts %}
@@ -94,8 +94,47 @@
 
         /* Creating datatables */
         $('#domains-list').DataTable();
-        $('#sites-list').DataTable();
         $('domains-related-sites-list').DataTable();
+        var sites = $(' #sites-list ').DataTable({
+            autoWidth: false,
+            order: [[1, "desc"]],
+            searching: true,
+            processing: true,
+            language: {
+            },
+            serverSide: true,
+            rowId: "id",
+            ajax: {
+                url: "{% url 'dashboard:site:sites' %}",
+                data: function (data) {
+                },
+                contentType: "application/json; charset=utf-8",  
+                type: "GET"
+            },
+            columns: [
+                {
+                    data: "associated",
+                    render: function (data, type, row, meta) {
+                        return `
+                        <div class="form-check" id="select-related-sites">
+                            <label class="form-check-label">
+                            <input name="selected-site" type="radio" aria-label="Group of associated URL" id=` + data + `"/>
+                            </label>
+                        </div>`
+                    },
+                },
+                {
+                    data: "name",
+                    orderable: true,
+                    searchable: true,
+                },
+            ],
+            initComplete: function () {},
+            buttons: [],
+            select: {
+            style: 'multi'
+            },
+        });
 
         /* Save site only if all inputs are filled */
         $("#vsf-sites-input, #vsf-description-input").on("change paste keyup", function() {
@@ -118,7 +157,6 @@
                 url: url,
                 data: data,
                 success: function(data, status) {
-                    //$("#associateUrl").modal("hide");
 
                     if (data.error === null) {
                         Swal.fire({
@@ -127,6 +165,8 @@
                             confirmButtonColor: "#28a745",
                             confirmButtonText: "Continue"
                         }).then((result) => {
+                            sites.ajax.reload();
+
                             if (result.isConfirmed) {
                                 $('#close-create-site-modal').click();
                             }
@@ -154,6 +194,7 @@
 
         let selectedPages = []; /*Array where we are going to store the selected pages*/
         /*Actions when we trigger the submit sites button*/
+
         $("#addToSite").click(function() {
 
             // Getting checked urls
@@ -162,9 +203,6 @@
                 id: checkBox.id
             }));
             var checkedBoxes = document.querySelectorAll('input[name=associated-values]:checked');
-            console.log(pages);
-            console.log(checkedBoxes);
-            console.log('aaaa');
             let $table = $("#vsf-grouped-sites");
 
             $table.empty();
@@ -181,13 +219,17 @@
             if (pages.length === 0) {
                 $table.append(
                     `<tr>
-            <td class="text-center">
-              <div class="alert alert-danger" role="alert">No sites to show!</div>
-            </td>
-          </tr>`);
+                        <td class="text-center">
+                        <div class="alert alert-danger" role="alert">No sites to show!</div>
+                        </td>
+                    </tr>`
+                );
             }
 
             selectedPages = pages;
+
+            
+
         });
 
 
@@ -220,8 +262,6 @@
                 url: url,
                 data: data,
                 success: function(data) {
-
-                    // $("submitConfirmationModal").modal("hide");
 
                     if (data.error === null) {
                         Swal.fire({
