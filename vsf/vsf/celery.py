@@ -77,12 +77,12 @@ app.conf.beat_schedule = {
         'options' : {'queue' : transient_queue_name}
     },
     # measurement_update to check for complete measurements to download
-    # 'update-measurements':{
-    #     'task':'apps.api.fp_tables_api.tasks.measurement_update',
-    #     'schedule':600,
-    #     'args':(),
-    #     'options' : {'queue' : transient_queue_name}
-    # },
+    'update-measurements':{
+        'task':'apps.api.fp_tables_api.tasks.measurement_update',
+        'schedule':600,
+        'args':(),
+        'options' : {'queue' : transient_queue_name}
+    },
     # Count Flags submeasurements updates the value of previous_counter field in submeasurements
     # field
     'update-hf-counters':{
