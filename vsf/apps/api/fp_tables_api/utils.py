@@ -35,7 +35,6 @@ from apps.main.asns.models              import ASN
 from .                                  import utils
 from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
-from vsf.utils                          import CachedData
 
 def checkPostData(data) -> bool:
         """
@@ -230,7 +229,6 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
             if start_time_datetime < cache_min_date:
                 cache_min_date = start_time_datetime
                 print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
-                cache.set(CachedData.EARLIEST_ADDED_MEASUREMENT_DATE, cache_min_date)
 
         except Exception as e:
             fp.report_ready = False

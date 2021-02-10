@@ -123,18 +123,6 @@ class VSFTask(Task):
         cache.set(self.vsf_name, ProcessState.FAILED)
         return super().on_failure(exc, task_id, args, kwargs, einfo)
 
-# --- CACHE MANAGEMENT --- #
-class CachedData:
-    """
-        Enum defining misc data cached for further use through the system.
-        Keep in mind that every cache-dependent logic should provide fallback
-        functionality in case the cached data is not stored for some reason,
-        that's very likely to happen. Thus, this is useful to optimize rather than 
-        implementing core logic over cached values.
-    """
-    EARLIEST_ADDED_MEASUREMENT_DATE = 'earliest-added-date'
-    
-
 # --- MISC --- #
 class Colors:
     """

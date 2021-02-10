@@ -156,9 +156,13 @@ LOGOUT_REDIRECT_URL = LOGIN_URL
 
 # EMAIL
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
-# FOR DEBUG ONLY
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST    = env.str("EMAIL_HOST")
+EMAIL_HOST_USER = env.str('VSF_EMAIL_HOST_USER') # email sender user
+EMAIL_HOST_PASSWORD = env.str('VSF_EMAIL_HOST_PASSWORD') # user password
+EMAIL_PORT = env.str("EMAIL_PORT")
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
