@@ -101,10 +101,6 @@ def alert(input : Input, delta : float):
         delta : float = anomaly_rate delta that was bigger than our treshold
     """
     emails = Emails.objects.all()
-    config = EarlyAlertConfig.get_config()
-
-    if config is None: return # can't send emails if i don't have a sender email
-
     now = datetime.now()
 
     subject = f"[ALERT] {input.input} for asn {input.asn}"

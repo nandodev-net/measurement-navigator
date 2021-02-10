@@ -13,15 +13,27 @@ class Input(models.Model):
         to our other apps. Instead, we will provide an interface to add elements.
         Try not to make it so big so we don't overload the ooni api with a lot of requests.
     """
-    input = models.URLField(
+    input = models.TextField(
                             verbose_name='input url', 
-                            editable=True
+                            editable=True,
                         )
     asn   = models.CharField(
                             verbose_name='internet provider ASN',
                             editable=True,
-                            max_length=20              
+                            max_length=30              
                         )
+
+    # anomaly rate for the previous time it was checked (time before the last)
+    last_anomaly_rate = models.FloatField(default=0)
+
+    # anomaly rate for the last time it was checked
+    previous_anomaly_rate = models.FloatField(default=0)
+
+    # When this model was added
+    added  = models.DateTimeField(auto_now_add=True)
+    
+    # When was updated for the last time
+    updated = models.DateTimeField(auto_now=True)
 
     @staticmethod
     def clear_table():
@@ -56,3 +68,38 @@ class Input(models.Model):
     @staticmethod
     def remove_input(asn : str, input : str):
         Input.objects.filter(asn=asn, input=input).delete()
+
+class EarlyAlertConfig(models.Model):
+    """
+        Config parameters to take in consideration when computing 
+        database updating logic
+    """
+    # how many days to take in cosideration when requesting for 
+    # new measurements
+    days_before_now = models.IntegerField(default=0)
+    # how many hours to take in cosideration when requesting for 
+    # new measurements
+    hours_before_now = models.IntegerField(default=1)
+    # how many minutes to take in cosideration when requesting for 
+    # new measurements
+    minutes_before_now = models.IntegerField(default=0)
+
+    # alarming anomaly rate change:
+    alarming_rate_delta = 0.1
+
+    # If this row is te actual configuration to use
+    is_current_config = models.BooleanField(default=False)
+
+    @staticmethod
+    def get_config():
+        """
+        Summary:
+            get the current config. It may return none if no config is active
+        """
+        return EarlyAlertConfig.objects.filter(is_current_config=True).first()
+
+class Emails(models.Model):
+    """
+        Emails to be notified when an event is triggered
+    """
+    email = models.EmailField(null=False, verbose_name="Email to be notified", unique=True)
