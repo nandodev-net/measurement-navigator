@@ -14,7 +14,7 @@ class SoftFlagCheckTest(TestCase):
 
     def setUp(self):
         """
-        # Get a measurement well-known measurement. This is a web connectivity measurement
+        # Get a well-known measurement measurement. This is a web connectivity measurement
         req = requests.get('https://api.ooni.io/api/v1/measurement/temp-id-432863629')
         if req.status_code >= 300:
             raise LookupError("Could not get test data samples from ooni")

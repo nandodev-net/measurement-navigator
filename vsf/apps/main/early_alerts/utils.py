@@ -31,7 +31,7 @@ def update_last_anomaly_rate_on_config():
                                 hours=config.hours_before_now, 
                                 minutes=config.minutes_before_now
                             )
-        alarming_rate : float = config.alarmin_rate_delta
+        alarming_rate : float = config.alarming_rate_delta
     
     update_last_anomaly_rate(delta, alarming_rate)
 
