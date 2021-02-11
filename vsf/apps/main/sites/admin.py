@@ -4,3 +4,4 @@ from .models import *
 
 admin.site.register(Site)
 admin.site.register(URL)
+admin.site.register(SiteCategory)

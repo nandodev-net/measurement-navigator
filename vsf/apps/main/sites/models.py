@@ -1,7 +1,115 @@
 from django.db                      import models
 from django.contrib.postgres.fields import JSONField
 
-# Create your models here.
+
+class SiteCategory(models.Model):
+
+    class CodeType(models.TextChoices):
+        """
+        	Every kind of possible code value
+        """
+
+        ALDR    = 'ALDR'
+        REL     = 'REL'
+        PORN    = 'PORN'
+        PROV    = 'PROV' 
+        POLR    = 'POLR' 
+        HUMR    = 'HUMR' 
+        ENV     = 'ENV' 
+        MILX    = 'MILX' 
+        HATE    = 'HATE' 
+        NEWS    = 'NEWS' 
+        XED     = 'XED' 
+        PUBH    = 'PUBH' 
+        GMB     = 'GMB' 
+        ANON    = 'ANON' 
+        DATE    = 'DATE' 
+        GRP     = 'GRP' 
+        LGBT    = 'LGBT' 
+        FILE    = 'FILE' 
+        HACK    = 'HACK' 
+        COMT    = 'COMT' 
+        MMED    = 'MMED' 
+        HOST    = 'HOST' 
+        SRCH    = 'SRCH' 
+        GAME    = 'GAME' 
+        CULTR   = 'CULTR' 
+        ECON    = 'ECON' 
+        GOVT    = 'GOVT' 
+        COMM    = 'COMM' 
+        CTRL    = 'CTRL' 
+        IGO     = 'IGO' 
+        MISC    = 'MISC'
+
+
+    class OldCodeType(models.TextChoices):
+        """
+        	Every kind of possible old code value
+        """
+
+        ALDR    = 'ALDR'
+        REL     = 'REL'
+        PORN    = 'PORN'
+        PROV    = 'PROV' 
+        POLR    = 'POLR POLT' 
+        HUMR    = 'HUMR MINR WOMR MINF' 
+        ENV     = 'ENV' 
+        MILX    = 'MILX' 
+        HATE    = 'HATE' 
+        NEWS    = 'FEXP' 
+        XED     = 'XED' 
+        PUBH    = 'PUBH SELFHARM' 
+        GMB     = 'GMB' 
+        ANON    = 'ANON' 
+        DATE    = 'DATE' 
+        GRP     = 'GRP' 
+        LGBT    = 'GAYL' 
+        FILE    = 'P2P SFTWR WRZ' 
+        HACK    = 'HACK' 
+        COMT    = 'VOIP EMAIL TRNS MSG' 
+        MMED    = 'MMED' 
+        HOST    = 'HOST BLGSERV CLOUD' 
+        SRCH    = 'SRCH' 
+        GAME    = 'GAME' 
+        CULTR   = 'HAL' 
+        ECON    = 'DEV' 
+        GOVT    = 'FREL USMIL' 
+        COMM    = 'COMM' 
+        CTRL    = 'CACH' 
+        IGO     = 'N/A' 
+        MISC    = 'MISC KWRD'
+
+
+    code = models.CharField(
+        max_length=20, 
+        null=False, 
+        choices=CodeType.choices 
+    )
+
+    old_code = models.CharField(
+        max_length=20, 
+        null=False, 
+        choices=OldCodeType.choices 
+    )
+
+    category_spa = models.TextField()  
+
+    category_eng = models.TextField(
+                    null = True,
+                    blank = True 
+            )  
+
+    description_spa = models.TextField()    
+
+    description_eng = models.TextField(     
+                    null = True,
+                    blank = True 
+            )
+
+    def __str__(self):
+        return str(self.code) + " : " + str(self.category_spa)
+
+
 class Site(models.Model):
     """
         This model represents a Site that may have more than 
@@ -19,6 +127,13 @@ class Site(models.Model):
                     null = True,
                     blank = True 
             )
+
+    category = models.ForeignKey(
+        SiteCategory,
+        null = True,
+        blank = True,
+        on_delete=models.SET_NULL
+        )
 
 class URL(models.Model):
     """

@@ -49,6 +49,7 @@ DJANGO_APPS = [
 INSTALLED_APPS = [
     'apps.vsf_base.apps.VsfBaseConfig',
     'apps.configs.apps.ConfigsConfig',
+    'apps.main.users.apps.UsersConfig',
     'apps.main.events.apps.EventsConfig',
     'apps.main.cases.apps.CasesConfig',
     'apps.main.measurements.flags.apps.FlagsConfig',
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     'apps.main.ooni_fp.fp_tables.apps.FpTablesConfig',
     'apps.main.sites.apps.SitesConfig',
     'apps.main.asns.apps.AsnsConfig',
+    'apps.main.early_alerts.apps.EarlyAlertsConfig',
     'apps.dashboard.apps.DashboardConfig',
 ]
 
@@ -80,6 +82,8 @@ THIRD_PARTY_APPS = [
 
 INSTALLED_APPS = INSTALLED_APPS + DJANGO_APPS + API_APPS + THIRD_PARTY_APPS
 
+AUTH_USER_MODEL = 'users.CustomUser'
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -91,6 +95,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'vsf.urls'
+
+LOGIN_REDIRECT_URL = "dashboard"   # Route defined in app/urls.py
+LOGOUT_REDIRECT_URL = "dashboard"  # Route defined in app/urls.py
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 TEMPLATES = [
     {
@@ -155,9 +163,13 @@ LOGOUT_REDIRECT_URL = LOGIN_URL
 
 # EMAIL
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
-# FOR DEBUG ONLY
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST    = env.str("EMAIL_HOST")
+EMAIL_HOST_USER = env.str('VSF_EMAIL_HOST_USER') # email sender user
+EMAIL_HOST_PASSWORD = env.str('VSF_EMAIL_HOST_PASSWORD') # user password
+EMAIL_PORT = env.str("EMAIL_PORT")
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
@@ -195,3 +207,6 @@ CACHES = {
         'TIMEOUT' : 86400
     }
 }
+
+# Url for the ooni api to get a set of measurements
+OONI_MEASUREMENTS_URL = "https://api.ooni.io/api/v1/measurements"

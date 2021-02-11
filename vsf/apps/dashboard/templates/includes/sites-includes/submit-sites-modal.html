@@ -1,6 +1,6 @@
 <!-- This modal performs the selection of a site to link to some set of domains -->
 
-<div class="modal fade" id="submitConfirmationModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="submitConfirmationModalLabel" aria-hidden="true">
+<div class="modal fade" data-dismiss="modal" data-toggle="modal" id="submitConfirmationModal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="submitConfirmationModalLabel" aria-hidden="true">
   
   <div class="modal-dialog modal-dialog-centered mw-100 w-75">
     <div class="modal-content">
@@ -16,11 +16,11 @@
       <div class="modal-body">
         <div class="container-fluid">
           <form>
-            <div class="card rounded mb-3 p-4 bg-transparent text-white">
+            <div class="card rounded mb-3 p-4 bg-transparent">
               <table class="table table-striped mt-5" id="domains-related-sites-list">
                 <thead>
                   <tr>
-                    <th class="text-white" scope="col">Domains</th>
+                    <th class="" scope="col">Domains</th>
                   </tr>
                 </thead>
                 <tbody id="vsf-grouped-sites">
@@ -28,27 +28,21 @@
                 </tbody>
               </table>
             </div>
-            <div class="card rounded p-4 bg-transparent text-white">
+
+            <button type="button" class="btn btn-outline-info rounded mb-5 ml-4" data-toggle="modal" data-target="#associateUrl">
+              <i class="fa fa-plus"></i> 
+              Create site
+            </button>
+            
+            <div class="card rounded p-4 bg-transparent text-white" id="sites-div">
               <table class="table table-striped mt-5" id="sites-list" >
                 <thead>
                   <tr>
-                    <th class="text-white" scope="col">Associate</th>
-                    <th class="text-white" scope="col">Site</th>
+                    <th class="" scope="col">Associate</th>
+                    <th class="" scope="col">Site</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for site in sites %}
-                  <tr>
-                    <td>
-                      <div class="form-check" id="select-related-sites">
-                        <label class="form-check-label">
-                          <input name="selected-site" type="radio" aria-label="Group of associated URL" id="{{ site.id }}"/>
-                        </label>
-                      </div>
-                    </td>
-                    <td class="text-white">{{ site.name }}</td>
-                  </tr>
-                  {% endfor %}
                 </tbody>
               </table>
             </div>
@@ -67,3 +61,5 @@
     </div>
   </div>
 </div>
+
+{% include "includes/sites-includes/create-sites-modal.html" with site_creation_form=site_creation_form %} 
