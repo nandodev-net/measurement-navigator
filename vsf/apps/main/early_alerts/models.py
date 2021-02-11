@@ -12,6 +12,7 @@ class Input(models.Model):
         There's a lot of ways to add input to this table, so we won't related directly 
         to our other apps. Instead, we will provide an interface to add elements.
         Try not to make it so big so we don't overload the ooni api with a lot of requests.
+        Also, note that 
     """
     input = models.TextField(
                             verbose_name='input url', 
@@ -69,6 +70,16 @@ class Input(models.Model):
     def remove_input(asn : str, input : str):
         Input.objects.filter(asn=asn, input=input).delete()
 
+    def __str__(self) -> str:
+        return f"[{self.input} - {self.asn}]"
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    class Meta:
+        # So we don't request data twice for each input
+        unique_together = ('input', 'asn')
+
 class EarlyAlertConfig(models.Model):
     """
         Config parameters to take in consideration when computing 
@@ -85,7 +96,7 @@ class EarlyAlertConfig(models.Model):
     minutes_before_now = models.IntegerField(default=0)
 
     # alarming anomaly rate change:
-    alarming_rate_delta = 0.1
+    alarming_rate_delta = models.FloatField(default=0.1)
 
     # If this row is te actual configuration to use
     is_current_config = models.BooleanField(default=False)
@@ -98,8 +109,17 @@ class EarlyAlertConfig(models.Model):
         """
         return EarlyAlertConfig.objects.filter(is_current_config=True).first()
 
+    def __str__(self) -> str:
+        return f"[days: {self.days_before_now}, hours: {self.hours_before_now}, minutes: {self.minutes_before_now}]{' On' if self.is_current_config else ''}"
+
 class Emails(models.Model):
     """
         Emails to be notified when an event is triggered
     """
     email = models.EmailField(null=False, verbose_name="Email to be notified", unique=True)
+
+    def __str__(self) -> str:
+        return f"{self.email}"
+    
+    def __repr__(self) -> str:
+        return str(self)
