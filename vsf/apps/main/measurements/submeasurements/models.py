@@ -3,9 +3,14 @@
 from django.db                      import models
 from django.contrib.postgres.fields import JSONField
 
+# third party imports
+import uuid
+
 # Local imports
 from apps.main.measurements.models                       import Measurement
 from apps.main.measurements.flags.models                 import Flag
+from apps.main.events.models                             import Event
+
 # Create your models here.
 class SubMeasurement(models.Model):
     """
@@ -13,12 +18,42 @@ class SubMeasurement(models.Model):
     each measurement may have multiple sub measurements. This 
     is the base class for such objects
     """
+    class FlagType(models.TextChoices):
+        """
+        	Every kind of possible flag value
+        """
+        OK 		     = "ok"     # The measurement has no problems
+        SOFT 	     = "soft"   # The measurement has some problem
+        HARD         = "hard"   # this measurement is grouped with other measurements as they have a common problem
+        MUTED		 = "muted"  # ignore this measurement
+        MANUAL       = "manual" # The measurement has set as it has a possible problem
+
     measurement = models.ForeignKey(
                                     to=Measurement,
                                     on_delete=models.CASCADE,
                                     db_index=True)
-                                    
+
     flag = models.ForeignKey(to=Flag, null=True, on_delete=models.SET_NULL)
+    
+    # Flag type
+    flag_type = models.CharField(
+        max_length=10, 
+        null=False, 
+        choices=FlagType.choices, 
+        default=FlagType.OK
+    )
+
+    event = models.ForeignKey(
+        to=Event, 
+        null=True,
+        blank=True, 
+        on_delete=models.SET_NULL,
+    )
+
+    confirmed = models.BooleanField(
+        default = False,
+        verbose_name = 'confirmed?'
+    )
 
     # The following fields are required for the hard flag logic:
     # The 'previous_counter' field stores an integer 'N' such that 
@@ -44,11 +79,7 @@ class SubMeasurement(models.Model):
         
         if self.pk is None:
             should_flag = check_submeasurement(self)
-            flag_type = Flag.FlagType.SOFT if should_flag else Flag.FlagType.OK
-            try:
-                self.flag = Flag.objects.create(flag=flag_type)
-            except:
-                pass
+            self.flag_type = SubMeasurement.FlagType.SOFT if should_flag else SubMeasurement.FlagType.OK
 
         return super().save(force_insert, force_update, using, update_fields)
 

@@ -2,8 +2,6 @@
 # directly. Instead, import utils.py so you can have a public api for this functions
 
 # Django imports:
-from time import timezone
-from django.db.models.expressions import OrderBy
 from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
 from django.db          import connection
@@ -11,7 +9,7 @@ from django.core.cache  import cache
 
 # Third party imports:
 from typing import List
-from datetime import datetime, time, timedelta, tzinfo
+from datetime import datetime, timedelta
 import pytz
 
 # Local imports
@@ -19,7 +17,7 @@ from .models                                import DNS, TCP, HTTP, SubMeasuremen
 from apps.main.measurements.flags.models    import Flag
 from apps.main.events.models                import Event
 from apps.main.measurements.models          import Measurement
-from vsf.utils                              import CachedData, Colors as c
+from vsf.utils                              import Colors as c
 
 
 # FLAG COUNTING
@@ -40,14 +38,13 @@ def count_flags_sql():
                             SELECT\
                                 {submsmnt}.id as {submsmnt}_id, \
                                 rms.measurement_start_time as start_time,\
-                                f.flag as flag,\
+                                {submsmnt}.flag_type as flag,\
                                 ms.domain_id as domain,\
                                 {submsmnt}.counted as counted,\
                                 rms.probe_asn as asn,\
                                 {submsmnt}.previous_counter as prev_counter\
                             FROM submeasurements_{submsmnt} {submsmnt}    JOIN measurements_measurement ms ON ms.id = {submsmnt}.measurement_id\
                                                             JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id\
-                                                            JOIN flags_flag f ON f.id = {submsmnt}.flag_id\
                             ORDER BY domain, asn, start_time, prev_counter, {submsmnt}_id\
                         ),\
                         ms_to_update as (\
@@ -70,39 +67,6 @@ def count_flags_sql():
                     FROM sq\
                     WHERE {submsmnt}.id = sq.id AND (NOT counted OR {submsmnt}.previous_counter<>sq.prev_counter);"
                 ).format(submsmnt=subm))
-
-def count_flags():
-    """
-        This function sets the value of "previous counter"
-        for every submeasurement according to its meaning
-    """
-
-    submeasurements = [DNS, TCP, HTTP]
-
-    # Iterate over the submeasurements types:
-    for SM in submeasurements:
-
-        # Get the data we need, all the submeasurements ordered by input, and by date
-        sms = SM.objects.all()\
-                .select_related('measurement', 'measurement__raw_measurement', 'flag')\
-                .exclude(flag=None)\
-                .order_by('measurement__raw_measurement__input', 'measurement__raw_measurement__measurement_start_time')\
-                .values('measurement__raw_measurement__input', 'id', 'flag__flag')
-        groups = Grouper(sms)   # perform a partition over the measurements by its input
-        for group in groups:
-            print(group[0]['measurement__raw_measurement__input'], " : ", len(group))
-            sms_ready = []          # store ready measurements in this list:
-            counter = 0
-            for sm in group:
-                counter += sm['flag__flag'] == Flag.FlagType.SOFT # If this measurement is tagged, add one to counter
-                sm['previous_counter'] = counter
-                sms_ready.append(sm)
-        
-            # Save the currently updated group
-            for m in sms_ready:
-                instance = SM.objects.get(id=m['id'])
-                instance.previous_counter = m['previous_counter']
-                instance.save()
 
 # HARD FLAG LOGIC
 class Grouper():
@@ -147,11 +111,18 @@ def __bin_search_max(max_date : datetime, measurements : List[SubMeasurement], s
     """
         return the index of the latest measurement within the given max_date
     """
+
+    if start==end: return start
+
+    # just a shortcut
+    start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
+
+    for i in range(end, start - 1, -1):
+        if start_time(measurements[i]) <= max_date: return i
+
     lo = start
     hi = end
     
-    # just a shortcut
-    start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
 
     while lo < hi:
         mid = lo + (hi - lo) // 2
@@ -206,14 +177,14 @@ def select( measurements : List[SubMeasurement],
     start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
     anomaly_count = lambda lo, hi : measurements[hi].previous_counter -\
                                     measurements[lo].previous_counter +\
-                                    (measurements[lo].flag.flag != Flag.FlagType.OK)
+                                    (measurements[lo].flag_type != SubMeasurement.FlagType.OK)
 
     # Pointers to start and end positions in our measurement window
     lo : int = 0
     hi : int = min(interval_size - 1, n_meas-1)
     while n_meas - lo > minimum_measurements:
         # Search for anomaly measurements
-        if measurements[lo].flag.flag == Flag.FlagType.OK:
+        if measurements[lo].flag_type == Flag.FlagType.OK:
             lo += 1
             hi = min(hi+1, n_meas-1)
             continue
@@ -232,7 +203,7 @@ def select( measurements : List[SubMeasurement],
 
             last_index = lo
             for i in range(lo, min(max_in_date + 1, n_meas)):
-                if measurements[i].flag.flag != Flag.FlagType.OK:
+                if measurements[i].flag_type != SubMeasurement.FlagType.OK:
                     current_block.append(measurements[i])
                     last_index = i
 
@@ -268,52 +239,44 @@ def merge(measurements_with_flags : List[SubMeasurement]):
 
     soft_flags : List[SubMeasurement] = [] # Measurements with soft flag
     hard_flags : List[SubMeasurement] = [] # Measurements with hard flag 
-    soft = Flag.FlagType.SOFT
-    hard = Flag.FlagType.HARD
+    soft = SubMeasurement.FlagType.SOFT
+    hard = SubMeasurement.FlagType.HARD
 
     start_time = lambda m: m.measurement.raw_measurement.measurement_start_time
 
     # Filter measurements by type
+    resulting_event : Event = None
     for measurement in measurements_with_flags:
-        if measurement.flag.flag == soft:
+        if measurement.flag_type == soft:
             soft_flags.append(measurement)
-        elif measurement.flag.flag == hard and measurement.flag.event and not measurement.flag.event.closed:
+        elif measurement.flag_type == hard and measurement.event and not measurement.event.closed:
             hard_flags.append(measurement)
-
-    # Don't delete the same flags twice
-    flags_to_delete = set()
+            if (resulting_event is None): resulting_event = measurement.event
 
     # merge all hard flags as one hard flag
     min_date : datetime = datetime.now(tz = pytz.utc) + timedelta(days=1)
     max_date = datetime(year=2000, day=1, month=1, tzinfo=pytz.utc)
 
-    if hard_flags:
-        # Merge all merge-able measurements to the first hard flag
-        resulting_flag = hard_flags[0].flag
-
-        for measurement in hard_flags:
-            if measurement.flag.id != resulting_flag.id:
-                flags_to_delete.add(measurement.flag)
-            
-            # Update flag field
-            measurement.flag = resulting_flag
-            measurement.save()
-
-            # update min date and max date
-            start = start_time(measurement)
-            if start < min_date:
-                min_date = start
-            if start > max_date:
-                max_date = start
-    else:
-        resulting_flag = Flag.objects.create(flag=hard)
-
+    # if there's no hard flag, setup a new event 
+    if resulting_event is None:
+        reference_measurement = measurements_with_flags[0]
+        resulting_event = _event_creator(
+                    min_date, 
+                    min_date, 
+                    reference_measurement.measurement.asn, 
+                    reference_measurement.measurement.domain,
+                    reference_measurement.__class__.__name__)    
+        resulting_event.save()
+    
+    meas_to_update : List[SubMeasurement] = []
     # upgrade this measurements to hard flag
     for measurement in soft_flags:
-        flags_to_delete.add(measurement.flag)
-        measurement.flag = resulting_flag
-        measurement.save()
 
+        # Update flag type and its event
+        measurement.flag_type = SubMeasurement.FlagType.HARD
+        measurement.event = resulting_event
+
+        meas_to_update.append(measurement)
         # update min date and max date
         start = start_time(measurement)
         if start < min_date:
@@ -321,31 +284,35 @@ def merge(measurements_with_flags : List[SubMeasurement]):
         if start > max_date:
             max_date = start
 
-    # Update event 
-    if resulting_flag.event is None:
-        reference_measurement = measurements_with_flags[0]
-        event = _event_creator(
-                    min_date, 
-                    max_date, 
-                    reference_measurement.measurement.asn, 
-                    reference_measurement.measurement.domain,
-                    reference_measurement.__class__.__name__)    
-    else:
-        event = resulting_flag.event
-        event.end_date = max(max_date, resulting_flag.Event.end_date)
-        
+    # Iterate over hard flags setting up new event
+    events_to_delete = set()
+    for measurement in  hard_flags:
+        if measurement.event != resulting_event:
+            events_to_delete.add(measurement.event)
+            measurement.event = resulting_event
+            meas_to_update.append(measurement)
+            measurement.flagged = True
     
-    event.save()
-    resulting_flag = event
-    resulting_flag.save()
+    if resulting_event.end_date < max_date or resulting_event.start_date > min_date:
+        resulting_event.end_date   = max(max_date, resulting_event.end_date)
+        resulting_event.start_date = min(min_date, resulting_event.start_date)
+        resulting_event.save()
 
-    # Delete irrelevant flags
-    for flag in flags_to_delete: 
+    # Delete innecesary events
+    for event in events_to_delete: event.delete()
 
-        if flag.event:
-            flag.event.delete()
-        flag.delete()
+    # Update changed measurements
+    reference_measurement = measurements_with_flags[0]
+    SM_types = [HTTP, TCP, DNS]
+    SM_type = None
+    for t in SM_types:
+        if isinstance(reference_measurement, t):
+            SM_type = t
+    
+    if SM_type is None: raise TypeError(f"ERROR, THIS IS NOT A SUBMEASUREMENT {reference_measurement}")
 
+    SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
+    
 def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements : int = 3):
     """
         This function evaluates the measurements and flags them properly in the database
@@ -377,25 +344,28 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                                                                         JOIN  measurements_rawmeasurement rms ON ms.raw_measurement_id=rms.id        \
                                     ),\
                                     dom_to_update as (\
-                                        SELECT DISTINCT ms.domain_id as domain  \
+                                        SELECT DISTINCT \
+                                            ms.domain_id as domain,  \
+                                            ms.probe_asn as asn    \
                                         FROM measurements ms \
                                         WHERE NOT flagged\
-                                    ), \
+                                    ),\
                                     valid_subms as (\
                                         SELECT id, probe_asn, domain_id \
                                         FROM \
-                                            measurements ms JOIN dom_to_update ON dom_to_update.domain = ms.domain_id\
+                                            measurements ms JOIN dom_to_update ON dom_to_update.domain = ms.domain_id and ms.probe_asn=dom_to_update.asn\
                                     )\
                                 SELECT \
                                     submeasurements_{label}.id, \
                                     submeasurements_{label}.flagged, \
                                     submeasurements_{label}.measurement_id,  \
-                                    submeasurements_{label}.flag_id,\
+                                    submeasurements_{label}.flag_type,\
                                     domain_id,\
+                                    previous_counter,\
                                     probe_asn \
                                 FROM \
                                     submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id\
-                                ORDER BY domain_id, probe_asn;")
+                                ORDER BY domain_id, probe_asn, previous_counter, id;")
         groups = filter(
                         lambda l:len(l) >= minimum_measurements,
                         Grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
@@ -409,75 +379,6 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
         
         SM.objects.filter(flagged=False).update(flagged=True)
             
-def sug_event_creator(classname, target, asn):
-    if classname == 'DNS':
-        issue_type = Event.IssueType.DNS
-    if classname == 'HTTP':
-        issue_type = Event.IssueType.HTTP
-    if classname == 'TCP':
-        issue_type = Event.IssueType.TCP
-    
-    new_event = Event.objects.create(
-        identification = classname + ' ISSUE AT '+ datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-        issue_type = issue_type,
-        domain = target,
-        asn = asn,
-    )
-    return new_event
-
-def merge_old(select_groups):
-
-    target_list = []
-
-    if not select_groups: return
-
-    for group in select_groups:
-
-        if group[0].flag.flag == 'soft':
-            target = group[0].measurement.domain
-            asn = group[0].measurement.asn
-            new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper(), target, asn)
-            new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
-            print('HardFlag creada: ', new_hard_flag.id)
-
-            for submeas in group:
-                print('Submedicion: ', submeas.id)
-                print('DeadFlag: ', submeas.flag.id)
-                Flag.objects.get(id=submeas.flag.id).delete()
-                submeas.flag=new_hard_flag
-                print('HardFlag asignada: ', submeas.flag.id)
-                submeas.save()
-
-        elif group[0].flag.flag == 'hard' and not group[0].flag.confirmed:
-            target_list.append(group)
-
-
-    if target_list:
-
-        target = target_list[0][0].measurement.domain
-        asn = target_list[0][0].measurement.asn
-        new_sug_event = sug_event_creator(str(group[0].__class__.__name__).upper(), target, asn)
-        new_hard_flag = Flag.objects.create(flag=Flag.FlagType.HARD, event=new_sug_event)
-        print('HardFlagHF creada: ', new_hard_flag.id)
-
-        for group in target_list:
-            for submeas in group:
-                print('Submedicion Hf: ', submeas.id)
-                print('DeadFlag Hf: ', submeas.flag.id)
-                try:
-                    Event.objects.get(id=submeas.flag.event.id).delete()
-                except:
-                    pass
-
-                try:
-                    Flag.objects.get(id=submeas.flag.id).delete()
-                except:
-                    pass
-                submeas.flag=new_hard_flag
-                print('HardFlag asignada Hf: ', submeas.flag.id)
-                submeas.save()
-
-        
 
 
 
