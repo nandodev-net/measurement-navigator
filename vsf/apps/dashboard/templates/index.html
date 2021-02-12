@@ -90,7 +90,7 @@
             </div>
             <div class="col-8 mx-auto">
               <select class="custom-select" id="test-name">
-                <option selected value="">Choose Test Type</option>
+                <option selected value="">Any</option>
                 <option value="web_connectivity">Web Connectivity</option>
                 <option value="http_requests">HTTP Requests</option>
                 <option value="dns_consistency">DNS Consistency</option>
@@ -206,7 +206,9 @@
             <i class="fas fa-exclamation-circle text-warning"></i>
           </td>
           {% else %}
-          <td class="text-center">N/A</td>
+          <td class="text-center">
+            <i class="fas fa-check text-success"></i>
+          </td>
           {% endif %}
 
           <!-- ASN -->
@@ -243,9 +245,44 @@
           </div>
         </td>
         {% endfor %}
+
       </tbody>
     </table>
   </div>
+
+  <nav
+    class="d-flex justify-content-center align-items-center"
+    aria-label="Pagination FastPath"
+  >
+    <ul class="pagination mt-5 justify-content-center">
+      {% if inbox_measurements.has_previous %}
+      <li class="page-item">
+        <button id="page-one" class="page-link">&laquo; First</button>
+      </li>
+
+      <li class="page-item">
+        <button id="page-previous" class="page-link">Previous</button>
+      </li>
+      {% endif %}
+
+      <li class="page-item">
+        <a class="page-link" href="#">
+          Page {{ inbox_measurements.number }} of {{ inbox_measurements.paginator.num_pages }}
+        </a>
+      </li>
+
+      {% if inbox_measurements.has_next %}
+      <li class="page-item">
+        <button id="page-next" class="page-link">Next</button>
+      </li>
+
+      <li class="page-item">
+        <button id="page-last" class="page-link">last &raquo;</button>
+      </li>
+      {% endif %}
+    </ul>
+  </nav>
+
 </form>
 
 {% include "includes/fastpath-includes/detailed-info-modal.html" %}
@@ -255,8 +292,6 @@
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script>
   
-  $('#fastpath-table').DataTable();
-
   let urlSearch;
   let data = {
     page    : 1,
