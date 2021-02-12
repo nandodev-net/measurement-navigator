@@ -13,7 +13,7 @@ from typing                                     import List
 from datetime                                   import datetime, timedelta
 import json
 #Utils import
-from apps.main.measurements.utils               import search_measurement_by_queryset
+from apps.main.measurements.utils               import search_measurement_by_queryset, _filter_by_flag_no_ok
 #Local imports
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
@@ -113,9 +113,12 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             prefill['test_name'] = test_name
             measurements = measurements.filter(raw_measurement__test_name=test_name)
         
-        flags = get.get('flags[]')
-        if flags:
-            prefill['flags'] = flags
+        flags_list = [ 'DNS', 'HTTP', 'TCP' ]
+        if get != {}:
+            flags = get.getlist('flags[]')
+            if flags:
+                prefill['flags'] = flags
+                measurements = _filter_by_flag_no_ok(measurements, flags)
 
         measurements.only(
             "raw_measurement__measurement_start_time",
@@ -124,7 +127,8 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             "raw_measurement__probe_cc",
             "id",
             "anomaly",
-            "site"
+            "site",
+            "flags"
         )
 
         # Get most recent measurement:
@@ -146,44 +150,10 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         context['test_types'] = test_types
         context['sites'] = sites
         context['prefill'] = prefill
+        context['flags'] = flags_list
         context['asns'] = AsnModels.ASN.objects.all()
         context['last_measurement_date'] = last_measurement_date
         return context
-
-    @staticmethod
-    def _filter_by_flag_no_ok(qs : QuerySet, subm_to_filter : List[str]) -> QuerySet:
-        """
-        Summary:
-            Given a queryset and a list of str with submeasurement names, return a queryset such that
-            every instance has a submeasurement such that its flag is not ok
-        Params:
-            qs : QuerySet = Measurement Queryset to filter
-            subm_to_filter : List[str] = list of submeasurement names, not case sensitive
-        Return:
-            QuerySet = Filtered queryset. If the given list is empty, the same queryset is returned.
-        """
-        # Check that this is a Measurement QuerySet
-        assert qs.model == MeasModels.Measurement, "This queryset is not a Measurement QuerySet"
-
-        # If nothing to filter, return the same queryset
-        if not subm_to_filter: return qs
-
-        def filter_aux(subm_type, qs : QuerySet) -> QuerySet:
-            field_name = f"{subm_type.__name__}_flag"
-            sq = subm_type.objects.filter(measurement=OuterRef('pk')).exclude(flag_type=SubMModels.SubMeasurement.FlagType.OK)
-            return qs.annotate(**{field_name:Subquery(sq[:1].values('flag_type'))}).exclude(**{field_name:None})
-
-        lowered_list = map(lambda s: s.lower(), subm_to_filter)
-        if 'dns' in lowered_list:
-            qs = filter_aux(SubMModels.DNS, qs)
-        
-        if 'http' in lowered_list:
-            qs = filter_aux(SubMModels.HTTP, qs)
-        
-        if 'tcp' in lowered_list:
-            qs = filter_aux(SubMModels.TCP, qs)
-
-        return qs
 
 
 class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
@@ -309,6 +279,7 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         anomaly     = get.get('anomaly')
         until       = get.get('until')
         site        = get.get('site')
+        flags        = get.getlist('flags[]') if get != {} else []
 
         # Get desired measurements
         measurements = search_measurement_by_queryset(
@@ -320,7 +291,8 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             country=country,
             until=until,
             site=site,
-            anomaly= anomaly.lower() == "true" if anomaly != None else None
+            anomaly= anomaly.lower() == "true" if anomaly != None else None,
+            flags=flags
         )
 
         return measurements
