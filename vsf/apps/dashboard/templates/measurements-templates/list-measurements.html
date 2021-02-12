@@ -3,6 +3,8 @@
 {% block custom_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"/>
+<link rel="stylesheet" type="text/css" href="{% static 'css/select2.css' %}" /> 
+
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Measurements {% endblock tab_title %}
@@ -124,7 +126,7 @@
               />
             </div>
                 
-            <div class="col-6 mt-3">
+            <div class="col-4 mt-3 my-auto">
               <div class="row align-items-center rounded p-2 bg-info">
                 <div class="col-4 mx-auto">
                   <label class="font-weight-bold text-white" for="site">Site</label>
@@ -142,6 +144,27 @@
                   </select>
                 </div>
               </div>   
+            </div>
+
+            <div class="col-6 mt-3">
+              <div class="row align-items-center rounded p-2 bg-info ml-1">
+                <div class="col-3 mx-auto">
+                  <label class="font-weight-bold text-white" for="flag">Flag Existence</label>
+                </div>
+                <div class="col-9 mx-auto">
+                  <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
+                    <option value="DNS">
+                      DNS
+                    </option>
+                    <option value="HTTP">
+                      HTTP
+                    </option>
+                    <option value="TCP">
+                      TCP
+                    </option>
+                  </select>
+                </div>
+              </div> 
             </div>
 
             <div class="col-2 my-auto mx-auto">
@@ -204,10 +227,18 @@
 {% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+
 <script>
   'use strict';
   var selectedRows = []
   $(document).ready(function() {
+
+      $('.select2').select2({
+        theme: "flat",
+        allowClear: true,
+        placeholder: "Select flags existence"
+      });
 
       /* Creating datatable */
       var table = $("#measurements-list").DataTable({
