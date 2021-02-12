@@ -42,49 +42,4 @@ urlpatterns = [
     path('',                                views.Dashboard.as_view(),          name="home"),
     path('get_measurement',                 views.GetMeasurement.as_view(),     name='get_measurement'),
 
-    #   Measurements
-    path(
-        'measurements/',
-        include(
-            'apps.dashboard.sections.measurements.urls',
-            namespace='measurement'
-        )
-    ),
-
-    #   Submeasurements
-    path(
-        'submeasurements/',
-        include(
-            'apps.dashboard.sections.measurements.submeasurements.urls',
-            namespace='submeasurement'
-        )
-    ),
-
-    #   Sites
-    path(
-        'sites/',
-        include(
-            'apps.dashboard.sections.sites.urls',
-            namespace='site'
-        )
-    ),
-
-    #   Cases
-    path(
-        'cases/',
-        include(
-            'apps.dashboard.sections.cases.urls',
-            namespace='case'
-        )
-    ),
-
-    #   Misc
-    path('probes',                          views.ListProbes.as_view(),         name="list_probes"),
-    path(
-        'control_panel/',
-        include(
-            'apps.dashboard.sections.control_panel.urls',
-            namespace='control_panel'
-        )
-    )
 ]
