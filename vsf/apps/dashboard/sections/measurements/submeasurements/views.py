@@ -91,10 +91,13 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         if asn:
             prefill['asn'] = asn
 
-        flag = get.get('flag')
-        if flag:
-            prefill['flag'] = flag
+        print(get)
+        if get != {}:
+            flags = get.getlist('flags[]')
+            if flags:
+                prefill['flags'] = flags
 
+        
         context =  super().get_context_data()
         context['flags'] = flag_types
         context['sites'] = sites
