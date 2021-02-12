@@ -97,17 +97,15 @@ class EventDetail(generics.GenericAPIView):
     
     def get(self, request, id):
         event = self.get_object(id)
-        flags = event.flags.all()
 
+        submeasurements = []
         measurements = []
-        for flag in flags:
-            if event.issue_type == 'dns':
-                submeasurements = DNS.objects.filter(flag=flag)
-            elif event.issue_type == 'tcp':
-                submeasurements = TCP.objects.filter(flag=flag)
-            else:
-                submeasurements = HTTP.objects.filter(flag=flag)
 
+        submeasurements.append(DNS.objects.filter(event=event))
+        submeasurements.append(TCP.objects.filter(event=event))
+        submeasurements.append(HTTP.objects.filter(event=event))
+
+        print(submeasurements)
         for submeasurement in submeasurements:
             measurements.append(submeasurement.measurement)
         _event = {'event':event, 'measurements':measurements}

@@ -11,13 +11,12 @@ from typing                                     import List
 from datetime                                   import datetime, timedelta
 import json
 #Utils import
-from apps.main.measurements.utils               import search_measurement_by_queryset, search_measurement
+from apps.main.measurements.utils               import search_measurement_by_queryset
 #Local imports
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
 from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMModels
-from apps.main.measurements.flags.models                 import Flag
 
 
 # --- MEASUREMENTS VIEWS --- #
@@ -57,7 +56,6 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
                     - anomaly
                     - asn
                     - test_name
-                    
         """
         # Note that the 'choices' member in a textchoice returns a
         # list of pairs [(s1, s2)] where s2 is the human readable (label) of the choice
@@ -75,8 +73,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         measurements = MeasModels.Measurement.objects.all()\
                                                 .select_related('raw_measurement')\
                                                 .select_related('domain')\
-                                                .select_related('domain__site')\
-                                                
+                                                .select_related('domain__site')
         
         inpt = get.get("input")
 
@@ -123,21 +120,6 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             "anomaly",
             "site"
             )
-
-        measurementsList = []
-        
-        measurementsList = map(lambda m : {
-            "id" : m.id,
-            "anomaly" : m.anomaly,
-            "input" : m.raw_measurement.input,
-            "test_type" : m.raw_measurement.test_name,
-            "measurement_start_time" : m.raw_measurement.measurement_start_time,
-            "probe_cc" : m.raw_measurement.probe_cc,
-            "site" : m.domain.site.name if m.domain and m.domain.site else "",
-            'flags_dns' : m.dns_set.all(),
-            'flags_http' : m.http_set.all(),
-            'flags_tcp' : m.tcp_set.all()
-        }, measurements)
 
         # Get most recent measurement:
         last_measurement_date = MeasModels\
@@ -249,7 +231,8 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             'raw_measurement__probe_asn',
             'raw_measurement__probe_cc',
             'domain__site__name',
-            'anomaly'
+            'anomaly',
+            'flags'
         ]
 
     order_columns = [
@@ -259,7 +242,8 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             'raw_measurement__probe_asn',
             'raw_measurement__probe_cc',
             'domain__site__name',
-            'anomaly'
+            'anomaly',
+            'flags',
         ]
 
     def get_initial_queryset(self):
@@ -303,12 +287,17 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
+        ok_flag = SubMModels.SubMeasurement.FlagType.OK
         for item in qs:
-
-            flagsDNS = [dns.flag.flag for dns in item.dns_set.all()]
-            flagsHTTP = [http.flag.flag for http in item.http_set.all()]
-            flagsTCP = [tcp.flag.flag for tcp in item.tcp_set.all()]
+            flagsDNS  = any(subm.flag_type != ok_flag for subm in item.dns_set.all())
+            flagsHTTP = any(subm.flag_type != ok_flag for subm in item.http_set.all())
+            flagsTCP  = any(subm.flag_type != ok_flag for subm in item.tcp_set.all())
             
+            id = 0
+            if flagsDNS: id += 1
+            if flagsHTTP: id += 1
+            if flagsTCP: id += 1
+
             json_data.append({
                 'raw_measurement__measurement_start_time':item.raw_measurement.measurement_start_time,
                 'raw_measurement__probe_cc':item.raw_measurement.probe_cc,
@@ -319,6 +308,6 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'site' : item.domain.site.id if item.domain and item.domain.site else -1,
                 'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
                 'anomaly' : item.anomaly,
-                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
+                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP, 'id': id}
             })
         return json_data

@@ -2,6 +2,7 @@
 from django.views.generic           import TemplateView
 from django.http                    import HttpResponseBadRequest, JsonResponse
 from requests.models                import CONTENT_CHUNK_SIZE
+from django_datatables_view.base_datatable_view import BaseDatatableView
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 from apps.dashboard.views           import VSFListPaginate
@@ -251,3 +252,24 @@ class SiteDetailView(VSFLoginRequiredMixin, VSFListPaginate):
         context['site'] = site
         context['domains'] = current_page
         return context
+
+
+class SitesEndpoint(BaseDatatableView):
+
+    columns = [
+        'associated',
+        'name'
+    ]
+
+    def get_initial_queryset(self):
+        return Site.objects.all()
+
+    def prepare_results(self, qs):
+        json_data = []
+        for item in qs:
+            print(item.__dict__)
+            json_data.append({
+                'associated': item.id,
+                'name' : item.name
+            })
+        return json_data
