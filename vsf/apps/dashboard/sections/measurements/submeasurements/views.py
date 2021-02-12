@@ -63,7 +63,7 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         # Compute flag types
         flag_types = []
         for value, name in FlagModels.Flag.FlagType.choices:
-            flag_types.append({'name' : name, 'value':value})
+            flag_types.append(name)
 
         # Compute prefill 
         get = self.request.GET or {}
@@ -91,12 +91,13 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         if asn:
             prefill['asn'] = asn
 
+        print('veamos que hay aqui')
+        
         if get != {}:
             flags = get.getlist('flags[]')
             if flags:
                 prefill['flags'] = flags
 
-        
         context =  super().get_context_data()
         context['flags'] = flag_types
         context['sites'] = sites
@@ -161,7 +162,10 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         anomaly     = get.get('anomaly')
         until       = get.get('until')
         site        = get.get('site')
-        flag        = get.get('flag') 
+        flags        = get.getlist('flags[]') if get != {} else []
+
+        print(flags)
+        print('-----------------')
         if input:
             qs = qs.filter(measurement__raw_measurement__input__contains=input)
         if since:
@@ -176,8 +180,9 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
-        if flag:
-            qs = qs.filter(flag_type=flag)
+        if flags:
+            flags = [flag.lower() for flag in flags]
+            qs = qs.filter(flag_type__in = flags)
 
         return qs
 
@@ -247,6 +252,9 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         # queryset is already paginated here
         json_data = []
         for item in qs:
+            print('mira tu')
+            print(item.__dict__)
+            print(item.flag_type)
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
                 'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
@@ -260,7 +268,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag__flag'      : item.flag_type if item.flag else "no flag"
+                'flag__flag'      : item.flag_type
             })
         return json_data
 
