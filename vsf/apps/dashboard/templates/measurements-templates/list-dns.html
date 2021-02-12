@@ -10,6 +10,7 @@
 
 {% block custom_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'css/select2.css' %}" /> 
 
 <link rel=stylesheet
   href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
@@ -86,7 +87,7 @@
             </div> 
           </div>
 
-          <div class="col-3 mt-3">
+          <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-info">
               <div class="col-5 mx-auto">
                 <label class='font-weight-bold text-white' for="asn">
@@ -107,7 +108,7 @@
             </div> 
           </div>
 
-          <div class="col-3 mt-3">
+          <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-info ml-1">
               <div class="col-5 mx-auto">
                 <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
@@ -126,7 +127,7 @@
             </div> 
           </div>
 
-          <div class="col-3 mt-3">
+          <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-info ml-1">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold text-white" for="site">Site</label>
@@ -146,40 +147,43 @@
             </div>   
           </div>
         
-          <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-info ml-1">
-              <div class="col-5 mx-auto">
-                <label class="font-weight-bold text-white" for="test-name">Flag Type</label>
+          <div class="col-5 mt-3">
+            <div class="row align-items-center rounded p-2 bg-info">
+              <div class="col-3 mx-auto">
+                <label class="font-weight-bold text-white" for="flag">Flag Type</label>
               </div>
-              <div class="col-7 mx-auto">
-                <select id="flag" class="custom-select additional-filter" name="flag">
-                  <option selected value="">Any</option>
+              <div class="col-9 mx-auto">
+                <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
                   {% for flag in flags %}
-                  <option
-                  {% if prefill.flag == flag.value %} selected {% endif %}
-                  value="{{ flag.value }}"
-                  >
-                  {{ flag.name }}
-                </option>
-                {% endfor %}
-              </select>
+                    <option {% if prefill.flag == flag.value %} selected {% endif %} value="{{ flag.value }}">
+                      {{ flag.name }}
+                    </option>
+                  {% endfor %}
+                </select>
               </div>
             </div> 
           </div>
 
+          <div class="col-6 mt-3 my-auto">
+            <input
+              id="input"
+              class="form-control mr-2 additional-filter w-100 border-top-0 border-left-0 border-right-0 bg-transparent"
+              type="search"
+              placeholder="URL"
+              aria-label="Search URL"
+              name="input"
+              value="{{prefill.input}}"
+            />
+          </div>
+
+          <div class="col-1 my-auto">
+            <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
+
         </div>
 
-        <div class="col-12 mt-3">
-          <input
-            id="input"
-            class="form-control mr-2 additional-filter w-100 border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="URL"
-            aria-label="Search URL"
-            name="input"
-            value="{{prefill.input}}"
-          />
-        </div>
       </div>
     </form>
     {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
@@ -234,12 +238,20 @@
 {% block custom_scripts %}
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/js/select2.min.js"></script>
+
 {% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 
 <script>
   'use strict';
   var selectedRows = []
   $(document).ready(function() {
+
+      $('.select2').select2({
+        theme: "flat",
+        allowClear: true,
+        placeholder: "Select flags types"
+      });
 
       $('#info').attr('disabled','disabled');
 
