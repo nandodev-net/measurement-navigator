@@ -63,7 +63,7 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         # Compute flag types
         flag_types = []
         for value, name in FlagModels.Flag.FlagType.choices:
-            flag_types.append({'name' : name, 'value':value})
+            flag_types.append(name)
 
         # Compute prefill 
         get = self.request.GET or {}
@@ -91,9 +91,12 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         if asn:
             prefill['asn'] = asn
 
-        flag = get.get('flag')
-        if flag:
-            prefill['flag'] = flag
+        print('veamos que hay aqui')
+        
+        if get != {}:
+            flags = get.getlist('flags[]')
+            if flags:
+                prefill['flags'] = flags
 
         context =  super().get_context_data()
         context['flags'] = flag_types
@@ -159,7 +162,9 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         anomaly     = get.get('anomaly')
         until       = get.get('until')
         site        = get.get('site')
-        flag        = get.get('flag') 
+        flags        = get.getlist('flags[]') if get != {} else []
+
+
         if input:
             qs = qs.filter(measurement__raw_measurement__input__contains=input)
         if since:
@@ -174,8 +179,9 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:
             qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
-        if flag:
-            qs = qs.filter(flag_type=flag)
+        if flags:
+            flags = [flag.lower() for flag in flags]
+            qs = qs.filter(flag_type__in = flags)
 
         return qs
 
@@ -204,7 +210,6 @@ class ListDNSTemplate(ListSubMeasurementTemplate):
             prefill['consistency'] = consistency
 
         context['prefill'] = prefill
-        print(context.keys())
         return context
 
 class ListDNSBackEnd(ListSubMeasurementBackend):
@@ -259,7 +264,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag__flag'      : item.flag_type if item.flag else "no flag"
+                'flag__flag'      : item.flag_type
             })
         return json_data
 
@@ -390,7 +395,7 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag_type if item.flag else "no flag",
+                'flag__flag'           : item.flag_type,
                 'status_code_match' : item.status_code_match,
                 'headers_match' : item.headers_match,
                 'body_length_match' : item.body_length_match,
@@ -491,7 +496,7 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag_type if item.flag else "no flag",
+                'flag__flag'           : item.flag_type,
                 'status_blocked' : item.status_blocked,
                 'status_failure' : item.status_failure or "N/A",
                 'status_success' : item.status_success,
