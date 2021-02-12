@@ -91,7 +91,6 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         if asn:
             prefill['asn'] = asn
 
-        print(get)
         if get != {}:
             flags = get.getlist('flags[]')
             if flags:
@@ -207,7 +206,6 @@ class ListDNSTemplate(ListSubMeasurementTemplate):
             prefill['consistency'] = consistency
 
         context['prefill'] = prefill
-        print(context.keys())
         return context
 
 class ListDNSBackEnd(ListSubMeasurementBackend):
