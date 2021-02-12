@@ -239,7 +239,7 @@
       since: $("#since").val(), until: $("#until").val(),
       asn: $("#asn").val(), test_name: $("#test-name").val(), 
       anomaly : $("#anomaly-state").val(), input: $("#input").val(),
-      site: $("#site").val(), flag: $("#flag").val()
+      site: $("#site").val(), flags: $("#flag").val()
     };
 
     let urlSearch = "{% url 'dashboard:measurement:list_measurements' %}";
@@ -277,7 +277,7 @@
                 if (this.id=='asn') data.asn = $(this).val();
                 if (this.id=='anomaly-state') data.anomaly = $(this).val();
                 if (this.id=='input') data.site = $(this).val();
-                if (this.id=='flag') data.flag = $(this).val();
+                if (this.id=='flag') data.flags = $(this).val();
             });
           },
           contentType: "application/json; charset=utf-8",  
