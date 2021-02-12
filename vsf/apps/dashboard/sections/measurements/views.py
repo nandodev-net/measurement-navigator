@@ -110,6 +110,10 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         if test_name:
             prefill['test_name'] = test_name
             measurements = measurements.filter(raw_measurement__test_name=test_name)
+        
+        flags = get.get('flags[]')
+        if flags:
+            prefill['flags'] = flags
 
         measurements.only(
             "raw_measurement__measurement_start_time",
@@ -119,7 +123,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             "id",
             "anomaly",
             "site"
-            )
+        )
 
         # Get most recent measurement:
         last_measurement_date = MeasModels\
