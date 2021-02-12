@@ -33,8 +33,8 @@
 {% endblock route %}
 
 {% block content %}
-  <nav class="navbar navbar-light bg-light mb-5">
-    <form id="urlForm">
+  <form id="urlForm">
+    <nav class="navbar navbar-light bg-light mb-5">
       <div class="container-fluid">
         <div class="row">
 
@@ -185,54 +185,53 @@
         </div>
 
       </div>
-    </form>
-    {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
-  </nav>
+      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+    </nav>
 
-  <div class="row mb-5">
-    <div class="col-6">
-      <h4><strong>Last DNS Measurement from:</strong> {{last_measurement_date}}</h4>
+    <div class="row mb-5">
+      <div class="col-6">
+        <h4><strong>Last DNS Measurement from:</strong> {{last_measurement_date}}</h4>
+      </div>
+      <div class="col-6">
+        <button type="button" class="btn btn-info rounded" id='info'>
+          <i class="fa fa-info-circle"></i> 
+        </button>
+      </div>
     </div>
-    <div class="col-6">
-      <button type="button" class="btn btn-info rounded" id='info'>
-        <i class="fa fa-info-circle"></i> 
-      </button>
+
+    <div class="card rounded" id="domains-list-card">
+      <div class="table-responsive">
+        <table class="table table-striped mt-5 datatable" id="dns-list">
+          <thead>
+            <tr>
+              <th class="text-center text-capitalize" scope="col">Input</th>
+              <th class="text-center text-capitalize" scope="col">Start Time</th>
+              <th class="text-center text-capitalize" scope="col">ASN</th>
+              <th class="text-center text-capitalize" scope="col">country</th>
+              <th class="text-center text-capitalize" scope="col">Site</th>
+              <th class="text-center text-capitalize" scope="col">Anomaly</th>
+              <th class="text-center text-capitalize" scope="col">Flag</th>
+              <th class="text-center text-capitalize" scope="col">Consistency</th>
+              <th class="text-center text-capitalize" scope="col">answers</th>
+              <th class="text-capitalize" scope="col">
+                control resolver answers
+              </th>
+              <th class="text-center text-capitalize" scope="col">
+                client resolver
+              </th>
+            </tr>
+          </thead>
+          <tbody id='dns-tbody'>
+
+          
+
+          </tbody>
+
+          <tfoot></tfoot>
+        </table>
+      </div>
     </div>
-  </div>
-
-  <div class="card rounded" id="domains-list-card">
-    <div class="table-responsive">
-      <table class="table table-striped mt-5 datatable" id="dns-list">
-        <thead>
-          <tr>
-            <th class="text-center text-capitalize" scope="col">Input</th>
-            <th class="text-center text-capitalize" scope="col">Start Time</th>
-            <th class="text-center text-capitalize" scope="col">ASN</th>
-            <th class="text-center text-capitalize" scope="col">country</th>
-            <th class="text-center text-capitalize" scope="col">Site</th>
-            <th class="text-center text-capitalize" scope="col">Anomaly</th>
-            <th class="text-center text-capitalize" scope="col">Flag</th>
-            <th class="text-center text-capitalize" scope="col">Consistency</th>
-            <th class="text-center text-capitalize" scope="col">answers</th>
-            <th class="text-capitalize" scope="col">
-              control resolver answers
-            </th>
-            <th class="text-center text-capitalize" scope="col">
-              client resolver
-            </th>
-          </tr>
-        </thead>
-        <tbody id='dns-tbody'>
-
-        
-
-        </tbody>
-
-        <tfoot></tfoot>
-      </table>
-    </div>
-  </div>
-
+  </form>
 {% endblock content %}
 
 {% block custom_scripts %}
@@ -245,6 +244,24 @@
 <script>
   'use strict';
   var selectedRows = []
+
+  $("#urlForm").on("submit", function (event) {
+    
+    event.preventDefault();
+
+    let data = {
+      since: $("#since").val(), until: $("#until").val(),
+      asn: $("#asn").val(), consistency: $("#consistency").val(), 
+      anomaly : $("#anomaly-state").val(), site: $("#site").val(), 
+      flags: $("#flag").val(), input: $("#input").val()
+    };
+
+    let urlSearch = "{% url 'dashboard:submeasurement:list_dns' %}";
+    let url = urlSearch + "?" + $.param(data);
+    window.location.href = url;
+
+  });
+
   $(document).ready(function() {
 
       $('.select2').select2({
@@ -272,9 +289,10 @@
                 if (this.id=='until') data.until = $(this).val();
                 if (this.id=='asn') data.asn = $(this).val();
                 if (this.id=='consistency') data.consistency = $(this).val();
-                if (this.id=='anomaly') data.anomaly = $(this).val();
+                if (this.id=='anomaly-state') data.anomaly = $(this).val();
                 if (this.id=='site') data.site = $(this).val();
-                if (this.id=='flag') data.flag = $(this).val();
+                if (this.id=='flag') data.flags = $(this).val();
+                if (this.id=='input') data.input = $(this).val();
             });
           },
           contentType: "application/json; charset=utf-8",  
