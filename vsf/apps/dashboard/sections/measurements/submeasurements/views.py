@@ -164,8 +164,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         site        = get.get('site')
         flags        = get.getlist('flags[]') if get != {} else []
 
-        print(flags)
-        print('-----------------')
+
         if input:
             qs = qs.filter(measurement__raw_measurement__input__contains=input)
         if since:
@@ -252,9 +251,6 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         # queryset is already paginated here
         json_data = []
         for item in qs:
-            print('mira tu')
-            print(item.__dict__)
-            print(item.flag_type)
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
                 'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
@@ -399,7 +395,7 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag_type if item.flag else "no flag",
+                'flag__flag'           : item.flag_type,
                 'status_code_match' : item.status_code_match,
                 'headers_match' : item.headers_match,
                 'body_length_match' : item.body_length_match,
@@ -500,7 +496,7 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag_type if item.flag else "no flag",
+                'flag__flag'           : item.flag_type,
                 'status_blocked' : item.status_blocked,
                 'status_failure' : item.status_failure or "N/A",
                 'status_success' : item.status_success,
