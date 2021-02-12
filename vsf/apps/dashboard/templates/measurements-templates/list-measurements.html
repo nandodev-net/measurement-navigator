@@ -112,7 +112,7 @@
               </div> 
             </div>
                 
-            <div class="col-3 mt-3">
+            <div class="col-6 mt-3">
               <input
               id="input"
               class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
@@ -124,8 +124,8 @@
               />
             </div>
                 
-            <div class="col-3 mt-3">
-              <div class="row align-items-center rounded p-2 bg-info ml-1">
+            <div class="col-6 mt-3">
+              <div class="row align-items-center rounded p-2 bg-info">
                 <div class="col-4 mx-auto">
                   <label class="font-weight-bold text-white" for="site">Site</label>
                 </div>
@@ -142,6 +142,12 @@
                   </select>
                 </div>
               </div>   
+            </div>
+
+            <div class="col-2 my-auto mx-auto">
+              <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
+                <i class="fa fa-search"></i>
+              </button>
             </div>
 
           </div> 
@@ -268,59 +274,25 @@
             orderable: true,
             searchable: true,
             render: function (data, type, row, meta) {
-              var line = `<strong>DNS:</strong>`;
+
+              if ( type === "sort" ) {
+                return data['id'];
+              } else {
+                var line = ``;
+
+                if ( data['dns'] ) {
+                  line = line + `<span class="badge badge-pill badge-warning">DNS</span>`;
+                }
+                if ( data['http'] ) {
+                  line = line + `<span class="badge badge-pill badge-warning">HTTP</span>`;
+                } 
+                if ( data['tcp'] ) {
+                  line = line + `<span class="badge badge-pill badge-warning">TCP</span>`;
+                } 
+
+                return line;
+              }
               
-              if ( data['dns'] ) {
-                data['dns'].forEach(element => {
-                  if (element === 'ok') {
-                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
-                  } else if (element === 'soft') {
-                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
-                  } else if (element === 'hard') {
-                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
-                  } else if (element === 'muted') {
-                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
-                  } else {
-                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
-                  }
-                });
-              }
-
-              line = line + `<br><strong>HTTP:</strong>`;
-              if ( data['http'] ) {
-                data['http'].forEach(element => {
-                  if (element === 'ok') {
-                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
-                  } else if (element === 'soft') {
-                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
-                  } else if (element === 'hard') {
-                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
-                  } else if (element === 'muted') {
-                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
-                  } else {
-                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
-                  }
-                });
-              }
-
-              line = line + `<br><strong>TCP:</strong>`;
-              if ( data['tcp'] ) {
-                data['tcp'].forEach(element => {
-                  if (element === 'ok') {
-                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
-                  } else if (element === 'soft') {
-                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
-                  } else if (element === 'hard') {
-                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
-                  } else if (element === 'muted') {
-                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
-                  } else {
-                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
-                  }
-                });
-              }
-
-              return line;
               
             },
           }
