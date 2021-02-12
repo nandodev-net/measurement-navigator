@@ -23,159 +23,158 @@
 {% endblock route %}
 
 {% block content %}
-
+  <form id="urlForm">
     <nav class="navbar navbar-light bg-light mb-5">
-      <form id="urlForm" action="#"></form>
-        <div class="container-fluid">
-          <div class="row">
-            <div class="col-3">
-              <div class="row align-items-center rounded p-2 bg-info">
-                <div class="col-3 mx-auto">
-                  <label class='font-weight-bold text-white'>
-                    Since
-                  </label>
-                </div>
-                <div class="col-9 mx-auto">
-                  <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
-                </div>
-              </div> 
-            </div>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-3">
+            <div class="row align-items-center rounded p-2 bg-info">
+              <div class="col-3 mx-auto">
+                <label class='font-weight-bold text-white'>
+                  Since
+                </label>
+              </div>
+              <div class="col-9 mx-auto">
+                <input id="since" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
+              </div>
+            </div> 
+          </div>
 
-            <div class="col-3">
-              <div class="row align-items-center rounded p-2 bg-info ml-1">
-                <div class="col-3 mx-auto">
-                  <label class='font-weight-bold text-white'>
-                    Until
-                  </label>
-                </div>
-                <div class="col-9 mx-auto">
-                  <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
-                </div>
-              </div> 
-            </div>
+          <div class="col-3">
+            <div class="row align-items-center rounded p-2 bg-info ml-1">
+              <div class="col-3 mx-auto">
+                <label class='font-weight-bold text-white'>
+                  Until
+                </label>
+              </div>
+              <div class="col-9 mx-auto">
+                <input id="until" class="form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
+              </div>
+            </div> 
+          </div>
 
-            <div class="col-6">
-              <div class="row align-items-center rounded p-2 bg-info ml-1">
-                <div class="col-3 mx-auto">
-                  <label class='font-weight-bold text-white' for="asn">
-                    ASN
-                  </label>
-                </div>
-                <div class="col-9 mx-auto">
-                  <select id="asn" class="custom-select additional-filter" name="asn">
-                    <option value="">Any ASN</option>
-                    {% for asn in asns %}
-                      <option 
-                      {% if asn.asn == prefill.asn %} selected {% endif %}
-                      value="{{ asn.asn }}" 
-                      >
-                      {{ asn.asn }} - {{ asn.name }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </div> 
-            </div>
-            
-            <div class="col-3 mt-3">
-              <div class="row align-items-center rounded p-2 bg-info">
-                <div class="col-5 mx-auto">
-                  <label class="font-weight-bold text-white" for="test-name">Test Type</label>
-                </div>
-                <div class="col-7 mx-auto">
-                  <select id="test-name" class="custom-select additional-filter" name="test_name">
-                    <option selected value="">Choose Test Type</option>
-                    {% for test in test_types %}
-                      <option {% if prefill.test_name == test.value %} selected {% endif %} value="{{ test.value }}">
-                        {{ test.name }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </div> 
-            </div>
-                
-            <div class="col-3 mt-3">
-              <div class="row align-items-center rounded p-2 bg-info ml-1">
-                <div class="col-4 mx-auto">
-                  <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
-                </div>
-                <div class="col-8 mx-auto">
-                  <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
-                    <option selected value="">Any</option>
-                    <option {% if prefill.anomaly == 'false' %} selected {% endif %} value="false">
-                      Anomaly False
+          <div class="col-6">
+            <div class="row align-items-center rounded p-2 bg-info ml-1">
+              <div class="col-3 mx-auto">
+                <label class='font-weight-bold text-white' for="asn">
+                  ASN
+                </label>
+              </div>
+              <div class="col-9 mx-auto">
+                <select id="asn" class="custom-select additional-filter" name="asn">
+                  <option value="">Any ASN</option>
+                  {% for asn in asns %}
+                    <option 
+                    {% if asn.asn == prefill.asn %} selected {% endif %}
+                    value="{{ asn.asn }}" 
+                    >
+                    {{ asn.asn }} - {{ asn.name }}
                     </option>
-                    <option {% if prefill.anomaly == 'true' %} selected {% endif %}value="true">
-                      Anomaly True
+                  {% endfor %}
+                </select>
+              </div>
+            </div> 
+          </div>
+          
+          <div class="col-3 mt-3">
+            <div class="row align-items-center rounded p-2 bg-info">
+              <div class="col-5 mx-auto">
+                <label class="font-weight-bold text-white" for="test-name">Test Type</label>
+              </div>
+              <div class="col-7 mx-auto">
+                <select id="test-name" class="custom-select additional-filter" name="test_name">
+                  <option selected value="">Choose Test Type</option>
+                  {% for test in test_types %}
+                    <option {% if prefill.test_name == test.value %} selected {% endif %} value="{{ test.value }}">
+                      {{ test.name }}
                     </option>
-                  </select>
-                </div>
-              </div> 
-            </div>
-                
-            <div class="col-6 mt-3">
-              <input
-              id="input"
-              class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-              type="search"
-              placeholder="URL"
-              aria-label="Search URL"
-              value="{{ prefill.input }}"
-              name="input"
-              />
-            </div>
-                
-            <div class="col-4 mt-3 my-auto">
-              <div class="row align-items-center rounded p-2 bg-info">
-                <div class="col-4 mx-auto">
-                  <label class="font-weight-bold text-white" for="site">Site</label>
-                </div>
-                <div class="col-8 mx-auto">
-                  <select class="custom-select additional-filter" id="site" name="site">
-                    <option selected value="">
-                      Any Site
+                  {% endfor %}
+                </select>
+              </div>
+            </div> 
+          </div>
+              
+          <div class="col-3 mt-3">
+            <div class="row align-items-center rounded p-2 bg-info ml-1">
+              <div class="col-4 mx-auto">
+                <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
+              </div>
+              <div class="col-8 mx-auto">
+                <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
+                  <option selected value="">Any</option>
+                  <option {% if prefill.anomaly == 'false' %} selected {% endif %} value="false">
+                    Anomaly False
+                  </option>
+                  <option {% if prefill.anomaly == 'true' %} selected {% endif %}value="true">
+                    Anomaly True
+                  </option>
+                </select>
+              </div>
+            </div> 
+          </div>
+              
+          <div class="col-6 mt-3">
+            <input
+            id="input"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="URL"
+            aria-label="Search URL"
+            value="{{ prefill.input }}"
+            name="input"
+            />
+          </div>
+              
+          <div class="col-4 mt-3 my-auto">
+            <div class="row align-items-center rounded p-2 bg-info">
+              <div class="col-4 mx-auto">
+                <label class="font-weight-bold text-white" for="site">Site</label>
+              </div>
+              <div class="col-8 mx-auto">
+                <select class="custom-select additional-filter" id="site" name="site">
+                  <option selected value="">
+                    Any Site
+                  </option>
+                  {% for site in sites %}
+                    <option value="{{ site.id }}" title="{{ site.description }}" {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}>
+                      {{ site.name }}
                     </option>
-                    {% for site in sites %}
-                      <option value="{{ site.id }}" title="{{ site.description }}" {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}>
-                        {{ site.name }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                </div>
-              </div>   
-            </div>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>   
+          </div>
 
-            <div class="col-6 mt-3">
-              <div class="row align-items-center rounded p-2 bg-info ml-1">
-                <div class="col-3 mx-auto">
-                  <label class="font-weight-bold text-white" for="flag">Flag Existence</label>
-                </div>
-                <div class="col-9 mx-auto">
-                  <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
-                    <option value="DNS">
-                      DNS
-                    </option>
-                    <option value="HTTP">
-                      HTTP
-                    </option>
-                    <option value="TCP">
-                      TCP
-                    </option>
-                  </select>
-                </div>
-              </div> 
-            </div>
+          <div class="col-6 mt-3">
+            <div class="row align-items-center rounded p-2 bg-info ml-1">
+              <div class="col-3 mx-auto">
+                <label class="font-weight-bold text-white" for="flag">Flag Existence</label>
+              </div>
+              <div class="col-9 mx-auto">
+                <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
+                  <option value="DNS">
+                    DNS
+                  </option>
+                  <option value="HTTP">
+                    HTTP
+                  </option>
+                  <option value="TCP">
+                    TCP
+                  </option>
+                </select>
+              </div>
+            </div> 
+          </div>
 
-            <div class="col-2 my-auto mx-auto">
-              <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
-                <i class="fa fa-search"></i>
-              </button>
-            </div>
+          <div class="col-2 my-auto mx-auto">
+            <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
 
-          </div> 
-        </div>   
-      </form>
+        </div> 
+      </div>   
+    
       <!-- copy-to-clipboard component for search fields -->
       {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
     </nav>
@@ -218,7 +217,7 @@
       </div>
     </div>
 
-
+  </form>
 
 {% endblock content %}
 
@@ -231,6 +230,24 @@
 
 <script>
   'use strict';
+
+  $("#urlForm").on("submit", function (event) {
+    
+    event.preventDefault();
+
+    let data = {
+      since: $("#since").val(), until: $("#until").val(),
+      asn: $("#asn").val(), test_name: $("#test-name").val(), 
+      anomaly : $("#anomaly-state").val(), input: $("#input").val(),
+      site: $("#site").val(), flag: $("#flag").val()
+    };
+
+    let urlSearch = "{% url 'dashboard:measurement:list_measurements' %}";
+    let url = urlSearch + "?" + $.param(data);
+    window.location.href = url;
+
+  });
+
   var selectedRows = []
   $(document).ready(function() {
 
@@ -242,7 +259,7 @@
 
       /* Creating datatable */
       var table = $("#measurements-list").DataTable({
-        order: [[1, "desc"]],
+        order: [[2, "desc"]],
         searching: true,
         processing: true,
         language: {
@@ -253,12 +270,14 @@
           url: '{% url "dashboard:measurement:list_measurements_data" %}',
           data: function (data) {
             $('#urlForm *').filter(':input').each(function(){
+              
                 if (this.id=='since') data.since = $(this).val();
                 if (this.id=='until') data.until = $(this).val();
                 if (this.id=='test-name') data.test_name = $(this).val();
                 if (this.id=='asn') data.asn = $(this).val();
-                if (this.id=='anomaly') data.anomaly = $(this).val();
+                if (this.id=='anomaly-state') data.anomaly = $(this).val();
                 if (this.id=='input') data.site = $(this).val();
+                if (this.id=='flag') data.flag = $(this).val();
             });
           },
           contentType: "application/json; charset=utf-8",  
