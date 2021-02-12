@@ -139,8 +139,8 @@
               <div class="col-9 mx-auto">
                 <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
                   {% for flag in flags %}
-                    <option {% if prefill.flag == flag.value %} selected {% endif %} value="{{ flag.value }}">
-                      {{ flag.name }}
+                    <option {% if flag in prefill.flags %} selected {% endif %} value="{{ flag }}">
+                      {{ flag }}
                     </option>
                   {% endfor %}
                 </select>
@@ -319,20 +319,20 @@
         ajax: {
           url: '{% url "dashboard:submeasurement:list_tcp_data" %}',
           data: function (data) {
-            $('#urlForm *').filter(':input').each(function(){
-                if (this.id=='since') data.since = $(this).val();
-                if (this.id=='until') data.until = $(this).val();
-                if (this.id=='asn') data.asn = $(this).val();
-                if (this.id=='consistency') data.consistency = $(this).val();
-                if (this.id=='anomaly-state') data.anomaly = $(this).val();
-                if (this.id=='site') data.site = $(this).val();
-                if (this.id=='input') data.input = $(this).val();
-                if (this.id=='flag') data.flags = $(this).val();
-                if (this.id=='status-blocked') data.status_blocked = $(this).val();
-                if (this.id=='status-failure') data.status_failure = $(this).val();
-                if (this.id=='status-success') data.status_success = $(this).val();
-                if (this.id=='ip') data.ip = $(this).val();
-            });
+
+            data.since = $("#since").val() ;
+            data.until = $("#until").val();
+            data.asn = $("#asn").val();
+            data.consistency = $("#consistency").val();
+            data.anomaly = $("#anomaly-state").val(); 
+            data.site = $("#site").val();
+            data.flags = $("#flag").val();
+            data.input = $("#input").val();
+            data.status_blocked = $("#status-blocked").val();
+            data.status_failure = $("#status-failure").val();
+            data.status_success = $("#status-success").val();
+            data.ip = $("#ip").val();
+
           },
           contentType: "application/json; charset=utf-8",  
           type: "GET",
@@ -381,11 +381,19 @@
                 return `<div class="text-center text-danger">
                           <i title="HARD" class="far fa-flag"></i>
                         </div>`;
-              } else {
+              } else if (data === "soft") {
                 return `<div class="text-center text-warning">
                           <i title="SOFT" class="far fa-flag"></i>
                         </div>`;
-              }
+              } else if (data === "muted") {
+                return `<div class="text-center text-secondary">
+                          <i title="MUTED" class="far fa-flag"></i>
+                        </div>`;
+              } else {
+                return `<div class="text-center text-dark">
+                            <i title="MANUAL" class="far fa-flag"></i>
+                          </div>`;
+              } 
             },
           },
           {
