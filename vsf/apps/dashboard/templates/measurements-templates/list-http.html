@@ -4,6 +4,7 @@
 
 {% block custom_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'css/select2.css' %}" /> 
 
 <link rel=stylesheet
   href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
@@ -128,25 +129,24 @@
             </div>   
           </div>
 
-          <div class="col-3 mt-3">
+          <div class="col-6 mt-3">
             <div class="row align-items-center rounded p-2 bg-info">
-              <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="test-name">Flag Type</label>
+              <div class="col-3 mx-auto">
+                <label class="font-weight-bold text-white" for="flag">Flag Type</label>
               </div>
-              <div class="col-8 mx-auto">
-                <select id="flag" class="custom-select additional-filter" name="flag">
-                  <option selected value="">Any</option>
+              <div class="col-9 mx-auto">
+                <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
                   {% for flag in flags %}
-                  <option {% if prefill.flag == flag.value %} selected {% endif %} value="{{ flag.value }}">
-                    {{ flag.name }}
-                  </option>
+                    <option {% if prefill.flag == flag.value %} selected {% endif %} value="{{ flag.value }}">
+                      {{ flag.name }}
+                    </option>
                   {% endfor %}
                 </select>
               </div>
-            </div>   
+            </div> 
           </div>
 
-          <div class="col-4 mt-3">
+          <div class="col-6 mt-3 my-auto">
             <div class="row align-items-center rounded p-2 bg-info ml-1">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold text-white" for="status-code-match">Status Code</label>
@@ -163,8 +163,8 @@
             </div>   
           </div>
 
-          <div class="col-5 mt-3">
-            <div class="row align-items-center rounded p-2 bg-info ml-1">
+          <div class="col-6 mt-3">
+            <div class="row align-items-center rounded p-2 bg-info">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold text-white" for="headers-match">Headers</label>
               </div>
@@ -181,8 +181,8 @@
             </div>   
           </div>
 
-          <div class="col-4 mt-3">
-            <div class="row align-items-center rounded p-2 bg-info">
+          <div class="col-6 mt-3">
+            <div class="row align-items-center rounded p-2 bg-info ml-1">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold text-white" for="body-length-match">Body Length</label>
               </div>
@@ -198,8 +198,8 @@
             </div>   
           </div>
 
-          <div class="col-4 mt-3">
-            <div class="row align-items-center rounded p-2 bg-info ml-1">
+          <div class="col-5 mt-3">
+            <div class="row align-items-center rounded p-2 bg-info">
               <div class="col-6 mx-auto">
                 <label class="font-weight-bold text-white" for="body-proportion-min">Min. Body Proportion</label>
               </div>
@@ -218,7 +218,7 @@
             </div> 
           </div>
 
-          <div class="col-4 mt-3">
+          <div class="col-5 mt-3">
             <div class="row align-items-center rounded p-2 bg-info ml-1">
               <div class="col-6 mx-auto">
                 <label class="font-weight-bold text-white" for="body-proportion-max">Max. Body Proportion</label>
@@ -236,6 +236,12 @@
                 />
               </div>
             </div> 
+          </div>
+
+          <div class="col-2 my-auto">
+            <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
+              <i class="fa fa-search"></i>
+            </button>
           </div>
 
         </div>
@@ -296,12 +302,19 @@
 {% block custom_scripts %}
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+
 {% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 
 <script>
   'use strict';
   var selectedRows = []
   $(document).ready(function() {
+      $('.select2').select2({
+        theme: "flat",
+        allowClear: true,
+        placeholder: "Select flags types"
+      });
 
       $('#info').attr('disabled','disabled');
       /* Creating datatables */
