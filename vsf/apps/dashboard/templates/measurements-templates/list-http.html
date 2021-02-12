@@ -27,8 +27,8 @@
 {% endblock route %}
 
 {% block content %}
-  <nav class="navbar navbar-light bg-light mb-5">
-    <form id="urlForm">
+  <form id="urlForm">
+    <nav class="navbar navbar-light bg-light mb-5">
       <div class="container-fluid">
         <div class="row">
           <div class="col-3">
@@ -137,8 +137,8 @@
               <div class="col-9 mx-auto">
                 <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
                   {% for flag in flags %}
-                    <option {% if prefill.flag == flag.value %} selected {% endif %} value="{{ flag.value }}">
-                      {{ flag.name }}
+                    <option {% if flag in prefill.flags %} selected {% endif %} value="{{ flag }}">
+                      {{ flag }}
                     </option>
                   {% endfor %}
                 </select>
@@ -239,62 +239,62 @@
           </div>
 
           <div class="col-2 my-auto">
-            <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
+            <button id="url-form-button" class="btn btn-outline-info btn-block my-auto" type="submit">
               <i class="fa fa-search"></i>
             </button>
           </div>
 
         </div>
       </div>
-    </form>
-    <!-- copy-to-clipboard component for search fields -->
-    {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
-  </nav>
+      <!-- copy-to-clipboard component for search fields -->
+      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+    </nav>
 
-  <div class="row mb-5">
-    <div class="col-6">
-      <h4><strong>Last HTTP Measurement from:</strong> {{last_measurement_date}} </h4>
+    <div class="row mb-5">
+      <div class="col-6">
+        <h4><strong>Last HTTP Measurement from:</strong> {{last_measurement_date}} </h4>
+      </div>
+      <div class="col-6">
+        <button type="button" class="btn btn-info rounded" id='info'>
+          <i class="fa fa-info-circle"></i> 
+        </button>
+      </div>
     </div>
-    <div class="col-6">
-      <button type="button" class="btn btn-info rounded" id='info'>
-        <i class="fa fa-info-circle"></i> 
-      </button>
+
+    <div class="card rounded" id="domains-list-card">
+      <div class="table-responsive">
+        <table class="table table-striped mt-5 datatable" id="http-list">
+          <thead>
+            <tr>
+              <th class="text-center text-capitalize" scope="col">Input</th>
+              <th class="text-center text-capitalize" scope="col">Start Time</th>
+              <th class="text-center text-capitalize" scope="col">ASN</th>
+              <th class="text-center text-capitalize" scope="col">country</th>
+              <th class="text-center text-capitalize" scope="col">Site</th>
+              <th class="text-center text-capitalize" scope="col">Anomaly</th>
+              <th class="text-center text-capitalize" scope="col">Flag</th>
+              <th class="text-center text-capitalize" scope="col">
+                Status Code Match
+              </th>
+              <th class="text-center text-capitalize" scope="col">Headers Match</th>
+              <th class="text-center text-capitalize" scope="col">
+                Body Length Match
+              </th>
+              <th class="text-center text-capitalize" scope="col">
+                Body proportion
+              </th>
+            </tr>
+          </thead>
+
+          <tbody id='http-tbody'>
+        
+          </tbody>
+
+          <tfoot></tfoot>
+        </table>
+      </div>
     </div>
-  </div>
-
-  <div class="card rounded" id="domains-list-card">
-    <div class="table-responsive">
-      <table class="table table-striped mt-5 datatable" id="http-list">
-        <thead>
-          <tr>
-            <th class="text-center text-capitalize" scope="col">Input</th>
-            <th class="text-center text-capitalize" scope="col">Start Time</th>
-            <th class="text-center text-capitalize" scope="col">ASN</th>
-            <th class="text-center text-capitalize" scope="col">country</th>
-            <th class="text-center text-capitalize" scope="col">Site</th>
-            <th class="text-center text-capitalize" scope="col">Anomaly</th>
-            <th class="text-center text-capitalize" scope="col">Flag</th>
-            <th class="text-center text-capitalize" scope="col">
-              Status Code Match
-            </th>
-            <th class="text-center text-capitalize" scope="col">Headers Match</th>
-            <th class="text-center text-capitalize" scope="col">
-              Body Length Match
-            </th>
-            <th class="text-center text-capitalize" scope="col">
-              Body proportion
-            </th>
-          </tr>
-        </thead>
-
-        <tbody id='http-tbody'>
-       
-        </tbody>
-
-        <tfoot></tfoot>
-      </table>
-    </div>
-  </div>
+  </form>
 
   
 {% endblock content %}
@@ -309,6 +309,26 @@
 <script>
   'use strict';
   var selectedRows = []
+
+  $("#urlForm").on("submit", function (event) {
+    
+    event.preventDefault();
+
+    let data = {
+      since: $("#since").val(), until: $("#until").val(),
+      asn: $("#asn").val(), anomaly : $("#anomaly-state").val(), 
+      input: $("#input").val(), site: $("#site").val(), 
+      flags: $("#flag").val(), status_code_match: $("#status-code-match").val(), 
+      headers_match: $("#headers-match").val(), body_length_match: $("#body-length-match").val(), 
+      body_proportion_max: $("#body-proportion-min").val(), body_proportion_max: $("#body-proportion-max").val()
+    };
+
+    let urlSearch = "{% url 'dashboard:submeasurement:list_http' %}";
+    let url = urlSearch + "?" + $.param(data);
+    window.location.href = url;
+
+  });
+
   $(document).ready(function() {
       $('.select2').select2({
         theme: "flat",
@@ -330,20 +350,21 @@
         ajax: {
           url: '{% url "dashboard:submeasurement:list_http_data" %}',
           data: function (data) {
-            $('#urlForm *').filter(':input').each(function(){
-              if (this.id=='since') data.since = $(this).val();
-              if (this.id=='until') data.until = $(this).val();
-              if (this.id=='asn') data.asn = $(this).val();
-              if (this.id=='consistency') data.consistency = $(this).val();
-              if (this.id=='anomaly') data.anomaly = $(this).val();
-              if (this.id=='site') data.site = $(this).val();
-              if (this.id=='flag') data.flag = $(this).val();
-              if (this.id=='status_code_match') data.status_code_match = $(this).val();
-              if (this.id=='headers_match') data.headers_match = $(this).val();
-              if (this.id=='body_length_match') data.body_length_match = $(this).val();
-              if (this.id=='body_proportion_min') data.body_proportion_min = $(this).val();
-              if (this.id=='body_proportion_max') data.body_proportion_max = $(this).val();
-            });
+
+            data.since = $("#since").val() ;
+            data.until = $("#until").val();
+            data.asn = $("#asn").val();
+            data.consistency = $("#consistency").val();
+            data.anomaly = $("#anomaly-state").val(); 
+            data.site = $("#site").val();
+            data.flags = $("#flag").val();
+            data.input = $("#input").val();
+            data.status_code_match = $("#status-code-match").val();
+            data.headers_match = $("#headers-match").val();
+            data.body_length_match = $("#body-length-match").val();
+            data.body_proportion_min = $("#body-proportion-min").val();
+            data.body_proportion_max = $("#body-proportion-max").val();
+
           },
           contentType: "application/json; charset=utf-8",  
           type: "GET",
@@ -392,11 +413,19 @@
                 return `<div class="text-center text-danger">
                           <i title="HARD" class="far fa-flag"></i>
                         </div>`;
-              } else {
+              } else if (data === "soft") {
                 return `<div class="text-center text-warning">
                           <i title="SOFT" class="far fa-flag"></i>
                         </div>`;
-              }
+              } else if (data === "muted") {
+                return `<div class="text-center text-secondary">
+                          <i title="MUTED" class="far fa-flag"></i>
+                        </div>`;
+              } else {
+                return `<div class="text-center text-dark">
+                            <i title="MANUAL" class="far fa-flag"></i>
+                          </div>`;
+              } 
             },
           },
           {

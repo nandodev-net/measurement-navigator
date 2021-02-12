@@ -1,12 +1,15 @@
 # Django imports:
 from django.db.models.query import QuerySet
 from django.core.exceptions import FieldError
+from django.db.models import Subquery, OuterRef
+
 # Third party imports
 import json
 import requests
+from typing import List
 
 # Local imports
-from .models                                        import Measurement, RawMeasurement
+from .models import Measurement, RawMeasurement
 import apps.main.measurements.submeasurements.models  as SubMeas
 
 """
@@ -32,14 +35,16 @@ import apps.main.measurements.submeasurements.models  as SubMeas
 """
 
 def search_measurement_by_queryset(
-                measurements  : QuerySet,
-                since=None, until=None,
-                test_name : str =None,
-                ASN       : str =None,
-                input     : str =None,
-                site      : str =None,
-                country   : str =None,
-                anomaly   : bool=None):
+        measurements  : QuerySet,
+        since=None, until=None,
+        test_name : str =None,
+        ASN       : str =None,
+        input     : str =None,
+        site      : str =None,
+        country   : str =None,
+        anomaly   : bool=None,
+        flags     : list=None
+    ):
     """
         Given a QuerySet of Measurements x RawMeasurements, return a filtered
         version based on the given input. If Site argument is provided,
@@ -57,6 +62,8 @@ def search_measurement_by_queryset(
         measurements = measurements.filter(raw_measurement__input__contains=input)
     if (anomaly != None and anomaly != ""):
         measurements = measurements.filter(anomaly=anomaly)
+    if (flags != None):
+        measurements = _filter_by_flag_no_ok(measurements, flags)
 
     measurements.site = None
     if site != None and site != "":
@@ -337,3 +344,37 @@ def anomaly_SNI(measurement : RawMeasurement) -> bool:
     """
 
     return measurement.test_keys['result'] != 'success.got_server_hello'
+
+def _filter_by_flag_no_ok(qs : QuerySet, subm_to_filter : List[str]) -> QuerySet:
+    """
+    Summary:
+        Given a queryset and a list of str with submeasurement names, return a queryset such that
+        every instance has a submeasurement such that its flag is not ok
+    Params:
+        qs : QuerySet = Measurement Queryset to filter
+        subm_to_filter : List[str] = list of submeasurement names, not case sensitive
+    Return:
+        QuerySet = Filtered queryset. If the given list is empty, the same queryset is returned.
+    """
+    # Check that this is a Measurement QuerySet
+    assert qs.model == Measurement, "This queryset is not a Measurement QuerySet"
+
+    # If nothing to filter, return the same queryset
+    if not subm_to_filter: return qs
+
+    def filter_aux(subm_type, qs : QuerySet) -> QuerySet:
+        field_name = f"{subm_type.__name__}_flag"
+        sq = subm_type.objects.filter(measurement=OuterRef('pk')).exclude(flag_type=SubMeas.SubMeasurement.FlagType.OK)
+        return qs.annotate(**{field_name:Subquery(sq[:1].values('flag_type'))}).exclude(**{field_name:None})
+
+    lowered_list = [s.lower() for s in subm_to_filter]
+    print(lowered_list)
+    if 'dns' in lowered_list:
+        qs = filter_aux(SubMeas.DNS, qs)
+    
+    if 'http' in lowered_list:
+        qs = filter_aux(SubMeas.HTTP, qs)
+    
+    if 'tcp' in lowered_list:
+        qs = filter_aux(SubMeas.TCP, qs)
+    return qs
