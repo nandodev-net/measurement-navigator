@@ -31,21 +31,6 @@ import apps.main.measurements.submeasurements.models  as SubMeas
 
 """
 
-def search_measurement(
-                since=None, until=None,
-                test_name : str =None,
-                ASN       : str =None,
-                input     : str =None,
-                site      : str =None,
-                country   : str =None
-                ) -> QuerySet:
-    """
-        provide an interface to search measurements easier
-    """
-    measurements = Measurement.objects.all().select_related('raw_measurement')
-    return search_measurement_by_queryset(measurements)
-
-
 def search_measurement_by_queryset(
                 measurements  : QuerySet,
                 since=None, until=None,
