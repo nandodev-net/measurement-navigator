@@ -268,59 +268,34 @@
             orderable: true,
             searchable: true,
             render: function (data, type, row, meta) {
-              var line = `<strong>DNS:</strong>`;
+
+              if ( type === "sort" ) {
+                console.log(data['id']);
+                return data['id'];
+              } else {
+                var line = `<strong>DNS:</strong>`;
+
+                if ( data['dns'] ) {
+                line = line + `<span class="badge badge-pill badge-warning">Exist</span><br><strong>HTTP:</strong>`;
+                } else {
+                  line = line + `<span class="badge badge-pill badge-success">OK</span><br><strong>HTTP:</strong>`;
+                }
+
+                if ( data['http'] ) {
+                  line = line + `<span class="badge badge-pill badge-warning">Exist</span><br><strong>HTTP:</strong>`;
+                } else {
+                  line = line + `<span class="badge badge-pill badge-success">OK</span><br><strong>HTTP:</strong>`;
+                }
+
+                if ( data['tcp'] ) {
+                  line = line + `<span class="badge badge-pill badge-warning">Exist</span>`;
+                } else {
+                  line = line + `<span class="badge badge-pill badge-success">OK</span>`;
+                }
+
+                return line;
+              }
               
-              if ( data['dns'] ) {
-                data['dns'].forEach(element => {
-                  if (element === 'ok') {
-                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
-                  } else if (element === 'soft') {
-                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
-                  } else if (element === 'hard') {
-                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
-                  } else if (element === 'muted') {
-                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
-                  } else {
-                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
-                  }
-                });
-              }
-
-              line = line + `<br><strong>HTTP:</strong>`;
-              if ( data['http'] ) {
-                data['http'].forEach(element => {
-                  if (element === 'ok') {
-                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
-                  } else if (element === 'soft') {
-                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
-                  } else if (element === 'hard') {
-                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
-                  } else if (element === 'muted') {
-                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
-                  } else {
-                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
-                  }
-                });
-              }
-
-              line = line + `<br><strong>TCP:</strong>`;
-              if ( data['tcp'] ) {
-                data['tcp'].forEach(element => {
-                  if (element === 'ok') {
-                    line = line + `<span class="badge badge-pill badge-success">OK</span>`;
-                  } else if (element === 'soft') {
-                    line = line + `<span class="badge badge-pill badge-warning">SOFT</span>`;
-                  } else if (element === 'hard') {
-                    line = line + `<span class="badge badge-pill badge-danger">HARD</span>`;
-                  } else if (element === 'muted') {
-                    line = line + `<span class="badge badge-pill badge-secondary">MUTED</span>`;
-                  } else {
-                    line = line + `<span class="badge badge-pill badge-info">MANUAL</span>`;
-                  }
-                });
-              }
-
-              return line;
               
             },
           }
