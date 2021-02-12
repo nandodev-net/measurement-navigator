@@ -276,28 +276,19 @@
             render: function (data, type, row, meta) {
 
               if ( type === "sort" ) {
-                console.log(data['id']);
                 return data['id'];
               } else {
-                var line = `<strong>DNS:</strong>`;
+                var line = ``;
 
                 if ( data['dns'] ) {
-                line = line + `<span class="badge badge-pill badge-warning">Exist</span><br><strong>HTTP:</strong>`;
-                } else {
-                  line = line + `<span class="badge badge-pill badge-success">OK</span><br><strong>HTTP:</strong>`;
+                  line = line + `<span class="badge badge-pill badge-warning">DNS</span>`;
                 }
-
                 if ( data['http'] ) {
-                  line = line + `<span class="badge badge-pill badge-warning">Exist</span><br><strong>HTTP:</strong>`;
-                } else {
-                  line = line + `<span class="badge badge-pill badge-success">OK</span><br><strong>HTTP:</strong>`;
-                }
-
+                  line = line + `<span class="badge badge-pill badge-warning">HTTP</span>`;
+                } 
                 if ( data['tcp'] ) {
-                  line = line + `<span class="badge badge-pill badge-warning">Exist</span>`;
-                } else {
-                  line = line + `<span class="badge badge-pill badge-success">OK</span>`;
-                }
+                  line = line + `<span class="badge badge-pill badge-warning">TCP</span>`;
+                } 
 
                 return line;
               }
