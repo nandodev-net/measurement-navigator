@@ -231,7 +231,8 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             'raw_measurement__probe_asn',
             'raw_measurement__probe_cc',
             'domain__site__name',
-            'anomaly'
+            'anomaly',
+            'flags'
         ]
 
     order_columns = [
@@ -241,7 +242,8 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             'raw_measurement__probe_asn',
             'raw_measurement__probe_cc',
             'domain__site__name',
-            'anomaly'
+            'anomaly',
+            'flags',
         ]
 
     def get_initial_queryset(self):
@@ -287,13 +289,15 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         json_data = []
         ok_flag = SubMModels.SubMeasurement.FlagType.OK
         for item in qs:
-
-            dnss  = (dns.flag_type  for dns  in item.dns_set.all())
-
             flagsDNS  = any(subm.flag_type != ok_flag for subm in item.dns_set.all())
             flagsHTTP = any(subm.flag_type != ok_flag for subm in item.http_set.all())
             flagsTCP  = any(subm.flag_type != ok_flag for subm in item.tcp_set.all())
             
+            id = 0
+            if flagsDNS: id += 1
+            if flagsHTTP: id += 1
+            if flagsTCP: id += 1
+
             json_data.append({
                 'raw_measurement__measurement_start_time':item.raw_measurement.measurement_start_time,
                 'raw_measurement__probe_cc':item.raw_measurement.probe_cc,
@@ -304,6 +308,6 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'site' : item.domain.site.id if item.domain and item.domain.site else -1,
                 'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
                 'anomaly' : item.anomaly,
-                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
+                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP, 'id': id}
             })
         return json_data
