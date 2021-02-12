@@ -152,15 +152,12 @@
               </div>
               <div class="col-9 mx-auto">
                 <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
-                  <option value="DNS">
-                    DNS
-                  </option>
-                  <option value="HTTP">
-                    HTTP
-                  </option>
-                  <option value="TCP">
-                    TCP
-                  </option>
+                  {% for flag in flags %}
+                    <option {% if flag in prefill.flags %} selected {% endif %} value="{{ flag }}">
+                      {{ flag }}
+                    </option>
+                  {% endfor %}
+
                 </select>
               </div>
             </div> 
@@ -269,16 +266,18 @@
         ajax: {
           url: '{% url "dashboard:measurement:list_measurements_data" %}',
           data: function (data) {
-            $('#urlForm *').filter(':input').each(function(){
-              
-                if (this.id=='since') data.since = $(this).val();
-                if (this.id=='until') data.until = $(this).val();
-                if (this.id=='test-name') data.test_name = $(this).val();
-                if (this.id=='asn') data.asn = $(this).val();
-                if (this.id=='anomaly-state') data.anomaly = $(this).val();
-                if (this.id=='input') data.site = $(this).val();
-                if (this.id=='flag') data.flags = $(this).val();
-            });
+
+            data.since = $("#since").val();
+            data.until = $("#until").val();
+            data.asn = $("#asn").val();
+            data.test_name = $("#test-name").val();
+            data.anomaly = $("#anomaly-state").val();
+            data.input = $("#input").val();
+            data.site = $("#site").val();
+            console.log($('#flag'));
+            console.log($("#flag :selected").val());
+            data.flags = $("#flag").val();
+
           },
           contentType: "application/json; charset=utf-8",  
           type: "GET",
