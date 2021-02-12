@@ -212,12 +212,17 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         This is the backend that talks to the template to perform
         the server-side data processing operations for the List DNS view
     """
-    columns = ListSubMeasurementBackend.columns + [ 'dns_consistency',
-                                                    'jsons__answers',
-                                                    'jsons__control_answers',
-                                                    'control_resolver_hostname',
-                                                    'hostname'
-                                                ]
+    columns = ListSubMeasurementBackend.columns + [ 
+        'dns_consistency',
+        'jsons__answers',
+        'jsons__control_answers',
+        'control_resolver_hostname',
+        'hostname',
+    ]
+    
+    order_columns = ListSubMeasurementBackend.order_columns + [
+        'dns_consistency'
+    ]
     SubMeasurement = SubMeasModels.DNS
 
     def filter_queryset(self, qs):
