@@ -272,6 +272,8 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             return {'ipv4' : json.get('ipv4')}
         elif type_of_answer == 'AAAA':
             return {'ipv6' : json.get('ipv6')}
+        elif type_of_answer == 'CNAME':
+            return {'ipv6' : json.get('CNAME')}
         else:
             return json
 
