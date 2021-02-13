@@ -25,7 +25,7 @@ from apps.dashboard.sections.sites                          import views as site
 from apps.dashboard.sections.measurements                   import views as measurements_views
 from apps.dashboard.sections.measurements.submeasurements   import views as submeasurements_views
 from apps.dashboard.sections.control_panel                  import views as control_panel_views
-
+from apps.dashboard.sections.events     import views as events_views
 
 app_name = 'dashboard'
 urlpatterns = [
@@ -86,5 +86,10 @@ urlpatterns = [
             'apps.dashboard.sections.control_panel.urls',
             namespace='control_panel'
         )
+    ),
+
+    path(
+        'events/',
+        include('apps.dashboard.sections.events.urls', namespace = 'events')
     )
 ]
