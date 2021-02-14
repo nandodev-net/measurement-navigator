@@ -10,8 +10,8 @@
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Users {% endblock tab_title %}
-{% block title %} Register User {% endblock title %}
-{% block sub_title %} Register a new user {% endblock sub_title %}
+{% block title %} Edit User {% endblock title %}
+{% block sub_title %} Edit a user {% endblock sub_title %}
 
 {% block route %}
 
@@ -19,7 +19,7 @@
   <a href="{% url home %}">Home</a>
 </li>
 <li class="breadcrumb-item">
-  <a href="{% url 'dashboard:users:users_create' %}">Users Register</a>
+  <a href="">Users Edit</a>
 </li>
 
 {% endblock route %}
@@ -68,7 +68,7 @@
                 <div class="col-md-12">
                   <div class="form-group">
                     <label class="bmd-label-floating">Role</label>
-                    {% render_field form.role class="form-control" %}
+                    {% render_field form.role class="form-control"%}
                   </div>
                 </div>
               </div>

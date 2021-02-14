@@ -17,4 +17,11 @@ urlpatterns = [
         name="users_create"
     ),   
 
+    path(
+        '<int:pk>',
+        views.UserUpdateView.as_view(),
+        name="user_edit"
+    ),   
+
+
 ]

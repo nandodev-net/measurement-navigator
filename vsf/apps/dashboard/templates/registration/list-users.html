@@ -143,7 +143,7 @@
                     {{ user_object.is_active }}
                 </td>
                 <td>
-                    <a href="">
+                    <a href="{% url 'dashboard:users:user_edit' user_object.id %}">
                         <button type="button" class="btn btn-info">Edit</button>
                     </a>
                     <button type="button" class="btn btn-danger">Disable</button>
