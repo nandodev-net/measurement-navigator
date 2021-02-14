@@ -91,5 +91,10 @@ urlpatterns = [
     path(
         'events/',
         include('apps.dashboard.sections.events.urls', namespace = 'events')
+    ),
+
+    path(
+        'users/',
+        include('apps.dashboard.sections.users.urls', namespace = 'users')
     )
 ]
