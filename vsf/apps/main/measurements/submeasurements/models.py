@@ -117,7 +117,7 @@ class DNS(SubMeasurement):
     client_resolver = models.GenericIPAddressField(null=True)
 
     class Meta:
-        default_related_name = 'dns_submeasurement'
+        default_related_name = 'dns_list'
 
 
 class HTTP(SubMeasurement):
@@ -130,7 +130,7 @@ class HTTP(SubMeasurement):
     body_proportion = models.FloatField()
 
     class Meta:
-        default_related_name = 'http_submeasurement'
+        default_related_name = 'http_list'
 
 class TCP(SubMeasurement):
     """
@@ -142,4 +142,4 @@ class TCP(SubMeasurement):
     ip             = models.CharField(max_length=50, null=True)
 
     class Meta:
-        default_related_name = 'tcp_submeasurement'
+        default_related_name = 'tcp_list'
