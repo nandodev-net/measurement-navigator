@@ -55,27 +55,27 @@ class EventDateDetail(generics.GenericAPIView):
         _enddate = datetime.datetime.strptime(end_date, "%Y-%m-%d")
 
         event = self.get_object(id)
-        flags = event.flags.all()
 
+        submeasurements = []
         measurements = []
-        for flag in flags:
-            if event.issue_type == 'dns':
-                submeasurements = DNS.objects.filter(flag=flag)
-            elif event.issue_type == 'tcp':
-                submeasurements = TCP.objects.filter(flag=flag)
-            else:
-                submeasurements = HTTP.objects.filter(flag=flag)
 
-        if _inidate and _enddate:
-            for submeasurement in submeasurements:
-                if submeasurement.measurement.\
-                    raw_measurement.measurement_start_time.replace(tzinfo=utc) >=\
-                         _inidate.replace(tzinfo=utc) and submeasurement.measurement.\
-                    raw_measurement.measurement_start_time.replace(tzinfo=utc) <= \
-                        _enddate.replace(tzinfo=utc): 
-                    measurements.append(submeasurement.measurement)
-                else:
-                    measurements.append(submeasurement.measurement)
+        submeasurements.append(DNS.objects.filter(event=event))
+        submeasurements.append(TCP.objects.filter(event=event))
+        submeasurements.append(HTTP.objects.filter(event=event))
+
+        for submeasurement in submeasurements:
+            if submeasurement:
+                for i in submeasurement:
+                    if i.measurement.raw_measurement.measurement_start_time.replace(tzinfo=utc) >=\
+                         _inidate.replace(tzinfo=utc) and i.measurement.raw_measurement.\
+                             measurement_start_time.replace(tzinfo=utc)<= \
+                        _enddate.replace(tzinfo=utc):
+
+                        measurements.append(i.measurement)
+                    else:
+                        pass
+            else:
+                pass
 
         _event = {'event':event, 'measurements':measurements}
         event_json = EventDetailSerializer(_event)
@@ -105,12 +105,35 @@ class EventDetail(generics.GenericAPIView):
         submeasurements.append(TCP.objects.filter(event=event))
         submeasurements.append(HTTP.objects.filter(event=event))
 
-        print(submeasurements)
         for submeasurement in submeasurements:
-            measurements.append(submeasurement.measurement)
+            if submeasurement:
+                for i in submeasurement:
+                    measurements.append(i.measurement)
+            else:
+                pass
         _event = {'event':event, 'measurements':measurements}
         event_json = EventDetailSerializer(_event)
         return Response(event_json.data, status=status.HTTP_200_OK)
+
+
+class EventPartialDetail(generics.GenericAPIView):
+    """
+        class created to provide response to endpoint 
+        returning one event instance by id 
+    """
+    serializer_class = EventDetailDataSerializer
+
+    def get_object(self,id):
+        try:
+            return Event.objects.get(id=id)
+        except Event.DoesNotExist:
+            raise Http404
+    
+    def get(self, request, id):
+        event = self.get_object(id)
+        event_json = EventDetailDataSerializer(event)
+        return Response(event_json.data, status=status.HTTP_200_OK)
+
 
 class ListEventsByASN(generics.GenericAPIView):
     """

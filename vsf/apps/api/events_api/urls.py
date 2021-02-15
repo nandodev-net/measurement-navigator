@@ -12,8 +12,13 @@ urlpatterns = [
         ),
 
     path(
-        '<int:id>', 
+        'full/<int:id>', 
         views.EventDetail.as_view(), 
+        name='event_detail_full'),
+
+    path(
+        'partial/<int:id>', 
+        views.EventPartialDetail.as_view(), 
         name='event_detail'),
 
     path(
