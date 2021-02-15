@@ -217,14 +217,21 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
 class MeasurementDetailView(DetailView):
     template_name = 'measurements-templates/measurement-detail.html'
     slug_field = 'pk'
-    model = MeasModels.RawMeasurement
+    model = MeasModels.Measurement
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['rawmeasurement'].test_keys = json.dumps(context['rawmeasurement'].test_keys)
-        context['rawmeasurement'].annotations = json.dumps(context['rawmeasurement'].annotations)
-        context['rawmeasurement'].test_helpers = json.dumps(context['rawmeasurement'].test_helpers)
-        print(context['rawmeasurement'].test_keys)
+
+        ok_flag = SubMModels.SubMeasurement.FlagType.OK
+        flagsDNS  = any(subm.flag_type != ok_flag for subm in context['measurement'].dns_set.all())
+        flagsHTTP = any(subm.flag_type != ok_flag for subm in context['measurement'].http_set.all())
+        flagsTCP  = any(subm.flag_type != ok_flag for subm in context['measurement'].tcp_set.all())
+
+        context['rawmeasurement'] = context['measurement'].raw_measurement
+        context['rawmeasurement'].test_keys = json.dumps(context['measurement'].raw_measurement.test_keys)
+        context['rawmeasurement'].annotations = json.dumps(context['measurement'].raw_measurement.annotations)
+        context['rawmeasurement'].test_helpers = json.dumps(context['measurement'].raw_measurement.test_helpers)
+        context['rawmeasurement'].flags = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
         return context
 
 
@@ -306,11 +313,6 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             flagsDNS  = any(subm.flag_type != ok_flag for subm in item.dns_set.all())
             flagsHTTP = any(subm.flag_type != ok_flag for subm in item.http_set.all())
             flagsTCP  = any(subm.flag_type != ok_flag for subm in item.tcp_set.all())
-            
-            id = 0
-            if flagsDNS: id += 1
-            if flagsHTTP: id += 1
-            if flagsTCP: id += 1
 
             json_data.append({
                 'raw_measurement__measurement_start_time':item.raw_measurement.measurement_start_time,
@@ -318,10 +320,10 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'raw_measurement__probe_asn':item.raw_measurement.probe_asn,
                 'raw_measurement__input':item.raw_measurement.input,
                 'raw_measurement__test_name':item.raw_measurement.test_name,
-                'id' : item.raw_measurement.id,
+                'id' : item.id,
                 'site' : item.domain.site.id if item.domain and item.domain.site else -1,
                 'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
                 'anomaly' : item.anomaly,
-                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP, 'id': id}
+                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
             })
         return json_data
