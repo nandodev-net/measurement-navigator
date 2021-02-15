@@ -6,6 +6,8 @@ from django.views.generic   import View
 # Local imports
 from .models                import Measurement
 from vsf.views              import VSFLoginRequiredMixin 
+from apps.main.measurements.submeasurements     import models as SubMModels
+
 # Create your views here.
 class GetMeasurement(VSFLoginRequiredMixin, View):
     """
@@ -25,5 +27,10 @@ class GetMeasurement(VSFLoginRequiredMixin, View):
 
         # Delete this useless member variable
         d = m.raw_measurement.__dict__
+        ok_flag = SubMModels.SubMeasurement.FlagType.OK
+        flagsDNS  = any(subm.flag_type != ok_flag for subm in m.dns_set.all())
+        flagsHTTP = any(subm.flag_type != ok_flag for subm in m.http_set.all())
+        flagsTCP  = any(subm.flag_type != ok_flag for subm in m.tcp_set.all())
+        d['flags'] = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
         del d['_state']
         return JsonResponse(d)

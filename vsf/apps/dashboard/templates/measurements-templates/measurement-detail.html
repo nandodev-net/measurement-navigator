@@ -200,9 +200,11 @@
                         <div class="col-3 mx-auto">
                             {% if rawmeasurement.flags.dns %}
                                 <span class="badge badge-pill badge-warning">DNS</span>
-                            {% elif rawmeasurement.flags.http %}
+                            {% endif%}
+                            {% if rawmeasurement.flags.http %}
                                 <span class="badge badge-pill badge-warning">HTTP</span>
-                            {% elif rawmeasurement.flags.tcp %}
+                            {% endif%}
+                            {% if rawmeasurement.flags.tcp %}
                                 <span class="badge badge-pill badge-warning">TCP</span>
                             {% endif%}
                         </div>
