@@ -223,9 +223,9 @@ class MeasurementDetailView(DetailView):
         context = super().get_context_data(**kwargs)
 
         ok_flag = SubMModels.SubMeasurement.FlagType.OK
-        flagsDNS  = any(subm.flag_type != ok_flag for subm in context['measurement'].dns_set.all())
-        flagsHTTP = any(subm.flag_type != ok_flag for subm in context['measurement'].http_set.all())
-        flagsTCP  = any(subm.flag_type != ok_flag for subm in context['measurement'].tcp_set.all())
+        flagsDNS  = any(subm.flag_type != ok_flag for subm in context['measurement'].dns_list.all())
+        flagsHTTP = any(subm.flag_type != ok_flag for subm in context['measurement'].http_list.all())
+        flagsTCP  = any(subm.flag_type != ok_flag for subm in context['measurement'].tcp_list.all())
 
         context['rawmeasurement'] = context['measurement'].raw_measurement
         context['rawmeasurement'].test_keys = json.dumps(context['measurement'].raw_measurement.test_keys)
@@ -310,9 +310,9 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         json_data = []
         ok_flag = SubMModels.SubMeasurement.FlagType.OK
         for item in qs:
-            flagsDNS  = any(subm.flag_type != ok_flag for subm in item.dns_set.all())
-            flagsHTTP = any(subm.flag_type != ok_flag for subm in item.http_set.all())
-            flagsTCP  = any(subm.flag_type != ok_flag for subm in item.tcp_set.all())
+            flagsDNS  = any(subm.flag_type != ok_flag for subm in item.dns_list.all())
+            flagsHTTP = any(subm.flag_type != ok_flag for subm in item.http_list.all())
+            flagsTCP  = any(subm.flag_type != ok_flag for subm in item.tcp_list.all())
 
             json_data.append({
                 'raw_measurement__measurement_start_time':item.raw_measurement.measurement_start_time,
