@@ -190,8 +190,23 @@
                         <div class="col-3">
                             <h5 class="text-info border border-info rounded p-3">Test Helpers: </h5>
                         </div>
-                        <div class="col-9 mx-auto">
+                        <div class="col-3 mx-auto">
                             <pre class="" id="test-helpers-detailed">{{ rawmeasurement.test_helpers }}</pre>
+                        </div>
+
+                        <div class="col-3">
+                            <h5 class="text-info border border-info rounded p-3">Flags: </h5>
+                        </div>
+                        <div class="col-3 mx-auto">
+                            {% if rawmeasurement.flags.dns %}
+                                <span class="badge badge-pill badge-warning">DNS</span>
+                            {% endif%}
+                            {% if rawmeasurement.flags.http %}
+                                <span class="badge badge-pill badge-warning">HTTP</span>
+                            {% endif%}
+                            {% if rawmeasurement.flags.tcp %}
+                                <span class="badge badge-pill badge-warning">TCP</span>
+                            {% endif%}
                         </div>
 
                     </div>
