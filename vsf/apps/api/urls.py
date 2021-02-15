@@ -25,6 +25,11 @@ urlpatterns = [
         include('apps.api.events_api.urls', namespace='events'),
         ),       
 
+    path(
+        'measurements/',
+        include('apps.api.measurements_api.urls', namespace='measurements'),
+        ), 
+
         path(
         'api-token-auth/', 
         obtain_auth_token, name='api_token_auth'),

@@ -116,6 +116,9 @@ class DNS(SubMeasurement):
     jsons = models.ForeignKey(to=DNSJsonFields, null=True, on_delete=models.SET_NULL)
     client_resolver = models.GenericIPAddressField(null=True)
 
+    class Meta:
+        default_related_name = 'dns_submeasurement'
+
 
 class HTTP(SubMeasurement):
     """
@@ -126,6 +129,9 @@ class HTTP(SubMeasurement):
     body_length_match = models.BooleanField(default=False)
     body_proportion = models.FloatField()
 
+    class Meta:
+        default_related_name = 'http_submeasurement'
+
 class TCP(SubMeasurement):
     """
         Model for TCP submeasurement, part of web connectivity tests
@@ -134,3 +140,6 @@ class TCP(SubMeasurement):
     status_failure = models.TextField(null=True)
     status_success = models.BooleanField(default=True)
     ip             = models.CharField(max_length=50, null=True)
+
+    class Meta:
+        default_related_name = 'tcp_submeasurement'
