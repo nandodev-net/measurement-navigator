@@ -2,7 +2,6 @@
 {% load static %}
 {% block custom_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"/>
 <link rel="stylesheet" type="text/css" href="{% static 'css/select2.css' %}" /> 
 
 {% endblock custom_stylesheet %}
@@ -182,7 +181,10 @@
       </div>
       <div class="col-6">
         <button type="button" class="btn btn-info rounded" id='info'>
-          <i class="fa fa-info-circle"></i> 
+          <i class="fa fa-info-circle"></i> Details in new tab
+        </button>
+        <button type="button" class="btn btn-info rounded" id='modal'>
+          <i class="fa fa-info-circle"></i> Detail in modal
         </button>
       </div>
     </div>
@@ -217,17 +219,22 @@
 
   </form>
 
+  {% include "includes/measurements-includes/detailed-info-modal.html" %}
+
+
 {% endblock content %}
 
 {% block custom_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
-{% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
+
 
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+{% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 
 <script>
   'use strict';
+
+  var table;
 
   $("#urlForm").on("submit", function (event) {
     
@@ -271,6 +278,98 @@
     }
   });
 
+  $("#modal").click(function() { 
+    var data = table.rows( { selected: true }).data();
+    if (data.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "There is nothing selected!",
+        confirmButtonColor: "#ffc107",
+        confirmButtonText: "Continue",
+      });
+    } else {
+
+      var id = data[0].id;
+      jQuery.noConflict();
+
+      $.ajax({
+        type: "GET",
+        url: '{% url "measurements:get_measurement" %}',
+        data: { id: id },
+        success: function (measurementData) {
+          $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#bucket-date-detailed").text(measurementData["bucket_date"]);
+          $("#data-format-version-detailed").text(
+            measurementData["data_format_version"]
+          );
+          $("#input-detailed").text(measurementData["input"]);
+          $("#measurement-start-time-detailed").text(
+            measurementData["measurement_start_time"]
+          );
+          $("#options-detailed").text(measurementData["options"]);
+          $("#probe-asn-detailed").text(measurementData["probe_asn"]);
+          $("#probe-cc-detailed").text(measurementData["probe_cc"]);
+          $("#probe-ip-detailed").text(measurementData["probe_ip"]);
+          $("#report-filename-detailed").text(
+            measurementData["report_filename"]
+          );
+          $("#report-id-detailed").text(measurementData["report_id"]);
+          $("#software-name-detailed").text(
+            measurementData["software_name"]
+          );
+          $("#software-version-detailed").text(
+            measurementData["software_version"]
+          );
+          $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#test-name-detailed").text(measurementData["test_name"]);
+          $("#test-runtime-detailed").text(
+            measurementData["test_runtime"]
+          );
+          $("#test-start-time-detailed").text(
+            measurementData["test_start_time"]
+          );
+          $("#test-version-detailed").text(
+            measurementData["test_version"]
+          );
+          console.log(measurementData);
+          if (measurementData["flags"]["dns"]) {
+            $("#flags").append(
+              '<span class="badge badge-pill badge-warning">DNS</span>'
+            );
+          }
+          if (measurementData["flags"]["http"]) {
+            $("#flags").append(
+              '<span class="badge badge-pill badge-warning">HTTP</span>'
+            );
+          }
+          if (measurementData["flags"]["tcp"]) {
+            $("#flags").append(
+              '<span class="badge badge-pill badge-warning">tcp</span>'
+            );
+          }
+          $("#modalMeasurementInfo").modal("show");
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          Swal.fire({
+            icon: "warning",
+            title: "There are an error in the inputs!",
+            confirmButtonColor: "#28a745",
+            confirmButtonText: "Continue",
+          });
+        },
+      });
+    }
+  });
 
   $(document).ready(function() {
 
@@ -281,7 +380,7 @@
     });
 
     /* Creating datatable */
-    var table = $("#measurements-list").DataTable({
+    table = $("#measurements-list").DataTable({
       order: [[2, "desc"]],
       searching: true,
       processing: true,
@@ -374,9 +473,8 @@
           orderable: true,
           searchable: true,
           render: function (data, type, row, meta) {
-            return `<input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">`
+            return `<input class="form-check-input" type="checkbox" value="">`
           }
-
         }
       ],
       initComplete: function () {},
