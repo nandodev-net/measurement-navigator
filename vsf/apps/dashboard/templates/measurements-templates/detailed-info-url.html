@@ -219,7 +219,6 @@
 
 {% block custom_scripts %}
 <script>
-  console.log("{{ measurement.raw_measurement.test_keys }}");
 
   $("#annotations-detailed").jsonViewer("{{ measurement.raw_measurement.annotations }}", {
     collapsed: true,
