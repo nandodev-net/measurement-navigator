@@ -23,6 +23,10 @@ h1, h2, h3, h4, h5, h6, p, label {
   padding: 5%
 }
 
+.inline {
+  display: -webkit-box;
+}
+
 .modal {
   overflow-y: auto !important;
 }

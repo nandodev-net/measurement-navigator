@@ -198,15 +198,58 @@
                             <h5 class="text-info border border-info rounded p-3">Flags: </h5>
                         </div>
                         <div class="col-3 mx-auto">
-                            {% if rawmeasurement.flags.dns %}
-                                <span class="badge badge-pill badge-warning">DNS</span>
-                            {% endif%}
-                            {% if rawmeasurement.flags.http %}
-                                <span class="badge badge-pill badge-warning">HTTP</span>
-                            {% endif%}
-                            {% if rawmeasurement.flags.tcp %}
-                                <span class="badge badge-pill badge-warning">TCP</span>
-                            {% endif%}
+                            <div class="inline">
+                                <p><strong>DNS:</strong></p>
+                                {% for flagDNS in rawmeasurement.flags.dns %}
+                                    {% if flagDNS == 'ok' %}
+                                        <span class="badge badge-pill badge-success">OK</span>
+                                    {% elif flagDNS == 'soft' %}
+                                        <span class="badge badge-pill badge-warning">SOFT</span>
+                                    {% elif flagDNS == 'hard' %}
+                                        <span class="badge badge-pill badge-danger">HARD</span>
+                                    {% elif flagDNS == 'manual' %}
+                                        <span class="badge badge-pill badge-info">MANUAL</span>
+                                    {% elif flagDNS == 'muted' %}
+                                        <span class="badge badge-pill badge-muted">MUTED</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="inline">
+                                <p><strong>HTTP:</strong></p>
+                                {% for flagHTTP in rawmeasurement.flags.http %}
+                                    {% if flagHTTP == 'ok' %}
+                                        <span class="badge badge-pill badge-success">OK</span>
+                                    {% elif flagHTTP == 'soft' %}
+                                        <span class="badge badge-pill badge-warning">SOFT</span>
+                                    {% elif flagHTTP == 'hard' %}
+                                        <span class="badge badge-pill badge-danger">HARD</span>
+                                    {% elif flagHTTP == 'manual' %}
+                                        <span class="badge badge-pill badge-info">MANUAL</span>
+                                    {% elif flagHTTP == 'muted' %}
+                                        <span class="badge badge-pill badge-muted">MUTED</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
+
+                            <div class="inline">
+                                <p><strong>TCP:</strong></p>
+                                {% for flagTCP in rawmeasurement.flags.tcp %}
+                                    {% if flagTCP == 'ok' %}
+                                        <span class="badge badge-pill badge-success">OK</span>
+                                    {% elif flagTCP == 'soft' %}
+                                        <span class="badge badge-pill badge-warning">SOFT</span>
+                                    {% elif flagTCP == 'hard' %}
+                                        <span class="badge badge-pill badge-danger">HARD</span>
+                                    {% elif flagTCP == 'manual' %}
+                                        <span class="badge badge-pill badge-info">MANUAL</span>
+                                    {% elif flagTCP == 'muted' %}
+                                        <span class="badge badge-pill badge-muted">MUTED</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+
                         </div>
 
                     </div>

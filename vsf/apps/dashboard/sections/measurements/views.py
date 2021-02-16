@@ -221,11 +221,10 @@ class MeasurementDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        ok_flag = SubMModels.SubMeasurement.FlagType.OK
-        flagsDNS  = any(subm.flag_type != ok_flag for subm in context['measurement'].dns_list.all())
-        flagsHTTP = any(subm.flag_type != ok_flag for subm in context['measurement'].http_list.all())
-        flagsTCP  = any(subm.flag_type != ok_flag for subm in context['measurement'].tcp_list.all())
+        
+        flagsDNS = [subm.flag_type for subm in context['measurement'].dns_list.all()]
+        flagsHTTP = [subm.flag_type for subm in context['measurement'].http_list.all()]
+        flagsTCP = [subm.flag_type for subm in context['measurement'].tcp_list.all()]
 
         context['rawmeasurement'] = context['measurement'].raw_measurement
         context['rawmeasurement'].test_keys = json.dumps(context['measurement'].raw_measurement.test_keys)

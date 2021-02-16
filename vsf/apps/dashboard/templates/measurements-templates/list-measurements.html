@@ -341,22 +341,39 @@
           $("#test-version-detailed").text(
             measurementData["test_version"]
           );
-          console.log(measurementData);
-          if (measurementData["flags"]["dns"]) {
-            $("#flags").append(
-              '<span class="badge badge-pill badge-warning">DNS</span>'
-            );
+
+          var line = '<div class="inline"><p><strong>DNS:</strong></p>';
+          for (var dns of measurementData['flags']['dns'] ) {
+            if (dns == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+            else if (dns == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+            else if (dns == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+            else if (dns == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+            else if (dns == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
           }
-          if (measurementData["flags"]["http"]) {
-            $("#flags").append(
-              '<span class="badge badge-pill badge-warning">HTTP</span>'
-            );
+
+          line = line + '</div><div class="inline"><p><strong>HTTP:</strong></p>';
+          for (var http of measurementData['flags']['http'] ) {
+            if (http == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+            else if (http == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+            else if (http == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+            else if (http == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+            else if (http == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
           }
-          if (measurementData["flags"]["tcp"]) {
-            $("#flags").append(
-              '<span class="badge badge-pill badge-warning">tcp</span>'
-            );
-          }
+          
+          line = line + '</div><div class="inline"><p><strong>TCP:</strong></p>';
+          for (var tcp of measurementData['flags']['tcp'] ) {
+            if (tcp == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+            else if (tcp == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+            else if (tcp == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+            else if (tcp == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+            else if (tcp == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
+          }     
+          line = line + '</div>';
+
+          $("#flags").append(
+            line
+          );
+          
           $("#modalMeasurementInfo").modal("show");
         },
         error: function (jqXHR, textStatus, errorThrown) {
