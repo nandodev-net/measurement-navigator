@@ -90,19 +90,19 @@
           <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-info">
               <div class="col-5 mx-auto">
-                <label class='font-weight-bold text-white' for="asn">
+                <label class='font-weight-bold text-white' for="dns_consistency">
                   Consistency
                 </label>
               </div>
               <div class="col-7 mx-auto">
-                <select id="consistency" class="custom-select additional-filter" name="consistency">
-                  <option selected value="">Any</option>
+                <select id="dns_consistency" class="custom-select additional-filter" name="dns_consistency">
+                  <option value="">Any</option>
                   <option
-                  {% if prefill.consistency == 'consistent' %} selected {% endif %}
-                  value="false">Consistent</option>
+                  {% if prefill.dns_consistency == 'consistent' %} selected {% endif %}
+                  value="consistent">Consistent</option>
                   <option
-                  {% if prefill.consistency == 'inconsistent' %} selected {% endif %}
-                  value="true">Inconsistent</option>
+                  {% if prefill.dns_consistency == 'inconsistent' %} selected {% endif %}
+                  value="inconsistent">Inconsistent</option>
                 </select>
               </div>
             </div> 
@@ -258,7 +258,7 @@
 
     let data = {
       since: $("#since").val(), until: $("#until").val(),
-      asn: $("#asn").val(), consistency: $("#consistency").val(), 
+      asn: $("#asn").val(), dns_consistency: $("#dns_consistency").val(), 
       anomaly : $("#anomaly-state").val(), site: $("#site").val(), 
       flags: $("#flag").val(), input: $("#input").val()
     };
@@ -390,6 +390,7 @@
             line
           );
           
+          line = ""
           $("#modalMeasurementInfo").modal("show");
         },
         error: function (jqXHR, textStatus, errorThrown) {
@@ -409,9 +410,21 @@
       $('.select2').select2({
         theme: "flat",
         allowClear: true,
-        placeholder: "Select flags types"
+        placeholder: "Select flags types",
+      }).on("select2:unselecting", function(e) {
+          $(this).data('state', 'unselected');
+      }).on("select2:open", function(e) {
+          if ($(this).data('state') === 'unselected') {
+              $(this).removeData('state'); 
+
+              var self = $(this);
+              setTimeout(function() {
+                  self.select2('close');
+              }, 1);
+          }    
       });
 
+      
       /* Creating datatable */
       table = $("#dns-list").DataTable({
         order: [[1, "desc"]],
@@ -428,11 +441,12 @@
             data.since = $("#since").val() ;
             data.until = $("#until").val();
             data.asn = $("#asn").val();
-            data.consistency = $("#consistency").val();
+            data.dns_consistency = $("#dns_consistency").val();
             data.anomaly = $("#anomaly-state").val(); 
             data.site = $("#site").val();
             data.flags = $("#flag").val();
             data.input = $("#input").val();
+            console.log(data);
 
           },
           contentType: "application/json; charset=utf-8",  
