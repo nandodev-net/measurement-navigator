@@ -87,19 +87,17 @@ class EventDetail(generics.GenericAPIView):
     def get(self, request, id):
         event = self.get_object(id)
 
-        submeasurements = []
+        subms = ['dns', 'tcp', 'http']
         measurements = []
 
-        submeasurements.append(DNS.objects.filter(event=event))
-        submeasurements.append(TCP.objects.filter(event=event))
-        submeasurements.append(HTTP.objects.filter(event=event))
-
-        for submeasurement in submeasurements:
-            if submeasurement:
-                for i in submeasurement:
-                    measurements.append(i.measurement)
-            else:
-                pass
+        for subm in subms:
+            ms = Measurement.objects.raw(   
+                f"SELECT DISTINCT measurements_measurement.* \
+                FROM measurements_measurement   JOIN submeasurements_{subm} subm ON subm.measurement_id=measurements_measurement.id \
+                                                JOIN measurements_rawmeasurement rms ON rms.id = measurements_measurement.raw_measurement_id\
+                WHERE subm.event_id=%s", 
+                [id])
+    
         _event = {'event':event, 'measurements':measurements}
         event_json = EventDetailSerializer(_event)
         return Response(event_json.data, status=status.HTTP_200_OK)
