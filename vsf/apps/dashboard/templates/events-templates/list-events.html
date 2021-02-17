@@ -43,7 +43,7 @@
           <div class="col-4">
             <div class="row align-items-center rounded p-2 bg-info ml-1">
               <div class="col-5 mx-auto">
-                <label class='font-weight-bold text-white' for="asn">
+                <label class='font-weight-bold text-white' for="confirmed">
                   Confirmed
                 </label>
               </div>
@@ -238,10 +238,10 @@
           data.end_time = $("#end_time").val();
           data.public_evidence = $("#public_evidence").val();
           data.private_evidence = $("#private_evidence").val();
-          data.asn = $( '#asn' ).val();
+          data.asn = $("#asn").val();
           data.issue_type = $("#issue_type").val();
           data.domain = $("#domain").val();
-
+          console.log(data);
         },
         contentType: "application/json; charset=utf-8",  
         type: "GET",
