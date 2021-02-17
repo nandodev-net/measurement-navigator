@@ -6,13 +6,19 @@ Select2 Override style
     display: none;
 }
 
+
 .select2-search__field {
     width: 5em !important;
     margin-top: 3px;
 }
 
+.select2-results__option {
+	background-color: white;
+}
+
 .select2-results__options {
-    list-style-type: none;
+	list-style-type: none;	
+	margin-top: 20%
 }
 
 .select2-selection__choice {
