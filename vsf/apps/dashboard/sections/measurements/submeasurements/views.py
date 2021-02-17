@@ -204,10 +204,10 @@ class ListDNSTemplate(ListSubMeasurementTemplate):
         prefill = context['prefill']
         get = self.request.GET or {}
     
-        consistency = get.get('consistency')
+        dns_consistency = get.get('dns_consistency')
 
-        if consistency:
-            prefill['consistency'] = consistency
+        if dns_consistency:
+            prefill['dns_consistency'] = dns_consistency
 
         context['prefill'] = prefill
         return context
@@ -240,7 +240,8 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         get = self.request.GET or {}
         qs = super().filter_queryset(qs)
         print(c.yellow(str(qs)))
-        consistency = get.get('consistency')
+        consistency = get.get('dns_consistency')
+        
         if consistency:
             qs = qs.filter(dns_consistency__contains=consistency)
 
