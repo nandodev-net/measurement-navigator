@@ -48,21 +48,10 @@ class MeasurementDetail(generics.GenericAPIView):
     
     def get(self, request, id):
         measurement = self.get_object(id)
-
-        try:
-            dns = measurement.dns_submeasurement
-        except:
-            dns = None
-
-        try:
-            http = measurement.http_submeasurement
-        except:
-            http = None
-
-        try:
-            tcp = measurement.tcp_submeasurement
-        except:
-            tcp = None
+        
+        dns = measurement.dns_list
+        http = measurement.http_list
+        tcp = measurement.tcp_list
 
         submeasurement = {'DNS':dns, 'HTTP':http, 'TCP':tcp}
         _measurement = {'measurement':measurement,'submeasurement':submeasurement}
