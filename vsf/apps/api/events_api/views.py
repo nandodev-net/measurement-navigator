@@ -97,6 +97,8 @@ class EventDetail(generics.GenericAPIView):
                                                 JOIN measurements_rawmeasurement rms ON rms.id = measurements_measurement.raw_measurement_id\
                 WHERE subm.event_id=%s", 
                 [id])
+            
+            measurements += list(ms)
     
         _event = {'event':event, 'measurements':measurements}
         event_json = EventDetailSerializer(_event)

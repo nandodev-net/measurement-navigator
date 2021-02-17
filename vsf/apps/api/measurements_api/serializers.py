@@ -51,7 +51,7 @@ class DNSSubmeasurementSerializer(serializers.ModelSerializer):
         ]
 
 class SubMeasurementDataSerializer(serializers.Serializer):
-    DNS = DNSSubmeasurementSerializer(read_only=True)
+    DNS = DNSSubmeasurementSerializer(read_only=True, many=True)
     HTTP = HTTPSubmeasurementSerializer(read_only=True, many=True)
     TCP = TCPSubmeasurementSerializer(read_only=True, many=True)
 
