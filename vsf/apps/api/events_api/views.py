@@ -51,31 +51,20 @@ class EventDateDetail(generics.GenericAPIView):
             raise Http404
     
     def get(self, request, id, start_date, end_date):
-        _inidate = datetime.datetime.strptime(start_date, "%Y-%m-%d")
-        _enddate = datetime.datetime.strptime(end_date, "%Y-%m-%d")
-
         event = self.get_object(id)
-
-        submeasurements = []
+        subms = ['dns', 'tcp', 'http']
         measurements = []
 
-        submeasurements.append(DNS.objects.filter(event=event))
-        submeasurements.append(TCP.objects.filter(event=event))
-        submeasurements.append(HTTP.objects.filter(event=event))
+        for subm in subms:
+            ms = Measurement.objects.raw(   
+                f"SELECT DISTINCT measurements_measurement.* \
+                FROM measurements_measurement   JOIN submeasurements_{subm} subm ON subm.measurement_id=measurements_measurement.id \
+                                                JOIN measurements_rawmeasurement rms ON rms.id = measurements_measurement.raw_measurement_id\
+                WHERE subm.event_id=%s AND rms.measurement_start_time >= %s AND rms.measurement_start_time <= %s", 
+                [id, start_date, end_date])
 
-        for submeasurement in submeasurements:
-            if submeasurement:
-                for i in submeasurement:
-                    if i.measurement.raw_measurement.measurement_start_time.replace(tzinfo=utc) >=\
-                         _inidate.replace(tzinfo=utc) and i.measurement.raw_measurement.\
-                             measurement_start_time.replace(tzinfo=utc)<= \
-                        _enddate.replace(tzinfo=utc):
-
-                        measurements.append(i.measurement)
-                    else:
-                        pass
-            else:
-                pass
+            measurements += list(ms)
+            
 
         _event = {'event':event, 'measurements':measurements}
         event_json = EventDetailSerializer(_event)
