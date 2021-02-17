@@ -102,4 +102,6 @@ class EventsData(BaseDatatableView):
                 'asn': event.asn
             })
 
+        print('flagflagflag')
+        print(response)
         return response
