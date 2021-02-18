@@ -112,9 +112,6 @@ class EventsData(BaseDatatableView):
         if issue_type != None and issue_type != "":
             qs = qs.filter(issue_type = issue_type)
 
-        domain = self.request.GET.get('domain')
-        if domain != None and domain != "":
-            qs = qs.filter(domain__domanin_name__iexact = domain)
 
         asn = self.request.GET.get('asn')
         if asn != None and asn != "":
