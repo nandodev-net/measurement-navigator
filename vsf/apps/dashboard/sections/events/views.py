@@ -89,7 +89,8 @@ class EventsData(BaseDatatableView):
 
         response = []
         for event in qs:
-
+            print(event.domain.__dict__)
+            print(event.asn.__dict__)
             response.append({
                 'identification': event.identification, 
                 'confirmed': event.confirmed, 
@@ -98,10 +99,8 @@ class EventsData(BaseDatatableView):
                 'public_evidence': event.public_evidence, 
                 'private_evidence': event.private_evidence, 
                 'issue_type': event.issue_type, 
-                'domain': event.domain, 
-                'asn': event.asn
+                'domain': event.domain.domain_name, 
+                'asn': event.asn.asn
             })
 
-        print('flagflagflag')
-        print(response)
         return response
