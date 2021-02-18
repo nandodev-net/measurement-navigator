@@ -39,7 +39,6 @@
             name="identification"
             />
           </div>
-
           <div class="col-4">
             <div class="row align-items-center rounded p-2 bg-info ml-1">
               <div class="col-5 mx-auto">
@@ -50,8 +49,9 @@
               <div class="col-7 mx-auto">
                 <select id="confirmed" class="custom-select additional-filter" name="confirmed">
                   <option value="">Any Confirmation</option>
-                  <option {% if prefill.confirmed %} selected {% endif %}>True</option>
-                  <option {% if not prefill.confirmed %} selected {% endif %}>False</option>
+                  
+                  <option {% if prefill.confirmed == "true" %} selected {% endif %} value="true">True</option>
+                  <option {% if prefill.confirmed == "false" %} selected {% endif %} value="false">False</option>
                   
                 </select>
               </div>
@@ -107,7 +107,7 @@
             name="private_evidence"
             />
           </div>
-
+          
           <div class="col-3 mt-3 my-auto">
             <div class="row align-items-center rounded p-2 bg-info">
               <div class="col-5 mx-auto">
@@ -120,7 +120,7 @@
                   </option>
                   {% for issue in issueTypes %}
                     <option 
-                    {% if issue.value == prefill.issue_type %} selected {% endif %}
+                    {% if issue.name == prefill.issue_type %} selected {% endif %}
                     value="{{ issue.name }}" 
                     >
                     {{ issue.name }}
@@ -143,17 +143,30 @@
             />
           </div>
 
+
           <div class="col-4 mt-3">
-            <input
-            id="asn"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="ASN"
-            aria-label="Search asn"
-            value="{{ prefill.asn }}"
-            name="asn"
-            />
+            <div class="row align-items-center rounded p-2 bg-info ml-1">
+              <div class="col-3 mx-auto">
+                <label class='font-weight-bold text-white' for="asn">
+                  ASN
+                </label>
+              </div>
+              <div class="col-9 mx-auto">
+                <select id="asn" class="custom-select additional-filter" name="asn">
+                  <option value="">Any ASN</option>
+                  {% for asn in asns %}
+                    <option 
+                    {% if asn.asn == prefill.asn %} selected {% endif %}
+                    value="{{ asn.asn }}" 
+                    >
+                    {{ asn.asn }} - {{ asn.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div> 
           </div>
+
 
           <div class="col-1 my-auto mx-auto">
             <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
@@ -206,12 +219,12 @@
 
     let data = {
       identification: $("#identification").val(), 
-      confirmed: $("#confirmed").val(), start_time: $("#start_time").val(), 
+      confirmed: $("#confirmed").val() == 'true', start_time: $("#start_time").val(), 
       end_time: $("#end_time").val(), public_evidence : $("#public_evidence").val(), 
       private_evidence: $("#private_evidence").val(), asn: $( '#asn' ).val(),
       issue_type: $("#issue_type").val(), domain: $("#domain").val()
     };
-
+    
     let urlSearch = "{% url 'dashboard:events:all' %}";
     let url = urlSearch + "?" + $.param(data);
     window.location.href = url;
@@ -233,7 +246,7 @@
         data: function (data) {
 
           data.identification = $("#identification").val();
-          data.confirmed = $("#confirmed").val();
+          data.confirmed = $("#confirmed").val() === 'true';
           data.start_time = $("#start_time").val();
           data.end_time = $("#end_time").val();
           data.public_evidence = $("#public_evidence").val();
