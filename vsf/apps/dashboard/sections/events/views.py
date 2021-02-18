@@ -10,6 +10,8 @@ from datetime                                   import datetime, timedelta
 
 # Local imports
 from apps.main.events.models    import Event
+from apps.main.asns.models      import ASN
+
 
 class EventsList(VSFLoginRequiredMixin, TemplateView):
 
@@ -19,7 +21,7 @@ class EventsList(VSFLoginRequiredMixin, TemplateView):
 
         get, prefill = self.request.GET or {}, {}
         issueTypes = Event.IssueType.choices
-        issueTypes = list(map(lambda m: {'name': m[1], 'value': m[0]}, issueTypes))
+        issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
 
         # ------------------ making prefill ------------------ #
         
@@ -32,14 +34,16 @@ class EventsList(VSFLoginRequiredMixin, TemplateView):
             prefillAux = get.get(field)
             if field == 'start_date' and not prefill:
                 prefillAux = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-            elif prefill:
-                prefill['field'] = prefillAux
+            elif field:
+                prefill[field] = prefillAux
 
         # ---------------------------------------------------- #
+
 
         context = super().get_context_data()
         context['prefill'] = prefill
         context['issueTypes'] = issueTypes
+        context['asns'] = ASN.objects.all()
         return context
 
 
@@ -71,7 +75,8 @@ class EventsData(BaseDatatableView):
 
         #------- Another type of data filtering ------#
 
-        filters = {
+        # Check later
+        """filters = {
             key: value
             for key, value in self.request.GET.items()
             if key in [ 
@@ -79,7 +84,41 @@ class EventsData(BaseDatatableView):
                 'private_evidence', 'issue_type', 'domain', 'asn'
             ] and value != None and value != ""
         }
-        qs.filter(**filters)
+        qs.filter(**filters)"""
+
+        identification = self.request.GET.get('identification')
+        if identification != None and identification != "":
+            qs = qs.filter(identification = identification)
+
+
+        confirmed = self.request.GET.get('confirmed')
+        
+        if confirmed != None and confirmed != "":
+            if confirmed == 'true': 
+                qs = qs.filter(confirmed = 't') 
+            else: 
+                qs = qs.filter(confirmed = 'f')
+
+
+        public_evidence = self.request.GET.get('public_evidence')
+        if public_evidence != None and public_evidence != "":
+            qs = qs.filter(public_evidence = public_evidence)
+
+        private_evidence = self.request.GET.get('private_evidence')
+        if private_evidence != None and private_evidence != "":
+            qs = qs.filter(private_evidence = private_evidence)
+
+        issue_type = self.request.GET.get('issue_type')
+        if issue_type != None and issue_type != "":
+            qs = qs.filter(issue_type = issue_type)
+
+        domain = self.request.GET.get('domain')
+        if domain != None and domain != "":
+            qs = qs.filter(domain__domanin_name__iexact = domain)
+
+        asn = self.request.GET.get('asn')
+        if asn != None and asn != "":
+            qs = qs.filter(asn__name = asn)
 
         #---------------------------------------------#
 
@@ -89,8 +128,7 @@ class EventsData(BaseDatatableView):
 
         response = []
         for event in qs:
-            print(event.domain.__dict__)
-            print(event.asn.__dict__)
+            
             response.append({
                 'identification': event.identification, 
                 'confirmed': event.confirmed, 
