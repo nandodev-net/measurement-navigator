@@ -107,7 +107,9 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
         'probe_cc': 'VE', # In case we want to add other countries
         'since': since,
         'until': until,
-        'limit': 1000
+        'limit': 1000,
+        'order':'asc',
+        'order_by' : 'measurement_start_time'
     }
 
     # Check if the post data is valid:
