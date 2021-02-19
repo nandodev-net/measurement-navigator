@@ -144,6 +144,10 @@
                 </td>
                 
                 <td>
+
+                    <button type="button" class="bs-modal btn btn-sm btn-warning" 
+                    onclick="open_pass_modal('{% url 'dashboard:users:user_reveal_pass' user_object.id %}')">Show Pass</button>
+
                     <button type="button" class="bs-modal btn btn-sm btn-info" 
                     onclick="open_edit_modal('{% url 'dashboard:users:user_edit' user_object.id %}')">Edit</button>
                     <button type="button" class="btn btn-sm btn-danger">Disable</button>
@@ -165,23 +169,34 @@
     onclick="open_register_modal('{% url 'dashboard:users:users_register' %}')">Create User</button>
     </p>  
 
-    <div class="modal fade" id='edit_user' role="dialog"></div>
 
     <div class="modal fade" id='register_user' role="dialog"></div>
-    
-    
+    <div class="modal fade" id='edit_user' role="dialog"></div>
+    <div class="modal fade" id='reveal_pass_user' role="dialog"></div>
+
+
+
     {% block extrajs %}
     <script type="text/javascript">
         var $ = jQuery.noConflict()
+    
         function open_register_modal(url){
             $('#register_user').load(url, function(){
                 $(this).modal('show');
     
             });
         }
-
+    
         function open_edit_modal(url){
             $('#edit_user').load(url, function(){
+                $(this).modal('show');
+    
+            });
+        
+        }
+    
+        function open_pass_modal(url){
+            $('#reveal_pass_user').load(url, function(){
                 $(this).modal('show');
     
             });
@@ -190,5 +205,7 @@
     </script>
     
     {% endblock extrajs %}
+
+
 
 {% endblock content %}

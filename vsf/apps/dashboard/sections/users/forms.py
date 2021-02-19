@@ -21,3 +21,4 @@ class CustomUserForm(forms.ModelForm):
             'email',
             'role',
         ]
+

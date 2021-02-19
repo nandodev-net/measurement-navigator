@@ -3,6 +3,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic           import TemplateView
 from django.views.generic.edit import UpdateView, CreateView
+from django.views.generic import DetailView
 from django.contrib.auth.hashers import make_password
 import random
 import string
@@ -80,6 +81,7 @@ class UserCreateView(VSFLoginRequiredMixin, CreateView):
             first_name = form.cleaned_data['first_name'],
             last_name = form.cleaned_data['last_name'],
             email = form.cleaned_data['email'],
+            raw_pss = password,
             password = make_password(password),
             is_active = True,
             date_joined = datetime.now()
@@ -230,6 +232,7 @@ class UserCreateModalView(VSFLoginRequiredMixin, CreateView):
             first_name = form.cleaned_data['first_name'],
             last_name = form.cleaned_data['last_name'],
             email = form.cleaned_data['email'],
+            raw_pss = password,
             password = make_password(password),
             is_active = True,
             date_joined = datetime.now()
@@ -265,4 +268,13 @@ class UserCreateModalView(VSFLoginRequiredMixin, CreateView):
             )
         )
 
+
+
+class CustomUserPasswdRevealView(DetailView):
+    model = CustomUser
+    template_name = "registration/reveal-user-psswd.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 

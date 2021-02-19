@@ -29,5 +29,12 @@ urlpatterns = [
         name="user_edit"
     ),   
 
+    path(
+        'passreveal/<int:pk>',
+        views.CustomUserPasswdRevealView.as_view(),
+        name="user_reveal_pass"
+    ),   
+
+
 
 ]

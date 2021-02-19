@@ -45,6 +45,16 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_editor = models.BooleanField(
         default=False
         )
+    
+    is_guest = models.BooleanField(
+        default=False
+        )
+    
+    raw_pss = models.CharField(
+        max_length = 50,
+        blank=True,
+        null=True,
+    )
 
     is_staff = models.BooleanField(
         default=False
