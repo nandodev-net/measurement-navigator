@@ -20,7 +20,7 @@ from django.conf.urls import include, url
 from django.urls            import include, path, re_path
 from django.contrib.auth    import views            as auth_views
 #Section import
-from apps.dashboard.sections.cases                          import views as cases_views
+from apps.dashboard.sections.event_cases                          import views as cases_views
 from apps.dashboard.sections.sites                          import views as sites_views
 from apps.dashboard.sections.measurements                   import views as measurements_views
 from apps.dashboard.sections.measurements.submeasurements   import views as submeasurements_views
@@ -69,12 +69,12 @@ urlpatterns = [
         )
     ),
 
-    #   Cases
+    #   Event cases
     path(
         'cases/',
         include(
-            'apps.dashboard.sections.cases.urls',
-            namespace='case'
+            'apps.dashboard.sections.event_cases.urls',
+            namespace='event_case'
         )
     ),
 
