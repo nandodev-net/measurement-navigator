@@ -136,6 +136,41 @@
               </div>
             </li>
 
+            <!-- Measurements -->
+            <li id="headingMeasurements" class="nav-item w-100">
+                <a
+                  class="nav-link collapsed"
+                  href="#"
+                  data-toggle="collapse"
+                  data-target="#collapseMeasurements"
+                  aria-expanded="false"
+                  aria-controls="collapseMeasurements"
+                >
+                  <div class="sb-nav-link-icon">
+                    <i class="fas fa-ruler"></i>
+                  </div>
+                  Measurements
+                  <div class="sb-sidenav-collapse-arrow">
+                    <i class="fas fa-angle-down"></i>
+                  </div>
+                </a>
+                <div
+                  class="collapse"
+                  id="collapseMeasurements"
+                  aria-labelledby="headingMeasurements"
+                  data-parent="#sidenavMenu"
+                >
+                  <nav class="sb-sidenav-menu-nested nav">
+                    <a class="nav-link" href="{% url 'dashboard:measurement:list_measurements' %}"> Measurements </a>
+                    <a class="nav-link" href="{% url 'dashboard:submeasurement:list_dns' %}"> DNS </a>
+                    <a class="nav-link" href="{% url 'dashboard:submeasurement:list_http' %}"> HTTP </a>
+                    <a class="nav-link" href="{% url 'dashboard:submeasurement:list_tcp' %}"> TCP </a>
+                  </nav>
+                </div>
+              </li>
+
+
+              
             <li id="headingEvents" class="nav-item w-100">
               <a
                 class="nav-link collapsed"
@@ -172,105 +207,36 @@
             </li>
 
             <li id="headingCases" class="nav-item w-100">
-              <a
-                class="nav-link collapsed"
-                href="#"
-                data-toggle="collapse"
-                data-target="#collapseCases"
-                aria-expanded="false"
-                aria-controls="collapseCases"
-              >
-                <div class="sb-nav-link-icon">
-                  <i class="fas fa-folder-open"></i>
+                <a
+                  class="nav-link collapsed"
+                  href="#"
+                  data-toggle="collapse"
+                  data-target="#collapseCases"
+                  aria-expanded="false"
+                  aria-controls="collapseCases"
+                >
+                  <div class="sb-nav-link-icon">
+                    <i class="fas fa-folder-open"></i>
+                  </div>
+                  Cases
+                  <div class="sb-sidenav-collapse-arrow">
+                    <i class="fas fa-angle-down"></i>
+                  </div>
+                </a>
+                <div
+                  class="collapse"
+                  id="collapseCases"
+                  aria-labelledby="headingCases"
+                  data-parent="#sidenavMenu"
+                >
+                  <nav class="sb-sidenav-menu-nested nav">
+                    <a class="nav-link" href="{% url 'dashboard:event_cases:list_cases' %}">
+                      List Cases
+                    </a>
+                    <a class="nav-link" href="#"> New Case </a>
+                  </nav>
                 </div>
-                Cases
-                <div class="sb-sidenav-collapse-arrow">
-                  <i class="fas fa-angle-down"></i>
-                </div>
-              </a>
-              <div
-                class="collapse"
-                id="collapseCases"
-                aria-labelledby="headingCases"
-                data-parent="#sidenavMenu"
-              >
-                <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url 'dashboard:case:list_cases' %}">
-                    List Cases
-                  </a>
-                  <a class="nav-link" href="#"> New Case </a>
-                  <a class="nav-link" href="#"> New Case from events </a>
-                  <a class="nav-link" href="{% url 'dashboard:case:list_categories' %}">
-                    List Categories
-                  </a>
-                  <a class="nav-link" href="{% url 'dashboard:case:new_category' %}">
-                    New Category
-                  </a>
-                </nav>
-              </div>
-            </li>
-
-            <li id="headingMutedInputs" class="nav-item w-100">
-              <a
-                class="nav-link collapsed"
-                href="#"
-                data-toggle="collapse"
-                data-target="#collapseInputs"
-                aria-expanded="false"
-                aria-controls="collapseInputs"
-              >
-                <div class="sb-nav-link-icon">
-                  <i class="fas fa-volume-mute"></i>
-                </div>
-                Muted Inputs
-                <div class="sb-sidenav-collapse-arrow">
-                  <i class="fas fa-angle-down"></i>
-                </div>
-              </a>
-              <div
-                class="collapse"
-                id="collapseInputs"
-                aria-labelledby="headingMutedInputs"
-                data-parent="#sidenavMenu"
-              >
-                <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="">
-                    List Muted Inputs
-                  </a>
-                  <a class="nav-link" href="#"> New Muted Input </a>
-                </nav>
-              </div>
-            </li>
-
-            <li id="headingProbes" class="nav-item w-100">
-              <a
-                class="nav-link collapsed"
-                href="#"
-                data-toggle="collapse"
-                data-target="#collapseProbes"
-                aria-expanded="false"
-                aria-controls="collapseProbes"
-              >
-                <div class="sb-nav-link-icon"><i class="fas fa-tasks"></i></div>
-                Probes
-                <div class="sb-sidenav-collapse-arrow">
-                  <i class="fas fa-angle-down"></i>
-                </div>
-              </a>
-              <div
-                class="collapse"
-                id="collapseProbes"
-                aria-labelledby="headingProbes"
-                data-parent="#sidenavMenu"
-              >
-                <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url 'dashboard:list_probes' %}">
-                    List Probes
-                  </a>
-                  <a class="nav-link" href="#"> New Probes </a>
-                </nav>
-              </div>
-            </li>
+              </li>
 
             <li id="headingPage" class="nav-item w-100">
               <a
@@ -303,41 +269,10 @@
                 </nav>
               </div>
             </li>
-
-            <!-- Measurements -->
-            <li id="headingMeasurements" class="nav-item w-100">
-              <a
-                class="nav-link collapsed"
-                href="#"
-                data-toggle="collapse"
-                data-target="#collapseMeasurements"
-                aria-expanded="false"
-                aria-controls="collapseMeasurements"
-              >
-                <div class="sb-nav-link-icon">
-                  <i class="fas fa-ruler"></i>
-                </div>
-                Measurements
-                <div class="sb-sidenav-collapse-arrow">
-                  <i class="fas fa-angle-down"></i>
-                </div>
-              </a>
-              <div
-                class="collapse"
-                id="collapseMeasurements"
-                aria-labelledby="headingMeasurements"
-                data-parent="#sidenavMenu"
-              >
-                <nav class="sb-sidenav-menu-nested nav">
-                  <a class="nav-link" href="{% url 'dashboard:measurement:list_measurements' %}"> Measurements </a>
-                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_dns' %}"> DNS </a>
-                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_http' %}"> HTTP </a>
-                  <a class="nav-link" href="{% url 'dashboard:submeasurement:list_tcp' %}"> TCP </a>
-                </nav>
-              </div>
-            </li>
-
-            <!-- Control panel -->
+        
+        </br>
+        <div class="sb-sidenav-menu-heading">Settings</div>
+        <!-- Control panel -->
             <li id="headingControlPanel" class="nav-item w-100">
               <a
                 class="nav-link collapsed"
