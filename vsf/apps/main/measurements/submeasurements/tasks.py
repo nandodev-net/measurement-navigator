@@ -7,9 +7,10 @@ from django.core.cache import cache
 from celery import shared_task
 
 # Local imports
-from .utils         import count_flags_sql, hard_flag
-from vsf.utils      import ProcessState, VSFTask
-from .FlagsUtils    import *
+from .utils              import count_flags_sql, hard_flag
+from vsf.utils           import ProcessState, VSFTask
+from .FlagsUtils         import *
+from apps.configs.models import Config
 
 class SUBMEASUREMENTS_TASKS:
     COUNT_FLAGS = 'count_flags'
@@ -44,8 +45,13 @@ def hard_flag_task():
 
     cache.set(name, ProcessState.RUNNING)
 
+    # parse config
+    config = Config.objects.all().first()
+    timedelta = config.hardflag_timewindow if config else timedelta(days=1)
+    minimum_measurements = config.hardflag_minmeasurements if config else 3
+
     try:
-        result['result'] = hard_flag()
+        result['result'] = hard_flag(timedelta, minimum_measurements)
     except Exception as e:
         result['error'] = str(e)
 
