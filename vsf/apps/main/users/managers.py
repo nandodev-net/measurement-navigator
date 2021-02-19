@@ -29,6 +29,7 @@ class CustomUserManager(BaseUserManager):
         extra_fields.setdefault('is_admin', True)
         extra_fields.setdefault('is_analist', True)
         extra_fields.setdefault('is_editor', True)
+        extra_fields.setdefault('is_guest', True)
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
@@ -37,6 +38,8 @@ class CustomUserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_analist=True.'))
         if extra_fields.get('is_editor') is not True:
             raise ValueError(_('Superuser must have is_editor=True.'))
+        if extra_fields.get('is_guest') is not True:
+            raise ValueError(_('Superuser must have is_guest=True.'))
         if extra_fields.get('is_admin') is not True:
             raise ValueError(_('Superuser must have is_admin=True.'))
         if extra_fields.get('is_staff') is not True:
