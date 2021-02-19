@@ -7,8 +7,8 @@
 
 {% endblock custom_stylesheet %}
 
-{% block tab_title %} VSF - Users {% endblock tab_title %}
-{% block title %} Users {% endblock title %}
+{% block tab_title %} VSF - Cases {% endblock tab_title %}
+{% block title %} Cases {% endblock title %}
 {% block sub_title %} List and filter all the currently available users {% endblock sub_title %}
 
 {% block route %}
@@ -17,7 +17,7 @@
   <a href="{% url home %}">Home</a>
 </li>
 <li class="breadcrumb-item">
-  <a href="{% url 'dashboard:users:users_list' %}">Users List</a>
+  <a href="{% url 'dashboard:event_cases:list_cases' %}">Cases List</a>
 </li>
 
 {% endblock route %}
