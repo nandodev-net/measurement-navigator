@@ -18,6 +18,12 @@ urlpatterns = [
     ),   
 
     path(
+        'create/',
+        views.UserCreateModalView.as_view(),
+        name="users_register"
+    ),  
+
+    path(
         '<int:pk>',
         views.UserUpdateView.as_view(),
         name="user_edit"
