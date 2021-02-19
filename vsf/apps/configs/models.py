@@ -3,15 +3,14 @@ from django.core.exceptions import ValidationError
 
 class Config(models.Model):
 
-    hardflag_timewindow = models.IntegerField(
+    hardflag_timewindow = models.FloatField(
         default=1,
-        verbose_name = 'HardFlag Time Window',
+        verbose_name = 'Hard Flag Time Window',
     )
 
     hardflag_minmeasurements = models.IntegerField(
         default=3,
         verbose_name = 'HardFlag Minimum Measurements',
-
     )
 
     def clean(self):
