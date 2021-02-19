@@ -1,89 +1,167 @@
-<!--
-    Main listing of Cases
--->
-
 {% extends 'extends/base.html' %}
 {% load static %}
+{% block custom_stylesheet %}
 
-{% with home='dashboard:home' %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
 
-{% block tab_title %} VSF - Cases {% endblock tab_title %}
 
-{% block title %} Cases {% endblock title %}
+{% endblock custom_stylesheet %}
 
-{% block sub_title %}
-    List of all available Cases
-{% endblock sub_title %}
+{% block tab_title %} VSF - Users {% endblock tab_title %}
+{% block title %} Users {% endblock title %}
+{% block sub_title %} List and filter all the currently available users {% endblock sub_title %}
 
 {% block route %}
-    <li class="breadcrumb-item"><a href="{% url list_fastpath %}">Home</a></li>
-    <li class="breadcrumb-item active">Cases</li>
+
+<li class="breadcrumb-item">
+  <a href="{% url home %}">Home</a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:users:users_list' %}">Users List</a>
+</li>
+
 {% endblock route %}
 
 {% block content %}
+  <form id="urlForm">
+    <nav class="navbar navbar-light bg-light mb-5">
+      <div class="container-fluid">
+        <div class="row">
 
-<div class="card mb-4">
-  <div class="card-header d-flex align-items-center">
-    <h6 class="m-0 font-weight-bold margin-auto mr-auto">All</h6>
+          <div class="col-4">
+            <input
+            id="title"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Title"
+            aria-label="Search title"
+            value="{{ prefill.title }}"
+            name="title"
+            />
+          </div>
 
-    <a href="#" class="btn p-0 mx-0 text-primary" title="Create a new event">
-      Create new Case <i class="fas fa-plus"></i>
-    </a>
-  </div>
-  <div class="card-body">
-    <div class="table-responsive">
-      <table
-        class="table table-bordered"
-        id="dataTable"
-        width="100%"
-        cellspacing="0"
-      >
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Category</th>
-            <th>Draft</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tfoot>
-          <tr>
-            <th>Title</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Category</th>
-            <th>Draft</th>
-            <th>Actions</th>
-          </tr>
-        </tfoot>
-        <tbody>
-          {% for case in cases %}
-          <tr>
-            <td>{{case.title}}</td>
-            <td>{{case.start_date}}</td>
-            <td>{{case.end_date}}</td>
-            <td>{{case.category}}</td>
-            <td>
-              {% if case.draft %}
-              <div class="text-success w-100 text-center">
-                <i class="fas fa-check"></i>
+          <div class="col-4">
+            <input
+            id="first_name"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Name"
+            aria-label="Search first name"
+            value="{{ prefill.first_name }}"
+            name="first_name"
+            />
+          </div>
+
+          <div class="col-4">
+            <input
+            id="last_name"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Last Name"
+            aria-label="Search last name"
+            value="{{ prefill.last_name }}"
+            name="last_name"
+            />
+          </div>
+
+          <div class="col-4">
+            <input
+            id="email"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Email"
+            aria-label="Search Email"
+            value="{{ prefill.email }}"
+            name="email"
+            />
+          </div>
+
+          <div class="col-4">
+            <div class="row align-items-center rounded p-2 bg-info ml-1">
+              <div class="col-5 mx-auto">
+                <label class='font-weight-bold text-white' for="asn">
+                  Role
+                </label>
               </div>
-              {% else %}
-              <div class="text-danger w-100 text-center">
-                <i class="fas fa-times"></i>
+              <div class="col-7 mx-auto">
+                <select id="first_name" class="custom-select additional-filter" name="first_name">
+                  <option value="">Any Role</option>
+                  <option >Superuser</option>
+                  <option >Admin</option>
+                  <option >Analist</option>
+                  <option >Editor</option>
+                  
+                </select>
               </div>
-              {% endif %}
-            </td>
-            <td>action ?</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+            </div> 
+          </div>
+          <div class="col-1 my-auto mx-auto">
+            <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
+        </div> 
+      </div>   
+    </nav>
+
+
+    <div class="card rounded p-5" id="users-card">
+      <div class="table-responsive">
+        <table class="table table-striped mt-5 datatable" id="users">
+          <thead>
+            <tr>
+              <th class="text-center" scope="col">Title</th>
+              <th class="text-center" scope="col">Start Date</th>
+              <th class="text-center" scope="col">End Date</th>
+              <th class="text-center" scope="col">Category</th>
+              <th class="text-center" scope="col">Draft</th>
+              <th class="text-center" scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id='users-tbody'>
+
+
+            {% for case_object in object_list %}
+            <tr>
+                <td>
+                    {{ case_object.title }}
+                    </td>
+                <td>
+                    {{ case_object.start_date }}
+                </td>
+                <td>
+                    {{ case_object.end_date }}
+                </td>
+                <td>
+                    {{ case_object.category }}
+                </td>
+                <td>
+                    {% if case_object.draft %}
+                    <div class="text-success w-100 text-center">
+                      <i class="fas fa-check"></i>
+                    </div>
+                    {% else %}
+                    <div class="text-danger w-100 text-center">
+                      <i class="fas fa-times"></i>
+                    </div>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="">
+                        <button type="button" class="btn btn-info">Edit</button>
+                    </a>
+                    <button type="button" class="btn btn-danger">Delete</button>
+                </td>
+                </tr>
+            {% endfor %}
+
+          </tbody>
+          <tfoot>
+          </tfoot>
+        </table>
+      </div>
     </div>
-  </div>
-</div>
+
+  </form>
+
 {% endblock content %}
-{% block custom_scripts %} {% endblock custom_scripts %}
-{% endwith %}
