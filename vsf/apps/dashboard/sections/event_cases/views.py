@@ -11,5 +11,10 @@ from apps.main.cases.models import Case
 from .forms import CaseForm
 
 
+class CasesListView(ListView):
+    template_name = "cases-templates/list-cases.html"
+    queryset = Case.objects.all()
+
+
 
 

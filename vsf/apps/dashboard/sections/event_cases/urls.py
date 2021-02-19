@@ -4,5 +4,9 @@ from . import views
 app_name = 'event_cases'
 
 urlpatterns = [
-
+    path(
+        '',
+        views.CasesListView.as_view(),
+        name="list_cases"
+    ),  
 ]
