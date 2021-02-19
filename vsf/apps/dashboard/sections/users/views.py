@@ -120,7 +120,7 @@ class UserUpdateView(VSFLoginRequiredMixin, UpdateView):
     form_class = CustomUserForm
     model = CustomUser 
     queryset = CustomUser.objects.all()
-    template_name = "registration/user-edit.html"
+    template_name = "registration/user-edit-form.html"
     success_url = "/dashboard/users/"
 
     def get_context_data(self, **kwargs):
@@ -193,3 +193,76 @@ class UserUpdateView(VSFLoginRequiredMixin, UpdateView):
                 form=form
             )
         )
+
+
+class UserCreateModalView(VSFLoginRequiredMixin, CreateView):
+    model = CustomUser
+    queryset = CustomUser.objects.all()
+    form_class = CustomUserForm
+    template_name = "registration/create-user-form.html"
+    success_url = "/dashboard/users/"
+
+    def get_random_alphanumeric_string(self, length):
+        letters_and_digits = string.ascii_letters + string.digits
+        result_str = ''.join((random.choice(letters_and_digits) for i in range(length)))
+        return result_str
+
+    def get_context_data(self, **kwargs):
+
+        context = super(UserCreateModalView, self).get_context_data(**kwargs)
+        return context
+
+    def post(self, request, *args, **kwargs):
+
+        self.object = None
+        form = self.get_form()
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+        
+        password = self.get_random_alphanumeric_string(8)
+        self.object = CustomUser(
+            username = form.cleaned_data['username'],
+            first_name = form.cleaned_data['first_name'],
+            last_name = form.cleaned_data['last_name'],
+            email = form.cleaned_data['email'],
+            password = make_password(password),
+            is_active = True,
+            date_joined = datetime.now()
+        )
+
+        if form.cleaned_data['role'] == "2":
+            self.object.is_admin = True
+            self.object.is_staff = True
+
+        elif form.cleaned_data['role'] == "3":
+            self.object.is_analist = True
+            self.object.is_staff = True
+        
+        else:
+            self.object.is_editor = True
+            self.object.is_staff = True
+
+
+        if form.cleaned_data['role'] == "1":
+            self.object.is_admin = True
+            self.object.is_analist = True
+            self.object.is_editor = True
+            self.object.is_staff = True
+            self.object.is_superuser = True
+        
+        self.object.save()
+        return HttpResponseRedirect("/dashboard/users/")
+
+    def form_invalid(self, form):
+        return self.render_to_response(
+            self.get_context_data(
+                form=form,
+            )
+        )
+
+

@@ -142,11 +142,11 @@
                 <td>
                     {{ user_object.is_active }}
                 </td>
+                
                 <td>
-                    <a href="{% url 'dashboard:users:user_edit' user_object.id %}">
-                        <button type="button" class="btn btn-info">Edit</button>
-                    </a>
-                    <button type="button" class="btn btn-danger">Disable</button>
+                    <button type="button" class="bs-modal btn btn-sm btn-info" 
+                    onclick="open_edit_modal('{% url 'dashboard:users:user_edit' user_object.id %}')">Edit</button>
+                    <button type="button" class="btn btn-sm btn-danger">Disable</button>
                 </td>
                 </tr>
             {% endfor %}
@@ -159,5 +159,36 @@
     </div>
 
   </form>
+<br>
+  <p style="text-align: right; margin-right: 50px;">
+    <button type="button" class="bs-modal btn  btn-info" 
+    onclick="open_register_modal('{% url 'dashboard:users:users_register' %}')">Create User</button>
+    </p>  
+
+    <div class="modal fade" id='edit_user' role="dialog"></div>
+
+    <div class="modal fade" id='register_user' role="dialog"></div>
+    
+    
+    {% block extrajs %}
+    <script type="text/javascript">
+        var $ = jQuery.noConflict()
+        function open_register_modal(url){
+            $('#register_user').load(url, function(){
+                $(this).modal('show');
+    
+            });
+        }
+
+        function open_edit_modal(url){
+            $('#edit_user').load(url, function(){
+                $(this).modal('show');
+    
+            });
+        }
+    
+    </script>
+    
+    {% endblock extrajs %}
 
 {% endblock content %}
