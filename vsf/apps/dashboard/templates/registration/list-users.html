@@ -140,7 +140,13 @@
                     {{ user_object.role }}
                 </td>
                 <td>
-                    {{ user_object.is_active }}
+                    
+                    {% if user_object.is_active %}
+                        <i class="far fa-check-circle text-success" title="User is Active"></i>
+                    {% else %}
+                        <i class="far fa-check-circle text-default" title="User is Inactive"></i>
+                    {% endif %}
+
                 </td>
                 
                 <td>

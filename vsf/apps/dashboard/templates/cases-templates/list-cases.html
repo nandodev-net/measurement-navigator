@@ -138,19 +138,19 @@
                 <td>
                     {% if case_object.draft %}
                     <div class="text-success w-100 text-center">
-                      <i class="fas fa-check"></i>
+                        <i class="far fa-check-circle text-success" title="User is Active"></i>
                     </div>
                     {% else %}
                     <div class="text-danger w-100 text-center">
-                      <i class="fas fa-times"></i>
+                        <i class="far fa-check-circle text-default" title="User is Inactive"></i>
                     </div>
                     {% endif %}
                 </td>
                 <td>
                     <a href="">
-                        <button type="button" class="btn btn-info">Edit</button>
+                        <button type="button" class="btn-sm btn-info">Edit</button>
                     </a>
-                    <button type="button" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn-sm btn-danger">Delete</button>
                 </td>
                 </tr>
             {% endfor %}
