@@ -156,7 +156,26 @@
 
                     <button type="button" class="bs-modal btn btn-sm btn-info" 
                     onclick="open_edit_modal('{% url 'dashboard:users:user_edit' user_object.id %}')">Edit</button>
-                    <button type="button" class="btn btn-sm btn-danger">Disable</button>
+
+                   {% if user_object.id != user.id %}
+
+                        {% if user_object.is_active %}
+                            <a href="{% url 'dashboard:users:user_activation' user_object.id  %}">
+                                <button type="button" class="btn btn-sm btn-danger deactivate-user">Deactivate</button>
+                            </a>
+                        {% else %}
+                        <a href="{% url 'dashboard:users:user_activation' user_object.id  %}">
+                            <button type="button" class="btn btn-sm btn-primary deactivate-user">Activate</button>
+                        </a>
+                        {% endif %}
+
+                    {% else %}
+                    <button type="button" class="btn btn-sm btn-secondary deactivate-user" disabled>Deactivate</button>
+                    {% endif %}
+                        
+                    <!-- <button type="button" class="btn btn-sm btn-danger deactivate-user" id="{{user_object.id}}">Disable</button>-->
+
+
                 </td>
                 </tr>
             {% endfor %}
@@ -184,6 +203,7 @@
 
     {% block extrajs %}
     <script type="text/javascript">
+        
         var $ = jQuery.noConflict()
     
         function open_register_modal(url){
@@ -207,6 +227,8 @@
     
             });
         }
+
+
     
     </script>
     
