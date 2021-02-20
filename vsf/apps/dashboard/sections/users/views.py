@@ -270,11 +270,25 @@ class UserCreateModalView(VSFLoginRequiredMixin, CreateView):
 
 
 
-class CustomUserPasswdRevealView(DetailView):
+class CustomUserPasswdRevealView(VSFLoginRequiredMixin, DetailView):
     model = CustomUser
     template_name = "registration/reveal-user-psswd.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         return context
+
+
+
+def CurtomUserActivationView(request, pk):
+    custom_usr = get_object_or_404(CustomUser, id = pk)
+
+    if custom_usr.is_active:
+        custom_usr.is_active = False
+    else:
+        custom_usr.is_active = True
+    
+    custom_usr.save()
+
+    return HttpResponseRedirect("/dashboard/users/")
 

@@ -35,6 +35,10 @@ urlpatterns = [
         name="user_reveal_pass"
     ),   
 
-
+    path(
+        'activation/<int:pk>',
+        views.CurtomUserActivationView,
+        name="user_activation"
+    ),  
 
 ]
