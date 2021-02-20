@@ -1,10 +1,7 @@
 {% extends 'extends/base.html' %}
 {% load static %}
 {% block custom_stylesheet %}
-
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
-
-
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Users {% endblock tab_title %}
@@ -24,90 +21,12 @@
 
 {% block content %}
   <form id="urlForm">
-    <nav class="navbar navbar-light bg-light mb-5">
-      <div class="container-fluid">
-        <div class="row">
-
-          <div class="col-4">
-            <input
-            id="username"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="Username"
-            aria-label="Search username"
-            value="{{ prefill.username }}"
-            name="username"
-            />
-          </div>
-
-          <div class="col-4">
-            <input
-            id="first_name"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="Name"
-            aria-label="Search first name"
-            value="{{ prefill.first_name }}"
-            name="first_name"
-            />
-          </div>
-
-          <div class="col-4">
-            <input
-            id="last_name"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="Last Name"
-            aria-label="Search last name"
-            value="{{ prefill.last_name }}"
-            name="last_name"
-            />
-          </div>
-
-          <div class="col-4">
-            <input
-            id="email"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="Email"
-            aria-label="Search Email"
-            value="{{ prefill.email }}"
-            name="email"
-            />
-          </div>
-
-          <div class="col-4">
-            <div class="row align-items-center rounded p-2 bg-info ml-1">
-              <div class="col-5 mx-auto">
-                <label class='font-weight-bold text-white' for="asn">
-                  Role
-                </label>
-              </div>
-              <div class="col-7 mx-auto">
-                <select id="first_name" class="custom-select additional-filter" name="first_name">
-                  <option value="">Any Role</option>
-                  <option >Superuser</option>
-                  <option >Admin</option>
-                  <option >Analist</option>
-                  <option >Editor</option>
-                  
-                </select>
-              </div>
-            </div> 
-          </div>
-          <div class="col-1 my-auto mx-auto">
-            <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
-              <i class="fa fa-search"></i>
-            </button>
-          </div>
-        </div> 
-      </div>   
-    </nav>
 
 
-    <div class="card rounded p-5" id="users-card">
-      <div class="table-responsive">
-        <table class="table table-striped mt-5 datatable" id="users">
+
+    <div class="card rounded p-3 mt-4">
+
+        <table class="table table-striped mt-5" id="users-table">
           <thead>
             <tr>
               <th class="text-center" scope="col">Username</th>
@@ -119,9 +38,8 @@
               <th class="text-center" scope="col">Actions</th>
             </tr>
           </thead>
-          <tbody id='users-tbody'>
 
-
+          <tbody>
             {% for user_object in object_list %}
             <tr>
                 <td>
@@ -181,13 +99,10 @@
             {% endfor %}
 
           </tbody>
-          <tfoot>
-          </tfoot>
         </table>
       </div>
-    </div>
-
   </form>
+
 <br>
   <p style="text-align: right; margin-right: 50px;">
     <button type="button" class="bs-modal btn  btn-info" 
@@ -202,8 +117,11 @@
 
 
     {% block extrajs %}
+    <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+
     <script type="text/javascript">
-        
+        $('#users-table').DataTable();
+
         var $ = jQuery.noConflict()
     
         function open_register_modal(url){
@@ -233,7 +151,4 @@
     </script>
     
     {% endblock extrajs %}
-
-
-
 {% endblock content %}
