@@ -1,0 +1,88 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block custom_stylesheet %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+
+
+{% endblock custom_stylesheet %}
+
+{% block tab_title %} VSF - Cases {% endblock tab_title %}
+{% block title %} Create Case {% endblock title %}
+{% block sub_title %} Create a new case {% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+    <a href="{% url home %}">Home</a>
+  </li>
+  <li class="breadcrumb-item">
+    <a href="{% url 'dashboard:event_cases:create_case' %}">Create Case</a>
+  </li>
+
+{% endblock route %}
+
+{% block content %}
+        <form method="post">
+            {% csrf_token %}
+                
+            <br />
+            <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Title</label>
+                    {% render_field form.title class="form-control" %}
+                  </div>
+                </div>
+
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="bmd-label-floating">Case Type</label>
+                        {% render_field form.case_type class="form-control" %}
+                      </div>
+                    </div>
+                  </div>
+
+                <br />
+                <div class="row">
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label class="bmd-label-floating">Start Date</label>
+                    {% render_field form.start_date class="form-control" %}
+                  </div>
+                </div>
+              <br />
+            
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="bmd-label-floating">End Date</label>
+                  {% render_field form.end_date class="form-control" %}
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label class="bmd-label-floating">Category</label>
+                  {% render_field form.category class="form-control" %}
+                </div>
+              </div>
+
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                      <label class="bmd-label-floating">Description</label>
+                      {% render_field form.description class="form-control" %}
+                    </div>
+                  </div>
+                </div>                
+
+
+            <button type="submit" class="btn btn-info " style="float: right;">Create</button>
+            <div class="clearfix"></div>
+          </form>
+
+
+{% endblock content %}
