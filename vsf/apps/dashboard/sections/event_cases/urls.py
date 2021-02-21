@@ -9,4 +9,16 @@ urlpatterns = [
         views.CasesListView.as_view(),
         name="list_cases"
     ),  
+
+    path(
+        'create/',
+        views.CaseCreateView.as_view(),
+        name="create_case"
+    ),  
+
+    path(
+        'add/',
+        views.CaseCreateModalView.as_view(),
+        name="add_case"
+    ),  
 ]

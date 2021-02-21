@@ -12,6 +12,20 @@ class CaseForm(forms.ModelForm):
         model = Case
         fields = '__all__'
 
+class CaseCreateForm(forms.ModelForm):
+    class Meta:
+        model = Case
+        fields = [
+            'title',
+            'case_type',
+            'start_date',
+            'end_date',
+            'category',
+            'description',
+        ]
+
+
+
 
 
 

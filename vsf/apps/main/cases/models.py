@@ -42,22 +42,53 @@ class Case(models.Model):
         ('dos', 'DoS')
     )
 
-    title = models.CharField(max_length=100)
-    description = models.TextField()
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
-    category = models.ForeignKey(   to=Category, 
-                                    on_delete=models.CASCADE, #FOR DEBUG ONLY @TODO
-                                    related_name="cases")
-    draft = models.BooleanField(default=True)
-    events = models.ManyToManyField(Event, related_name="cases")
-    twitter_search = models.CharField(max_length=400, null=True, blank=True)
+    title = models.CharField(
+        max_length=100
+        )
 
-    domain  = models.ForeignKey(
-                            to=Domain,
-                            null=True,
-                            on_delete=SET_NULL
-                            ) 
+    description = models.TextField(
+        null=True, 
+        blank=True,
+    )
+
+    case_type = models.CharField(
+        choices=TYPE_CATEGORIES, 
+        max_length=50,
+        default = 'bloqueo',
+        )
+
+    start_date = models.DateField(
+        null=True, 
+        blank=True,
+    )
+
+    end_date = models.DateField(
+        null=True, 
+        blank=True,
+        )
+
+    category = models.ForeignKey(   
+        to=Category,                          
+        related_name="cases",
+        on_delete=models.DO_NOTHING,
+        )
+
+    draft = models.BooleanField(
+        default=True,
+        )
+
+    events = models.ManyToManyField(
+        Event,
+        blank=True,
+        related_name="cases",
+        )
+
+    twitter_search = models.CharField(
+        max_length=400, 
+        null=True, 
+        blank=True,
+        )
+
                             
     def __str__(self):
         return self.title
