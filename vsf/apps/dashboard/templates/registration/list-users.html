@@ -21,7 +21,12 @@
 
 {% block content %}
   <form id="urlForm">
-
+    <form id="sitesForm">    
+        <button type="button" class="bs-modal btn  btn-info" 
+            onclick="open_register_modal('{% url 'dashboard:users:users_register' %}')">
+          <i class="fa fa-user-plus"></i> Create User
+        </button>
+    </form>
     <div class="card rounded p-3 mt-4">
 
         <table class="table table-striped mt-5" id="users-table">
@@ -104,7 +109,7 @@
 <br>
   <p style="text-align: right; margin-right: 50px;">
     <button type="button" class="bs-modal btn  btn-info" 
-    onclick="open_register_modal('{% url 'dashboard:users:users_register' %}')">Create User</button>
+    onclick="open_register_modal('{% url 'dashboard:users:users_register' %}')"><i class="fa fa-user-plus"></i> Create User</button>
     </p>  
 
 

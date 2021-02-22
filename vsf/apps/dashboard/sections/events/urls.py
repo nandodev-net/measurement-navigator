@@ -7,7 +7,7 @@ app_name = 'events'
 urlpatterns = [
     
     path(
-        'all/',
+        '',
         EventsList.as_view(),
         name="all"
     ),

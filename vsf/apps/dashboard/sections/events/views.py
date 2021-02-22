@@ -1,5 +1,5 @@
 # Django imports
-from django.views.generic           import TemplateView
+from django.views.generic           import TemplateView, ListView
 
 # Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -13,8 +13,8 @@ from apps.main.events.models    import Event
 from apps.main.asns.models      import ASN
 
 
-class EventsList(VSFLoginRequiredMixin, TemplateView):
-
+class EventsList(VSFLoginRequiredMixin, ListView):
+    queryset = Event.objects.all()
     template_name = "events-templates/list-events.html"
 
     def get_context_data(self, **kwargs):
@@ -44,6 +44,7 @@ class EventsList(VSFLoginRequiredMixin, TemplateView):
         context['prefill'] = prefill
         context['issueTypes'] = issueTypes
         context['asns'] = ASN.objects.all()
+
         return context
 
 
