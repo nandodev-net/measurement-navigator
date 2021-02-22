@@ -240,7 +240,7 @@
                     </td>    
                     <td>
                         <button type="button" class="bs-modal btn btn-sm btn-dark" 
-                        onclick="">Expand</button>
+                        onclick="open_edit_modal('{% url 'dashboard:events:event_edit' event.id %}')">Expand</button>
                         {% if event.confirmed %}
                             <a href="">
                                 <button type="button" class="btn btn-sm btn-danger confirm-case">Deny</button>
@@ -257,6 +257,7 @@
         </table>
     </div>
   </form>
+  <div class="modal fade" id='edit_event' role="dialog"></div>
 
   <br>
   <p style="text-align: right; margin-right: 50px;">
@@ -270,6 +271,16 @@
 
     <script type="text/javascript">
         $('#events').DataTable();
+        $('measurements').DataTable();
+        
+        var $ = jQuery.noConflict()
+
+        function open_edit_modal(url){
+            $('#edit_event').load(url, function(){
+                $(this).modal('show');
+    
+            });}
+        
     </script>
   
   {% endblock extrajs %}
