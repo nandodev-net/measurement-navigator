@@ -4,7 +4,6 @@
 
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
 
-
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Events {% endblock tab_title %}
@@ -179,24 +178,82 @@
       {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
     </nav>
 
+    <form id="sitesForm">    
+      <button type="button" class="btn btn-dark rounded mb-4" id="addToSite" data-toggle="modal" data-target="#submitConfirmationModal">
+        <i class="fa fa-folder-plus"></i> Add to Case
+      </button>
+    </form>
+
 
     <div class="card rounded p-5" id="events-card">
       <div class="table-responsive">
         <table class="table table-striped mt-5 datatable" id="events">
           <thead>
             <tr>
-              <th class="text-center" scope="col">Identification</th>
+              <th class="text-center" scope="col">Associate</th>
+              <th class="text-center" scope="col">Event Type</th>
               <th class="text-center" scope="col">Confirmed</th>
               <th class="text-center" scope="col">Start Date</th>
               <th class="text-center" scope="col">End Date</th>
-              <th class="text-center" scope="col">Public Evidence</th>
-              <th class="text-center" scope="col">Private Evidence</th>
-              <th class="text-center" scope="col">Issue Type</th>
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
+              <th class="text-center" scope="col">Actions</th>
             </tr>
           </thead>
-          <tbody id='evenets-tbody'>
+          <tbody>
+            {% for event in object_list %}
+            <tr>
+              <td>
+                  <div class="form-check">
+                      <label class="form-check-label">
+                          <input name="associated-values" type="checkbox" value="checkedValue"
+                              aria-label="Group of associated events" id="{{ event.id }}"
+                              class="associate-events" data-vsf-domain="{{ event.identification }}"
+                          />
+                      </label>
+                  </div>
+              </td>
+              <td>
+                  {{ event.issue_type }}
+              </td>
+              <td>
+                  {% if event.confirmed %}
+                  <div class="text-success w-100 text-center">
+                      <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                  </div>
+                  {% else %}
+                  <div class="text-danger w-100 text-center">
+                      <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                  </div>
+                  {% endif %}
+              </td>
+              <td>
+                  {{ event.start_date }}
+              </td>
+              <td>
+                  {{ event.end_date }}
+              </td>
+              <td>
+                  {{ event.domain }}
+              </td>
+              <td>
+                  {{ event.asn }}
+              </td>    
+              <td>
+                  <button type="button" class="bs-modal btn btn-sm btn-dark" 
+                  onclick="open_edit_modal('{% url 'dashboard:events:event_edit' event.id %}')">Expand</button>
+                  {% if event.confirmed %}
+                      <a href="">
+                          <button type="button" class="btn btn-sm btn-danger confirm-case">Deny</button>
+                      </a>
+                  {% else %}
+                  <a href="">
+                      <button type="button" class="btn btn-sm btn-success confirm-case">Confirm</button>
+                  </a>
+                  {% endif %}
+              </td>
+            </tr>         
+            {% endfor %}
           </tbody>
           <tfoot>
           </tfoot>
@@ -205,113 +262,37 @@
     </div>
 
   </form>
+  <div class="modal fade" id='edit_event' role="dialog"></div>
+
+
+
+
+
+  {% block extrajs %}
+    <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+
+    <script type="text/javascript">
+        $('#events').DataTable();
+
+        $('measurements').DataTable();
+
+        var $ = jQuery.noConflict()
+
+      function open_edit_modal(url){
+        $('#edit_event').load(url, function(){
+            $(this).modal('show');
+
+      });}
+
+    </script>
+
+  {% endblock extrajs %}
 
 {% endblock content %}
 
 {% block custom_scripts %}
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
-<script>
-  'use strict';
 
-  $("#urlForm").on("submit", function (event) {
-    event.preventDefault();
 
-    let data = {
-      identification: $("#identification").val(), 
-      confirmed: $("#confirmed").val() == 'true', start_time: $("#start_time").val(), 
-      end_time: $("#end_time").val(), public_evidence : $("#public_evidence").val(), 
-      private_evidence: $("#private_evidence").val(), asn: $( '#asn' ).val(),
-      issue_type: $("#issue_type").val(), domain: $("#domain").val()
-    };
-    
-    let urlSearch = "{% url 'dashboard:events:all' %}";
-    let url = urlSearch + "?" + $.param(data);
-    window.location.href = url;
-  });
-
-  $(document).ready(function() {
-    
-    /* Creating datatable */
-    var table = $( '#events' ).DataTable({
-      order: [[2, "desc"]],
-      searching: true,
-      processing: true,
-      language: {
-      },
-      serverSide: true,
-      rowId: "id",
-      ajax: {
-        url: '{% url "dashboard:events:data" %}',
-        data: function (data) {
-
-          data.identification = $("#identification").val();
-          data.confirmed = $("#confirmed").val() === 'true';
-          data.start_time = $("#start_time").val();
-          data.end_time = $("#end_time").val();
-          data.public_evidence = $("#public_evidence").val();
-          data.private_evidence = $("#private_evidence").val();
-          data.asn = $("#asn").val();
-          data.issue_type = $("#issue_type").val();
-          data.domain = $("#domain").val();
-          console.log(data);
-        },
-        contentType: "application/json; charset=utf-8",  
-        type: "GET",
-      },
-      columns: [
-        {
-          data: "identification",
-          orderable: true,
-          searchable: true,
-        },
-        {
-          data: "confirmed",
-          orderable: true,
-          searchable: true,
-        },
-        {
-          data: "start_date",
-          orderable: true,
-          searchable: true,
-        },
-        {
-          data: "end_date",
-          orderable: true,
-          searchable: true,
-        },
-        {
-          data: "public_evidence",
-          orderable: true,
-          searchable: true,
-        },
-        {
-          data: "private_evidence",
-          orderable: true,
-          searchable: true,
-        },
-        {
-          data: "issue_type",
-          orderable: true,
-          searchable: true,
-        },
-        {
-          data: "domain",
-          orderable: true,
-          searchable: true,
-        },
-        {
-          data: "asn",
-          orderable: true,
-          searchable: true,
-        },
-      ],
-      initComplete: function () {},
-      buttons: [],
-      select: {
-        style: 'multi'
-      },
-    });
-  })
-</script>
 {% endblock custom_scripts %}
