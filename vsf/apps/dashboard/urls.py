@@ -16,85 +16,114 @@ Including another URLconf
 
 from .                      import views
 from django.contrib         import admin
-from django.conf.urls import include, url
+from django.conf.urls       import include, url
 from django.urls            import include, path, re_path
 from django.contrib.auth    import views            as auth_views
-#Section import
-from apps.dashboard.sections.event_cases                          import views as cases_views
-from apps.dashboard.sections.sites                          import views as sites_views
-from apps.dashboard.sections.measurements                   import views as measurements_views
-from apps.dashboard.sections.measurements.submeasurements   import views as submeasurements_views
-from apps.dashboard.sections.control_panel                  import views as control_panel_views
-from apps.dashboard.sections.events     import views as events_views
+
+# -- Section import
+from .event_cases                   import views as cases_views
+from .sites                         import views as sites_views
+from .measurements                  import views as measurements_views
+from .measurements.submeasurements  import views as submeasurements_views
+from .control_panel                 import views as control_panel_views
+from .events                        import views as events_views
+
+
 
 app_name = 'dashboard'
 urlpatterns = [
 
-    # Accounting pages
-    path('login',                           views.VSFLogin.as_view(),           name='login'),
-    path('',                                include('django.contrib.auth.urls')),
+    # Auth
+    path(
+        'login',
+        views.VSFLogin.as_view(),
+        name='login'
+    ),
+    path(
+        '',
+        include('django.contrib.auth.urls')
+    ),
 
 
 
-    # Site Pages
+    # --------------- Sections --------------- # 
 
-    #   Main dashboard
-    path('',                                views.Dashboard.as_view(),          name="home"),
-    path('get_measurement',                 views.GetMeasurement.as_view(),     name='get_measurement'),
+    # -- Home
+    path(
+        '',
+        views.Dashboard.as_view(),
+        name="home"
+    ),
+    path(
+        'get_measurement',
+        views.GetMeasurement.as_view(),
+        name='get_measurement'
+    ),
 
-    #   Measurements
+    # -- Measurements
     path(
         'measurements/',
         include(
-            'apps.dashboard.sections.measurements.urls',
+            'apps.dashboard.measurements.urls',
             namespace='measurement'
         )
     ),
 
-    #   Submeasurements
+    # -- Submeasurements
     path(
         'submeasurements/',
         include(
-            'apps.dashboard.sections.measurements.submeasurements.urls',
+            'apps.dashboard.measurements.submeasurements.urls',
             namespace='submeasurement'
         )
     ),
 
-    #   Sites
+    # -- Sites
     path(
         'sites/',
         include(
-            'apps.dashboard.sections.sites.urls',
+            'apps.dashboard.sites.urls',
             namespace='site'
         )
     ),
 
-    #   Event cases
+    # -- Event cases
     path(
         'cases/',
         include(
-            'apps.dashboard.sections.event_cases.urls',
+            'apps.dashboard.event_cases.urls',
             namespace='event_case'
         )
     ),
 
-    #   Misc
-    path('probes',                          views.ListProbes.as_view(),         name="list_probes"),
+    # -- Events
+    path(
+        'events/',
+        include('apps.dashboard.events.urls', namespace = 'events')
+    ),
+
+    # -- Control Panel
     path(
         'control_panel/',
         include(
-            'apps.dashboard.sections.control_panel.urls',
+            'apps.dashboard.control_panel.urls',
             namespace='control_panel'
         )
     ),
 
-    path(
-        'events/',
-        include('apps.dashboard.sections.events.urls', namespace = 'events')
-    ),
-
+    # -- Users
     path(
         'users/',
-        include('apps.dashboard.sections.users.urls', namespace = 'users')
-    )
+        include('apps.dashboard.users.urls', namespace = 'users')
+    ),
+
+    # -- Misc
+    path(
+        'probes',
+        views.ListProbes.as_view(),
+        name="list_probes"
+    ),
+
+
+    
 ]
