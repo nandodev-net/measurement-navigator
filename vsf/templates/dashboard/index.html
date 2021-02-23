@@ -262,7 +262,6 @@
 
   let urlSearch;
   let data = {
-    page    : 1,
     since   : "{{ search_params.since }}",
     until   : "{{ search_params.until }}",
     testName: "{{ search_params.testName }}",
@@ -303,7 +302,6 @@
     urlSearch = "{% url home %}";
 
     data = {
-      page    : 1,
       since   : since,
       until   : until,
       testName: testName,
@@ -312,52 +310,6 @@
       anomaly : anomaly,
       data_ready : data_ready
     };
-
-    let url = urlSearch + "?" + $.param(data);
-
-    window.location.href = url;
-  });
-
-  $("#page-one").on("click", function (event) {
-    event.preventDefault();
-
-    urlSearch = "{% url home %}";
-
-    data.page = 1;
-
-    let url = urlSearch + "?" + $.param(data);
-
-    window.location.href = url;
-  });
-  $("#page-previous").on("click", function (event) {
-    event.preventDefault();
-
-    urlSearch = "{% url home %}";
-
-    data.page = "{% if inbox_measurements.has_previous %}{{ inbox_measurements.previous_page_number }}{% else %}1{% endif %}";
-
-    let url = urlSearch + "?" + $.param(data);
-
-    window.location.href = url;
-  });
-  $("#page-next").on("click", function (event) {
-    event.preventDefault();
-
-    urlSearch = "{% url home %}";
-
-    data.page = "{% if inbox_measurements.has_next %}{{ inbox_measurements.next_page_number }}{% else %}{{inbox_measurements.paginator.num_pages }} {% endif %}";
-
-    let url = urlSearch + "?" + $.param(data);
-
-    window.location.href = url;
-  });
-
-  $("#page-last").on("click", function (event) {
-    event.preventDefault();
-
-    urlSearch = "{% url home %}";
-
-    data.page = "{{ inbox_measurements.paginator.num_pages }}";
 
     let url = urlSearch + "?" + $.param(data);
 
