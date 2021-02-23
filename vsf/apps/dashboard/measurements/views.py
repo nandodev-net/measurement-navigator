@@ -227,10 +227,12 @@ class MeasurementDetailView(DetailView):
         flagsTCP = [subm.flag_type for subm in context['measurement'].tcp_list.all()]
 
         context['rawmeasurement'] = context['measurement'].raw_measurement
-        context['rawmeasurement'].test_keys = json.dumps(context['measurement'].raw_measurement.test_keys)
+        context['rawmeasurement'].test_keys = context['measurement'].raw_measurement.test_keys
         context['rawmeasurement'].annotations = json.dumps(context['measurement'].raw_measurement.annotations)
         context['rawmeasurement'].test_helpers = json.dumps(context['measurement'].raw_measurement.test_helpers)
         context['rawmeasurement'].flags = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
+        print(context['rawmeasurement'].test_keys)
+        print('----------------')
         return context
 
 

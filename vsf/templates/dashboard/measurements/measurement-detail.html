@@ -5,6 +5,14 @@
 <link rel=stylesheet
   href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
 />
+<style>
+    .pcoded-main-container {
+        width: auto;
+    }
+    #header {
+        width: 270%;
+    }
+</style>
 {% endblock custom_stylesheet %}
 
 
@@ -15,7 +23,7 @@
 {% block route %}
 
 <li class="breadcrumb-item">
-  <a href="{% url home %}">Home</a>
+    <a href="{% url home %}"><i class="feather icon-home"></i></a>
 </li>
 <li class="breadcrumb-item">
   <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements List</a>
@@ -27,245 +35,56 @@
 {% endblock route %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-12">
-            <div class="card rounded">
-                <div class="card-body p-5">
 
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Input: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.input}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Test name: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.test_name}}</p>
-                        </div>
-                    </div>
+    <div class="card p-5 bg-success" id="header">  
+        <div class="row mb-5">
+            <div class="col-3">
 
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Start Time: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.measurement_start_time}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Probe ASN: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.probe_asn}}</p>
-                        </div>
-                    </div>
+            </div>
+            <div class="col-6">
+                {% if rawmeasurement.test_name == 'web_connectivity' %}
+                    {% if rawmeasurement.test_keys.accessible %}
+                        <strong><h1 class="text-center text-white"> OK </h1></strong>
+                    {% else %}
+                        <strong><h1 class="text-center text-white"> ? Error </h1></strong>
+                    {% endif %}
+                    <h3 class="text-center text-white">{{rawmeasurement.input}}</h3>
+                {% endif %}
+            </div>
+            <div class="col-3">
+                
+            </div>
+        </div>
 
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Test Keys: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <button
-                            class="btn btn-outline-info"
-                            type="button"
-                            data-toggle="collapse"
-                            data-target="#collapseTestKeys"
-                            aria-expanded="false"
-                            aria-controls="collapseTestKeys">
-                            Show Test Keys
-                            </button>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Annotations: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <pre id="annotations-detailed">{{ rawmeasurement.annotations }}</pre>
-                        </div>
-                    </div>
+        <div class="row mt-5">
+            <div class="col-3">
 
-                    <div class="row align-items-center">
-                        <div class="col-12">
-                            <div class="collapse" id="collapseTestKeys">
-                                <div class="card card-body">
-                                  <pre id="test-keys-detailed">{{ rawmeasurement.test_keys }}</pre>
-                                </div>
-                              </div>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Bucket Date: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.bucket_date}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Data Format Version: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.data_format_version}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Options: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.options}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Probe CC: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.probe_cc}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Probe IP: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.probe_ip}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Report Filename: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.report_filename}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Report ID: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.report_id}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Software Name: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.software_name}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Software Version: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.software_version}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Test Runtime: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.test_runtime}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Test Start Time: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.test_start_time}}</p>
-                        </div>
-                        <div class="col-3">
-                            <h5 class="text-dark border border-dark rounded p-3">Test Version: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <p class="">{{rawmeasurement.test_version}}</p>
-                        </div>
-                    </div>
-
-                    <div class="row align-items-center">
-
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Test Helpers: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <pre class="" id="test-helpers-detailed">{{ rawmeasurement.test_helpers }}</pre>
-                        </div>
-
-                        <div class="col-3">
-                            <h5 class="text-info border border-info rounded p-3">Flags: </h5>
-                        </div>
-                        <div class="col-3 mx-auto">
-                            <div class="inline">
-                                <p><strong>DNS:</strong></p>
-                                {% for flagDNS in rawmeasurement.flags.dns %}
-                                    {% if flagDNS == 'ok' %}
-                                        <span class="badge badge-pill badge-success">OK</span>
-                                    {% elif flagDNS == 'soft' %}
-                                        <span class="badge badge-pill badge-warning">SOFT</span>
-                                    {% elif flagDNS == 'hard' %}
-                                        <span class="badge badge-pill badge-danger">HARD</span>
-                                    {% elif flagDNS == 'manual' %}
-                                        <span class="badge badge-pill badge-info">MANUAL</span>
-                                    {% elif flagDNS == 'muted' %}
-                                        <span class="badge badge-pill badge-muted">MUTED</span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                            
-                            <div class="inline">
-                                <p><strong>HTTP:</strong></p>
-                                {% for flagHTTP in rawmeasurement.flags.http %}
-                                    {% if flagHTTP == 'ok' %}
-                                        <span class="badge badge-pill badge-success">OK</span>
-                                    {% elif flagHTTP == 'soft' %}
-                                        <span class="badge badge-pill badge-warning">SOFT</span>
-                                    {% elif flagHTTP == 'hard' %}
-                                        <span class="badge badge-pill badge-danger">HARD</span>
-                                    {% elif flagHTTP == 'manual' %}
-                                        <span class="badge badge-pill badge-info">MANUAL</span>
-                                    {% elif flagHTTP == 'muted' %}
-                                        <span class="badge badge-pill badge-muted">MUTED</span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-
-
-                            <div class="inline">
-                                <p><strong>TCP:</strong></p>
-                                {% for flagTCP in rawmeasurement.flags.tcp %}
-                                    {% if flagTCP == 'ok' %}
-                                        <span class="badge badge-pill badge-success">OK</span>
-                                    {% elif flagTCP == 'soft' %}
-                                        <span class="badge badge-pill badge-warning">SOFT</span>
-                                    {% elif flagTCP == 'hard' %}
-                                        <span class="badge badge-pill badge-danger">HARD</span>
-                                    {% elif flagTCP == 'manual' %}
-                                        <span class="badge badge-pill badge-info">MANUAL</span>
-                                    {% elif flagTCP == 'muted' %}
-                                        <span class="badge badge-pill badge-muted">MUTED</span>
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                </div>
+            </div>
+            <div class="col-6">
+                {% if rawmeasurement.test_name == 'web_connectivity' %}
+                    {% if rawmeasurement.test_keys.accessible %}
+                        <strong><h1 class="text-center text-white"> OK </h1></strong>
+                    {% else %}
+                        <strong><h1 class="text-center text-white"> ? Error </h1></strong>
+                    {% endif %}
+                    <h3 class="text-center text-white">{{rawmeasurement.input}}</h3>
+                {% endif %}
+            </div>
+            <div class="col-3">
+                
             </div>
         </div>
     </div>
+
 
 {% endblock content %}
 
 {% block custom_scripts %}
 
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
 <script>
-
+    console.log("{{rawmeasurement.test_keys}}");
     var test_keys = $('#test-keys-detailed').text();
     $("#test-keys-detailed").jsonViewer(JSON.parse(test_keys), {
         collapsed: true,
