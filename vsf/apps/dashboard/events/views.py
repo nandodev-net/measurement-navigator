@@ -1,5 +1,6 @@
 # Django imports
-from django.views.generic           import TemplateView
+from django.views.generic           import TemplateView, ListView, UpdateView
+from django.shortcuts import get_object_or_404, redirect, render
 
 # Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -11,6 +12,8 @@ from datetime                                   import datetime, timedelta
 # Local imports
 from apps.main.events.models    import Event
 from apps.main.asns.models      import ASN
+
+from .forms                     import EventForm
 
 
 class EventsList(VSFLoginRequiredMixin, TemplateView):
@@ -44,6 +47,7 @@ class EventsList(VSFLoginRequiredMixin, TemplateView):
         context['prefill'] = prefill
         context['issueTypes'] = issueTypes
         context['asns'] = ASN.objects.all()
+
         return context
 
 
@@ -139,3 +143,65 @@ class EventsData(BaseDatatableView):
             })
 
         return response
+
+
+class EventUpdateView(VSFLoginRequiredMixin, UpdateView):
+    form_class = EventForm
+    model = Event 
+    queryset = Event.objects.all()
+    template_name = "events-templates/event-edit-form.html"
+    success_url = "/dashboard/events/"
+
+    def get_context_data(self, **kwargs):
+
+        context = super(EventUpdateView, self).get_context_data(**kwargs)
+        query = get_object_or_404(Event, pk=self.kwargs['pk'])
+
+        context['event_start_date'] = query.start_date
+
+        if query.issue_type == 'dns':
+            submeasurements = query.dns_list.all()
+        elif query.issue_type == 'http':
+            submeasurements = query.http_list.all()
+        else:
+            submeasurements = query.tcp_list.all()
+
+        context['measurements'] = []
+
+        for i in submeasurements:
+            context['measurements'].append(
+                {
+                    'measurement_id':i.measurement.id,
+                    'raw_meas_id':i.measurement.raw_measurement.id,
+                    'raw_start_time':i.measurement.raw_measurement.measurement_start_time,
+                })
+
+        return context  
+
+
+    def post(self, request, *args, **kwargs):
+
+        self.object = self.get_object()
+        form = self.get_form()
+
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def form_valid(self, form):
+
+        self.object.confirmed = form.cleaned_data['confirmed']
+        self.object.public_evidence = form.cleaned_data['public_evidence']
+        self.object.private_evidence = form.cleaned_data['private_evidence']        
+        self.object.save()
+
+        return HttpResponseRedirect("/dashboard/events/")
+
+
+    def form_invalid(self, form):
+        return self.render_to_response(
+            self.get_context_data(
+                form=form
+            )
+        )

@@ -15,6 +15,11 @@ urlpatterns = [
         'data/',
         EventsData.as_view(),
         name="data"
-    )    
+    ),
+    path(
+        '<int:pk>',
+        views.EventUpdateView.as_view(),
+        name="event_edit"
+    )       
 
 ]
