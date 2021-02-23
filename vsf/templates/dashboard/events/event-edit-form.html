@@ -1,0 +1,127 @@
+
+{% load widget_tweaks %}
+
+
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Event Details</h2>
+            <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <form method="post" action="{% url 'dashboard:events:event_edit' object.id %}">
+            {% csrf_token %}
+          
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="bmd-label-floating">Identification</label>
+                        {% render_field form.identification class="form-control" %}
+                      </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                          <label class="bmd-label-floating">Event Type</label>
+                          {% render_field form.issue_type class="form-control" %}
+                        </div>
+                      </div>   
+                        <div class="col-md-2">
+                          <div class="form-group">
+                            <label class="bmd-label-floating">Confirmed</label>
+                            {% render_field form.confirmed class="form-control" %}
+                          </div>
+                        </div>
+                      </div>
+    
+                    <br />
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                              <label class="bmd-label-floating">Domain</label>
+                              {% render_field form.domain class="form-control" %}
+                            </div>
+                          </div>
+                          <div class="col-md-3">
+                            <div class="form-group">
+                              <label class="bmd-label-floating">ASN</label>
+                              {% render_field form.asn class="form-control" %}
+                            </div>
+                          </div>
+                    <div class="col-md-3">
+                      <div class="form-group">
+                        <label class="bmd-label-floating">Start Date</label>
+                        <input type="text" value="{{event_start_date}}" disabled>
+                        
+                      </div>
+                    </div>
+                  <br />
+                
+                  <div class="col-md-3">
+                    <div class="form-group">
+                      <label class="bmd-label-floating">End Date</label>
+                      <input type="text" value="{{form.end_date.initial}}" disabled>
+                    </div>
+                  </div>
+                </div>
+    
+                <br />
+                <div class="row">
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <label class="bmd-label-floating">Public Evidence</label>
+                        {% render_field form.public_evidence class="form-control" %}
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                          <label class="bmd-label-floating">Private Evidence</label>
+                          {% render_field form.public_evidence class="form-control" %}
+                        </div>
+                      </div>
+                  </div>
+
+
+                  <h5>Event Measurements</h5>
+
+                    <div class="card rounded p-3 mt-4">
+                        <table class="table table-striped mt-5 datatable" id="measurements">
+                          <thead>
+                                <tr>
+                                    <th class="text-center" scope="col">Measurement id</th>
+                                    <th class="text-center" scope="col">Raw measurement id</th>
+                                    <th class="text-center" scope="col">Start Date</th>
+                                </tr>
+                          </thead>
+                          <tbody>
+                              {% for event in object_list %}
+                              <tr>
+                                    <td>
+                                        {{ measurements.measurement_id }}
+                                    </td>
+                                    <td>
+                                        {{ measurements.raw_meas_id }}
+                                    </td>
+                                    <td>
+                                        {{ measurements.raw_start_time }}
+                                    </td>
+                                </tr>         
+                                {% endfor %}
+                          </tbody>
+                        </table>
+                    </div>
+
+              
+    
+            </div>
+          
+            <div class="modal-footer">
+                <button class="btn btn-default pull-left" type="button" data-dismiss="modal">Cancel</button>
+              <button class="submit-btn btn btn-primary" type="submit">Save</button>
+            </div>
+          
+          </form>
+    </div>
+
+</div>

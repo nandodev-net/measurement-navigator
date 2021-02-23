@@ -14,7 +14,7 @@ from .forms import CaseForm, CaseCreateForm
 
 
 class CasesListView(VSFLoginRequiredMixin, ListView):
-    template_name = "cases-templates/list-cases.html"
+    template_name = "cases/list-cases.html"
     queryset = Case.objects.all()
 
 
@@ -23,7 +23,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
     model = Case
     queryset = Case.objects.all()
     form_class = CaseCreateForm
-    template_name = "cases-templates/create-case.html"
+    template_name = "cases/create-case.html"
     success_url = "/dashboard/cases/"
 
     def get_context_data(self, **kwargs):
@@ -68,7 +68,7 @@ class CaseCreateModalView(VSFLoginRequiredMixin, CreateView):
     model = Case
     queryset = Case.objects.all()
     form_class = CaseCreateForm
-    template_name = "cases-templates/create-case-form.html"
+    template_name = "cases/create-case-form.html"
     success_url = "/dashboard/cases/"
 
     def get_context_data(self, **kwargs):
