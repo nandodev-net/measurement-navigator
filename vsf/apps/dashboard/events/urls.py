@@ -8,13 +8,13 @@ urlpatterns = [
     
     path(
         '',
-        views.EventsList.as_view(),
+        EventsList.as_view(),
         name="all"
     ),
 
     path(
         'data/',
-        views.EventsData.as_view(),
+        EventsData.as_view(),
         name="data"
     ),
     path(
