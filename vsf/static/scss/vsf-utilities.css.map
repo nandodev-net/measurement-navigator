@@ -1,9 +1,0 @@
-{
-    "version": 3,
-    "mappings": "AAAA,AAAA,gBAAgB,CAAC;EAChB,SAAS,EAAE,CAAC;CACZ;;AAED,AAAA,QAAQ,AAAA,iBAAiB,CAAC;EACtB,MAAM,EAAE,KAAK;EACb,UAAU,EAAE,KAAK;CACpB;;AAED,AAAA,kBAAkB,CAAC;EACf,KAAK,EAAE,YAAY;CACtB;;AAED,AAAA,eAAe,CAAC;EACZ,OAAO,EAAE,MAAM;CAClB",
-    "sources": [
-        "vsf-utilities.scss"
-    ],
-    "names": [],
-    "file": "vsf-utilities.css"
-}
