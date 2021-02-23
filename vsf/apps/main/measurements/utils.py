@@ -62,7 +62,7 @@ def search_measurement_by_queryset(
         measurements = measurements.filter(raw_measurement__input__contains=input)
     if (anomaly != None and anomaly != ""):
         measurements = measurements.filter(anomaly=anomaly)
-    if (flags != None):
+    if flags:
         measurements = _filter_by_flag_no_ok(measurements, flags)
 
     measurements.site = None
@@ -368,7 +368,6 @@ def _filter_by_flag_no_ok(qs : QuerySet, subm_to_filter : List[str]) -> QuerySet
         return qs.annotate(**{field_name:Subquery(sq[:1].values('flag_type'))}).exclude(**{field_name:None})
 
     lowered_list = [s.lower() for s in subm_to_filter]
-    print(lowered_list)
     if 'dns' in lowered_list:
         qs = filter_aux(SubMeas.DNS, qs)
     
