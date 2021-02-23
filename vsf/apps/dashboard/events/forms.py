@@ -33,3 +33,5 @@ class EventForm(forms.ModelForm):
           'public_evidence': forms.Textarea(attrs={'rows':3}),
           'private_evidence': forms.Textarea(attrs={'rows':3}),
         }
+
+
