@@ -1,0 +1,65 @@
+{% extends 'extends/base_accounting.html' %}
+{% load widget_tweaks %}
+
+{% block tab_title %} VSF - Login {% endblock tab_title %}
+{% block title %} Login {% endblock title %}
+
+{% block body %}
+
+<form method="post" action="{% url 'dashboard:login' %}">
+  {% csrf_token %}
+  <div class="form-group mb-4">
+    <label class="floating-label" for="inputEmailAddress">
+      {{ form.username.label_tag }}
+    </label>
+    {% render_field form.username class="form-control" id="inputEmailAddress"  %}
+  </div>
+
+  <div class="form-group mb-3">
+    <label class="floating-label" for="inputPassword">{{ form.password.label_tag }}</label>
+    {% render_field form.password class="form-control" id="inputPassword" type="password"  %}
+  </div>
+  <div class="form-group">
+    <div class="custom-control custom-checkbox">
+      <input
+        class="custom-control-input"
+        id="rememberPasswordCheck"
+        type="checkbox"
+      />
+      <label class="custom-control-label" for="rememberPasswordCheck"
+        >Remember password
+      </label>
+    </div>
+  </div>
+  <div class="form-group w-100 mt-4 mb-0">
+    <input class="btn btn-primary w-100" type="submit" value="login" />
+    <input type="hidden" name="next" value="{{ next }}" />
+  </div>
+</form>
+
+<p class="mt-2 text-muted">Forgot password? <a href="auth-reset-password.html" class="f-w-400">Reset</a></p>
+
+
+{% if form.errors %}
+<div class="alert alert-danger my-2">
+  <strong>Error:</strong>
+  <p>Unmatching username and password</p>
+</div>
+{% endif %}
+{% endblock body %}
+
+{% block footer %}
+<div class="py-4 bg-light mt-auto">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center justify-content-center">
+      <div>
+        <a class="small" href="{% url 'dashboard:password_reset' %}"
+          >Forgot Password?</a
+        >
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock footer %}
+
+

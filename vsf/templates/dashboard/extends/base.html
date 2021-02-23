@@ -1,0 +1,250 @@
+{% load static %}
+
+{% with home='dashboard:home' logout='dashboard:logout' list_fastpath='dashboard:list_fastpath' %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+    <!-- Favicon icon -->
+    <link rel="icon" href="{% static 'img/vesinfiltro.png' %}" type="image/x-icon">
+
+    <title>{% block tab_title %} VSF {% endblock tab_title %}</title>
+
+    {% block style %}   
+      <link href="{% static 'css/vendor.css' %}" rel="stylesheet" />
+    {% endblock style %}
+
+    {% block custom_stylesheet %}
+    {% endblock custom_stylesheet %}
+  </head>
+
+  <body>
+
+
+    <nav class="pcoded-navbar menu-light ">
+      <div class="navbar-wrapper">
+        <div class="navbar-content scroll-div" >
+
+          <ul class="nav pcoded-inner-navbar pt-4">
+            <li class="nav-item pcoded-menu-caption">
+                <label>Main</label>
+            </li>
+            <li class="nav-item">
+                <a href="{% url home %}" class="nav-link ">
+                    <span class="pcoded-micon">
+                        <i class="feather icon-home"></i>
+                    </span>
+                    <span class="pcoded-mtext">
+                        Home
+                    </span>
+                </a>
+            </li>
+
+
+            <li class="nav-item pcoded-menu-caption">
+                <label>Incidents</label>
+            </li>
+            <li class="nav-item pcoded-hasmenu">
+                <a href="#" class="nav-link ">
+                    <span class="pcoded-micon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </span>
+                    <span class="pcoded-mtext">
+                        Fastpath
+                    </span>
+                </a>
+                <ul class="pcoded-submenu">
+                    <li><a href="{% url home %}">All</a></li>
+                </ul>
+            </li>
+            <li class="nav-item pcoded-hasmenu">
+                <a href="#" class="nav-link ">
+                    <span class="pcoded-micon">
+                        <i class="fas fa-ruler"></i>
+                    </span>
+                    <span class="pcoded-mtext">
+                        Measurements
+                    </span>
+                </a>
+                <ul class="pcoded-submenu">
+                    <li><a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements</a></li>
+                    <li><a href="{% url 'dashboard:submeasurement:list_dns' %}">DNS</a></li>
+                    <li><a href="{% url 'dashboard:submeasurement:list_http' %}">HTTP</a></li>
+                    <li><a href="{% url 'dashboard:submeasurement:list_tcp' %}">TCP</a></li>
+                </ul>
+            </li>
+            <li class="nav-item pcoded-hasmenu">
+                <a href="#" class="nav-link ">
+                    <span class="pcoded-micon">
+                        <i class="far fa-calendar"></i>
+                    </span>
+                    <span class="pcoded-mtext">
+                        Events
+                    </span>
+                </a>
+                <ul class="pcoded-submenu">
+                    <li><a href="{% url 'dashboard:events:all' %}">List Events</a></li>
+                </ul>
+            </li>
+            <li class="nav-item pcoded-hasmenu">
+                <a href="#" class="nav-link ">
+                    <span class="pcoded-micon">
+                        <i class="far fa-folder-open"></i>
+                    </span>
+                    <span class="pcoded-mtext">
+                        Cases
+                    </span>
+                </a>
+                <ul class="pcoded-submenu">
+                    <li><a href="{% url 'dashboard:event_cases:list_cases' %}">List Cases</a></li>
+                    <li><a href="{% url 'dashboard:event_cases:create_case' %}">New Case</a></li>
+                </ul>
+            </li>
+            <li class="nav-item pcoded-hasmenu">
+                <a href="#" class="nav-link ">
+                    <span class="pcoded-micon">
+                        <i class="far fa-file"></i>
+                    </span>
+                    <span class="pcoded-mtext">
+                        Sites
+                    </span>
+                </a>
+                <ul class="pcoded-submenu">
+                    <li><a href="{% url 'dashboard:sites:list_domains' %}">Domains</a></li>
+                    <li><a href="{% url 'dashboard:site:list_sites' %}">Sites</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item pcoded-menu-caption">
+                <label>Settings</label>
+            </li>
+            <li class="nav-item pcoded-hasmenu">
+                <a href="#" class="nav-link ">
+                    <span class="pcoded-micon">
+                        <i class="feather icon-briefcase"></i>
+                    </span>
+                    <span class="pcoded-mtext">
+                        Control Panel
+                    </span>
+                </a>
+                <ul class="pcoded-submenu">
+                    <li><a href="{% url 'dashboard:control_panel:controls' %}">Controls</a></li>
+                </ul>
+            </li>
+
+            <li class="nav-item pcoded-hasmenu">
+                <a href="#" class="nav-link ">
+                    <span class="pcoded-micon">
+                        <i class="feather icon-user"></i>
+                    </span>
+                    <span class="pcoded-mtext">
+                        Users
+                    </span>
+                </a>
+                <ul class="pcoded-submenu">
+                    <li><a href="{% url 'dashboard:users:users_list' %}">List Users</a></li>
+                    <li><a href="{% url 'dashboard:users:users_create' %}">New User</a></li>
+                </ul>
+            </li>
+          </ul>
+          
+        </div>
+      </div>
+    </nav>
+
+    <header class="navbar pcoded-header navbar-expand-lg navbar-light header-blue">	
+      <div class="m-header">
+        <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
+        <a href="#!" class="b-brand">
+        </a>
+        <a href="#!" class="b-brand">
+            <img height="30px" src="{% static 'img/logo.png' %}" alt="" class="logo">
+        </a>
+        <a href="#!" class="mob-toggler">
+          <i class="feather icon-more-vertical"></i>
+        </a>
+      </div>
+      <div class="collapse navbar-collapse">
+        
+        <ul class="navbar-nav ml-auto">
+          <li>
+            <div class="dropdown drp-user">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                <i class="feather icon-user"></i>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right profile-notification">
+                <ul class="pro-body">
+                  <li>
+                    <a href="#" class="dropdown-item">
+                      <i class="feather icon-settings"></i> Settings
+                    </a>
+                  </li>
+                  <li>
+                    <a href="{% url 'admin:index' %}" class="dropdown-item">
+                      <i class="feather icon-clipboard"></i> Admin
+                    </a>
+                  </li>
+                  <li>
+                    <a href="/dashboard/logout/" class="dropdown-item">
+                      <i class="feather icon-log-out"></i> Logout
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </header>
+
+    <div class="pcoded-main-container">
+      <div class="pcoded-content">
+          <div class="page-header">
+              <div class="page-block">
+                  <div class="row align-items-center">
+                      <div class="col-md-12">
+                          <div class="page-header-title">
+                            <h5 class="m-b-10">{% block title %}Title{% endblock title %}</h5>
+                            <small class="text-secondary">
+                                {% block sub_title %}{% endblock sub_title %}
+                            </small>
+                          </div>
+                          {% block site_route %}
+                          <ul class="breadcrumb">
+                            {% block route %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url home %}">
+                                    <i class="feather icon-home"></i>
+                                </a>
+                            </li>
+                            <li class="breadcrumb-item active">Static Navigation</li>
+                            {% endblock route %}
+                          </ul>
+                          {% endblock site_route %}
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="row">
+            {% block content %} {% endblock content %}
+          </div>
+
+      </div>
+  </div>
+
+    {% block scripts %}
+        <script src="{% static 'js/vendor-all.min.js' %}"></script>
+        <script src="{% static 'js/plugins/bootstrap.min.js' %}"></script>
+    {% endblock scripts %}
+    {% block custom_scripts %}
+        
+    {% endblock custom_scripts %}
+  </body>
+</html>
+{% endwith %}

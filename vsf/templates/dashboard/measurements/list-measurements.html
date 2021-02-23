@@ -1,0 +1,521 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+{% block custom_stylesheet %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'css/select2.css' %}" /> 
+
+{% endblock custom_stylesheet %}
+
+{% block tab_title %} VSF - Measurements {% endblock tab_title %}
+{% block title %} Measurements {% endblock title %}
+{% block sub_title %} List and filter all the currently available measurements {% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+  <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements List</a>
+</li>
+
+{% endblock route %}
+
+{% block content %}
+  <form id="urlForm">
+    <nav class="navbar navbar-light bg-light mb-5">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-3">
+            <div class="row align-items-center rounded p-2 bg-dark">
+              <div class="col-3 mx-auto">
+                <label class='font-weight-bold text-white'>
+                  Since
+                </label>
+              </div>
+              <div class="col-9 mx-auto">
+                <input id="since" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
+              </div>
+            </div> 
+          </div>
+
+          <div class="col-3">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+              <div class="col-3 mx-auto">
+                <label class='font-weight-bold text-white'>
+                  Until
+                </label>
+              </div>
+              <div class="col-9 mx-auto">
+                <input id="until" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
+              </div>
+            </div> 
+          </div>
+
+          <div class="col-6">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+              <div class="col-3 mx-auto">
+                <label class='font-weight-bold text-white' for="asn">
+                  ASN
+                </label>
+              </div>
+              <div class="col-9 mx-auto">
+                <select id="asn" class="custom-select additional-filter" name="asn">
+                  <option value="">Any ASN</option>
+                  {% for asn in asns %}
+                    <option 
+                    {% if asn.asn == prefill.asn %} selected {% endif %}
+                    value="{{ asn.asn }}" 
+                    >
+                    {{ asn.asn }} - {{ asn.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div> 
+          </div>
+          
+          <div class="col-3 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark">
+              <div class="col-5 mx-auto">
+                <label class="font-weight-bold text-white" for="test-name">Test Type</label>
+              </div>
+              <div class="col-7 mx-auto">
+                <select id="test-name" class="custom-select additional-filter" name="test_name">
+                  <option selected value="">Choose Test Type</option>
+                  {% for test in test_types %}
+                    <option {% if prefill.test_name == test.value %} selected {% endif %} value="{{ test.value }}">
+                      {{ test.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div> 
+          </div>
+              
+          <div class="col-3 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+              <div class="col-4 mx-auto">
+                <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
+              </div>
+              <div class="col-8 mx-auto">
+                <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
+                  <option selected value="">Any</option>
+                  <option {% if prefill.anomaly == 'false' %} selected {% endif %} value="false">
+                    Anomaly False
+                  </option>
+                  <option {% if prefill.anomaly == 'true' %} selected {% endif %}value="true">
+                    Anomaly True
+                  </option>
+                </select>
+              </div>
+            </div> 
+          </div>
+              
+
+              
+          <div class="col-6 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+              <div class="col-4 mx-auto">
+                <label class="font-weight-bold text-white" for="site">Site</label>
+              </div>
+              <div class="col-8 mx-auto">
+                <select class="custom-select additional-filter" id="site" name="site">
+                  <option selected value="">
+                    Any Site
+                  </option>
+                  {% for site in sites %}
+                    <option value="{{ site.id }}" title="{{ site.description }}" {% if prefill.site == site.id|stringformat:"i" %} selected {% endif %}>
+                      {{ site.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>   
+          </div>
+
+          <div class="col-5 mt-3">
+            <input
+            id="input"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="URL"
+            aria-label="Search URL"
+            value="{{ prefill.input }}"
+            name="input"
+            />
+          </div>
+
+          <div class="col-5 mt-3 ">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+              <div class="col-3 mx-auto">
+                <label class="font-weight-bold text-white" for="flag">Flag Existence</label>
+              </div>
+              <div class="col-9 mx-auto">
+                <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
+                  {% for flag in flags %}
+                    <option {% if flag in prefill.flags %} selected {% endif %} value="{{ flag }}">
+                      {{ flag }}
+                    </option>
+                  {% endfor %}
+
+                </select>
+              </div>
+            </div> 
+          </div>
+
+          <div class="col-2 my-auto mx-auto">
+            <button id="url-form-button" class="btn btn-outline-dark btn-block" type="submit">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
+
+        </div> 
+      </div>   
+    
+      <!-- copy-to-clipboard component for search fields -->
+      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+    </nav>
+
+    <div class="row mb-3">
+      <div class="col-6">
+        <h4><strong>Last Measurement from:</strong> {{last_measurement_date}} </h4>
+      </div>
+      <div class="col-6">
+        <button type="button" class="btn btn-dark rounded" id='info'>
+          <i class="fa fa-info-circle"></i> Details in new tab
+        </button>
+        <button type="button" class="btn btn-dark rounded" id='modal'>
+          <i class="fa fa-info-circle"></i> Detail in modal
+        </button>
+      </div>
+    </div>
+    
+
+    <div class="card rounded p-5" id="domains-list-card">
+      <div class="table-responsive">
+        <table class="table table-striped mt-5 datatable" id="measurements-list">
+          <thead>
+            <tr>
+              <th class="text-center" scope="col">Input</th>
+              <th class="text-center" scope="col">Type</th>
+              <th class="text-center" scope="col">Start Time</th>
+              <th class="text-center" scope="col">ASN</th>
+              <th class="text-center" scope="col">Country</th>
+              <th class="text-center" scope="col">Site</th>
+              <th class="text-center" scope="col">Anomaly</th>
+              <th class="text-center" scope="col">Flags</th>
+              <th class="text-center" scope="col">Selected</th>
+            </tr>
+          </thead>
+          <tbody id='measurements-tbody'>
+
+          </tbody>
+          
+          <tfoot>
+          </tfoot>
+          
+        </table>
+      </div>
+    </div>
+
+  </form>
+
+  {% include "includes/measurements-includes/detailed-info-modal.html" %}
+
+
+{% endblock content %}
+
+{% block custom_scripts %}
+
+
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+{% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
+
+<script>
+  'use strict';
+
+  var table;
+
+  $("#urlForm").on("submit", function (event) {
+    
+    event.preventDefault();
+
+    let data = {
+      since: $("#since").val(), until: $("#until").val(),
+      asn: $("#asn").val(), test_name: $("#test-name").val(), 
+      anomaly : $("#anomaly-state").val(), input: $("#input").val(),
+      site: $("#site").val(), flags: $("#flag").val()
+    };
+
+    let urlSearch = "{% url 'dashboard:measurement:list_measurements' %}";
+    let url = urlSearch + "?" + $.param(data);
+    window.location.href = url;
+
+  });
+
+  $("#info").click(function() { 
+    var result = $("tr:has(:checked)");
+    
+    if (result.length < 1) { 
+      Swal.fire({
+        icon: "warning",
+        title: "You must select at least one row to get the details.",
+        confirmButtonColor: "#ffc107",
+        confirmButtonText: "Continue",
+      });
+    } else {
+      var urls = []
+      for (const val of Object.values(result)) {
+        if (val.id) { 
+          var url = "{% url 'dashboard:measurement:detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', val.id);
+          urls.push(url);
+        }
+      }
+
+      urls.forEach(function(url){
+        window.open(url, '_blank');
+      });
+    }
+  });
+
+  $("#modal").click(function() { 
+    var data = table.rows( { selected: true }).data();
+    if (data.length === 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "There is nothing selected!",
+        confirmButtonColor: "#ffc107",
+        confirmButtonText: "Continue",
+      });
+    } else {
+
+      var id = data[0].id;
+      jQuery.noConflict();
+
+      $.ajax({
+        type: "GET",
+        url: '{% url "measurements:get_measurement" %}',
+        data: { id: id },
+        success: function (measurementData) {
+          $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#bucket-date-detailed").text(measurementData["bucket_date"]);
+          $("#data-format-version-detailed").text(
+            measurementData["data_format_version"]
+          );
+          $("#input-detailed").text(measurementData["input"]);
+          $("#measurement-start-time-detailed").text(
+            measurementData["measurement_start_time"]
+          );
+          $("#options-detailed").text(measurementData["options"]);
+          $("#probe-asn-detailed").text(measurementData["probe_asn"]);
+          $("#probe-cc-detailed").text(measurementData["probe_cc"]);
+          $("#probe-ip-detailed").text(measurementData["probe_ip"]);
+          $("#report-filename-detailed").text(
+            measurementData["report_filename"]
+          );
+          $("#report-id-detailed").text(measurementData["report_id"]);
+          $("#software-name-detailed").text(
+            measurementData["software_name"]
+          );
+          $("#software-version-detailed").text(
+            measurementData["software_version"]
+          );
+          $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#test-name-detailed").text(measurementData["test_name"]);
+          $("#test-runtime-detailed").text(
+            measurementData["test_runtime"]
+          );
+          $("#test-start-time-detailed").text(
+            measurementData["test_start_time"]
+          );
+          $("#test-version-detailed").text(
+            measurementData["test_version"]
+          );
+
+          var line = '<div class="inline"><p><strong>DNS:</strong></p>';
+          for (var dns of measurementData['flags']['dns'] ) {
+            if (dns == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+            else if (dns == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+            else if (dns == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+            else if (dns == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+            else if (dns == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
+          }
+
+          line = line + '</div><div class="inline"><p><strong>HTTP:</strong></p>';
+          for (var http of measurementData['flags']['http'] ) {
+            if (http == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+            else if (http == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+            else if (http == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+            else if (http == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+            else if (http == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
+          }
+          
+          line = line + '</div><div class="inline"><p><strong>TCP:</strong></p>';
+          for (var tcp of measurementData['flags']['tcp'] ) {
+            if (tcp == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+            else if (tcp == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+            else if (tcp == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+            else if (tcp == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+            else if (tcp == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
+          }     
+          line = line + '</div>';
+
+          $("#flags").append(
+            line
+          );
+          
+          line = ""
+          $("#modalMeasurementInfo").modal("show");
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          Swal.fire({
+            icon: "warning",
+            title: "There are an error in the inputs!",
+            confirmButtonColor: "#28a745",
+            confirmButtonText: "Continue",
+          });
+        },
+      });
+    }
+  });
+
+  $(document).ready(function() {
+
+    $('.select2').select2({
+      theme: "flat",
+      allowClear: true,
+      placeholder: "Select flags existence"
+    }).on("select2:unselecting", function(e) {
+          $(this).data('state', 'unselected');
+      }).on("select2:open", function(e) {
+          if ($(this).data('state') === 'unselected') {
+              $(this).removeData('state'); 
+
+              var self = $(this);
+              setTimeout(function() {
+                  self.select2('close');
+              }, 1);
+          }    
+      });
+
+    /* Creating datatable */
+    table = $("#measurements-list").DataTable({
+      order: [[2, "desc"]],
+      searching: true,
+      processing: true,
+      language: {
+      },
+      serverSide: true,
+      rowId: "id",
+      ajax: {
+        url: '{% url "dashboard:measurement:list_measurements_data" %}',
+        data: function (data) {
+
+          data.since = $("#since").val();
+          data.until = $("#until").val();
+          data.asn = $("#asn").val();
+          data.test_name = $("#test-name").val();
+          data.anomaly = $("#anomaly-state").val();
+          data.input = $("#input").val();
+          data.site = $("#site").val();
+          data.flags = $("#flag").val();
+          console.log(data);
+        },
+        contentType: "application/json; charset=utf-8",  
+        type: "GET",
+      },
+      columns: [
+        {
+          data: "raw_measurement__input",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "raw_measurement__test_name",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "raw_measurement__measurement_start_time",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "raw_measurement__probe_asn",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "raw_measurement__probe_cc",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "site_name",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "anomaly",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "flags",
+          orderable: true,
+          searchable: true,
+          render: function (data, type, row, meta) {
+
+            if ( type === "sort" ) {
+              return data['id'];
+            } else {
+              var line = ``;
+
+              if ( data['dns'] ) {
+                line = line + `<span class="badge badge-pill badge-warning">DNS</span>`;
+              }
+              if ( data['http'] ) {
+                line = line + `<span class="badge badge-pill badge-warning">HTTP</span>`;
+              } 
+              if ( data['tcp'] ) {
+                line = line + `<span class="badge badge-pill badge-warning">TCP</span>`;
+              } 
+
+              return line;
+            }
+            
+            
+          },
+        },
+        {
+          data: "selection",
+          orderable: true,
+          searchable: true,
+          render: function (data, type, row, meta) {
+            return `<input class="form-check-input" type="checkbox" value="">`
+          }
+        }
+      ],
+      initComplete: function () {},
+      buttons: [],
+      select: {
+        style: 'single'
+      },
+    });
+
+  })
+</script>
+{% endblock custom_scripts %}
