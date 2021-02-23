@@ -232,9 +232,6 @@
         <button type="button" class="btn btn-dark rounded" id='info'>
           <i class="fa fa-info-circle"></i> Details in new tab 
         </button>
-        <button type="button" class="btn btn-dark rounded" id='modal'>
-          <i class="fa fa-info-circle"></i> Detail in modal
-        </button>
       </div>
     </div>
 
@@ -287,6 +284,115 @@
   'use strict';
   var table;
 
+  $("#detailed-measurement-page").click(function() {
+    var url = $(this).attr('alt');
+    window.open(url, '_blank');
+  });
+  
+  $( '#tcp-list' ).on('dblclick', 'tbody tr', function() {
+    var id = $( this ).attr( 'id' );
+    var urlBlank = "{% url 'dashboard:measurement:detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', id);
+    jQuery.noConflict();
+
+    $.ajax({
+      type: "GET",
+      url: '{% url "measurements:get_measurement" %}',
+      data: { id: id },
+      success: function (measurementData) {
+        
+        $("#flags").empty();
+        $("#detailed-measurement-page").attr("alt", urlBlank);
+        $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
+          collapsed: true,
+          rootCollapsable: false
+        });
+        $("#bucket-date-detailed").text(measurementData["bucket_date"]);
+        $("#data-format-version-detailed").text(
+          measurementData["data_format_version"]
+        );
+        $("#input-detailed").text(measurementData["input"]);
+        $("#measurement-start-time-detailed").text(
+          measurementData["measurement_start_time"]
+        );
+        $("#options-detailed").text(measurementData["options"]);
+        $("#probe-asn-detailed").text(measurementData["probe_asn"]);
+        $("#probe-cc-detailed").text(measurementData["probe_cc"]);
+        $("#probe-ip-detailed").text(measurementData["probe_ip"]);
+        $("#report-filename-detailed").text(
+          measurementData["report_filename"]
+        );
+        $("#report-id-detailed").text(measurementData["report_id"]);
+        $("#software-name-detailed").text(
+          measurementData["software_name"]
+        );
+        $("#software-version-detailed").text(
+          measurementData["software_version"]
+        );
+        $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
+          collapsed: true,
+          rootCollapsable: false
+        });
+        $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
+          collapsed: true,
+          rootCollapsable: false
+        });
+        $("#test-name-detailed").text(measurementData["test_name"]);
+        $("#test-runtime-detailed").text(
+          measurementData["test_runtime"]
+        );
+        $("#test-start-time-detailed").text(
+          measurementData["test_start_time"]
+        );
+        $("#test-version-detailed").text(
+          measurementData["test_version"]
+        );
+
+        var line = '<div class="form-inline mb-1"><p class="mb-0"><strong>DNS:</strong></p>';
+        for (var dns of measurementData['flags']['dns'] ) {
+          if (dns == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+          else if (dns == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+          else if (dns == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+          else if (dns == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+          else if (dns == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
+        }
+
+        line = line + '</div><div class="form-inline mb-1"><p class="mb-0"><strong>HTTP:</strong></p>';
+        for (var http of measurementData['flags']['http'] ) {
+          if (http == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+          else if (http == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+          else if (http == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+          else if (http == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+          else if (http == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
+        }
+        
+        line = line + '</div><div class="form-inline mb-1"><p class="mb-0"><strong>TCP:</strong></p>';
+        for (var tcp of measurementData['flags']['tcp'] ) {
+          if (tcp == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
+          else if (tcp == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
+          else if (tcp == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
+          else if (tcp == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
+          else if (tcp == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
+        }     
+        line = line + '</div>';
+
+        $("#flags").append(
+          line
+        );
+        
+        line = ""
+        $("#modalMeasurementInfo").modal("show");
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        Swal.fire({
+          icon: "warning",
+          title: "There are an error in the inputs!",
+          confirmButtonColor: "#28a745",
+          confirmButtonText: "Continue",
+        });
+      },
+    });
+  });
+
   $("#urlForm").on("submit", function (event) {
     
     event.preventDefault();
@@ -328,117 +434,6 @@
 
       urls.forEach(function(url){
         window.open(url, '_blank');
-      });
-    }
-  });
-
-  $("#modal").click(function() { 
-    var data = table.rows( { selected: true }).data();
-    if (data.length === 0) {
-      Swal.fire({
-        icon: "warning",
-        title: "There is nothing selected!",
-        confirmButtonColor: "#ffc107",
-        confirmButtonText: "Continue",
-      });
-    } else {
-      
-      var id = data[0].measurement__id;
-      jQuery.noConflict();
-
-      $.ajax({
-        type: "GET",
-        url: '{% url "measurements:get_measurement" %}',
-        data: { id: id },
-        success: function (measurementData) {
-          $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
-            collapsed: true,
-            rootCollapsable: false
-          });
-          $("#bucket-date-detailed").text(measurementData["bucket_date"]);
-          $("#data-format-version-detailed").text(
-            measurementData["data_format_version"]
-          );
-          $("#input-detailed").text(measurementData["input"]);
-          $("#measurement-start-time-detailed").text(
-            measurementData["measurement_start_time"]
-          );
-          $("#options-detailed").text(measurementData["options"]);
-          $("#probe-asn-detailed").text(measurementData["probe_asn"]);
-          $("#probe-cc-detailed").text(measurementData["probe_cc"]);
-          $("#probe-ip-detailed").text(measurementData["probe_ip"]);
-          $("#report-filename-detailed").text(
-            measurementData["report_filename"]
-          );
-          $("#report-id-detailed").text(measurementData["report_id"]);
-          $("#software-name-detailed").text(
-            measurementData["software_name"]
-          );
-          $("#software-version-detailed").text(
-            measurementData["software_version"]
-          );
-          $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
-            collapsed: true,
-            rootCollapsable: false
-          });
-          $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
-            collapsed: true,
-            rootCollapsable: false
-          });
-          $("#test-name-detailed").text(measurementData["test_name"]);
-          $("#test-runtime-detailed").text(
-            measurementData["test_runtime"]
-          );
-          $("#test-start-time-detailed").text(
-            measurementData["test_start_time"]
-          );
-          $("#test-version-detailed").text(
-            measurementData["test_version"]
-          );
-          
-          var line = '<div class="inline"><p><strong>DNS:</strong></p>';
-          for (var dns of measurementData['flags']['dns'] ) {
-            if (dns == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
-            else if (dns == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
-            else if (dns == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
-            else if (dns == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
-            else if (dns == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
-          }
-
-          line = line + '</div><div class="inline"><p><strong>HTTP:</strong></p>';
-          for (var http of measurementData['flags']['http'] ) {
-            if (http == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
-            else if (http == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
-            else if (http == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
-            else if (http == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
-            else if (http == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
-          }
-          
-          line = line + '</div><div class="inline"><p><strong>TCP:</strong></p>';
-          for (var tcp of measurementData['flags']['tcp'] ) {
-            if (tcp == 'ok'){ line = line + '<span class="badge badge-pill badge-success">OK</span>' }
-            else if (tcp == 'soft') { line = line + '<span class="badge badge-pill badge-warning">SOFT</span>'}
-            else if (tcp == 'hard') { line = line + '<span class="badge badge-pill badge-danger">HARD</span>'}
-            else if (tcp == 'manual') { line = line + '<span class="badge badge-pill badge-info">MANUAL</span>'}
-            else if (tcp == 'muted') { line = line + '<span class="badge badge-pill badge-muted">MUTED</span>'}
-          }     
-          line = line + '</div>';
-
-          $("#flags").append(
-            line
-          );
-          
-          line = ""
-          $("#modalMeasurementInfo").modal("show");
-        },
-        error: function (jqXHR, textStatus, errorThrown) {
-          Swal.fire({
-            icon: "warning",
-            title: "There are an error in the inputs!",
-            confirmButtonColor: "#28a745",
-            confirmButtonText: "Continue",
-          });
-        },
       });
     }
   });
@@ -576,7 +571,7 @@
             orderable: true,
             searchable: true,
             render: function (data, type, row, meta) {
-              return `<input class="form-check-input" type="checkbox" value="">`
+              return `<input class="form-check-input ml-4" type="checkbox" value="">`
             }
           }
         ],
