@@ -1,0 +1,48 @@
+<!--
+  Provides a copy-to-clipboard text field so we can
+  easily copy an url with some prefilled search. Note that
+  this html code depends on copy-clipboard-search-url-js.html
+  include, it should be included in the same template as this one
+-->
+
+<div class="w-100 gutter-padding mt-3">
+  <div class="row align-items-center rounded p-2">
+    <div class="col-2 mx-auto">
+      <label class="font-weight-bold text-gray">Search Url</label>
+    </div>
+    <div class="col-9 w-100 mx-auto">
+      <input
+        class="border-top-0 border-left-0 border-right-0 bg-transparent w-100"
+        type="text"
+        name="copy-search-url"
+        id="copy-search-url"
+        readonly
+        value="asdadasd"
+      />
+    </div>
+    <div class="col-1 mx-auto">
+      <a id="copy-search-url-btn" href="#" class="btn btn-dark">
+        <i class="fas fa-copy"></i>
+      </a>
+    </div>
+  
+  </div>
+</div>
+
+<div
+  class="w-100 gutter-margin mt-3 rounded alert-success p-2"
+  id="copy-clipboard-success"
+  hidden
+>
+  Succesfully copied to clipboard!
+  <i class="fas fa-check"></i>
+</div>
+
+<div
+  class="w-100 gutter-margin mt-3 rounded alert-danger p-2"
+  id="copy-clipboard-error"
+  hidden
+>
+  Error copying to clipboard!
+  <i class="fas fa-exclamation-triangle"></i>
+</div>
