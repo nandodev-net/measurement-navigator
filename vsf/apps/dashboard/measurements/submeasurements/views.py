@@ -124,7 +124,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_cc',
             'site_name',
             'measurement__anomaly',
-            'flag__flag'
+            'flag_type'
         ]
 
     # Columns to be ordered
@@ -135,7 +135,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
             'measurement__raw_measurement__probe_cc',
             'site_name',
             'measurement__anomaly',
-            'flag__flag'
+            'flag_type'
         ]
     
     # SubMeasurement class to use (class inheriting SubMeasurement)
@@ -143,7 +143,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
 
     def get_initial_queryset(self):
         qs = self.SubMeasurement.objects.all()\
-                .select_related('measurement', 'flag')\
+                .select_related('measurement')\
                 .select_related('measurement__raw_measurement')\
                 .select_related('measurement__domain')\
                 .select_related('measurement__domain__site')
@@ -239,7 +239,6 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         """
         get = self.request.GET or {}
         qs = super().filter_queryset(qs)
-        print(c.yellow(str(qs)))
         consistency = get.get('dns_consistency')
         
         if consistency:
@@ -250,6 +249,22 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
     def prepare_results(self, qs):
         # prepare list with output column data
         # queryset is already paginated here
+
+        qs = qs.only(
+            "measurement__raw_measurement__measurement_start_time",
+            "measurement__raw_measurement__probe_cc",
+            "measurement__raw_measurement__probe_asn",
+            "measurement__raw_measurement__input",
+            "measurement__id",
+            "measurement__domain__site__name",
+            "measurement__anomaly",
+            "jsons__answers",
+            "jsons__control_resolver_answers",
+            "client_resolver",
+            "dns_consistency",
+
+
+        )
         json_data = []
         for item in qs:
             json_data.append({
@@ -265,7 +280,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag__flag'      : item.flag_type
+                'flag_type'      : item.flag_type
             })
         return json_data
 
@@ -396,7 +411,7 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag_type,
+                'flag_type'           : item.flag_type,
                 'status_code_match' : item.status_code_match,
                 'headers_match' : item.headers_match,
                 'body_length_match' : item.body_length_match,
@@ -497,7 +512,7 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'flag__flag'           : item.flag_type,
+                'flag_type'           : item.flag_type,
                 'status_blocked' : item.status_blocked,
                 'status_failure' : item.status_failure or "N/A",
                 'status_success' : item.status_success,
