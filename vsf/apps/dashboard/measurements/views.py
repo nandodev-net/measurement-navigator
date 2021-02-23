@@ -287,6 +287,8 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         site        = get.get('site')
         flags        = get.getlist('flags[]') if get != {} else []
 
+        
+
         # Get desired measurements
         measurements = search_measurement_by_queryset(
             qs,
@@ -297,7 +299,7 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             country=country,
             until=until,
             site=site,
-            anomaly= anomaly.lower() == "true" if anomaly != None else None,
+            anomaly= anomaly.lower() == "true" if anomaly else None,
             flags=flags
         )
 
@@ -308,7 +310,18 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         # queryset is already paginated here
         json_data = []
         ok_flag = SubMModels.SubMeasurement.FlagType.OK
-        
+
+        qs = qs.only(
+                'raw_measurement__measurement_start_time',
+                "raw_measurement__probe_cc",
+                "raw_measurement__probe_asn",
+                "raw_measurement__input",
+                "raw_measurement__test_name",
+                "id",
+                "domain",
+                "domain__site__name"
+            )
+
         for item in qs:
             flagsDNS  = any(subm.flag_type != ok_flag for subm in item.dns_list.all())
             flagsHTTP = any(subm.flag_type != ok_flag for subm in item.http_list.all())
@@ -327,6 +340,4 @@ class ListMeasurementsBackEnd(BaseDatatableView):
                 'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
             })
 
-        print(json_data)
-        print('---------------')
         return json_data
