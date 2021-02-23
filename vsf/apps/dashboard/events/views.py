@@ -16,8 +16,6 @@ from apps.main.asns.models      import ASN
 from .forms                     import EventForm
 
 
-class EventsList(VSFLoginRequiredMixin, TemplateView):
-
     template_name = "events/list-events.html"
 
     def get_context_data(self, **kwargs):

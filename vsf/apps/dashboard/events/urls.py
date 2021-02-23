@@ -7,13 +7,14 @@ app_name = 'events'
 urlpatterns = [
     
     path(
-        'all/',
-        EventsList.as_view(),
+        '',
+        views.EventsList.as_view(),
         name="all"
     ),
+
     path(
         'data/',
-        EventsData.as_view(),
+        views.EventsData.as_view(),
         name="data"
     ),
     path(

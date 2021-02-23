@@ -1,9 +1,7 @@
 {% extends 'extends/base.html' %}
 {% load static %}
 {% block custom_stylesheet %}
-
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
-
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Events {% endblock tab_title %}
@@ -22,6 +20,9 @@
 {% endblock route %}
 
 {% block content %}
+
+
+
   <form id="urlForm">
     <nav class="navbar navbar-light bg-light mb-5">
       <div class="container-fluid">
@@ -185,8 +186,7 @@
     </form>
 
 
-    <div class="card rounded p-5" id="events-card">
-      <div class="table-responsive">
+    <div class="card rounded p-3 mt-4">
         <table class="table table-striped mt-5 datatable" id="events">
           <thead>
             <tr>
@@ -255,12 +255,8 @@
             </tr>         
             {% endfor %}
           </tbody>
-          <tfoot>
-          </tfoot>
         </table>
-      </div>
     </div>
-
   </form>
   <div class="modal fade" id='edit_event' role="dialog"></div>
 
