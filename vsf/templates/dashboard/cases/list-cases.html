@@ -101,9 +101,14 @@
       </div>   
     </nav>
 
+    <form id="sitesForm">    
+        <button type="button" class="bs-modal btn  btn-info" 
+        onclick="open_create_modal('{% url 'dashboard:event_cases:add_case' %}')">Create Case</button>
+      </form>
 
-    <div class="card rounded p-3 mt-4" >
-        <table class="table table-striped mt-5 datatable" id="cases-table">
+  
+    <div class="card rounded p-3 mt-4" style="width: 100%;">
+        <table class="table table-striped mt-5 datatable"  id="cases-table">
           <thead>
             <tr>
               <th class="text-center" scope="col">Title</th>
@@ -155,10 +160,7 @@
   </form>
 
   <br>
-  <p style="text-align: right; margin-right: 50px;">
-    <button type="button" class="bs-modal btn  btn-info" 
-    onclick="open_create_modal('{% url 'dashboard:event_cases:add_case' %}')">Create Case</button>
-    </p>  
+
 
 
     <div class="modal fade" id='create_case' role="dialog"></div>
