@@ -235,7 +235,7 @@ class MeasurementDetailView(DetailView):
         if context['measurement'].raw_measurement.test_name == 'web_connectivity':
             context['rawmeasurement'].hasTcpConnections = len(context['measurement'].raw_measurement.test_keys['tcp_connect']) > 0
             context['rawmeasurement'].platform = context['measurement'].raw_measurement.annotations['platform']
-            context['rawmeasurement'].engine = context['measurement'].raw_measurement.annotations['engine_name'] + '(' + context['measurement'].raw_measurement.annotations['engine_version'] + ')'
+            context['rawmeasurement'].engine = context['measurement'].raw_measurement.annotations['engine_name'] + ' (' + context['measurement'].raw_measurement.annotations['engine_version'] + ')'
             context['rawmeasurement'].hasHttpRequests = len(context['measurement'].raw_measurement.test_keys['requests']) > 0            
             context['rawmeasurement'].annotations = json.dumps(context['measurement'].raw_measurement.annotations)
             context['rawmeasurement'].urlFlag = '/static/img/flags/' + context['measurement'].raw_measurement.probe_cc.lower() + '.svg'
