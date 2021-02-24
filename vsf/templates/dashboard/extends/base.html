@@ -121,7 +121,7 @@
                     <li><a href="{% url 'dashboard:site:list_sites' %}">Sites</a></li>
                 </ul>
             </li>
-
+            {% if user.is_admin %}
             <li class="nav-item pcoded-menu-caption">
                 <label>Settings</label>
             </li>
@@ -138,7 +138,6 @@
                     <li><a href="{% url 'dashboard:control_panel:controls' %}">Controls</a></li>
                 </ul>
             </li>
-
             <li class="nav-item pcoded-hasmenu">
                 <a href="#" class="nav-link ">
                     <span class="pcoded-micon">
@@ -153,6 +152,7 @@
                     <li><a href="{% url 'dashboard:users:users_create' %}">New User</a></li>
                 </ul>
             </li>
+            {% endif %}
           </ul>
           
         </div>

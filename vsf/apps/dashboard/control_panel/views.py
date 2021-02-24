@@ -11,7 +11,13 @@ from apps.main.measurements.submeasurements.tasks import count_flags_submeasurem
 from apps.api.fp_tables_api.tasks import fp_update, measurement_update
 from vsf.utils                      import ProcessState
 from vsf.celery                     import transient_queue_name, USER_TASK_PRIORITY
+# Permission imports
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from apps.main.users import decorators
 
+
+@method_decorator([login_required, decorators.admin_required], name='dispatch')
 class ControlPanel(VSFLoginRequiredMixin, TemplateView):
     """
         This view presents a set of buttons to run control 
