@@ -250,25 +250,6 @@
 <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
 <script>
 
-    /*var test_keys = $('#test-keys-detailed').text();
-    $("#test-keys-detailed").jsonViewer(JSON.parse(test_keys), {
-        collapsed: true,
-        rootCollapsable: false
-    });
-    
-    var annotations_detailed = $('#annotations-detailed').text();
-    $("#annotations-detailed").jsonViewer(JSON.parse(annotations_detailed), {
-        collapsed: true,
-        rootCollapsable: false
-    });
-
-    var test_helper = $('#test-helpers-detailed').text();
-    $("#test-helpers-detailed").jsonViewer(JSON.parse(test_helper), {
-        collapsed: true,
-        rootCollapsable: false
-    });*/
-
-
     $(document).ready(function() {
         if ('{{rawmeasurement.test_name}}' === 'web_connectivity') {
             if ('{{rawmeasurement.test_keys.accessible}}' === 'False') {
@@ -294,8 +275,12 @@
                 );
             }
 
-            var test_helper = $('#raw-data').text();
-            $("#raw-data").jsonViewer(JSON.parse(test_helper), {
+
+            var raw = $('#raw-data').text();
+            rawParsed = JSON.parse(raw);
+            rawParsed[0]['fields']['annotations'] = JSON.parse(rawParsed[0]['fields']['annotations']);
+            rawParsed[0]['fields']['test_helpers'] = JSON.parse(rawParsed[0]['fields']['test_helpers']);
+            $("#raw-data").jsonViewer(rawParsed[0]['fields'], {
                 collapsed: true,
                 rootCollapsable: false
             });
