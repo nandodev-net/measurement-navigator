@@ -7,6 +7,7 @@ ROLE_CHOICES =(
     ("2", "Admin"), 
     ("3", "Analist"), 
     ("4", "Editor"), 
+    ("5", "Guest"), 
 ) 
 
 

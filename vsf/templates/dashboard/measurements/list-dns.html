@@ -518,7 +518,26 @@
             orderable: false,
             searchable: false,
             render: function (data, type, row, meta) {
-              return `<pre class='answer'> ${prettyPrintJson.toHtml( data )} </pre>`;
+              if (data.isOk) {
+                let html = "<div class='answer'>"
+                let json = data.json
+                for (const type in json) {
+                  if (json[type].length === 0) continue
+
+                  html += `<strong>${type}:</strong>`;
+                  html += "<ul class='mb-0'>";
+                  
+                  json[type].forEach(x => html+=`<li><pre class='mb-0'> ${x} </pre></li>`)
+
+                  html += "</ul>";
+
+                }
+                html += "</div>"
+                return html
+              }
+              else {
+                return `<pre class='answer'> ${prettyPrintJson.toHtml( data.json )} </pre>`;
+              }
             },
           },
           {

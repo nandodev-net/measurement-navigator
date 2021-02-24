@@ -35,8 +35,10 @@ class UsersList(VSFLoginRequiredMixin, TemplateView):
                 role = 'Admin'
             elif i.is_analist:
                 role = 'Analist'
-            else:
+            elif i.is_editor:
                 role = 'Editor'
+            else:
+                role = 'Guest'
 
             if i.is_superuser:
                 role ='Superuser'
@@ -95,15 +97,20 @@ class UserCreateView(VSFLoginRequiredMixin, CreateView):
             self.object.is_analist = True
             self.object.is_staff = True
         
-        else:
+        elif form.cleaned_data['role'] == "4":
             self.object.is_editor = True
             self.object.is_staff = True
+        
+        else:
+            self.object.is_guest = True
+            self.object.is_staff = True            
 
 
         if form.cleaned_data['role'] == "1":
             self.object.is_admin = True
             self.object.is_analist = True
             self.object.is_editor = True
+            self.object.is_guest = True
             self.object.is_staff = True
             self.object.is_superuser = True
         
@@ -131,20 +138,31 @@ class UserUpdateView(VSFLoginRequiredMixin, UpdateView):
 
         i = get_object_or_404(CustomUser, pk=self.kwargs['pk'])
 
-        context['object_list'] = []
-
         if i.is_admin:
-            role = '2'
+            role = 2
+            
         elif i.is_analist:
-            role = '3'
+            role = 3
+
+        elif i.is_editor:
+            role = 4
+
         else:
-            role = '4'
+            role = 5
 
         if i.is_superuser:
-            role ='1'
-            
-        context['object_list'].append({'role':role})
+            role = 1
 
+        context['form'] = CustomUserForm(
+           initial = {
+                'username':i.username,
+                'first_name':i.first_name,
+                'last_name':i.last_name,
+                'email':i.email,
+                'role': [role]            
+           }
+        )
+        
         return context  
 
 
@@ -165,28 +183,56 @@ class UserUpdateView(VSFLoginRequiredMixin, UpdateView):
         self.object.last_name = form.cleaned_data['last_name']
         self.object.email = form.cleaned_data['email']   
 
-        if form.cleaned_data['role'] == "2":
-            self.object.is_admin = True
-            self.object.is_staff = True
-
-        elif form.cleaned_data['role'] == "3":
-            self.object.is_analist = True
-            self.object.is_staff = True
-        
-        else:
-            self.object.is_editor = True
-            self.object.is_staff = True
-
 
         if form.cleaned_data['role'] == "1":
             self.object.is_admin = True
             self.object.is_analist = True
             self.object.is_editor = True
+            self.object.is_guest = True
             self.object.is_staff = True
             self.object.is_superuser = True
+            self.object.save()
+            return HttpResponseRedirect("/dashboard/users/")
+
+        elif form.cleaned_data['role'] == "2":
+            self.object.is_admin = True
+            self.object.is_analist = False
+            self.object.is_editor = False
+            self.object.is_guest = False
+            self.object.is_staff = True
+            self.object.is_superuser = False
+            self.object.save()
+            return HttpResponseRedirect("/dashboard/users/")
+
+        elif form.cleaned_data['role'] == "3":
+            self.object.is_admin = False
+            self.object.is_analist = True
+            self.object.is_editor = False
+            self.object.is_guest = False
+            self.object.is_staff = True
+            self.object.is_superuser = False
+            self.object.save()
+            return HttpResponseRedirect("/dashboard/users/")
         
-        self.object.save()
-        return HttpResponseRedirect("/dashboard/users/")
+        elif form.cleaned_data['role'] == "4":
+            self.object.is_admin = False
+            self.object.is_analist = False
+            self.object.is_editor = True
+            self.object.is_guest = False
+            self.object.is_staff = True
+            self.object.is_superuser = False
+            self.object.save()
+            return HttpResponseRedirect("/dashboard/users/")
+        
+        else:
+            self.object.is_admin = False
+            self.object.is_analist = False
+            self.object.is_editor = False
+            self.object.is_guest = True
+            self.object.is_staff = True
+            self.object.is_superuser = False
+            self.object.save()
+            return HttpResponseRedirect("/dashboard/users/")        
 
 
     def form_invalid(self, form):
@@ -246,15 +292,20 @@ class UserCreateModalView(VSFLoginRequiredMixin, CreateView):
             self.object.is_analist = True
             self.object.is_staff = True
         
-        else:
+        elif form.cleaned_data['role'] == "4":
             self.object.is_editor = True
             self.object.is_staff = True
+        
+        else:
+            self.object.is_guest = True
+            self.object.is_staff = True  
 
 
         if form.cleaned_data['role'] == "1":
             self.object.is_admin = True
             self.object.is_analist = True
             self.object.is_editor = True
+            self.object.is_guest = True
             self.object.is_staff = True
             self.object.is_superuser = True
         

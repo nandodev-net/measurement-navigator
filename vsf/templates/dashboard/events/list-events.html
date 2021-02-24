@@ -186,7 +186,7 @@
     </form>
 
 
-    <div class="card rounded p-3 mt-4">
+    <div class="card rounded p-3 mt-4" style="width: 100%;">
         <table class="table table-striped mt-5 datatable" id="events">
           <thead>
             <tr>
@@ -258,6 +258,7 @@
         </table>
     </div>
   </form>
+  
   <div class="modal fade" id='edit_event' role="dialog"></div>
 
 
@@ -266,6 +267,8 @@
 
   {% block extrajs %}
     <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
 
     <script type="text/javascript">
         $('#events').DataTable();
@@ -285,10 +288,3 @@
   {% endblock extrajs %}
 
 {% endblock content %}
-
-{% block custom_scripts %}
-<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
-
-
-{% endblock custom_scripts %}
