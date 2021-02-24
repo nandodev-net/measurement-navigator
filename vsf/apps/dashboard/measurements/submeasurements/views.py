@@ -9,6 +9,7 @@ from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from datetime                                   import datetime, timedelta
+from typing                                     import Tuple, List
 # Local imports
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
@@ -274,28 +275,40 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'jsons__answers' : [self._get_answers(j) for j in item.jsons.answers],
+                'jsons__answers' :  self._get_answers(item.jsons.answers),
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag_type'      : item.flag_type
+                'flag_type'       : item.flag_type
             })
         return json_data
 
-    def _get_answers(self, json : dict) -> dict:
+    def _get_answers(self, answers : List[dict]) -> dict:
         """
-            Get just ipv4/ipv6 field from 'answers' field
+            Get just ipv4/ipv6 field from 'answers' field.
+            return (b, d) where b : bool tells if the provided dict is a json object
+            or our processed version with the following format:
+            {
+                ipv6 : [str],
+                ipv4 : [str],
+                cname: [str]
+            }
+            if true, it is a processed version. Otherwise it's just a raw json
         """
-        type_of_answer = json.get('answer_type')
-        if type_of_answer == 'A':
-            return {'ipv4' : json.get('ipv4')}
-        elif type_of_answer == 'AAAA':
-            return {'ipv6' : json.get('ipv6')}
-        elif type_of_answer == 'CNAME':
-            return {'ipv6' : json.get('CNAME')}
-        else:
-            return json
+        try:
+            out = {}
 
+            out['A']  = [answer.get('ipv4')  for answer in answers if answer.get('answer_type')=='A']
+            out['AAAA']  = [answer.get('ipv6')  for answer in answers if answer.get('answer_type')=='AAAA']
+            out['cname'] = [answer.get('cname') for answer in answers if answer.get('answer_type')=='cname']
+            
+            if out['A'] or out['AAAA'] or out['cname']: 
+                return {'isOk' : True, 'json' : out}
+            else:
+                return {'isOk' : False, 'json' : answers}
+
+        except:
+            return {'isOk' : False, 'json' : answers}
 
 
 class ListHTTPTemplate(ListSubMeasurementTemplate):
