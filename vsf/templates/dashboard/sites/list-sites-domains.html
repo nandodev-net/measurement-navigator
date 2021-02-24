@@ -8,6 +8,12 @@
         #domains-list-card{
             width: 130%;
         }
+        .field-wrap {
+            width: -webkit-fill-available;
+        }
+        body > div.swal2-container.swal2-center.swal2-backdrop-show > div {
+            z-index: 1000000;
+        }
     </style>
 {% endblock custom_stylesheet %} 
 {% with home='dashboard:home' %} 
@@ -53,28 +59,32 @@
                 {% for domain in domains %}
                 <tr>
                     <td>
-                        <div class="form-check">
+                        <div class="form-check text-center">
                             <label class="form-check-label">
-                    <input name="associated-values" type="checkbox" value="checkedValue"
-                    aria-label="Group of associated domains" id="{{ domain.id }}"
-                    class="associate-page" data-vsf-domain="{{ domain.domain }}"
-                    />
-                </label>
+                                <input name="associated-values" type="checkbox" value="checkedValue"
+                                aria-label="Group of associated domains" id="{{ domain.id }}"
+                                class="associate-page" data-vsf-domain="{{ domain.domain }}"
+                                />
+                            </label>
                         </div>
                     </td>
-                    <td>
+                    <td class="text-center">
                         <a class="text-info" href="{% url 'dashboard:measurement:list_measurements'%}?input={{ domain.domain }}">
-                {{ domain.domain }}
-                </a>
+                            {{ domain.domain }}
+                        </a>
                     </td>
-                    <td>
+                    <td class="text-center">
                         {% if domain.site_id != -1 %}
-                        <a class="text-info" href="{% url 'dashboard:sites:site_details' id=domain.site_id %}">
-                {{ domain.site_name }}
-                </a> {% else %}
-                        <a class="text-info" href="#"> {{ domain.site_name }}</a> {% endif %}
+                            <a class="text-info" href="{% url 'dashboard:sites:site_details' id=domain.site_id %}">
+                                {{ domain.site_name }}
+                            </a> 
+                        {% else %}
+                            <a class="text-info" href="#"> 
+                                {{ domain.site_name }}
+                            </a> 
+                        {% endif %}
                     </td>
-                    <td>{{ domain.measurement_count }}</td>
+                    <td class="text-center">{{ domain.measurement_count }}</td>
                 </tr>
                 {% empty %}
                 <tr>
