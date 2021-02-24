@@ -1982,6 +1982,7 @@ pre code {
     padding: 0.75rem;
     vertical-align: top;
     border-top: 1px solid #e3eaef;
+    text-align: center;
 }
 
 .table thead th {
