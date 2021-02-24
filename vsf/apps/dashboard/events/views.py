@@ -149,7 +149,7 @@ class EventUpdateView(VSFLoginRequiredMixin, UpdateView):
     form_class = EventForm
     model = Event 
     queryset = Event.objects.all()
-    template_name = "events-templates/event-edit-form.html"
+    template_name = "events/event-edit-form.html"
     success_url = "/dashboard/events/"
 
     def get_context_data(self, **kwargs):
