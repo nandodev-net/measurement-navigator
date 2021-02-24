@@ -155,12 +155,17 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
         site = post.get('site')
         domains = post.get('domains[]')
 
+        print(site)
+        print('-------------')
         # Check the consistensy of the request
         if domains == None or site == None:
             return HttpResponseBadRequest()
 
+
+
         # Query dict returns a list of string, we're concerned just with one site
         site = site[0] if len(site) > 0 else ''
+
 
         # Check that the ids are all integers
         try:
@@ -267,7 +272,6 @@ class SitesEndpoint(BaseDatatableView):
     def prepare_results(self, qs):
         json_data = []
         for item in qs:
-            print(item.__dict__)
             json_data.append({
                 'associated': item.id,
                 'name' : item.name

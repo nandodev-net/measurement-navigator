@@ -8,9 +8,6 @@
         #domains-list-card{
             width: 130%;
         }
-        .field-wrap {
-            width: -webkit-fill-available;
-        }
         body > div.swal2-container.swal2-center.swal2-backdrop-show > div {
             z-index: 1000000;
         }
@@ -248,7 +245,7 @@
 
             if (site.length === 0) return;
 
-            site = site[0].id;
+            site = site[0].associated;
 
             let data = {
                 domains: pagesIds,
