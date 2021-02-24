@@ -9,6 +9,7 @@ from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from datetime                                   import datetime, timedelta
+from typing                                     import Tuple, List
 # Local imports
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
@@ -261,9 +262,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             "jsons__answers",
             "jsons__control_resolver_answers",
             "client_resolver",
-            "dns_consistency",
-
-
+            "dns_consistency" 
         )
         json_data = []
         for item in qs:
@@ -276,28 +275,40 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
-                'jsons__answers' : [self._get_answers(j) for j in item.jsons.answers],
+                'jsons__answers' :  self._get_answers(item.jsons.answers),
                 'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
-                'flag_type'      : item.flag_type
+                'flag_type'       : item.flag_type
             })
         return json_data
 
-    def _get_answers(self, json : dict) -> dict:
+    def _get_answers(self, answers : List[dict]) -> dict:
         """
-            Get just ipv4/ipv6 field from 'answers' field
+            Get just ipv4/ipv6 field from 'answers' field.
+            return (b, d) where b : bool tells if the provided dict is a json object
+            or our processed version with the following format:
+            {
+                ipv6 : [str],
+                ipv4 : [str],
+                cname: [str]
+            }
+            if true, it is a processed version. Otherwise it's just a raw json
         """
-        type_of_answer = json.get('answer_type')
-        if type_of_answer == 'A':
-            return {'ipv4' : json.get('ipv4')}
-        elif type_of_answer == 'AAAA':
-            return {'ipv6' : json.get('ipv6')}
-        elif type_of_answer == 'CNAME':
-            return {'ipv6' : json.get('CNAME')}
-        else:
-            return json
+        try:
+            out = {}
 
+            out['ipv4']  = [answer.get('ipv4')  for answer in answers if answer.get('answer_type')=='A']
+            out['ipv6']  = [answer.get('ipv6')  for answer in answers if answer.get('answer_type')=='AAAA']
+            out['cname'] = [answer.get('cname') for answer in answers if answer.get('answer_type')=='cname']
+            
+            if out['ipv4'] or out['ipv6'] or out['cname']: 
+                return {'isOk' : True, 'json' : out}
+            else:
+                return {'isOk' : False, 'json' : answers}
+
+        except:
+            return {'isOk' : False, 'json' : answers}
 
 
 class ListHTTPTemplate(ListSubMeasurementTemplate):
@@ -401,6 +412,22 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
+
+        qs = qs.only(
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_cc',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__input',
+            'measurement__id',
+            'measurement__domain__site__name',
+            'measurement__anomaly',
+            'flag_type',
+            'status_code_match',
+            'headers_match',
+            'body_length_match',
+            'body_proportion'
+        )
+
         for item in qs:
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
@@ -502,6 +529,22 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
+
+        qs = qs.only(
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_cc',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__input',
+            'measurement__id',
+            'measurement__domain__site__name',
+            'measurement__anomaly',
+            'flag_type',
+            'status_blocked',
+            'status_failure',
+            'status_success',
+            'ip'
+        )
+
         for item in qs:
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,

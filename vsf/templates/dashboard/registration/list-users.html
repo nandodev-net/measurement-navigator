@@ -21,13 +21,92 @@
 
 {% block content %}
   <form id="urlForm">
+    <nav class="navbar navbar-light bg-light mb-5" >
+        <div class="container-fluid" >
+          <div class="row">
+  
+            <div class="col-4">
+              <input
+              id="title"
+              class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+              type="search"
+              placeholder="Title"
+              aria-label="Search title"
+              value="{{ prefill.title }}"
+              name="title"
+              />
+            </div>
+  
+            <div class="col-4">
+              <input
+              id="first_name"
+              class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+              type="search"
+              placeholder="Name"
+              aria-label="Search first name"
+              value="{{ prefill.first_name }}"
+              name="first_name"
+              />
+            </div>
+  
+            <div class="col-4">
+              <input
+              id="last_name"
+              class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+              type="search"
+              placeholder="Last Name"
+              aria-label="Search last name"
+              value="{{ prefill.last_name }}"
+              name="last_name"
+              />
+            </div>
+  
+            <div class="col-4">
+              <input
+              id="email"
+              class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+              type="search"
+              placeholder="Email"
+              aria-label="Search Email"
+              value="{{ prefill.email }}"
+              name="email"
+              />
+            </div>
+  
+            <div class="col-4">
+              <div class="row align-items-center rounded p-2 bg-info ml-1">
+                <div class="col-5 mx-auto">
+                  <label class='font-weight-bold text-white' for="asn">
+                    Role
+                  </label>
+                </div>
+                <div class="col-7 mx-auto">
+                  <select id="first_name" class="custom-select additional-filter" name="first_name">
+                    <option value="">Any Role</option>
+                    <option >Superuser</option>
+                    <option >Admin</option>
+                    <option >Analist</option>
+                    <option >Editor</option>
+                    
+                  </select>
+                </div>
+              </div> 
+            </div>
+            <div class="col-1 my-auto mx-auto">
+              <button id="url-form-button" class="btn btn-outline-info btn-block" type="submit">
+                <i class="fa fa-search"></i>
+              </button>
+            </div>
+          </div> 
+        </div>   
+      </nav>
     <form id="sitesForm">    
         <button type="button" class="bs-modal btn  btn-info" 
             onclick="open_register_modal('{% url 'dashboard:users:users_register' %}')">
           <i class="fa fa-user-plus"></i> Create User
         </button>
     </form>
-    <div class="card rounded p-3 mt-4">
+    <div class="card rounded p-3 mt-4" style="width: 100%;">
 
         <table class="table table-striped mt-5" id="users-table">
           <thead>
@@ -107,10 +186,6 @@
   </form>
 
 <br>
-  <p style="text-align: right; margin-right: 50px;">
-    <button type="button" class="bs-modal btn  btn-info" 
-    onclick="open_register_modal('{% url 'dashboard:users:users_register' %}')"><i class="fa fa-user-plus"></i> Create User</button>
-    </p>  
 
 
     <div class="modal fade" id='register_user' role="dialog"></div>

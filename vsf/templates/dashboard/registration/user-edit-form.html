@@ -49,12 +49,21 @@
     
                 <br />
                 <div class="row">
+                    {% if object.id == user.id %}
                     <div class="col-md-12">
                       <div class="form-group">
                         <label class="bmd-label-floating">Role</label>
-                        {% render_field form.role class="form-control" %}
+                            {% render_field form.role|append_attr:"disabled" class="form-control" %}
                       </div>
                     </div>
+                    {% else %}
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Role</label>
+                                {% render_field form.role class="form-control" %}
+                        </div>
+                    </div>
+                    {% endif %}
                   </div>
     
             </div>
