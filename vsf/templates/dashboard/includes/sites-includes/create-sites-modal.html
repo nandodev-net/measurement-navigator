@@ -1,17 +1,7 @@
-<!--
-  ******************************************
-  MODAL CREATE SITE
-
-  THIS MODAL EXPECTS THE FOLLOWING ARGUMENTS:
-
-  SITE-CREATION-FORM: FORM TO CREATE A NEW SITE, YOU CAN FIND IT IN THE FORMS.PY
-  ******************************************
--->
-
 {% load widget_tweaks %}
 
 <!-- Modal -->
-<div class="modal fade" data-dismiss="modal" data-toggle="modal" id="associateUrl" tabindex="2" role="dialog" aria-labelledby="associateUrlLabel" aria-hidden="true">
+<div class="modal fade" data-dismiss="modal" data-toggle="modal" id="associateUrl" tabindex="-1" role="dialog" aria-labelledby="associateUrlLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
@@ -79,7 +69,7 @@
               {% for error in site_creation_form.description.errors %} {{ error }} {% endfor %}
             </div>
 
-            <div class="form-group buttons-modal">
+            <div class="form-group buttons-modal float-right mt-4">
               <button id='close-create-site-modal' type="button" class="btn btn-danger" data-dismiss="modal" >
                 Close
               </button>
