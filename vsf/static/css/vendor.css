@@ -24214,3 +24214,7 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
     transition:border-color .25s ease, box-shadow .25s ease;
     height: 50px;
   }
+
+.field-wrap {
+    width: -webkit-fill-available;
+}
