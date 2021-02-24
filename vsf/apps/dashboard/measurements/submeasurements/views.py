@@ -298,11 +298,11 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         try:
             out = {}
 
-            out['ipv4']  = [answer.get('ipv4')  for answer in answers if answer.get('answer_type')=='A']
-            out['ipv6']  = [answer.get('ipv6')  for answer in answers if answer.get('answer_type')=='AAAA']
+            out['A']  = [answer.get('ipv4')  for answer in answers if answer.get('answer_type')=='A']
+            out['AAAA']  = [answer.get('ipv6')  for answer in answers if answer.get('answer_type')=='AAAA']
             out['cname'] = [answer.get('cname') for answer in answers if answer.get('answer_type')=='cname']
             
-            if out['ipv4'] or out['ipv6'] or out['cname']: 
+            if out['A'] or out['AAAA'] or out['cname']: 
                 return {'isOk' : True, 'json' : out}
             else:
                 return {'isOk' : False, 'json' : answers}
