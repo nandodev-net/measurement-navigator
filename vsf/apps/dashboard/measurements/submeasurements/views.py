@@ -261,9 +261,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             "jsons__answers",
             "jsons__control_resolver_answers",
             "client_resolver",
-            "dns_consistency",
-
-
+            "dns_consistency" 
         )
         json_data = []
         for item in qs:
@@ -401,6 +399,22 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
+
+        qs = qs.only(
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_cc',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__input',
+            'measurement__id',
+            'measurement__domain__site__name',
+            'measurement__anomaly',
+            'flag_type',
+            'status_code_match',
+            'headers_match',
+            'body_length_match',
+            'body_proportion'
+        )
+
         for item in qs:
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
@@ -502,6 +516,22 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
+
+        qs = qs.only(
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_cc',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__raw_measurement__input',
+            'measurement__id',
+            'measurement__domain__site__name',
+            'measurement__anomaly',
+            'flag_type',
+            'status_blocked',
+            'status_failure',
+            'status_success',
+            'ip'
+        )
+
         for item in qs:
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,

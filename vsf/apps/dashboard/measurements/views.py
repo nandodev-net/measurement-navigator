@@ -250,7 +250,6 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             'raw_measurement__probe_cc',
             'domain__site__name',
             'anomaly',
-            'flags'
         ]
 
     order_columns = [
@@ -261,7 +260,6 @@ class ListMeasurementsBackEnd(BaseDatatableView):
             'raw_measurement__probe_cc',
             'domain__site__name',
             'anomaly',
-            'flags',
         ]
 
     def get_initial_queryset(self):
