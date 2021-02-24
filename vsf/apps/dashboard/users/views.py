@@ -35,8 +35,10 @@ class UsersList(VSFLoginRequiredMixin, TemplateView):
                 role = 'Admin'
             elif i.is_analist:
                 role = 'Analist'
-            else:
+            elif i.is_editor:
                 role = 'Editor'
+            else:
+                role = 'Guest'
 
             if i.is_superuser:
                 role ='Superuser'
@@ -95,15 +97,20 @@ class UserCreateView(VSFLoginRequiredMixin, CreateView):
             self.object.is_analist = True
             self.object.is_staff = True
         
-        else:
+        elif form.cleaned_data['role'] == "4":
             self.object.is_editor = True
             self.object.is_staff = True
+        
+        else:
+            self.object.is_guest = True
+            self.object.is_staff = True            
 
 
         if form.cleaned_data['role'] == "1":
             self.object.is_admin = True
             self.object.is_analist = True
             self.object.is_editor = True
+            self.object.is_guest = True
             self.object.is_staff = True
             self.object.is_superuser = True
         
@@ -173,15 +180,20 @@ class UserUpdateView(VSFLoginRequiredMixin, UpdateView):
             self.object.is_analist = True
             self.object.is_staff = True
         
-        else:
+        elif form.cleaned_data['role'] == "4":
             self.object.is_editor = True
             self.object.is_staff = True
+        
+        else:
+            self.object.is_guest = True
+            self.object.is_staff = True  
 
 
         if form.cleaned_data['role'] == "1":
             self.object.is_admin = True
             self.object.is_analist = True
             self.object.is_editor = True
+            self.object.is_guest = True
             self.object.is_staff = True
             self.object.is_superuser = True
         
@@ -246,15 +258,20 @@ class UserCreateModalView(VSFLoginRequiredMixin, CreateView):
             self.object.is_analist = True
             self.object.is_staff = True
         
-        else:
+        elif form.cleaned_data['role'] == "4":
             self.object.is_editor = True
             self.object.is_staff = True
+        
+        else:
+            self.object.is_guest = True
+            self.object.is_staff = True  
 
 
         if form.cleaned_data['role'] == "1":
             self.object.is_admin = True
             self.object.is_analist = True
             self.object.is_editor = True
+            self.object.is_guest = True
             self.object.is_staff = True
             self.object.is_superuser = True
         
