@@ -236,10 +236,10 @@ class MeasurementDetailView(DetailView):
             context['rawmeasurement'].hasTcpConnections = len(context['measurement'].raw_measurement.test_keys['tcp_connect']) > 0
             context['rawmeasurement'].platform = context['measurement'].raw_measurement.annotations['platform']
             context['rawmeasurement'].engine = context['measurement'].raw_measurement.annotations['engine_name'] + '(' + context['measurement'].raw_measurement.annotations['engine_version'] + ')'
-            context['rawmeasurement'].hasHttpRequests = len(context['measurement'].raw_measurement.test_keys['requests']) > 0
+            context['rawmeasurement'].hasHttpRequests = len(context['measurement'].raw_measurement.test_keys['requests']) > 0            
             context['rawmeasurement'].annotations = json.dumps(context['measurement'].raw_measurement.annotations)
             context['rawmeasurement'].urlFlag = '/static/img/flags/' + context['measurement'].raw_measurement.probe_cc.lower() + '.svg'
-            context['rawmeasurement'].rawjson = json.dumps(context['measurement'].raw_measurement)
+            context['rawmeasurement'].rawjson = serializers.serialize('json', [context['measurement'].raw_measurement])
         return context
 
 
@@ -295,7 +295,6 @@ class ListMeasurementsBackEnd(BaseDatatableView):
         until       = get.get('until')
         site        = get.get('site')
         flags        = get.getlist('flags[]') if get != {} else []
-
         
 
         # Get desired measurements
