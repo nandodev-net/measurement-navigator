@@ -19,6 +19,12 @@ from datetime                                   import datetime, timedelta
 from apps.main.users.models import CustomUser
 from .forms import CustomUserForm
 
+# Permission imports
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from apps.main.users import decorators
+
+@method_decorator([login_required, decorators.admin_required], name='dispatch')
 class UsersList(VSFLoginRequiredMixin, TemplateView):
 
     template_name = "registration/list-users.html"
@@ -47,6 +53,8 @@ class UsersList(VSFLoginRequiredMixin, TemplateView):
             'last_name':i.last_name, 'email':i.email,'role':role, 'is_active':i.is_active })
         return context  
 
+
+@method_decorator([login_required, decorators.admin_required], name='dispatch')
 
 class UserCreateView(VSFLoginRequiredMixin, CreateView):
     model = CustomUser
@@ -124,6 +132,7 @@ class UserCreateView(VSFLoginRequiredMixin, CreateView):
             )
         )
 
+@method_decorator([login_required, decorators.admin_required], name='dispatch')
 
 class UserUpdateView(VSFLoginRequiredMixin, UpdateView):
     form_class = CustomUserForm
@@ -243,6 +252,7 @@ class UserUpdateView(VSFLoginRequiredMixin, UpdateView):
         )
 
 
+@method_decorator([login_required, decorators.admin_required], name='dispatch')
 class UserCreateModalView(VSFLoginRequiredMixin, CreateView):
     model = CustomUser
     queryset = CustomUser.objects.all()
@@ -320,7 +330,7 @@ class UserCreateModalView(VSFLoginRequiredMixin, CreateView):
         )
 
 
-
+@method_decorator([login_required, decorators.admin_required], name='dispatch')
 class CustomUserPasswdRevealView(VSFLoginRequiredMixin, DetailView):
     model = CustomUser
     template_name = "registration/reveal-user-psswd.html"
