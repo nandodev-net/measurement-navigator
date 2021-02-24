@@ -2840,13 +2840,13 @@ fieldset:disabled a.btn {
 
 .btn-primary:hover {
     color: #fff;
-    background-color: #2066ff;
+    background-color: gray;
     border-color: #135dff;
 }
 
 .btn-primary:focus, .btn-primary.focus {
     color: #fff;
-    background-color: #2066ff;
+    background-color: gray;
     border-color: #135dff;
     box-shadow: 0 0 0 0rem rgba(98, 147, 255, 0.5);
 }

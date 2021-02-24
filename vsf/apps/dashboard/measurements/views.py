@@ -2,6 +2,7 @@
 from django.db.models.query         import QuerySet
 from django.db.models               import Subquery, OuterRef
 from django.http.response           import Http404
+from django.core                    import serializers
 from django.views.generic           import TemplateView, DetailView
 from apps.main                      import measurements
 from apps.main.measurements         import submeasurements
@@ -228,11 +229,17 @@ class MeasurementDetailView(DetailView):
 
         context['rawmeasurement'] = context['measurement'].raw_measurement
         context['rawmeasurement'].test_keys = context['measurement'].raw_measurement.test_keys
-        context['rawmeasurement'].annotations = json.dumps(context['measurement'].raw_measurement.annotations)
         context['rawmeasurement'].test_helpers = json.dumps(context['measurement'].raw_measurement.test_helpers)
         context['rawmeasurement'].flags = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
-        print(context['rawmeasurement'].test_keys)
-        print('----------------')
+
+        if context['measurement'].raw_measurement.test_name == 'web_connectivity':
+            context['rawmeasurement'].hasTcpConnections = len(context['measurement'].raw_measurement.test_keys['tcp_connect']) > 0
+            context['rawmeasurement'].platform = context['measurement'].raw_measurement.annotations['platform']
+            context['rawmeasurement'].engine = context['measurement'].raw_measurement.annotations['engine_name'] + '(' + context['measurement'].raw_measurement.annotations['engine_version'] + ')'
+            context['rawmeasurement'].hasHttpRequests = len(context['measurement'].raw_measurement.test_keys['requests']) > 0
+            context['rawmeasurement'].annotations = json.dumps(context['measurement'].raw_measurement.annotations)
+            context['rawmeasurement'].urlFlag = '/static/img/flags/' + context['measurement'].raw_measurement.probe_cc.lower() + '.svg'
+
         return context
 
 
