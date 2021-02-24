@@ -107,7 +107,7 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
                     'id'               : domain.id,
                     'site_name'        : domain.site.name if domain.site != None else "(No site)" ,
                     'site_id'          : domain.site.id   if domain.site != None else -1,
-                } for domain in current_page ]
+                } for domain in domains ]
 
         domains.sort(key=lambda u: u['domain'])
 
