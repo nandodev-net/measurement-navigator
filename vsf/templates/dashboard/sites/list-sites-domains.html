@@ -48,7 +48,6 @@
         <table class="table table-striped mt-5 datatable" id="domains-list">
             <thead>
                 <tr>
-                    <th class="text-center" scope="col">Associate</th>
                     <th class="text-center" scope="col">Domain</th>
                     <th class="text-center" scope="col">Site</th>
                     <th class="text-center" scope="col">Measurements Quantity</th>
@@ -57,17 +56,7 @@
 
             <tbody>
                 {% for domain in domains %}
-                <tr>
-                    <td>
-                        <div class="form-check text-center">
-                            <label class="form-check-label">
-                                <input name="associated-values" type="checkbox" value="checkedValue"
-                                aria-label="Group of associated domains" id="{{ domain.id }}"
-                                class="associate-page" data-vsf-domain="{{ domain.domain }}"
-                                />
-                            </label>
-                        </div>
-                    </td>
+                <tr id="{{domain.id}}" alt="{{ domain.domain }}">
                     <td class="text-center">
                         <a class="text-info" href="{% url 'dashboard:measurement:list_measurements'%}?input={{ domain.domain }}">
                             {{ domain.domain }}
@@ -116,11 +105,14 @@
     $(document).ready(function() {
 
         /* Creating datatables */
-        $('#domains-list').DataTable();
+        var domains = $('#domains-list').DataTable({
+            select: {
+                style: 'multi'
+            },
+        });
         $('domains-related-sites-list').DataTable();
         var sites = $(' #sites-list ').DataTable({
             autoWidth: false,
-            order: [[1, "desc"]],
             searching: true,
             processing: true,
             language: {
@@ -136,17 +128,6 @@
             },
             columns: [
                 {
-                    data: "associated",
-                    render: function (data, type, row, meta) {
-                        return `
-                        <div class="form-check" id="select-related-sites">
-                            <label class="form-check-label">
-                            <input name="selected-site" type="radio" aria-label="Group of associated URL" id=` + data + `"/>
-                            </label>
-                        </div>`
-                    },
-                },
-                {
                     data: "name",
                     orderable: true,
                     searchable: true,
@@ -155,7 +136,7 @@
             initComplete: function () {},
             buttons: [],
             select: {
-            style: 'multi'
+                style: 'multi'
             },
         });
 
@@ -220,17 +201,16 @@
 
         $("#addToSite").click(function() {
 
-            // Getting checked urls
-            let pages = $('[class="associate-page"]:checked').toArray().map((checkBox) => ({
-                url: checkBox.dataset.vsfDomain,
-                id: checkBox.id
+            var rSelected = domains.rows( { selected: true }).data().toArray().map((selected) => ({
+                url: selected[0],
+                id: selected.DT_RowId
             }));
-            var checkedBoxes = document.querySelectorAll('input[name=associated-values]:checked');
+
             let $table = $("#vsf-grouped-sites");
 
             $table.empty();
 
-            pages.forEach(page => {
+            rSelected.forEach(page => {
                 $table.append(
                     `<tr>
                         <td class='text-black'>
@@ -239,7 +219,7 @@
                     </tr>`);
             });
 
-            if (pages.length === 0) {
+            if (rSelected.length === 0) {
                 $table.append(
                     `<tr>
                         <td class="text-center">
@@ -249,7 +229,7 @@
                 );
             }
 
-            selectedPages = pages;
+            selectedPages = rSelected;
 
             
 
@@ -259,18 +239,14 @@
         $("#submitConfirmationBtn").click(function(event) {
 
             event.preventDefault();
-
-            if (selectedPages.length === 0) {
-                return;
-            }
+            if (selectedPages.length === 0)return;
 
             let pagesIds = selectedPages.map(v => v.id);
             let url = "{% url 'dashboard:site:list_domains' %}";
-            let site = $("input[name=selected-site]:checked").toArray();
+            var site = sites.rows({ selected: true }).data().toArray();
+            console.log(site);
 
-            if (site.length === 0) {
-                return;
-            }
+            if (site.length === 0) return;
 
             site = site[0].id;
 
@@ -279,7 +255,7 @@
                 site: site,
                 csrfmiddlewaretoken: "{{ csrf_token }}"
             };
-
+            jQuery.noConflict();
             $.ajax({
                 type: "POST",
                 url: url,
