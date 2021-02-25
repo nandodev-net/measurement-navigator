@@ -101,10 +101,12 @@
       </div>   
     </nav>
 
+    {% if user.is_editor %}
     <form id="sitesForm">    
         <button type="button" class="bs-modal btn  btn-info" 
         onclick="open_create_modal('{% url 'dashboard:event_cases:add_case' %}')">Create Case</button>
       </form>
+    {% endif %}
 
   
     <div class="card rounded p-3 mt-4" style="width: 100%;">
@@ -116,7 +118,9 @@
               <th class="text-center" scope="col">End Date</th>
               <th class="text-center" scope="col">Category</th>
               <th class="text-center" scope="col">Draft</th>
-              <th class="text-center" scope="col">Actions</th>
+              {% if user.is_editor %}
+                <th class="text-center" scope="col">Actions</th>
+              {% endif %}
             </tr>
           </thead>
           <tbody>
@@ -145,12 +149,14 @@
                     </div>
                     {% endif %}
                 </td>
+                {% if user.is_editor %}
                 <td>
                     <a href="">
                         <button type="button" class="btn-sm btn-info">Edit</button>
                     </a>
                     <button type="button" class="btn-sm btn-danger">Delete</button>
                 </td>
+                {% endif %}
                 </tr>
             {% endfor %}
 

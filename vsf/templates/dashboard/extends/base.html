@@ -80,6 +80,7 @@
                     <li><a href="{% url 'dashboard:submeasurement:list_tcp' %}">TCP</a></li>
                 </ul>
             </li>
+            
             <li class="nav-item pcoded-hasmenu">
                 <a href="#" class="nav-link ">
                     <span class="pcoded-micon">
@@ -93,6 +94,8 @@
                     <li><a href="{% url 'dashboard:events:all' %}">List Events</a></li>
                 </ul>
             </li>
+            
+            
             <li class="nav-item pcoded-hasmenu">
                 <a href="#" class="nav-link ">
                     <span class="pcoded-micon">
@@ -104,9 +107,13 @@
                 </a>
                 <ul class="pcoded-submenu">
                     <li><a href="{% url 'dashboard:event_cases:list_cases' %}">List Cases</a></li>
+                    {% if user.is_editor %}
                     <li><a href="{% url 'dashboard:event_cases:create_case' %}">New Case</a></li>
+                    {% endif %}
                 </ul>
             </li>
+            
+            {% if user.is_analist %}
             <li class="nav-item pcoded-hasmenu">
                 <a href="#" class="nav-link ">
                     <span class="pcoded-micon">
@@ -121,6 +128,7 @@
                     <li><a href="{% url 'dashboard:site:list_sites' %}">Sites</a></li>
                 </ul>
             </li>
+            {% endif %}
             {% if user.is_admin %}
             <li class="nav-item pcoded-menu-caption">
                 <label>Settings</label>
