@@ -1,0 +1,74 @@
+[
+    {
+        "model": "sites.sitecategory", 
+        "pk": 1, 
+        "fields": {
+            "code": "ALDR",
+            "old_code": "ALDR",
+            "category_spa": "categoria",
+            "category_eng": "category",
+            "description_spa": "descripcion",
+            "description_eng": "description"
+        }
+    },
+    {
+        "model": "sites.sitecategory", 
+        "pk": 2, 
+        "fields": {
+            "code": "REL",
+            "old_code": "REL",
+            "category_spa": "categoria",
+            "category_eng": "category",
+            "description_spa": "descripcion",
+            "description_eng": "description"
+        }
+    },
+    {
+        "model": "sites.sitecategory", 
+        "pk": 3, 
+        "fields": {
+            "code": "PORN",
+            "old_code": "PORN",
+            "category_spa": "categoria",
+            "category_eng": "category",
+            "description_spa": "descripcion",
+            "description_eng": "description"
+        }
+    },
+    {
+        "model": "sites.sitecategory", 
+        "pk": 4, 
+        "fields": {
+            "code": "PROV",
+            "old_code": "PROV",
+            "category_spa": "categoria",
+            "category_eng": "category",
+            "description_spa": "descripcion",
+            "description_eng": "description"
+        }
+    },
+    {
+        "model": "sites.sitecategory", 
+        "pk": 5, 
+        "fields": {
+            "code": "POLR",
+            "old_code": "POLR POLT",
+            "category_spa": "categoria",
+            "category_eng": "category",
+            "description_spa": "descripcion",
+            "description_eng": "description"
+        }
+    },
+    {
+        "model": "sites.sitecategory", 
+        "pk": 6, 
+        "fields": {
+            "code": "HUMR",
+            "old_code": "HUMR MINR WOMR MINF",
+            "category_spa": "categoria",
+            "category_eng": "category",
+            "description_spa": "descripcion",
+            "description_eng": "description"
+        }
+    }
+]
