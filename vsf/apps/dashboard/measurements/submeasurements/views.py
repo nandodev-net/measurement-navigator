@@ -276,7 +276,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
                 'measurement__anomaly' : item.measurement.anomaly,
                 'jsons__answers' :  self._get_answers(item.jsons.answers),
-                'jsons__control_resolver_answers' : item.jsons.control_resolver_answers,
+                'jsons__control_resolver_answers' : self._get_control_resolver_answers(item.jsons.control_resolver_answers),
                 'client_resolver' : item.client_resolver,
                 'dns_consistency' : item.dns_consistency,
                 'flag_type'       : item.flag_type
@@ -286,14 +286,14 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
     def _get_answers(self, answers : List[dict]) -> dict:
         """
             Get just ipv4/ipv6 field from 'answers' field.
-            return (b, d) where b : bool tells if the provided dict is a json object
+            return a dict {isOk : b, json : dict} where b : bool tells if the provided dict is a json object
             or our processed version with the following format:
             {
                 ipv6 : [str],
                 ipv4 : [str],
                 cname: [str]
             }
-            if true, it is a processed version. Otherwise it's just a raw json
+            if true, it is a processed version. Otherwise it's just the raw json
         """
         try:
             out = {}
@@ -309,6 +309,23 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
 
         except:
             return {'isOk' : False, 'json' : answers}
+
+    def _get_control_resolver_answers(self, cr_answers : dict) -> dict:
+        """
+            Return a dict 
+            {
+                isOk : bool,
+                json : dict
+            }
+
+            such that isOk tells if the provided json is our processed version or the raw json, 
+            so we can render it different if the processing was ok
+        """
+        try:
+            out = cr_answers['addrs']
+            return {'isOk' : True, 'json' : out}
+        except:
+            return {'isOk' : False, 'json' : cr_answers}
 
 
 class ListHTTPTemplate(ListSubMeasurementTemplate):
