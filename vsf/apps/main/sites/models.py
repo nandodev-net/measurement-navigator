@@ -133,7 +133,7 @@ class Site(models.Model):
         null = True,
         blank = True,
         on_delete=models.SET_NULL
-        )
+    )
 
 class URL(models.Model):
     """

@@ -6,9 +6,10 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
 from apps.dashboard.views           import VSFListPaginate
+import json
 # Local imports
 from apps.main.sites.forms          import SiteForm
-from apps.main.sites.models         import Domain, URL, Site
+from apps.main.sites.models         import Domain, URL, Site, SiteCategory
 
 
 # --- SITES VIEWS --- #
@@ -26,8 +27,9 @@ class ListSites(VSFLoginRequiredMixin, TemplateView):
                 + sites : all site objects
         """
         # Return a list of sites sorted by name
-        sites = Site.objects.all().order_by('name')
-
+        sites = Site.objects.values('id', 'name', 'description_spa', 'description_eng', 'category__code').order_by('name')
+        siteCategories = SiteCategory.objects.all()
+        categories = [cat.code for cat in siteCategories]
         context = super().get_context_data()
 
         # Generate the site form
@@ -36,8 +38,42 @@ class ListSites(VSFLoginRequiredMixin, TemplateView):
         # Return the context
         context['site_creation_form']   = siteForm
         context['sites']                = sites
-
+        context['siteCategories'] = json.dumps(categories)
         return context
+
+    def post(self, request, *args, **kwargs):
+        print('VENEZUELA')
+        post = dict(request.POST)
+
+        assotiation = post.get('association')[0]
+        assotiation = json.loads(assotiation)
+        for element in assotiation:
+            element['category']
+            element['site']
+
+            try:
+                db_site = Site.objects.get(name=element['site'])
+            except Site.DoesNotExist:
+                return JsonResponse(
+                    {'error':
+                            { 'type': 'unvalid_site', 'url' : None }
+                    }
+                )
+
+            try:
+                db_category = SiteCategory.objects.get(code=element['category'])
+            except SiteCategory.DoesNotExist:
+                return JsonResponse(
+                    {'error':
+                            { 'type': 'unvalid_site', 'url' : None }
+                    }
+                )
+
+            db_site.category = db_category
+            db_site.save()
+
+        return JsonResponse({'error' : None})
+
 
 class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
     """
@@ -257,7 +293,6 @@ class SiteDetailView(VSFLoginRequiredMixin, VSFListPaginate):
         context['site'] = site
         context['domains'] = current_page
         return context
-
 
 class SitesEndpoint(BaseDatatableView):
 

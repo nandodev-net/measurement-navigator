@@ -7,7 +7,7 @@
             width: 100% !important;
         }
         #sites-list-card{
-            width: 150%;
+            width: 140%;
         }
     </style> 
 {% endblock custom_stylesheet %} 
@@ -28,44 +28,60 @@
 
 {% block content %}
 <div>
-    <form id="sitesForm">
-        <button type="button" class="btn btn-dark rounded mb-4" data-toggle="modal" data-target="#associateUrl">
+    <div class="d-flex">
+        <form id="sitesForm">
+            <button type="button" class="btn btn-dark rounded mb-4" data-toggle="modal" data-target="#associateUrl">
+                <i class="fa fa-plus"></i> 
+                Create site
+            </button>
+        </form>
+
+        <button type="button" id="assignCategoryBtn" class="btn btn-dark rounded mb-4 ml-2" data-toggle="modal" data-target="#assignCategory">
             <i class="fa fa-plus"></i> 
-            Create site
+            Category Assignment
         </button>
-    </form>
-        
+
+    </div>
     <div class="card rounded p-5" id="sites-list-card">
         <div class="table-responsive">
             <table class="table table-striped" id="sites-list">
                 {% csrf_token %}
                 <thead>
                     <tr>
-                        <th class="text-center text-capitalize" scope="col">Sites</th>
+                        <th class="text-center text-capitalize" scope="col">
+                            Sites
+                        </th>
                         <th class="text-center text-capitalize" scope="col">
                             Measurements
                         </th>
-                        <th class="text-center text-capitalize" scope="col">Delete</th>
+                        <th class="text-center text-capitalize" scope="col">
+                            Delete
+                        </th>
+                        <th class="text-center text-capitalize" scope="col">
+                            Category
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for site in sites %}
                     <tr>
-                        <th class="text-center text-capitalize" scope="row">
+                        <th class="" scope="row">
                             <a class="text-dark" href="{% url 'dashboard:site:site_details' id=site.id %}" title="Go to site details">
-                            {{ site.name }}
-                        </a>
+                                {{ site.name }}
+                            </a>
                         </th>
-                        <td class="text-center text-capitalize">
+                        <td class="text-capitalize">
                             <a class="text-dark" href="{% url 'dashboard:measurement:list_measurements' %}?site={{ site.id }}">
                                 Go to measurements
                             </a>
                         </td>
-                        <td class="text-center text-capitalize">
+                        <td class="text-capitalize">
                             <button type="button" class="btn btn-outline-danger delete-site" id="{{ site.id }}">
                                 <i class="fa fa-trash"></i> 
                             </button>
-                            
+                        </td>
+                        <td>
+                            {{site.category__code}}
                         </td>
                     </tr>
                     {% empty %}
@@ -81,6 +97,7 @@
 
 
 {% include "includes/sites-includes/create-sites-modal.html" with site_creation_form=site_creation_form %} 
+{% include "includes/sites-includes/associate-category-modal.html" %}
 
 {% endblock content %} 
 
@@ -91,11 +108,124 @@
 <script>
     'use strict';
 
+    var sites;    
+    $("#assignCategoryBtn").click(function() {
+        var rSelected = sites.rows( { selected: true }).data().toArray().map((selected) => ({
+            url: selected[0],
+            category: selected[3]
+        }));
+
+        if (rSelected.length !== 0){
+            $("#assignCategoryConfirm").attr('disabled', false);
+        } else {
+            $("#assignCategoryConfirm").attr('disabled', true);
+        }
+        
+        let $table = $("#sitesSelected");
+        $("#sitesSelected td").remove();
+
+        var categories = JSON.parse("{{siteCategories}}".replace(/&quot;/g, '\"'));
+
+        rSelected.forEach(site => {
+
+            var selector= `<select class="mb-3 form-control"><option>None</option>`;
+            categories.forEach(category => {
+                selector = selector + `<option>${category}</option>`;
+            });
+            selector = selector + `</select>`;
+            $table.append(
+                `<tr>
+                    <td class='text-black'>
+                        ${ site.url }
+                    </td>
+                    <td class='text-black'>
+                        ${ selector }
+                    </td>
+
+                </tr>`
+            );
+            var x = $('#sitesSelected tr td select').last().val(site.category).change();
+        });
+    });
+
+
+    $( '#assignCategoryConfirm' ).click(function() {
+        var association = []
+        $("#sitesSelected tr").map(function (index, elem) {
+            var categorySelected = $(this).find(":selected").text();
+            var urlSelected = $(this).find("a").text();
+            urlSelected = urlSelected.replace(/\s+/g,'');
+            if (categorySelected && categorySelected !== 'None') {
+                association.push(
+                    {
+                        "category": categorySelected,
+                        "site": urlSelected
+                    }
+                )
+            }
+        });
+        console.log(association);
+
+        let data = {
+            association: JSON.stringify(association),
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+        };
+        jQuery.noConflict();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'dashboard:site:list_sites' %}",
+            data: data,
+            success: function(data) {
+                if (data.error === null) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Successful linking!",
+                        confirmButtonColor: "#28a745",
+                        confirmButtonText: "Continue"
+                    }).then(result => {
+
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                } else {
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "There is some page (or pages) that was already selected!",
+                        text: `${ data.error }`,
+                        confirmButtonColor: "#dc3545",
+                        confirmButtonText: "Continue"
+                    });
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+
+                $("submitConfirmationModal").modal("hide");
+
+                Swal.fire({
+                    icon: "error",
+                    title: "There was an error!",
+                    text: `${ textStatus }, ${ errorThrown }`,
+                    confirmButtonColor: "#dc3545",
+                    confirmButtonText: "Continue"
+                });
+            }
+        });
+
+    
+
+    });
+
 
     $(document).ready(function() {
 
         /* Creating datatables */
-        $('#sites-list').DataTable();
+        sites = $('#sites-list').DataTable({
+            select: {
+                style: 'multi'
+            },
+        });
 
         $(".delete-site").click(function (event) {
     
@@ -116,56 +246,106 @@
                 confirmButtonText : `Yes`,
                 confirmButtonColor: "#ffc107",
                 denyButtonText    : `No`
-                }).then((result) => {
-                    if (result.isConfirmed) {
+            }).then((result) => {
+                if (result.isConfirmed) {
 
-                        $.ajax({
-                        type      : "POST",
-                        url       : url,
-                        data      : data,
-                        success: function (data) {
+                    $.ajax({
+                    type      : "POST",
+                    url       : url,
+                    data      : data,
+                    success: function (data) {
 
-                            if (data.error === null) {
+                        if (data.error === null) {
 
-                            Swal.fire({
-                                icon              : "success",
-                                title             : "The removal was successful!",
-                                confirmButtonColor: "#28a745",
-                                confirmButtonText : "Continue"
-                            }).then((result) => {
+                        Swal.fire({
+                            icon              : "success",
+                            title             : "The removal was successful!",
+                            confirmButtonColor: "#28a745",
+                            confirmButtonText : "Continue"
+                        }).then((result) => {
 
-                                if (result.isConfirmed) {
+                            if (result.isConfirmed) {
 
-                                location.reload();
-                                }
-                            });
-                            } else {
-
-                            Swal.fire({
-                                icon              : "error",
-                                title             : "Oops! There was an error deleting the site.",
-                                text              : `${data.error}`,
-                                confirmButtonColor: "#dc3545",
-                                confirmButtonText : "Continue"
-                            });
+                            location.reload();
                             }
-                        },
-                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        });
+                        } else {
 
-                            Swal.fire({
+                        Swal.fire({
                             icon              : "error",
-                            title             : "There was an error!",
-                            text              : `${textStatus}: ${errorThrown}`,
+                            title             : "Oops! There was an error deleting the site.",
+                            text              : `${data.error}`,
                             confirmButtonColor: "#dc3545",
                             confirmButtonText : "Continue"
-                            });
-                        },
                         });
-                    }
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+
+                        Swal.fire({
+                        icon              : "error",
+                        title             : "There was an error!",
+                        text              : `${textStatus}: ${errorThrown}`,
+                        confirmButtonColor: "#dc3545",
+                        confirmButtonText : "Continue"
+                        });
+                    },
                     });
+                }
                 });
             });
-        
+        });
+
+        /* Save site only if all inputs are filled */
+        $("#vsf-sites-input, #vsf-description-input").on("change paste keyup", function() {
+            if ($("#vsf-sites-input").val() === "" || $("#vsf-description-input").val() === "") {
+                $("#create-sites-btn").attr('disabled', true);
+            } else {
+                $("#create-sites-btn").attr('disabled', false);
+            }
+        });
+        /* Event triggered for creating a site */
+        $("#create-sites-btn").click(function(event) {
+            let $form = $("#site-creation-form");
+            let data = $form.serialize();
+            let url = '{% url "sites:create_site" %}';
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                success: function(data, status) {
+
+                    if (data.error === null) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "The site has been created!",
+                            confirmButtonColor: "#28a745",
+                            confirmButtonText: "Continue"
+                        }).then((result) => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "The name's site is already in use!",
+                            confirmButtonColor: "#ffc107",
+                            confirmButtonText: "Continue"
+                        })
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "There was an error!",
+                        text: `${ textStatus }: ${ errorThrown }`,
+                        confirmButtonColor: "#dc3545",
+                        confirmButtonText: "Continue"
+                    });
+                }
+            });
+        });
+
 </script>
 
 {% endblock custom_scripts %} 

@@ -241,8 +241,7 @@
             let pagesIds = selectedPages.map(v => v.id);
             let url = "{% url 'dashboard:site:list_domains' %}";
             var site = sites.rows({ selected: true }).data().toArray();
-            console.log(site);
-
+            
             if (site.length === 0) return;
 
             site = site[0].associated;
