@@ -545,7 +545,18 @@
             orderable: false,
             searchable: false,
             render: function (data, type, row, meta) {
-              return `<pre class='controlResolverAnswers'> ${prettyPrintJson.toHtml(data)} </pre>`;
+              console.log(data)
+              if (data.isOk) {
+                let html = "<strong>Address:</strong>";
+                html += "<ul>";
+                for (const i in data.json)
+                  html += `<li> <pre class='mb-0'> ${data.json[i]} </pre> </li>`
+
+                html += "</ul>";
+                return html;
+              }
+              else
+                return `<pre class='controlResolverAnswers'> ${prettyPrintJson.toHtml(data)} </pre>`;
             },
           },
           {
