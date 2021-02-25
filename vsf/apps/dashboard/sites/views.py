@@ -10,9 +10,15 @@ import json
 # Local imports
 from apps.main.sites.forms          import SiteForm
 from apps.main.sites.models         import Domain, URL, Site, SiteCategory
+# Permission imports
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
+from apps.main.users import decorators
 
 
 # --- SITES VIEWS --- #
+
+@method_decorator([login_required, decorators.analist_required], name='dispatch')
 class ListSites(VSFLoginRequiredMixin, TemplateView):
     """
         This view is intended to list all the available sites, so you can
@@ -42,7 +48,6 @@ class ListSites(VSFLoginRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        print('VENEZUELA')
         post = dict(request.POST)
 
         assotiation = post.get('association')[0]
@@ -237,6 +242,7 @@ class ListDomains(VSFLoginRequiredMixin, VSFListPaginate):
 
         return JsonResponse({'error' : None})
 
+@method_decorator([login_required, decorators.analist_required], name='dispatch')
 class SiteDetailView(VSFLoginRequiredMixin, VSFListPaginate):
     """
         This view provides a detailed view about a site, showing its description and
@@ -294,6 +300,7 @@ class SiteDetailView(VSFLoginRequiredMixin, VSFListPaginate):
         context['domains'] = current_page
         return context
 
+@method_decorator([login_required, decorators.analist_required], name='dispatch')
 class SitesEndpoint(BaseDatatableView):
 
     columns = [
