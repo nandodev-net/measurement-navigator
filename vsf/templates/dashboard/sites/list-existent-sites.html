@@ -176,6 +176,7 @@
             url: "{% url 'dashboard:site:list_sites' %}",
             data: data,
             success: function(data) {
+                console.log(data.error);
                 if (data.error === null) {
                     Swal.fire({
                         icon: "success",
