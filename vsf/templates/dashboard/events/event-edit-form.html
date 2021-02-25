@@ -17,19 +17,32 @@
                     <div class="col-md-6">
                       <div class="form-group">
                         <label class="bmd-label-floating">Identification</label>
-                        {% render_field form.identification class="form-control" %}
+                        {% if user.is_analist %}
+                            {% render_field form.identification class="form-control" %}
+                        {% else %}
+                            {% render_field form.identification|append_attr:"disabled" class="form-control" %}
+                        {% endif %}
                       </div>
                     </div>
                     <div class="col-md-4">
                         <div class="form-group">
                           <label class="bmd-label-floating">Event Type</label>
-                          {% render_field form.issue_type class="form-control" %}
+                            {% if user.is_analist %}
+                                {% render_field form.issue_type class="form-control" %}
+                            {% else %}
+                                {% render_field form.issue_type|append_attr:"disabled" class="form-control" %}
+                            {% endif %}
                         </div>
                       </div>   
                         <div class="col-md-2">
                           <div class="form-group">
                             <label class="bmd-label-floating">Confirmed</label>
-                            {% render_field form.confirmed class="form-control" %}
+                            {% if user.is_analist %}
+                                {% render_field form.confirmed class="form-control" %}
+                            {% else %}
+                                {% render_field form.confirmed|append_attr:"disabled" class="form-control" %}
+                            {% endif %}
+                            
                           </div>
                         </div>
                       </div>
@@ -39,13 +52,23 @@
                         <div class="col-md-3">
                             <div class="form-group">
                               <label class="bmd-label-floating">Domain</label>
-                              {% render_field form.domain class="form-control" %}
+                                {% if user.is_analist %}
+                                    {% render_field form.domain class="form-control" %}
+                                {% else %}
+                                    {% render_field form.domain|append_attr:"disabled" class="form-control" %}
+                                {% endif %}
+                              
                             </div>
                           </div>
                           <div class="col-md-3">
                             <div class="form-group">
                               <label class="bmd-label-floating">ASN</label>
-                              {% render_field form.asn class="form-control" %}
+                                {% if user.is_analist %}
+                                    {% render_field form.asn class="form-control" %}   
+                                {% else %}
+                                    {% render_field form.asn|append_attr:"disabled" class="form-control" %} 
+                                {% endif %}
+                              
                             </div>
                           </div>
                     <div class="col-md-3">
@@ -70,13 +93,23 @@
                     <div class="col-md-6">
                       <div class="form-group">
                         <label class="bmd-label-floating">Public Evidence</label>
-                        {% render_field form.public_evidence class="form-control" %}
+                        {% if user.is_analist %}
+                            {% render_field form.public_evidence class="form-control" %}
+                        {% else %}
+                            {% render_field form.public_evidence|append_attr:"disabled" class="form-control" %}
+                        {% endif %}
+                        
                       </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
                           <label class="bmd-label-floating">Private Evidence</label>
-                          {% render_field form.public_evidence class="form-control" %}
+                            {% if user.is_analist %}
+                                {% render_field form.public_evidence class="form-control" %}
+                            {% else %}
+                                {% render_field form.public_evidence|append_attr:"disabled" class="form-control" %}
+                            {% endif %}
+                          
                         </div>
                       </div>
                   </div>
@@ -105,7 +138,9 @@
           
             <div class="modal-footer">
                 <button class="btn btn-default pull-left" type="button" data-dismiss="modal">Cancel</button>
-              <button class="submit-btn btn btn-primary" type="submit">Save</button>
+                {% if user.is_analist %}
+                    <button class="submit-btn btn btn-primary" type="submit">Save</button>
+                {% endif %}
             </div>
           
           </form>

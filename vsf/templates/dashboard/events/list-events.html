@@ -179,11 +179,13 @@
       {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
     </nav>
 
+    {% if user.is_analist %}
     <form id="sitesForm">    
       <button type="button" class="btn btn-dark rounded mb-4" id="addToSite" data-toggle="modal" data-target="#submitConfirmationModal">
         <i class="fa fa-folder-plus"></i> Add to Case
       </button>
     </form>
+    {% endif %}
 
 
     <div class="card rounded p-3 mt-4" style="width: 100%;">
@@ -238,20 +240,24 @@
               </td>
               <td>
                   {{ event.asn }}
-              </td>    
+              </td>  
+               
               <td>
                   <button type="button" class="bs-modal btn btn-sm btn-dark" 
                   onclick="open_edit_modal('{% url 'dashboard:events:event_edit' event.id %}')">Expand</button>
-                  {% if event.confirmed %}
-                      <a href="">
-                          <button type="button" class="btn btn-sm btn-danger confirm-case">Deny</button>
-                      </a>
-                  {% else %}
-                  <a href="">
-                      <button type="button" class="btn btn-sm btn-success confirm-case">Confirm</button>
-                  </a>
+                  {% if user.is_analist %} 
+                    {% if event.confirmed %}
+                        <a href="">
+                            <button type="button" class="btn btn-sm btn-danger confirm-case">Deny</button>
+                        </a>
+                    {% else %}
+                    <a href="">
+                        <button type="button" class="btn btn-sm btn-success confirm-case">Confirm</button>
+                    </a>
+                    {% endif %}
                   {% endif %}
               </td>
+              
             </tr>         
             {% endfor %}
           </tbody>
