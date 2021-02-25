@@ -34,10 +34,12 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         ]
 
         for field in fields:
-            prefillAux = get.get(field)
+            getter = get.get(field)
+            prefillAux = getter if getter else ""
             if field == 'start_date' and not prefill:
                 prefillAux = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
             elif field:
+                print(prefillAux)
                 prefill[field] = prefillAux
 
         # ---------------------------------------------------- #

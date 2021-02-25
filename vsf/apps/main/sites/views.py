@@ -84,18 +84,19 @@ class RemoveUrlFromSite(VSFLoginRequiredMixin, View):
         # Get post request data
         post = request.POST
         post = post if post != None else {}
-
+        
         url = post.get('url')
+        
         # Check consistency
         if url == None or url == "" :
             return HttpResponseBadRequest()
-
+            
         # Check if the url is in the database
         try:
-            url_object = URL.objects.get(url=url)
+            url_object = URL.objects.get(url__contains=url)
         except URL.DoesNotExist:
             return Http404()
-
+            
         # Reset site object
         url_object.site = None
         url_object.save()

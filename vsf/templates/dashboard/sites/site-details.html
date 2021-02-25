@@ -107,7 +107,6 @@
       $('.delete-site').click(function ( event ) {
 
         event.preventDefault();
-
         let urlToDelete = event.target.id;
         let urlToPost = '{% url "sites:remove_from_site" %}';
 
@@ -115,8 +114,7 @@
           url                : urlToDelete,
           csrfmiddlewaretoken: "{{ csrf_token }}",
         };
-        console.log(data);
-        console.log(urlToPost);
+        
         Swal.fire({
           icon              : "warning",
           title             : 'Do you want delete this site?',
