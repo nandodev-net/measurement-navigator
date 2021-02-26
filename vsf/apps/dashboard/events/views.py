@@ -64,7 +64,7 @@ class EventsData(BaseDatatableView):
     order_columns = columns
 
     def get_initial_queryset(self):
-        return Event.objects.select_related("case").all()
+        return Event.objects.select_related("cases").all()
 
     def filter_queryset(self, qs):
 
@@ -161,12 +161,14 @@ class EventUpdateView(VSFLoginRequiredMixin, UpdateView):
 
         context['event_start_date'] = query.start_date
 
-        if query.issue_type == 'dns':
+        if query.issue_type == Event.IssueType.DNS:
             submeasurements = query.dns_list.all()
-        elif query.issue_type == 'http':
+        elif query.issue_type == Event.IssueType.HTTP:
             submeasurements = query.http_list.all()
-        else:
+        elif query.issue_type == Event.IssueType.TCP:
             submeasurements = query.tcp_list.all()
+        else:
+            raise ValueError(f"Unexpected query type: {query.issue_type}")
 
         context['measurements'] = []
 
