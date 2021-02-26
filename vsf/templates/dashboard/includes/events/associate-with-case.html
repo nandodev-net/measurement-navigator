@@ -1,0 +1,70 @@
+<div class="modal fade" id="associateModal" tabindex="-1" role="dialog" aria-labelledby="associateModalLabel" aria-hidden="true">
+    <div class="modal-dialog mw-100 w-75" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="associateModalLabel">
+            Associate Event with Case
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+            <span aria-hidden="true">&times;</span>
+        </button>
+        </div>
+        <form id="associateCasesForm" method="POST">
+            <div class="modal-body">
+                <div class="container-fluid">
+
+                    <div class="card rounded p-3 mt-4" style="width: 100%;">
+                        <h5 class="text-weight-bold">Selected Events</h5>
+                        <table class="table table-striped mt-5 datatable" id="selectedEvents">
+                            <thead>
+                                <tr>
+                                <th class="text-center" scope="col">Event Type</th>
+                                <th class="text-center" scope="col">Confirmed</th>
+                                <th class="text-center" scope="col">Start Date</th>
+                                <th class="text-center" scope="col">End Date</th>
+                                <th class="text-center" scope="col">Domain</th>
+                                <th class="text-center" scope="col">ASN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="selectedEvents-tbody">
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card rounded p-3 mt-5">
+                        <h5 class="text-weight-bold">Cases</h5>
+                        <table class="table table-striped mt-5 datatable w-100" id="cases-table">
+                            <thead>
+                                <tr>
+                                    <th class="text-center" scope="col">Title</th>
+                                    <th class="text-center" scope="col">Start Date</th>
+                                    <th class="text-center" scope="col">End Date</th>
+                                    <th class="text-center" scope="col">Category</th>
+                                    <th class="text-center" scope="col">Draft</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">
+                    Close
+                </button>
+                <button type="button" id="associateBtn" class="btn btn-primary">
+                    Associate
+                </button>
+            </div>
+        </form>
+            
+    </div>
+    </div>
+  </div>
+  
