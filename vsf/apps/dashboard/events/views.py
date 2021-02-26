@@ -63,7 +63,7 @@ class EventsData(BaseDatatableView):
     order_columns = columns
 
     def get_initial_queryset(self):
-        return Event.objects.all()
+        return Event.objects.select_related("case").all()
 
     def filter_queryset(self, qs):
 

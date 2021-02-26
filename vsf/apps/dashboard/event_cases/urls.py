@@ -21,4 +21,10 @@ urlpatterns = [
         views.CaseCreateModalView.as_view(),
         name="add_case"
     ),  
+
+    path(
+        'data/',
+        views.CasesData.as_view(),
+        name="data"
+    ),
 ]
