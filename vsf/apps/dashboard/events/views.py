@@ -1,6 +1,7 @@
 # Django imports
-from django.views.generic           import TemplateView, ListView, UpdateView
-from django.shortcuts import get_object_or_404, redirect, render
+from django.views.generic           import TemplateView, ListView, UpdateView, View
+from django.shortcuts               import get_object_or_404, redirect, render
+from django.http                    import JsonResponse
 
 # Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -146,7 +147,6 @@ class EventsData(BaseDatatableView):
 
         return response
 
-
 class EventUpdateView(VSFLoginRequiredMixin, UpdateView):
     form_class = EventForm
     model = Event 
@@ -207,3 +207,35 @@ class EventUpdateView(VSFLoginRequiredMixin, UpdateView):
                 form=form
             )
         )
+
+
+class EventDetail(VSFLoginRequiredMixin, View):
+    """
+        Returns information about a specific event.
+        Expected GET Arguments:
+            - id: Case id.
+    """
+
+    def get(self, request, **kwargs):
+
+        get = self.request.GET or {}
+        eventId = get.get('id')
+
+        if eventId != None:
+            eventObj = Event.objects.get(id = eventId)
+            print(eventObj)
+            print('-------------')
+            data = {
+                "identification": eventObj.identification,
+                "start_date": eventObj.start_date,
+                "end_date": eventObj.end_date,
+                "public_evidence": eventObj.public_evidence,
+                "private_evidence": eventObj.private_evidence,
+                "issue_type": eventObj.issue_type,
+                "domain": eventObj.domain.domain_name,
+                "asn": eventObj.asn.asn
+            }
+            print(data)
+            return JsonResponse(data, safe=False)
+        else:
+            return JsonResponse({})
