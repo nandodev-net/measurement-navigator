@@ -231,6 +231,10 @@
               </td>  
                
               <td>
+                  <button type="button" id="{{ event.id }}" data-toggle="modal" data-target="#eventDetail"
+                  aria-label="eventDetailLabel" class="btn btn-sm btn-primary detail-btn">
+                    Detail
+                  </button>
                   <button type="button" class="bs-modal btn btn-sm btn-dark" 
                   onclick="open_edit_modal('{% url 'dashboard:events:event_edit' event.id %}')">Expand</button>
                   {% if user.is_analist %} 
@@ -254,28 +258,57 @@
   </form>
   
   <div class="modal fade" id='edit_event' role="dialog"></div>
-
-
-  {% block extrajs %}
-    <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
-    <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
-
-
-    <script type="text/javascript">
-        $('#events').DataTable();
-
-        $('measurements').DataTable();
-
-        var $ = jQuery.noConflict()
-
-      function open_edit_modal(url){
-        $('#edit_event').load(url, function(){
-            $(this).modal('show');
-
-      });}
-
-    </script>
-
-  {% endblock extrajs %}
+  {% include "includes/events/detail.html" %}
 
 {% endblock content %}
+{% block custom_scripts %}
+  <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+
+  <script type="text/javascript">
+    
+    'use strict';
+    var events; 
+
+    function open_edit_modal(url){
+      $('#edit_event').load(url, function(){
+        $(this).modal('show');
+      });
+    }
+
+    $('.detail-btn').on("click", function ( event ) {
+      event.preventDefault();
+      $.ajax({
+        url    : "{% url 'dashboard:events:get' %}",
+        type   : "GET",
+        data   : { 'id': event.target.id },
+        success: function (json) {
+          $( '#identification_detail' ).text(json["identification"]);
+          $( '#start_date_detail' ).text(json["start_date"]);
+          $( '#end_date_detail' ).text(json["end_date"]);
+          $( '#public_evidence_detail' ).text(json["public_evidence"]);
+          $( '#private_evidence_detail' ).text(json["private_evidence"]);
+          $( '#issue_type_detail' ).text(json["issue_type"]);
+          $( '#domain_detail' ).text(json["domain"]);
+          $( '#asn_detail' ).text(json["asn"]);
+        }
+      });
+
+    });
+
+    $(document).ready(function() {
+      events = $('#events').DataTable({
+        order: [[2, "desc"]],
+        searching: true,
+        select: {
+          style: 'multi'
+        },
+      });
+    });
+
+  </script>
+
+{% endblock custom_scripts %}
+
+
