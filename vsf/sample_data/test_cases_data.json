@@ -1,0 +1,98 @@
+[
+    {
+        "model": "cases.Category", 
+        "pk": 1, 
+        "fields": {
+            "name": "category_name_test_1",
+            "display_name": "category_display_name_test_1"
+        }
+    },
+    {
+        "model": "cases.Category", 
+        "pk": 2, 
+        "fields": {
+            "name": "category_name_test_2",
+            "display_name": "category_display_name_test_2"
+        }
+    },
+    {
+        "model": "cases.Category", 
+        "pk": 3, 
+        "fields": {
+            "name": "category_name_test_3",
+            "display_name": "category_display_name_test_3"
+        }
+    },
+    {
+        "model": "cases.Category", 
+        "pk": 4, 
+        "fields": {
+            "name": "category_name_test_4",
+            "display_name": "category_display_name_test_4"
+        }
+    },
+    {
+        "model": "cases.Category", 
+        "pk": 5, 
+        "fields": {
+            "name": "category_name_test_5",
+            "display_name": "category_display_name_test_5"
+        }
+    },
+    {
+        "model": "cases.case", 
+        "pk": 6, 
+        "fields": {
+            "title": "Case Test 1",
+            "description": "description_test_1",
+            "case_type": "bloqueo",
+            "start_date": "2021-02-02",
+            "end_date": "2021-02-15",
+            "category": 1,
+            "draft": true,
+            "twitter_search": "One"
+        }
+    },
+    {
+        "model": "cases.case", 
+        "pk": 7, 
+        "fields": {
+            "title": "Case Test 2",
+            "description": "description_test_2",
+            "case_type": "bloqueo",
+            "start_date": "2021-02-02",
+            "end_date": "2021-02-15",
+            "category": 3,
+            "draft": false,
+            "twitter_search": "Two"
+        }
+    },
+    {
+        "model": "cases.case", 
+        "pk": 8, 
+        "fields": {
+            "title": "Case Test 3",
+            "description": "description_test_3",
+            "case_type": "desconexion",
+            "start_date": "2021-02-02",
+            "end_date": "2021-02-15",
+            "category": 5,
+            "draft": true,
+            "twitter_search": "Three"
+        }
+    },
+    {
+        "model": "cases.case", 
+        "pk": 9, 
+        "fields": {
+            "title": "Case Test 4",
+            "description": "description_test_4",
+            "case_type": "relentizacion",
+            "start_date": "2021-02-02",
+            "end_date": "2021-02-15",
+            "draft": false,
+            "category": 5,
+            "twitter_search": "Four"
+        }
+    }
+]
