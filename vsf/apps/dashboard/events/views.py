@@ -1,7 +1,9 @@
 # Django imports
 from django.views.generic           import TemplateView, ListView, UpdateView, View
 from django.shortcuts               import get_object_or_404, redirect, render
+from django.http.response           import HttpResponseBadRequest
 from django.http                    import JsonResponse
+from django.core.serializers.json   import DjangoJSONEncoder
 
 # Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -9,9 +11,11 @@ from vsf.views                      import VSFLoginRequiredMixin
 # Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from datetime                                   import datetime, timedelta
+import json
 
 # Local imports
 from apps.main.events.models    import Event
+from apps.main.cases.models     import Case
 from apps.main.asns.models      import ASN
 
 from .forms                     import EventForm
@@ -52,6 +56,26 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         context['asns'] = ASN.objects.all()
 
         return context
+
+    def post(self, request, *args, **kwargs):
+        post = dict(request.POST)
+        print(post)
+        eventsIds = post['events[]']
+        cases = post['cases[]']
+
+        eventsObjetcs = Event.objects.filter(id__in=eventsIds).all()
+        casesObjects = Case.objects.filter(title__in=cases).all()
+        print(eventsObjetcs)
+        print(casesObjects)
+        try:
+            for case in casesObjects:
+                for event in eventsObjetcs:
+                    case.events.set(event)
+            return JsonResponse({'error' : None})
+
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()
 
 
 class EventsData(BaseDatatableView):
@@ -225,8 +249,18 @@ class EventDetail(VSFLoginRequiredMixin, View):
 
         if eventId != None:
             eventObj = Event.objects.get(id = eventId)
-            print(eventObj)
-            print('-------------')
+
+            cases = [
+                {
+                    "title": case.title,
+                    "start_date": case.start_date,
+                    "end_date": case.end_date,
+                    "category": case.category.name,
+                    "draft": case.draft
+                }
+                for case in eventObj.cases.all()
+            ]
+            
             data = {
                 "identification": eventObj.identification,
                 "start_date": eventObj.start_date,
@@ -235,7 +269,8 @@ class EventDetail(VSFLoginRequiredMixin, View):
                 "private_evidence": eventObj.private_evidence,
                 "issue_type": eventObj.issue_type,
                 "domain": eventObj.domain.domain_name,
-                "asn": eventObj.asn.asn
+                "asn": eventObj.asn.asn,
+                "cases": json.dumps(cases, cls=DjangoJSONEncoder)
             }
             print(data)
             return JsonResponse(data, safe=False)
