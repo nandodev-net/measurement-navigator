@@ -177,12 +177,10 @@
       {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
     </nav>
 
-    {% if user.is_analist %}
-    <form id="sitesForm">    
-      <button type="button" class="btn btn-dark rounded mb-4" id="addToSite" data-toggle="modal" data-target="#submitConfirmationModal">
+    {% if user.is_analist %} 
+      <button type="button" class="btn btn-dark rounded mb-4" id="associateTrigger">
         <i class="fa fa-folder-plus"></i> Add to Case
       </button>
-    </form>
     {% endif %}
 
 
@@ -203,9 +201,9 @@
           <tbody>
             {% for event in object_list %}
             
-            <tr>
+            <tr id="{{ event.id }}">
               <td>
-                  {{ event.issue_type }} {{event.id}}
+                  {{ event.issue_type }}
               </td>
               <td>
                   {% if event.confirmed %}
@@ -264,6 +262,7 @@
   
   <div class="modal fade" id='edit_event' role="dialog"></div>
   {% include "includes/events/detail.html" %}
+  {% include "includes/events/associate-with-case.html" %}
 
 {% endblock content %}
 {% block custom_scripts %}
@@ -275,12 +274,45 @@
     
     'use strict';
     var events; 
+    var casesTable;
 
     function open_edit_modal(url){
       $('#edit_event').load(url, function(){
         $(this).modal('show');
       });
     }
+
+    $( '#associateTrigger' ).click(function(e) {
+      jQuery.noConflict();
+
+      $( '#selectedEvents-tbody' ).empty();
+      var rSelected = events.rows( { selected: true }).data().toArray();
+
+
+      rSelected.forEach(event => {
+        $( '#selectedEvents-tbody' ).append(
+          `<tr>
+            <td>${event[0]}</td>
+            <td>${event[1]}</td>
+            <td>${event[2]}</td>
+            <td>${event[3]}</td>
+            <td>${event[4]}</td>
+            <td>${event[5]}</td>
+          </tr>`
+        );
+      });
+
+      if (rSelected.length === 0){
+        Swal.fire({
+            icon: "error",
+            title: "You must select at least one event",
+            confirmButtonColor: "#dc3545",
+            confirmButtonText: "Continue"
+        });
+      } else {
+        $( '#associateModal' ).modal('show');
+      }   
+    });
 
     $('.detail-btn').on("click", function ( event ) {
       event.preventDefault();
@@ -330,6 +362,53 @@
 
     });
 
+    $( '#associateBtn' ).click(function (event) {
+      var eventsSelected = events.rows( { selected: true }).data().toArray().map((selected) => (
+        selected.DT_RowId
+      ));
+      var casesSelected = casesTable.rows( { selected: true }).data().toArray().map((selected) => (
+        selected.title
+      ))
+
+      $.ajax({
+        type: "POST",
+        url: "{% url 'dashboard:events:all' %}",
+        data: {events: eventsSelected, cases: casesSelected, csrfmiddlewaretoken: "{{ csrf_token }}"},
+        success: function(data) {
+          if (data.error === null) {
+            Swal.fire({
+                icon: "success",
+                title: "Successful linking!",
+                confirmButtonColor: "#28a745",
+                confirmButtonText: "Continue"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+          } else {
+            Swal.fire({
+                icon: "error",
+                title: "Some or all of the selected events are already related to some of the selected cases.",
+                text: `${ data.error }`,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+            });
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $("associateModal").modal("hide");
+          Swal.fire({
+              icon: "error",
+              title: "There was an error!",
+              text: `${ textStatus }, ${ errorThrown }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+      });
+    });
+
     $(document).ready(function() {
       events = $('#events').DataTable({
         order: [[2, "desc"]],
@@ -338,6 +417,69 @@
           style: 'multi'
         },
       });
+      console.log($('#cases-table'));
+      casesTable = $("#cases-table").DataTable({
+        order: [[1, "desc"]],
+        searching: true,
+        processing: true,
+        fixedColumns: true,
+        language: {
+        },
+        serverSide: true,
+        rowId: "id",
+        ajax: {
+          url: '{% url "dashboard:event_cases:data" %}',
+          data: function (data) {
+          },
+          contentType: "application/json; charset=utf-8",  
+          type: "GET",
+        },
+        columns: [
+          {
+            data: "title",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "start_date",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "end_date",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "category",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "draft",
+            orderable: false,
+            searchable: true,
+            render: function (data, type, row, meta) {
+              if (data) {
+                return `<div class="text-success w-100 text-center">
+                          <i class="far fa-check-circle text-success"></i>
+                      </div>`
+              } else {
+                return `<div class="text-danger w-100 text-center">
+                          <i class="far fa-check-circle text-default"></i>
+                      </div>`
+              }            
+            },
+          }
+        ],
+        initComplete: function () {},
+        buttons: [],
+        select: {
+            style: 'multi'
+        },
+      });
+
+
     });
 
   </script>

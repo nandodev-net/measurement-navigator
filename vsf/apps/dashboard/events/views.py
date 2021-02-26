@@ -1,6 +1,7 @@
 # Django imports
 from django.views.generic           import TemplateView, ListView, UpdateView, View
 from django.shortcuts               import get_object_or_404, redirect, render
+from django.http.response           import HttpResponseBadRequest
 from django.http                    import JsonResponse
 from django.core.serializers.json   import DjangoJSONEncoder
 
@@ -14,6 +15,7 @@ import json
 
 # Local imports
 from apps.main.events.models    import Event
+from apps.main.cases.models     import Case
 from apps.main.asns.models      import ASN
 
 from .forms                     import EventForm
@@ -54,6 +56,26 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         context['asns'] = ASN.objects.all()
 
         return context
+
+    def post(self, request, *args, **kwargs):
+        post = dict(request.POST)
+        print(post)
+        eventsIds = post['events[]']
+        cases = post['cases[]']
+
+        eventsObjetcs = Event.objects.filter(id__in=eventsIds).all()
+        casesObjects = Case.objects.filter(title__in=cases).all()
+        print(eventsObjetcs)
+        print(casesObjects)
+        try:
+            for case in casesObjects:
+                for event in eventsObjetcs:
+                    case.events.set(event)
+            return JsonResponse({'error' : None})
+
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()
 
 
 class EventsData(BaseDatatableView):
