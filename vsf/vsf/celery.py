@@ -94,7 +94,7 @@ app.conf.beat_schedule = {
     # Run the hard flag algorithm over all the measurements
     'update-hard-flags':{
         'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
-        'schedule':600,
+        'schedule':7200,
         'args':(),
         'options' : {'queue' : user_transient_queue_name}
     },
