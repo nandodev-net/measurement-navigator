@@ -196,6 +196,7 @@
               <th class="text-center" scope="col">End Date</th>
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
+              <th class="text-center" scope="col">Related Cases</th>
               <th class="text-center" scope="col">Actions</th>
             </tr>
           </thead>
@@ -229,7 +230,11 @@
               <td>
                   {{ event.asn }}
               </td>  
-               
+              <td>
+                 {% for case in event.cases.all %}
+                  <span class="badge badge-pill badge-primary">{{case.title}}</span>
+                 {% endfor %}
+              </td>  
               <td>
                   <button type="button" id="{{ event.id }}" data-toggle="modal" data-target="#eventDetail"
                   aria-label="eventDetailLabel" class="btn btn-sm btn-primary detail-btn">
