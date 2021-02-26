@@ -2,6 +2,7 @@
 from django.views.generic           import TemplateView, ListView, UpdateView, View
 from django.shortcuts               import get_object_or_404, redirect, render
 from django.http                    import JsonResponse
+from django.core.serializers.json   import DjangoJSONEncoder
 
 # Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -9,6 +10,7 @@ from vsf.views                      import VSFLoginRequiredMixin
 # Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from datetime                                   import datetime, timedelta
+import json
 
 # Local imports
 from apps.main.events.models    import Event
@@ -223,8 +225,18 @@ class EventDetail(VSFLoginRequiredMixin, View):
 
         if eventId != None:
             eventObj = Event.objects.get(id = eventId)
-            print(eventObj)
-            print('-------------')
+
+            cases = [
+                {
+                    "title": case.title,
+                    "start_date": case.start_date,
+                    "end_date": case.end_date,
+                    "category": case.category.name,
+                    "draft": case.draft
+                }
+                for case in eventObj.cases.all()
+            ]
+            
             data = {
                 "identification": eventObj.identification,
                 "start_date": eventObj.start_date,
@@ -233,7 +245,8 @@ class EventDetail(VSFLoginRequiredMixin, View):
                 "private_evidence": eventObj.private_evidence,
                 "issue_type": eventObj.issue_type,
                 "domain": eventObj.domain.domain_name,
-                "asn": eventObj.asn.asn
+                "asn": eventObj.asn.asn,
+                "cases": json.dumps(cases, cls=DjangoJSONEncoder)
             }
             print(data)
             return JsonResponse(data, safe=False)

@@ -279,11 +279,13 @@
 
     $('.detail-btn').on("click", function ( event ) {
       event.preventDefault();
+      events = $('#cases_detail').DataTable();
       $.ajax({
         url    : "{% url 'dashboard:events:get' %}",
         type   : "GET",
         data   : { 'id': event.target.id },
         success: function (json) {
+          $("#tbody-cases-detail").empty();
           $( '#identification_detail' ).text(json["identification"]);
           $( '#start_date_detail' ).text(json["start_date"]);
           $( '#end_date_detail' ).text(json["end_date"]);
@@ -292,6 +294,32 @@
           $( '#issue_type_detail' ).text(json["issue_type"]);
           $( '#domain_detail' ).text(json["domain"]);
           $( '#asn_detail' ).text(json["asn"]);
+          var cases = JSON.parse(json['cases']);
+          cases.forEach(el => {
+            var html = `<tr>
+              <td>${el.title}</td>
+              <td>${el.start_date}</td>
+              <td>${el.end_date}</td>
+              <td>${el.category}</td>
+            `
+            if (el.draft) {
+              html = html + `<td><div class="text-success w-100 text-center">
+                    <i class="far fa-check-circle text-success"></i>
+                </div></td>`
+            } else{
+              html = html + `<td>
+                  <div class="text-danger w-100 text-center">
+                      <i class="far fa-check-circle text-default"></i>
+                  </div>
+                </td>`
+            }
+
+            html = html + `</tr>`
+            $("#tbody-cases-detail").append(
+              html
+            );
+          });
+
         }
       });
 
