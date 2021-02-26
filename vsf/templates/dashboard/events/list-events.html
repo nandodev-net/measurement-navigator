@@ -21,8 +21,6 @@
 
 {% block content %}
 
-
-
   <form id="urlForm">
     <nav class="navbar navbar-light bg-light mb-5">
       <div class="container-fluid">
@@ -192,7 +190,6 @@
         <table class="table table-striped mt-5 datatable" id="events">
           <thead>
             <tr>
-              <th class="text-center" scope="col">Associate</th>
               <th class="text-center" scope="col">Event Type</th>
               <th class="text-center" scope="col">Confirmed</th>
               <th class="text-center" scope="col">Start Date</th>
@@ -204,19 +201,10 @@
           </thead>
           <tbody>
             {% for event in object_list %}
+            
             <tr>
               <td>
-                  <div class="form-check">
-                      <label class="form-check-label">
-                          <input name="associated-values" type="checkbox" value="checkedValue"
-                              aria-label="Group of associated events" id="{{ event.id }}"
-                              class="associate-events" data-vsf-domain="{{ event.identification }}"
-                          />
-                      </label>
-                  </div>
-              </td>
-              <td>
-                  {{ event.issue_type }}
+                  {{ event.issue_type }} {{event.id}}
               </td>
               <td>
                   {% if event.confirmed %}
@@ -266,9 +254,6 @@
   </form>
   
   <div class="modal fade" id='edit_event' role="dialog"></div>
-
-
-
 
 
   {% block extrajs %}
