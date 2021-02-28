@@ -63,7 +63,7 @@
             </div> 
           </div>
       
-          <div class="col-5 mt-3">
+          <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-primary ml-1">
               <div class="col-5 mx-auto">
                 <label class='font-weight-bold text-white' for="category">
@@ -84,13 +84,21 @@
             </div> 
           </div>
 
-          <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-3 bg-primary ml-1">
-              <div class="custom-control custom-checkbox mx-auto my-auto py-1">
-                <input type="checkbox" class="custom-control-input mx-auto" id="draft" {% if prefill.draft %} checked {% endif %}>
-                <label class="custom-control-label font-weight-bold text-white mx-auto" for="draft">Draft</label>
+
+
+          <div class="col-4 mt-3">
+            <div class="row align-items-center rounded p-2 bg-primary ml-1">
+              <div class="col-4 mx-auto">
+                <label class="font-weight-bold text-white" for="draft">Draft</label>
               </div>
-            </div> 
+              <div class="col-8 mx-auto">
+                <select id="draft" class="custom-select additional-filter" name="draft">
+                  <option selected value="">Any</option>
+                  <option {% if prefill.draft == 'false' %} selected {% endif %} value="false">False</option>
+                  <option {% if prefill.draft == 'true' %} selected {% endif %} value="true">True</option>
+                </select>
+              </div>
+            </div>   
           </div>
 
           <div class="col-3 my-auto mx-auto">
@@ -146,7 +154,7 @@
     let data = {
       title: $("#title").val(), start_date: $("#start_date").val(),
       end_date: $("#end_date").val(), category: $("#category").val(), 
-      draft: $('#draft').is(":checked")
+      draft: $('#draft').val()
     };
 
     let urlSearch = "{% url 'dashboard:event_cases:list_cases' %}";
@@ -235,7 +243,7 @@
           data.start_date = $("#start_date").val();
           data.end_date = $("#end_date").val();
           data.category = $("#category").val();
-          data.draft = $('#draft').is(":checked");
+          data.draft = $('#draft').val();
         },
         contentType: "application/json; charset=utf-8",  
         type: "GET",
