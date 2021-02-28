@@ -155,8 +155,8 @@
 
 
                     {% if user_object.raw_pass %}
-                        <button type="button" class="bs-modal btn btn-sm btn-warning" 
-                        onclick="open_pass_modal('{% url 'dashboard:users:user_reveal_pass' user_object.id %}')">Show Pass</button>
+                        <button type="button" onclick="open_pass_modal('{% url 'dashboard:users:user_reveal_pass' user_object.id %}')" class="bs-modal btn btn-sm btn-warning" 
+                        >Show Pass</button>
                     {% else %}
                         <button type="button" class="bs-modal btn btn-sm btn-secondary" disabled>Show Pass</button>
                     {% endif %}
