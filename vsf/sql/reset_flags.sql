@@ -32,3 +32,7 @@ set
     flag_type='soft',
     event_id=NULL
 WHERE flag_type='hard';
+
+DELETE FROM cases_case_events;
+
+DELETE FROM events_event;
