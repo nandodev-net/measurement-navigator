@@ -2,6 +2,7 @@
 # directly. Instead, import utils.py so you can have a public api for this functions
 
 # Django imports:
+from django.db.models.query import QuerySet
 from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
 from django.db          import connection
@@ -69,44 +70,57 @@ def count_flags_sql():
                 ).format(submsmnt=subm))
 
 # HARD FLAG LOGIC
-class Grouper():
+def Grouper(queryset : QuerySet, key = lambda m: m['measurement__raw_measurement__input']):
     """
-        Provides an object for lazy grouping a list of objects.
+        Provides a generator object for lazy grouping a list of objects.
         Given an iterator sorted by some key, and the function to retrieve such key,
         provide an iterator over the groups of objects with the same key. Every iteration
         return a list of objects with the same key.
     """
-    def __init__(self, queryset, get_key = lambda m: m['measurement__raw_measurement__input']):
-        self.queryset_it = iter(queryset)
-        self.get_key = get_key
+    # if empty, nothing to do, return an empty list
+    if queryset.count() == 0:
+        return []
 
-    def __iter__(self):
-        try:
-            self.next_elem = next(self.queryset_it)
-        except:
-            self.next_elem = None
-        return self
-    
-    def __next__(self):
-        if self.next_elem is None:
-            raise StopIteration
-        get_input = self.get_key
-        acc = []
-        while True:
-            acc.append(self.next_elem)
-            try:
-                self.next_elem = next(self.queryset_it)
-            except StopIteration:
-                self.next_elem = None
-                if len(acc) == 0:
-                    raise StopIteration
-                else:
-                    return acc
-            if get_input(acc[0]) != get_input(self.next_elem):
-                break
+    queryset = queryset.iterator()
+    acc = [next(queryset)]
 
-        return acc
-    
+    for elem in queryset:
+        # if they have the same key, add it to the list
+        if key(acc[0]) == key(elem):
+            acc.append(elem)
+        else:
+            # otherwhise, return this element and start a new group
+            yield acc
+            acc = [elem]
+        
+    if acc: yield acc
+
+class ModelDeleter():
+    """
+        Efficiently schedule deleting model elements, delete
+        when count is greater than a treshold.
+        model: model class to whose objects are to be deleted
+        treshold: how many measurements to store before deleting (defaults to 1000)
+    """
+    def __init__(self, model, treshold : int = 1000):
+        self.model = model
+        self.buff  = []
+        self.treshold = treshold
+
+    def delete(self, elem):
+        self.buff.append(elem)
+        if len(self.buff) > self.treshold: 
+            self.flush()
+        
+    def flush(self):
+        ids = map(lambda m: m.id, self.buff)
+        self.model.objects.filter(id__in=ids).delete()
+        self.buff = []
+        pass
+
+    def __del__(self):
+        self.flush()
+
 def __bin_search_max(max_date : datetime, measurements : List[SubMeasurement], start : int, end : int) -> int:
     """
         return the index of the latest measurement within the given max_date
