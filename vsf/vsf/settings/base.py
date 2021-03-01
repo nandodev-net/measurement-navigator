@@ -155,7 +155,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Authentication
 # --------------------------------------------------
 
-LOGIN_URL = "login"
+LOGIN_URL = "/dashboard/login"
 
 LOGIN_REDIRECT_URL = "/dashboard"
 

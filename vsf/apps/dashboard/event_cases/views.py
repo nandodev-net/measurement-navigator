@@ -40,8 +40,6 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
             if field == 'start_date' and not prefill:
                 prefillAux = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
             elif field:
-                if prefillAux == 'true': prefillAux = True 
-                elif prefillAux == 'false': prefillAux = False
                 prefill[field] = prefillAux
 
         context = super().get_context_data()

@@ -69,8 +69,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         print(casesObjects)
         try:
             for case in casesObjects:
-                for event in eventsObjetcs:
-                    case.events.set(event)
+                case.events.set(eventsObjetcs)
             return JsonResponse({'error' : None})
 
         except Exception as e:

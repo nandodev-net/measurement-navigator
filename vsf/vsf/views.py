@@ -1,5 +1,5 @@
 # Django imports
-from django.shortcuts               import redirect
+from django.shortcuts               import redirect, HttpResponseRedirect
 from django.contrib.auth.mixins     import LoginRequiredMixin
 from django.contrib.auth.views      import LoginView
 
@@ -16,3 +16,4 @@ class VSFLoginRequiredMixin(LoginRequiredMixin):
 
 class VSFLogin(LoginView):
     redirect_authenticated_user = True
+
