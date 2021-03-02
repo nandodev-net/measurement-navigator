@@ -58,7 +58,7 @@ class CreateSiteView(VSFLoginRequiredMixin, CreateView):
             'error' : null | 'unvalid_fields'# A string specifying type of error, or null if no errors
         }
     """
-    fields = ['name', 'description_spa', 'description_eng']
+    fields = ['name', 'description_spa', 'description_eng', 'category']
     model  = Site
 
     def form_invalid(self, form):
