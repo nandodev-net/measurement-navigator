@@ -70,19 +70,18 @@ def count_flags_sql():
                 ).format(submsmnt=subm))
 
 # HARD FLAG LOGIC
-def Grouper(queryset : QuerySet, key = lambda m: m['measurement__raw_measurement__input']):
+def Grouper(queryset, key = lambda m: m['measurement__raw_measurement__input']):
     """
         Provides a generator object for lazy grouping a list of objects.
         Given an iterator sorted by some key, and the function to retrieve such key,
         provide an iterator over the groups of objects with the same key. Every iteration
         return a list of objects with the same key.
     """
-    # if empty, nothing to do, return an empty list
-    if queryset.count() == 0:
-        return []
 
-    queryset = queryset.iterator()
-    acc = [next(queryset)]
+    try:
+        acc = [next(queryset)]
+    except StopIteration:
+        return []
 
     for elem in queryset:
         # if they have the same key, add it to the list
@@ -104,53 +103,40 @@ class ModelDeleter():
     """
     def __init__(self, model, treshold : int = 1000):
         self.model = model
-        self.buff  = []
+        self.buff  = set()
         self.treshold = treshold
 
+    # Schedule an element to delete
     def delete(self, elem):
-        self.buff.append(elem)
+        self.buff.add(elem)
         if len(self.buff) > self.treshold: 
             self.flush()
         
+    # actually delete scheduled objects
     def flush(self):
         ids = map(lambda m: m.id, self.buff)
-        self.model.objects.filter(id__in=ids).delete()
-        self.buff = []
-        pass
+        self.model.objects.filter(id__in=list(ids)).delete()
+        self.buff = set()
 
+    # delete all before destroy
     def __del__(self):
         self.flush()
 
-def __bin_search_max(max_date : datetime, measurements : List[SubMeasurement], start : int, end : int) -> int:
-    """
-        return the index of the latest measurement within the given max_date
-    """
-
-    if start==end: return start
-
-    # just a shortcut
-    start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
-
-    for i in range(end, start - 1, -1):
-        if start_time(measurements[i]) <= max_date: return i
-
-    lo = start
-    hi = end
-    
+def _bin_search_max(indexable, upper_bound, start : int = 0, end : int = None, key = lambda x : x) -> int:
+    lo : int = start
+    hi : int = end or (len(indexable) - 1)
 
     while lo < hi:
         mid = lo + (hi - lo) // 2
 
-        if start_time(measurements[mid]) > max_date:
-            hi = mid
-        else:
+        if key(indexable[mid]) <= upper_bound:
             lo = mid
-        if hi - lo == 1:
-            return_hi = int(start_time(measurements[hi]) <= max_date)
-            # branchless since this is hot code
-            return hi * return_hi + lo * (1 - return_hi)
+        else:
+            hi = mid
 
-    return hi
+        if hi - lo == 1: break
+
+    return hi if key(indexable[hi]) <= upper_bound else lo
 
 def _event_creator(min_date : datetime, max_date : datetime, asn : ASN, domain : Domain, type : str) -> Event:
     """
@@ -188,7 +174,7 @@ def select( measurements : List[SubMeasurement],
     result : List[List[SubMeasurement]] = []
 
     # shortcuts
-    start_time = lambda m : m.measurement.raw_measurement.measurement_start_time
+    start_time = lambda m : m.start_time
     anomaly_count = lambda lo, hi : measurements[hi].previous_counter -\
                                     measurements[lo].previous_counter +\
                                     (measurements[lo].flag_type != SubMeasurement.FlagType.OK)
@@ -202,7 +188,7 @@ def select( measurements : List[SubMeasurement],
             lo += 1
             hi = min(hi+1, n_meas-1)
             continue
-        max_in_date = __bin_search_max(start_time(measurements[lo]) + timedelta, measurements, lo, hi)
+        max_in_date = _bin_search_max(measurements, start_time(measurements[lo]) + timedelta, lo, hi, start_time)
         n_anomalies = anomaly_count(lo, max_in_date)
         # If too many anomalies in this interval:
         if n_anomalies < minimum_measurements:
@@ -224,11 +210,12 @@ def select( measurements : List[SubMeasurement],
             lo = last_index
             hi = min(lo + interval_size - 1, n_meas-1)
             # search for anomaly measurements whose start time is within the given window 
-            max_in_date = __bin_search_max(
-                                start_time(measurements[last_index])+timedelta, 
+            max_in_date = _bin_search_max(
                                 measurements, 
+                                start_time(measurements[last_index])+timedelta, 
                                 lo, 
-                                hi)
+                                hi,
+                                start_time)
             n_anomalies = anomaly_count(last_index, max_in_date)
 
             lo = min(lo+1, n_meas-1)
@@ -256,7 +243,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     soft = SubMeasurement.FlagType.SOFT
     hard = SubMeasurement.FlagType.HARD
 
-    start_time = lambda m: m.measurement.raw_measurement.measurement_start_time
+    start_time = lambda m: m.start_time
 
     # Filter measurements by type
     resulting_event : Event = None
@@ -299,10 +286,10 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             max_date = start
 
     # Iterate over hard flags setting up new event
-    events_to_delete = set()
+    events_to_delete = ModelDeleter(Event)
     for measurement in  hard_flags:
         if measurement.event != resulting_event:
-            events_to_delete.add(measurement.event)
+            events_to_delete.delete(measurement.event)
             measurement.event = resulting_event
             meas_to_update.append(measurement)
             measurement.flagged = True
@@ -311,9 +298,6 @@ def merge(measurements_with_flags : List[SubMeasurement]):
         resulting_event.end_date   = max(max_date, resulting_event.end_date)
         resulting_event.start_date = min(min_date, resulting_event.start_date)
         resulting_event.save()
-
-    # Delete innecesary events
-    for event in events_to_delete: event.delete()
 
     # Update changed measurements
     reference_measurement = measurements_with_flags[0]
@@ -352,10 +336,10 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                                             domain_id,\
                                             subms.id as id,\
                                             flagged,\
-                                            probe_asn\
+                                            ms.asn_id as probe_asn,\
+                                            raw_measurement_id\
                                         FROM    \
                                             measurements_measurement ms JOIN  submeasurements_{label} subms ON ms.id=subms.measurement_id\
-                                                                        JOIN  measurements_rawmeasurement rms ON ms.raw_measurement_id=rms.id        \
                                     ),\
                                     dom_to_update as (\
                                         SELECT DISTINCT \
@@ -365,9 +349,9 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                                         WHERE NOT flagged\
                                     ),\
                                     valid_subms as (\
-                                        SELECT id, probe_asn, domain_id \
+                                        SELECT id, probe_asn, domain_id, raw_measurement_id \
                                         FROM \
-                                            measurements ms JOIN dom_to_update ON dom_to_update.domain = ms.domain_id and ms.probe_asn=dom_to_update.asn\
+                                            measurements ms JOIN dom_to_update ON dom_to_update.domain = ms.domain_id AND ms.probe_asn=dom_to_update.asn\
                                     )\
                                 SELECT \
                                     submeasurements_{label}.id, \
@@ -376,10 +360,12 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                                     submeasurements_{label}.flag_type,\
                                     domain_id,\
                                     previous_counter,\
-                                    probe_asn \
+                                    valid_subms.probe_asn as probe_asn, \
+                                    rms.measurement_start_time as start_time\
                                 FROM \
                                     submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id\
-                                ORDER BY domain_id, probe_asn, previous_counter, id;")
+                                                            JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
+                                ORDER BY domain_id, probe_asn, start_time, previous_counter;")
         groups = filter(
                         lambda l:len(l) >= minimum_measurements,
                         Grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
