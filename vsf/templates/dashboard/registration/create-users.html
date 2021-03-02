@@ -22,9 +22,9 @@
 {% endblock route %}
 
 {% block content %}
-<form id="urlForm">
+<form id="urlForm" class="py-3 px-5" style="width: 1000px;">
 
-    <div class="card rounded p-3 mt-4" style="width: 100%;">
+    <div class="card rounded p-4 mt-4" style="width: 100%;">
         <form method="post">
             {% csrf_token %}
                 
@@ -74,10 +74,15 @@
               </div>
 
 
-            <button type="submit" class="btn btn-info " style="float: right;">Register</button>
+            <button type="submit" class="btn btn-primary " style="float: right;">Register</button>
             <div class="clearfix"></div>
           </form>
     </div>
 </form>
 
 {% endblock content %}
+{% block custom_scripts %}
+
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+{% endblock custom_scripts %} 
