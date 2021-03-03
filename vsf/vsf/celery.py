@@ -92,12 +92,12 @@ app.conf.beat_schedule = {
         'options' : {'queue' : transient_queue_name}
     },
     # Run the hard flag algorithm over all the measurements
-    #'update-hard-flags':{
-    #    'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
-    #    'schedule':7200,
-    #    'args':(),
-    #    'options' : {'queue' : user_transient_queue_name}
-    #},
+    'update-hard-flags':{
+        'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
+        'schedule':7200,
+        'args':(),
+        'options' : {'queue' : user_transient_queue_name}
+    },
     'check-anomaly-rate':{
         'task':'apps.main.early_alerts.tasks.check_anomaly_rate',
         'schedule':600,
