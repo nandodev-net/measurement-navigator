@@ -37,6 +37,7 @@
             name="identification"
             />
           </div>
+
           <div class="col-4">
             <div class="row align-items-center rounded p-2 bg-dark ml-1">
               <div class="col-5 mx-auto">
@@ -176,7 +177,7 @@
       </div>   
       {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
     </nav>
-
+    
     {% if user.is_analist %} 
       <button type="button" class="btn btn-dark rounded mb-4" id="associateTrigger">
         <i class="fa fa-folder-plus"></i> Add to Case
@@ -199,62 +200,6 @@
             </tr>
           </thead>
           <tbody>
-            {% for event in object_list %}
-            
-            <tr id="{{ event.id }}">
-              <td>
-                  {{ event.issue_type }}
-              </td>
-              <td>
-                  {% if event.confirmed %}
-                  <div class="text-success w-100 text-center">
-                      <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
-                  </div>
-                  {% else %}
-                  <div class="text-danger w-100 text-center">
-                      <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
-                  </div>
-                  {% endif %}
-              </td>
-              <td>
-                  {{ event.start_date }}
-              </td>
-              <td>
-                  {{ event.end_date }}
-              </td>
-              <td>
-                  {{ event.domain }}
-              </td>
-              <td>
-                  {{ event.asn }}
-              </td>  
-              <td>
-                 {% for case in event.cases.all %}
-                  <span class="badge badge-pill badge-primary">{{case.title}}</span>
-                 {% endfor %}
-              </td>  
-              <td>
-                  <button type="button" id="{{ event.id }}" data-toggle="modal" data-target="#eventDetail"
-                  aria-label="eventDetailLabel" class="btn btn-sm btn-primary detail-btn">
-                    Detail
-                  </button>
-                  <button type="button" class="bs-modal btn btn-sm btn-dark" 
-                  onclick="open_edit_modal('{% url 'dashboard:events:event_edit' event.id %}')">Expand</button>
-                  {% if user.is_analist %} 
-                    {% if event.confirmed %}
-                        <a href="">
-                            <button type="button" class="btn btn-sm btn-danger confirm-case">Deny</button>
-                        </a>
-                    {% else %}
-                    <a href="">
-                        <button type="button" class="btn btn-sm btn-success confirm-case">Confirm</button>
-                    </a>
-                    {% endif %}
-                  {% endif %}
-              </td>
-              
-            </tr>         
-            {% endfor %}
           </tbody>
         </table>
     </div>
@@ -314,13 +259,13 @@
       }   
     });
 
-    $('.detail-btn').on("click", function ( event ) {
-      event.preventDefault();
-      events = $('#cases_detail').DataTable();
+    $( '#events' ).on('dblclick', 'tbody tr', function() {
+      var id = $( this ).attr( 'id' );
+      var associated_cases = $('#cases_detail').DataTable();
       $.ajax({
         url    : "{% url 'dashboard:events:get' %}",
         type   : "GET",
-        data   : { 'id': event.target.id },
+        data   : { 'id': id },
         success: function (json) {
           $("#tbody-cases-detail").empty();
           $( '#identification_detail' ).text(json["identification"]);
@@ -360,11 +305,15 @@
         }
       });
 
+      jQuery.noConflict();
+      $("#eventDetail").modal("show");
     });
 
     $( '#associateBtn' ).click(function (event) {
+      var eventsSelected = events.rows( { selected: true }).data().toArray();
+      
       var eventsSelected = events.rows( { selected: true }).data().toArray().map((selected) => (
-        selected.DT_RowId
+        selected.id
       ));
       var casesSelected = casesTable.rows( { selected: true }).data().toArray().map((selected) => (
         selected.title
@@ -387,6 +336,7 @@
                 }
             });
           } else {
+            console.log(data)
             Swal.fire({
                 icon: "error",
                 title: "Some or all of the selected events are already related to some of the selected cases.",
@@ -411,18 +361,120 @@
 
     $(document).ready(function() {
       events = $('#events').DataTable({
-        order: [[2, "desc"]],
         searching: true,
+        processing: true,
+        language: {
+        },
+        serverSide: true,
+        rowId: "id",
+        order: [[2, "desc"]],
+        ajax: {
+          url: '{% url "dashboard:events:data" %}',
+          data: function (data) {
+
+            data.identification = $("#identification").val() ;
+            data.confirmed = $("#confirmed").val();
+            data.start_time = $("#start_time").val();
+            data.end_time = $("#end_time").val();
+            data.public_evidence = $("#public_evidence").val(); 
+            data.private_evidence = $("#private_evidence").val();
+            data.issue_type = $("#issue_type").val();
+            data.domain = $("#domain").val();
+
+            console.log(data);
+          },
+          contentType: "application/json; charset=utf-8",  
+          type: "GET",
+        },
+        columns: [
+          {
+            data: "issue_type",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "confirmed",
+            orderable: false,
+            searchable: false,
+            render: function (data, type, row, meta) {
+              if (data) {
+                return `<div class="text-success w-100 text-center">
+                          <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                        </div>`
+              } else {
+                return `<div class="text-danger w-100 text-center">
+                          <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                        </div>`
+              }
+            },
+          },
+          {
+            data: "start_date",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "end_date",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "domain",
+            orderable: false,
+            searchable: true,
+          },
+          {
+            data: "asn",
+            orderable: false,
+            searchable: true,
+          },
+          {
+            data: "cases",
+            orderable: false,
+            searchable: false,
+            render: function (data, type, row, meta) {
+              var pills = ``;
+              data.forEach( title => {
+                pills = pills + `<span class="badge badge-pill badge-primary">${title}</span>`
+              });
+              return pills;
+            },
+          },
+          {
+            data: "actions",
+            orderable: false,
+            searchable: false,
+            render: function (data, type, row, meta) {
+
+              var render = ``;
+
+              if ("{{user.is_analist}}" == "True"){
+                if (data.confirmed) {
+                  render = render + `<a href="">
+                      <button type="button" class="btn btn-sm btn-danger confirm-case">Deny</button>
+                    </a>`;
+                } else {
+                  render = render + `<a href="">
+                      <button type="button" class="btn btn-sm btn-success confirm-case">Confirm</button>
+                    </a>`;
+                }
+              }
+              return render;
+
+            },
+          }
+        ],
+        initComplete: function () {},
+        buttons: [],
         select: {
           style: 'multi'
         },
       });
-      console.log($('#cases-table'));
+      
       casesTable = $("#cases-table").DataTable({
         order: [[1, "desc"]],
         searching: true,
         processing: true,
-        fixedColumns: true,
         language: {
         },
         serverSide: true,
