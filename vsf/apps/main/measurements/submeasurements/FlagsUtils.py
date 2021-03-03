@@ -365,7 +365,7 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                                 FROM \
                                     submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id\
                                                             JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
-                                ORDER BY domain_id, probe_asn, start_time, previous_counter;")
+                                ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
         groups = filter(
                         lambda l:len(l) >= minimum_measurements,
                         Grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
