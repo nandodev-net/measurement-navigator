@@ -51,7 +51,8 @@ def hard_flag_task():
     minimum_measurements = config.hardflag_minmeasurements if config else 3
 
     try:
-        result['result'] = hard_flag(timedelta, minimum_measurements)
+        result['counted'] = count_flags_sql()
+        result['result']  = hard_flag(timedelta, minimum_measurements)
     except Exception as e:
         result['error'] = str(e)
 
