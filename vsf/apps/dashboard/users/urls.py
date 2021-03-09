@@ -41,4 +41,16 @@ urlpatterns = [
         name="user_activation"
     ),  
 
+    path(
+        'createpass/<int:pk>',
+        views.CustomUserCreatePass.as_view(),
+        name="user_pass_create"
+    ), 
+
+    path(
+        'profile/',
+        views.UserProfileView.as_view(),
+        name="user_profile"
+    ),  
+
 ]

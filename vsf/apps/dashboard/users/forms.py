@@ -23,3 +23,13 @@ class CustomUserForm(forms.ModelForm):
             'role',
         ]
 
+
+class CustomUserPassForm(forms.ModelForm):
+    password1 = forms.CharField(required=True) 
+    password2 = forms.CharField(required=True) 
+    class Meta:
+        model = CustomUser
+        fields = [
+            'password1',
+            'password2',
+        ]

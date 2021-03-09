@@ -1,4 +1,5 @@
 # Django imports
+from django.shortcuts               import redirect, HttpResponseRedirect
 from django.db.models.query         import QuerySet
 from django.core.paginator          import Paginator, Page
 from django.views.generic           import TemplateView, ListView, View, CreateView
@@ -61,6 +62,14 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
             page_size: number of items per page
     """
     template_name = "index.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        
+        if request.user.is_authenticated and request.user.raw_pss:
+            return HttpResponseRedirect("/dashboard/users/createpass/"+str(request.user.id))
+        else:
+            return super(Dashboard, self).dispatch(request, *args, **kwargs)
+
 
     def get_context_data(self, **kwargs):
         # Get parent context:
