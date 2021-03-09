@@ -181,22 +181,22 @@
       </div>
       <div class="collapse navbar-collapse">
         
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav ml-auto mr-5">
           <li>
             <div class="dropdown drp-user">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                <i class="feather icon-user"></i>
+                <i class="feather icon-user"></i> {{user.username}}
               </a>
               <div class="dropdown-menu dropdown-menu-right profile-notification">
                 <ul class="pro-body">
                   <li>
-                    <a href="#" class="dropdown-item">
-                      <i class="feather icon-settings"></i> Settings
+                    <a href="{% url 'dashboard:users:user_profile' %}" class="dropdown-item">
+                      <i class="feather icon-user"></i> Profile
                     </a>
                   </li>
                   <li>
                     <a href="{% url 'admin:index' %}" class="dropdown-item">
-                      <i class="feather icon-clipboard"></i> Admin
+                      <i class="feather icon-clipboard"></i> Admin Site
                     </a>
                   </li>
                   <li>

@@ -9,8 +9,13 @@ class Config(models.Model):
     )
 
     hardflag_minmeasurements = models.IntegerField(
-        default=3,
+        default=7,
         verbose_name = 'HardFlag Minimum Measurements',
+    )
+
+    hardflag_interval_size = models.IntegerField(
+        default=10,
+        verbose_name = "How many measurements to check in each iteration of the algorithm"
     )
 
     def clean(self):

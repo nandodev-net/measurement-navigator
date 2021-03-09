@@ -59,7 +59,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
 
     def post(self, request, *args, **kwargs):
         post = dict(request.POST)
-        print(post)
+        
         eventsIds = post['events[]']
         cases = post['cases[]']
 
@@ -87,7 +87,7 @@ class EventsData(BaseDatatableView):
     order_columns = columns
 
     def get_initial_queryset(self):
-        return Event.objects.select_related("case").all()
+        return Event.objects.all()
 
     def filter_queryset(self, qs):
 
@@ -156,16 +156,19 @@ class EventsData(BaseDatatableView):
         response = []
         for event in qs:
             
+            cases_title_related = [ case.title for case in event.cases.all() ]
+
             response.append({
-                'identification': event.identification, 
+                'id': event.id,
+                'identification': event.identification,
+                'issue_type': event.issue_type, 
                 'confirmed': event.confirmed, 
                 'start_date': event.start_date, 
                 'end_date': event.end_date, 
-                'public_evidence': event.public_evidence, 
-                'private_evidence': event.private_evidence, 
-                'issue_type': event.issue_type, 
                 'domain': event.domain.domain_name, 
-                'asn': event.asn.asn
+                'asn': event.asn.asn,
+                'cases': cases_title_related,
+                "actions": {"confirmed": event.confirmed}
             })
 
         return response
@@ -184,12 +187,14 @@ class EventUpdateView(VSFLoginRequiredMixin, UpdateView):
 
         context['event_start_date'] = query.start_date
 
-        if query.issue_type == 'dns':
+        if query.issue_type == Event.IssueType.DNS:
             submeasurements = query.dns_list.all()
-        elif query.issue_type == 'http':
+        elif query.issue_type == Event.IssueType.HTTP:
             submeasurements = query.http_list.all()
-        else:
+        elif query.issue_type == Event.IssueType.TCP:
             submeasurements = query.tcp_list.all()
+        else:
+            raise ValueError(f"Unexpected query type: {query.issue_type}")
 
         context['measurements'] = []
 

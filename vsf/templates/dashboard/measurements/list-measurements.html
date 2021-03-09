@@ -3,16 +3,6 @@
 {% block custom_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
 <link rel="stylesheet" type="text/css" href="{% static 'css/select2.css' %}" /> 
-<style>
-  table{
-    margin: 0 auto;
-    width: 100%;
-    clear: both;
-    border-collapse: collapse;
-    table-layout: fixed; 
-    word-wrap: break-word; 
-  }
-</style>
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Measurements {% endblock tab_title %}
@@ -419,7 +409,6 @@
       order: [[2, "desc"]],
       searching: true,
       processing: true,
-      fixedColumns: true,
       language: {
       },
       serverSide: true,

@@ -47,11 +47,18 @@ def hard_flag_task():
 
     # parse config
     config = Config.objects.all().first()
-    timedelta = config.hardflag_timewindow if config else timedelta(days=1)
-    minimum_measurements = config.hardflag_minmeasurements if config else 3
+    if config:
+        delta = config.hardflag_timewindow 
+        minimum_measurements = config.hardflag_minmeasurements 
+        interval_size = config.hardflag_interval_size
+    else:
+        delta = timedelta(days=1)
+        minimum_measurements = 3
+        interval_size = 10
 
     try:
-        result['result'] = hard_flag(timedelta, minimum_measurements)
+        result['counted'] = count_flags_sql()
+        result['result']  = hard_flag(delta, minimum_measurements, interval_size)
     except Exception as e:
         result['error'] = str(e)
 

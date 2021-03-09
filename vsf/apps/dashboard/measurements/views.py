@@ -129,6 +129,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             "id",
             "anomaly",
             "site",
+            "site__name",
             "flags"
         )
 
