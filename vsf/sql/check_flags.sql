@@ -21,4 +21,4 @@ WITH
                                         JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id
         ORDER BY domain, asn, start_time, prev_counter, subm_id
     )
-select subm_id, domain, asn, start_time, flag, event_id, prev_counter, flagged, counted from measurements where flag<>'ok';
+select subm_id, domain, asn, start_time, flag, event_id, prev_counter, flagged, counted from measurements;
