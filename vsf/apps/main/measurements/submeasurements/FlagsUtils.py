@@ -311,7 +311,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
 
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
     
-def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements : int = 3):
+def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements : int = 7, interval_size : int = 10):
     """
         This function evaluates the measurements and flags them properly in the database
         params:
@@ -319,6 +319,7 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                             contained
             minimum_measurements =  minimum ammount of too-near measurements to consider a hard
                                     flag
+            interval_size = how many measurements to consider in each step of the algorithm
     """
 
     submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns')]
@@ -373,7 +374,7 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
         for group in groups:
-            weird_measurements = select(group, time_window,minimum_measurements)
+            weird_measurements = select(group, time_window,minimum_measurements, interval_size)
             for sub_group in weird_measurements:
                 merge(sub_group)
         
