@@ -10,5 +10,23 @@ from django.contrib import admin
 from .models import *
 # Register your models here.
 
-admin.site.register(Measurement)
-admin.site.register(RawMeasurement)
+class MeasurementAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'domain',
+        'asn',
+        'raw_measurement_id',
+        'anomaly'
+    )
+
+class RawMeasurementAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'probe_asn',
+        'test_name',
+        'measurement_start_time',
+        'input'
+    )
+
+admin.site.register(Measurement, MeasurementAdmin)
+admin.site.register(RawMeasurement, RawMeasurementAdmin)
