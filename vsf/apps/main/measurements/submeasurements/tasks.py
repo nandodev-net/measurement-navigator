@@ -15,7 +15,8 @@ from apps.configs.models import Config
 class SUBMEASUREMENTS_TASKS:
     COUNT_FLAGS = 'count_flags'
     HARD_FLAGS  = 'hard_flags'
-    
+
+# maybe deprecated, merged with hard_flag_task 
 @shared_task(time_limit=3600, vsf_name=SUBMEASUREMENTS_TASKS.COUNT_FLAGS, base=VSFTask)
 def count_flags_submeasurements():
     name = SUBMEASUREMENTS_TASKS.COUNT_FLAGS
@@ -64,7 +65,3 @@ def hard_flag_task():
 
     result['ran'] = True
     return result
-
-@shared_task(time_limit=10, vsf_name = "test_task", base=VSFTask)
-def test_task():
-    return "corrí"

@@ -135,6 +135,9 @@ class Site(models.Model):
         on_delete=models.SET_NULL
     )
 
+    def __str__(self) -> str:
+        return f"[{self.name}]"
+
 class URL(models.Model):
     """
         This model represents a simple URL that may (or not) be related
