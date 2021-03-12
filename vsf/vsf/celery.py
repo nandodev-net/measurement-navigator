@@ -70,12 +70,12 @@ app.conf.task_queues = (transient_queue, user_transient_queue, celery_queue)
 # --------- Celery Beat config: Set up periodic tasks --------- #
 app.conf.beat_schedule = {
     # fp update to search for new recent measurements in the fast path
-    'update-fastpath':{
-        'task': 'apps.api.fp_tables_api.tasks.fp_update',
-        'schedule':3600,
-        'args':(None, None, False),
-        'options' : {'queue' : transient_queue_name}
-    },
+    # 'update-fastpath':{
+    #     'task': 'apps.api.fp_tables_api.tasks.fp_update',
+    #     'schedule':3600,
+    #     'args':(None, None, False),
+    #     'options' : {'queue' : transient_queue_name}
+    # },
     # measurement_update to check for complete measurements to download
     'update-measurements':{
         'task':'apps.api.fp_tables_api.tasks.measurement_update',
@@ -85,7 +85,7 @@ app.conf.beat_schedule = {
     },
     'update-hard-flags':{
         'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
-        'schedule':7200,
+        'schedule':600,
         'args':(),
         'options' : {'queue' : user_transient_queue_name}
     },
