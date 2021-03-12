@@ -49,7 +49,7 @@ def hard_flag_task():
     # parse config
     config = Config.objects.all().first()
     if config:
-        delta = config.hardflag_timewindow 
+        delta = timedelta(days=config.hardflag_timewindow)  
         minimum_measurements = config.hardflag_minmeasurements 
         interval_size = config.hardflag_interval_size
     else:
