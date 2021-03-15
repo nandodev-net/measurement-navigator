@@ -23938,9 +23938,10 @@ table.dataTable tbody > tr > .selected th.select-checkbox:after,
 table.dataTable tbody > tr.selected td.select-checkbox:after,
 table.dataTable tbody > tr.selected th.select-checkbox:after {
     content: '\2714';
-    margin-top: -11px;
-    margin-left: -4px;
     text-align: center;
+    margin-left: 0;
+    margin-top: -2px;
+    color: gray;
 }
 
 div.dt-button-info {

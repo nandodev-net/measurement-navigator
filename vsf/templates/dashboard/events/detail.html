@@ -1,0 +1,117 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+{% block custom_stylesheet %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+{% endblock custom_stylesheet %}
+
+{% block tab_title %} VSF - Events {% endblock tab_title %}
+{% block title %} Events {% endblock title %}
+{% block sub_title %} Event Detail {% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+  <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:events:all' %}">Events List</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'dashboard:events:detail' object.id %}">Event Detail</a>
+  </li>
+
+{% endblock route %}
+{% block content %}
+
+<div class="col-12">
+    <div class="card p-5">
+        <h3 class="text-primary text-center px-5">Event {{object.id}}</h3>
+    </div>
+</div>
+
+<div class="col-10"></div>
+<div class="col-2"><button class='btn btn-success' type='button'> Confirm </button></div>
+
+<div class="col-12">
+    <div class="card mt-4 p-5">
+        <form>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Identification</h5>
+                </div>
+                <div class="col-9">
+                    <p>{{ object.identification }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Start Date</h5>
+                </div>
+                <div class="col-9">
+                    <p>{{ object.start_date }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">End Date</h5>
+                </div>
+                <div class="col-9">
+                    <p>{{ object.end_date }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Public Evidence</h5>
+                </div>
+                <div class="col-9">
+                    <p>{{ object.public_evidence }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Private Evidence</h5>
+                </div>
+                <div class="col-9">
+                    <p>{{ object.private_evidence }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Issue Type</h5>
+                </div>
+                <div class="col-9">
+                    <p>{{ object.issue_type }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Domain</h5>
+                </div>
+                <div class="col-9">
+                    <p>{{ object.domain }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">ASN</h5>
+                </div>
+                <div class="col-9">
+                    <p>{{ object.asn }}</p>
+                </div>
+            </div>
+
+            falta confirmado, booleano de continuacion de eventos, relacion con casos, submediciones asociadas
+        </form>
+    </div>
+</div>
+
+{% endblock content %}
+{% block custom_scripts %}
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+<script>
+
+</script>
+{% endblock custom_scripts %}
+

@@ -189,13 +189,14 @@
         <table class="table table-striped mt-5 datatable" id="events">
           <thead>
             <tr>
+              <th class="text-center" scope="col"> </th>
               <th class="text-center" scope="col">Event Type</th>
               <th class="text-center" scope="col">Confirmed</th>
               <th class="text-center" scope="col">Start Date</th>
               <th class="text-center" scope="col">End Date</th>
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
-              <th class="text-center" scope="col">Related Cases</th>
+              <th class="text-center" scope="col">Related Case</th>
               <th class="text-center" scope="col">Actions</th>
             </tr>
           </thead>
@@ -260,14 +261,15 @@
     });
 
     $( '#events' ).on('dblclick', 'tbody tr', function() {
+
       var id = $( this ).attr( 'id' );
-      var associated_cases = $('#cases_detail').DataTable();
+
       $.ajax({
         url    : "{% url 'dashboard:events:get' %}",
         type   : "GET",
         data   : { 'id': id },
         success: function (json) {
-          $("#tbody-cases-detail").empty();
+          
           $( '#identification_detail' ).text(json["identification"]);
           $( '#start_date_detail' ).text(json["start_date"]);
           $( '#end_date_detail' ).text(json["end_date"]);
@@ -276,36 +278,10 @@
           $( '#issue_type_detail' ).text(json["issue_type"]);
           $( '#domain_detail' ).text(json["domain"]);
           $( '#asn_detail' ).text(json["asn"]);
-          var cases = JSON.parse(json['cases']);
-          cases.forEach(el => {
-            var html = `<tr>
-              <td>${el.title}</td>
-              <td>${el.start_date}</td>
-              <td>${el.end_date}</td>
-              <td>${el.category}</td>
-            `
-            if (el.draft) {
-              html = html + `<td><div class="text-success w-100 text-center">
-                    <i class="far fa-check-circle text-success"></i>
-                </div></td>`
-            } else{
-              html = html + `<td>
-                  <div class="text-danger w-100 text-center">
-                      <i class="far fa-check-circle text-default"></i>
-                  </div>
-                </td>`
-            }
-
-            html = html + `</tr>`
-            $("#tbody-cases-detail").append(
-              html
-            );
-          });
-
         }
       });
-
       jQuery.noConflict();
+      
       $("#eventDetail").modal("show");
     });
 
@@ -358,8 +334,10 @@
         }
       });
     });
+    
 
     $(document).ready(function() {
+
       events = $('#events').DataTable({
         searching: true,
         processing: true,
@@ -367,7 +345,7 @@
         },
         serverSide: true,
         rowId: "id",
-        order: [[2, "desc"]],
+        order: [[3, "desc"]],
         ajax: {
           url: '{% url "dashboard:events:data" %}',
           data: function (data) {
@@ -380,13 +358,24 @@
             data.private_evidence = $("#private_evidence").val();
             data.issue_type = $("#issue_type").val();
             data.domain = $("#domain").val();
-
-            console.log(data);
+            data.asn = $("#asn").val();
           },
           contentType: "application/json; charset=utf-8",  
           type: "GET",
         },
+        columnDefs: [ {
+            orderable: false,
+            className: 'select-checkbox',
+            targets:   0
+        } ],
         columns: [
+          {
+            data: 'id',
+            orderable: false,
+            render: function (data, type, row, meta) { 
+              return `<div class="p-2"></div>`
+            }
+          },
           {
             data: "issue_type",
             orderable: true,
@@ -394,7 +383,7 @@
           },
           {
             data: "confirmed",
-            orderable: false,
+            orderable: true,
             searchable: false,
             render: function (data, type, row, meta) {
               if (data) {
@@ -429,23 +418,18 @@
             searchable: true,
           },
           {
-            data: "cases",
-            orderable: false,
-            searchable: false,
-            render: function (data, type, row, meta) {
-              var pills = ``;
-              data.forEach( title => {
-                pills = pills + `<span class="badge badge-pill badge-primary">${title}</span>`
-              });
-              return pills;
-            },
+            data: "case",
+            orderable: true,
+            searchable: true,
           },
           {
             data: "actions",
             orderable: false,
             searchable: false,
             render: function (data, type, row, meta) {
-
+              
+              var url = "{% url 'dashboard:events:detail' pk=1 %}".replace(1, row.id);
+              console.log(url);
               var render = ``;
 
               if ("{{user.is_analist}}" == "True"){
@@ -458,6 +442,10 @@
                       <button type="button" class="btn btn-sm btn-success confirm-case">Confirm</button>
                     </a>`;
                 }
+
+                render = render + `<a href="${url}" target='_blank'>
+                  <button type="button" class="btn btn-sm btn-primary confirm-case">Detail</button>
+                </a>`;
               }
               return render;
 
@@ -467,7 +455,8 @@
         initComplete: function () {},
         buttons: [],
         select: {
-          style: 'multi'
+          style: 'multi',
+          
         },
       });
       
@@ -527,7 +516,7 @@
         initComplete: function () {},
         buttons: [],
         select: {
-            style: 'multi'
+            style: 'single'
         },
       });
 
