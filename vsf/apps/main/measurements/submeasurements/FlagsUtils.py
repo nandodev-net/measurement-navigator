@@ -323,7 +323,7 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
     """
 
     submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns')]
-
+    
     # For every submeasurement type...
     for (SM, label) in submeasurements:
 
