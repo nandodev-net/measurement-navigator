@@ -75,7 +75,6 @@ class VSFRequest(Request):
         if cache.get(name) is None:
             cache.set(name, ProcessState.RUNNING)
         
-        
         cache.set(name, ProcessState.FAILED)
 
         return super().on_failure(exc_info, send_failed_event=send_failed_event, return_ok=return_ok)
