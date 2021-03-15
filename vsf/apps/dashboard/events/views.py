@@ -1,5 +1,5 @@
 # Django imports
-from django.views.generic           import TemplateView, ListView, UpdateView, View
+from django.views.generic           import TemplateView, ListView, UpdateView, View, DetailView
 from django.shortcuts               import get_object_or_404, redirect, render
 from django.http.response           import HttpResponseBadRequest
 from django.http                    import JsonResponse
@@ -44,11 +44,9 @@ class EventsList(VSFLoginRequiredMixin, ListView):
             if field == 'start_date' and not prefill:
                 prefillAux = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
             elif field:
-                print(prefillAux)
                 prefill[field] = prefillAux
 
         # ---------------------------------------------------- #
-
 
         context = super().get_context_data()
         context['prefill'] = prefill
@@ -65,8 +63,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
 
         eventsObjetcs = Event.objects.filter(id__in=eventsIds).all()
         casesObjects = Case.objects.filter(title__in=cases).all()
-        print(eventsObjetcs)
-        print(casesObjects)
+
         try:
             for case in casesObjects:
                 case.events.set(eventsObjetcs)
@@ -75,7 +72,6 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()
-
 
 class EventsData(BaseDatatableView):
 
@@ -144,8 +140,9 @@ class EventsData(BaseDatatableView):
 
 
         asn = self.request.GET.get('asn')
+
         if asn != None and asn != "":
-            qs = qs.filter(asn__name = asn)
+            qs = qs.filter(asn__asn = asn)
 
         #---------------------------------------------#
 
@@ -155,8 +152,11 @@ class EventsData(BaseDatatableView):
 
         response = []
         for event in qs:
-            
-            cases_title_related = [ case.title for case in event.cases.all() ]
+
+            try:
+                case = event.cases.latest('id').title
+            except:
+                case = None
 
             response.append({
                 'id': event.id,
@@ -167,7 +167,7 @@ class EventsData(BaseDatatableView):
                 'end_date': event.end_date, 
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
-                'cases': cases_title_related,
+                'case': case,
                 "actions": {"confirmed": event.confirmed}
             })
 
@@ -236,8 +236,8 @@ class EventUpdateView(VSFLoginRequiredMixin, UpdateView):
             )
         )
 
+class EventDetailData(VSFLoginRequiredMixin, View):
 
-class EventDetail(VSFLoginRequiredMixin, View):
     """
         Returns information about a specific event.
         Expected GET Arguments:
@@ -251,17 +251,6 @@ class EventDetail(VSFLoginRequiredMixin, View):
 
         if eventId != None:
             eventObj = Event.objects.get(id = eventId)
-
-            cases = [
-                {
-                    "title": case.title,
-                    "start_date": case.start_date,
-                    "end_date": case.end_date,
-                    "category": case.category.name,
-                    "draft": case.draft
-                }
-                for case in eventObj.cases.all()
-            ]
             
             data = {
                 "identification": eventObj.identification,
@@ -272,9 +261,19 @@ class EventDetail(VSFLoginRequiredMixin, View):
                 "issue_type": eventObj.issue_type,
                 "domain": eventObj.domain.domain_name,
                 "asn": eventObj.asn.asn,
-                "cases": json.dumps(cases, cls=DjangoJSONEncoder)
             }
-            print(data)
+            
             return JsonResponse(data, safe=False)
         else:
             return JsonResponse({})
+
+
+class EventDetailView(DetailView):
+    template_name = 'events/detail.html'
+    slug_field = 'pk'
+    model = Event
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        print(context['object'].__dict__)
+        return context
