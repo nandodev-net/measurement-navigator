@@ -196,7 +196,6 @@
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
               <th class="text-center" scope="col">Related Cases</th>
-              <th class="text-center" scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -440,29 +439,7 @@
               return pills;
             },
           },
-          {
-            data: "actions",
-            orderable: false,
-            searchable: false,
-            render: function (data, type, row, meta) {
 
-              var render = ``;
-
-              if ("{{user.is_analist}}" == "True"){
-                if (data.confirmed) {
-                  render = render + `<a href="">
-                      <button type="button" class="btn btn-sm btn-danger confirm-case">Deny</button>
-                    </a>`;
-                } else {
-                  render = render + `<a href="">
-                      <button type="button" class="btn btn-sm btn-success confirm-case">Confirm</button>
-                    </a>`;
-                }
-              }
-              return render;
-
-            },
-          }
         ],
         initComplete: function () {},
         buttons: [],
