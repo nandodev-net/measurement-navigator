@@ -1,6 +1,6 @@
 from django.conf.urls import include
 from django.urls import path
-from .views import EventsList, EventsData, EventUpdateView, EventDetail
+from .views import EventsList, EventsData, EventUpdateView, EventDetail, EventConfirm
 
 app_name = 'events'
 
@@ -26,7 +26,11 @@ urlpatterns = [
         'get/',
         EventDetail.as_view(),
         name="get"
+    ),
+    path(
+        'confirm/',
+        EventConfirm.as_view(),
+        name="confirm"
     )
-
 
 ]
