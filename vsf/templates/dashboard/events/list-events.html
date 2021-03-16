@@ -182,6 +182,9 @@
       <button type="button" class="btn btn-dark rounded mb-4" id="associateTrigger">
         <i class="fa fa-folder-plus"></i> Add to Case
       </button>
+      <button type="button" class="btn btn-dark rounded mb-4" id="confirmTrigger">
+        <i class="fa fa-check"></i> Confirm Events
+      </button>
     {% endif %}
 
 
@@ -357,6 +360,78 @@
         }
       });
     });
+
+
+    $( '#confirmTrigger' ).click(function(e) {
+      jQuery.noConflict();
+
+      $( '#selectedEvents-tbody' ).empty();
+      var rSelected = events.rows( { selected: true }).data().toArray();
+
+
+        rSelected.forEach(event => {
+            $('#selectedEvents-tbody').append(
+                `<tr>
+            <td>${event[0]}</td>
+            <td>${event[1]}</td>
+            <td>${event[2]}</td>
+            <td>${event[3]}</td>
+            <td>${event[4]}</td>
+            <td>${event[5]}</td>
+          </tr>`
+            );
+        });
+
+        if (rSelected.length === 0) {
+            Swal.fire({
+                icon: "error",
+                title: "You must select at least one event",
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+            });
+        } else {
+            var eventsSelected = events.rows({ selected: true }).data().toArray();
+
+            var eventsSelected = events.rows({ selected: true }).data().toArray().map((selected) => (
+                selected.id
+            ));
+            console.log('HI', eventsSelected)
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'dashboard:events:confirm' %}",
+                data: { events: eventsSelected , csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function (data) {
+                    if (data.error === null) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Successful Confirmed!",
+                            confirmButtonColor: "#28a745",
+                            confirmButtonText: "Continue"
+                        }).then(result => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    } else {
+                        console.log(data)
+                        Swal.fire({
+                            icon: "error",
+                            title: "Bad request.",
+                            text: `${data.error}`,
+                            confirmButtonColor: "#dc3545",
+                            confirmButtonText: "Continue"
+                        });
+                    }
+                
+                }
+            });
+        }
+    });
+
+
+
+
 
     $(document).ready(function() {
       events = $('#events').DataTable({

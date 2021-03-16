@@ -49,6 +49,13 @@ class Case(models.Model):
     description = models.TextField(
         null=True, 
         blank=True,
+        verbose_name = 'description_spa'
+    )
+
+    description_eng = models.TextField(
+        null=True, 
+        blank=True,
+        verbose_name = 'description_eng'
     )
 
     case_type = models.CharField(

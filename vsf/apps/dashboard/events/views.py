@@ -278,3 +278,24 @@ class EventDetail(VSFLoginRequiredMixin, View):
             return JsonResponse(data, safe=False)
         else:
             return JsonResponse({})
+
+
+class EventConfirm(VSFLoginRequiredMixin, View):
+
+    def post(self, request, **kwargs):
+        
+        post = dict(request.POST)
+        
+        eventsIds = post['events[]']
+        print(eventsIds)
+
+        eventsObjetcs = Event.objects.filter(id__in=eventsIds).all()
+        try:
+            for event in eventsObjetcs:
+                event.confirmed = True
+                event.save()
+            return JsonResponse({'error' : None})
+
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()
