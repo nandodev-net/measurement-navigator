@@ -1,5 +1,5 @@
 # Django imports
-from django.views.generic           import TemplateView, ListView, UpdateView, View
+from django.views.generic           import TemplateView, ListView, UpdateView, View, DetailView
 from django.shortcuts               import get_object_or_404, redirect, render
 from django.http.response           import HttpResponseBadRequest
 from django.http                    import JsonResponse
@@ -17,7 +17,9 @@ import json
 from apps.main.events.models    import Event
 from apps.main.cases.models     import Case
 from apps.main.asns.models      import ASN
-
+from apps.main.measurements.submeasurements.models import DNS, HTTP, TCP
+from apps.main.sites.models import Domain
+from apps.main.asns.models import ASN
 from .forms                     import EventForm
 
 
@@ -44,11 +46,9 @@ class EventsList(VSFLoginRequiredMixin, ListView):
             if field == 'start_date' and not prefill:
                 prefillAux = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
             elif field:
-                print(prefillAux)
                 prefill[field] = prefillAux
 
         # ---------------------------------------------------- #
-
 
         context = super().get_context_data()
         context['prefill'] = prefill
@@ -65,8 +65,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
 
         eventsObjetcs = Event.objects.filter(id__in=eventsIds).all()
         casesObjects = Case.objects.filter(title__in=cases).all()
-        print(eventsObjetcs)
-        print(casesObjects)
+
         try:
             for case in casesObjects:
                 case.events.set(eventsObjetcs)
@@ -75,7 +74,6 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()
-
 
 class EventsData(BaseDatatableView):
 
@@ -144,8 +142,9 @@ class EventsData(BaseDatatableView):
 
 
         asn = self.request.GET.get('asn')
+
         if asn != None and asn != "":
-            qs = qs.filter(asn__name = asn)
+            qs = qs.filter(asn__asn = asn)
 
         #---------------------------------------------#
 
@@ -155,8 +154,11 @@ class EventsData(BaseDatatableView):
 
         response = []
         for event in qs:
-            
-            cases_title_related = [ case.title for case in event.cases.all() ]
+
+            try:
+                case = event.cases.latest('id').title
+            except:
+                case = None
 
             response.append({
                 'id': event.id,
@@ -167,7 +169,7 @@ class EventsData(BaseDatatableView):
                 'end_date': event.end_date, 
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
-                'cases': cases_title_related,
+                'case': case,
                 "actions": {"confirmed": event.confirmed}
             })
 
@@ -236,8 +238,8 @@ class EventUpdateView(VSFLoginRequiredMixin, UpdateView):
             )
         )
 
+class EventDetailData(VSFLoginRequiredMixin, View):
 
-class EventDetail(VSFLoginRequiredMixin, View):
     """
         Returns information about a specific event.
         Expected GET Arguments:
@@ -251,17 +253,6 @@ class EventDetail(VSFLoginRequiredMixin, View):
 
         if eventId != None:
             eventObj = Event.objects.get(id = eventId)
-
-            cases = [
-                {
-                    "title": case.title,
-                    "start_date": case.start_date,
-                    "end_date": case.end_date,
-                    "category": case.category.name,
-                    "draft": case.draft
-                }
-                for case in eventObj.cases.all()
-            ]
             
             data = {
                 "identification": eventObj.identification,
@@ -272,12 +263,78 @@ class EventDetail(VSFLoginRequiredMixin, View):
                 "issue_type": eventObj.issue_type,
                 "domain": eventObj.domain.domain_name,
                 "asn": eventObj.asn.asn,
-                "cases": json.dumps(cases, cls=DjangoJSONEncoder)
             }
-            print(data)
+            
             return JsonResponse(data, safe=False)
         else:
             return JsonResponse({})
+            
+class EventDetailView(DetailView):
+    template_name = 'events/detail.html'
+    slug_field = 'pk'
+    model = Event
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        issue_type = context['object'].issue_type
+        queryStr = issue_type + '.objects.all()'
+        submeasures = eval(queryStr)
+        submeasuresRelated = submeasures.filter(event = context['object'].id)
+        
+        context['submeasures'] = [
+            {
+                'start_time': sub.measurement.raw_measurement.measurement_start_time,
+                'probe_cc': sub.measurement.raw_measurement.probe_cc,
+                'probe_asn': sub.measurement.raw_measurement.probe_asn,
+                'input': sub.measurement.raw_measurement.input,
+                'id': sub.measurement_id,
+                'site': sub.measurement.domain.site.id if sub.measurement.domain and sub.measurement.domain.site else -1,
+                'site_name': sub.measurement.domain.site.name if sub.measurement.domain and sub.measurement.domain.site else "(no site)",
+                'measurement_anomaly': sub.measurement.anomaly,
+                'flag_type': sub.flag_type,
+
+            } for sub in submeasuresRelated
+        ]
+
+        caseRelated = Case.objects.filter(events = context['object']).first()
+        context['case'] = caseRelated.__dict__ if caseRelated else {}
+        context['case']['category'] = caseRelated.category.name if caseRelated else ""
+        context['asns'] = ASN.objects.all()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        post = dict(request.POST)
+
+        identification = post['identification'][0]
+        start_date = post['start_time'][0]
+        end_date = post['end_date'][0]
+        public_evidence = post['public_evidence'][0]
+        private_evidence = post['private_evidence'][0]
+        domain = post['domain'][0]
+        asn = post['asn'][0]
+
+
+
+        try:
+            domainId = Domain.objects.filter(domain_name = domain).first().id 
+            asnId = ASN.objects.filter(asn = asn).first().id 
+
+            Event.objects.filter(identification = identification).update(
+                identification = identification,
+                start_date = start_date,
+                end_date = end_date,
+                public_evidence = public_evidence,
+                private_evidence = private_evidence,
+                domain = domainId,
+                asn = asnId
+            )
+
+            return redirect('/dashboard/events/detail/' + post['id'][0])
+
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()
 
 
 class EventConfirm(VSFLoginRequiredMixin, View):
@@ -295,7 +352,5 @@ class EventConfirm(VSFLoginRequiredMixin, View):
                 event.confirmed = True
                 event.save()
             return JsonResponse({'error' : None})
-
         except Exception as e:
             print(e)
-            return HttpResponseBadRequest()
