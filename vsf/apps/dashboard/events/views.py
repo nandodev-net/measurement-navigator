@@ -17,7 +17,9 @@ import json
 from apps.main.events.models    import Event
 from apps.main.cases.models     import Case
 from apps.main.asns.models      import ASN
-
+from apps.main.measurements.submeasurements.models import DNS, HTTP, TCP
+from apps.main.sites.models import Domain
+from apps.main.asns.models import ASN
 from .forms                     import EventForm
 
 
@@ -267,7 +269,6 @@ class EventDetailData(VSFLoginRequiredMixin, View):
         else:
             return JsonResponse({})
 
-
 class EventDetailView(DetailView):
     template_name = 'events/detail.html'
     slug_field = 'pk'
@@ -275,5 +276,62 @@ class EventDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(context['object'].__dict__)
+
+        issue_type = context['object'].issue_type
+        queryStr = issue_type + '.objects.all()'
+        submeasures = eval(queryStr)
+        submeasuresRelated = submeasures.filter(event = context['object'].id)
+        
+        context['submeasures'] = [
+            {
+                'start_time': sub.measurement.raw_measurement.measurement_start_time,
+                'probe_cc': sub.measurement.raw_measurement.probe_cc,
+                'probe_asn': sub.measurement.raw_measurement.probe_asn,
+                'input': sub.measurement.raw_measurement.input,
+                'id': sub.measurement_id,
+                'site': sub.measurement.domain.site.id if sub.measurement.domain and sub.measurement.domain.site else -1,
+                'site_name': sub.measurement.domain.site.name if sub.measurement.domain and sub.measurement.domain.site else "(no site)",
+                'measurement_anomaly': sub.measurement.anomaly,
+                'flag_type': sub.flag_type,
+
+            } for sub in submeasuresRelated
+        ]
+
+        caseRelated = Case.objects.filter(events = context['object']).first()
+        context['case'] = caseRelated.__dict__ if caseRelated else {}
+        context['case']['category'] = caseRelated.category.name if caseRelated else ""
+        context['asns'] = ASN.objects.all()
         return context
+
+    def post(self, request, *args, **kwargs):
+        post = dict(request.POST)
+
+        identification = post['identification'][0]
+        start_date = post['start_time'][0]
+        end_date = post['end_date'][0]
+        public_evidence = post['public_evidence'][0]
+        private_evidence = post['private_evidence'][0]
+        domain = post['domain'][0]
+        asn = post['asn'][0]
+
+
+
+        try:
+            domainId = Domain.objects.filter(domain_name = domain).first().id 
+            asnId = ASN.objects.filter(asn = asn).first().id 
+
+            Event.objects.filter(identification = identification).update(
+                identification = identification,
+                start_date = start_date,
+                end_date = end_date,
+                public_evidence = public_evidence,
+                private_evidence = private_evidence,
+                domain = domainId,
+                asn = asnId
+            )
+
+            return redirect('/dashboard/events/detail/' + post['id'][0])
+
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()

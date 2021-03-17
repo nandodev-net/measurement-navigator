@@ -182,6 +182,10 @@
       <button type="button" class="btn btn-dark rounded mb-4" id="associateTrigger">
         <i class="fa fa-folder-plus"></i> Add to Case
       </button>
+
+      <button type="button" class="btn btn-dark rounded mb-4" id="detailNewTab">
+        <i class="fas fa-info mr-1"></i> Details in New Tab
+      </button>
     {% endif %}
 
 
@@ -335,6 +339,25 @@
       });
     });
     
+    $( '#detailNewTab' ).click(function (event) {
+      var selectedRows = events.rows( { selected: true }).data().toArray().map(
+        (selected) => selected.id
+      );
+      if (selectedRows.length < 1) { 
+        Swal.fire({
+          icon: "warning",
+          title: "You must select at least one row to get the details.",
+          confirmButtonColor: "#ffc107",
+          confirmButtonText: "Continue",
+        });
+      } else {
+        selectedRows.forEach(function(id){
+          window.open("{% url 'dashboard:events:detail' pk=1 %}".replace(1, id), '_blank')
+        });
+      }
+
+
+    });
 
     $(document).ready(function() {
 

@@ -24,86 +24,212 @@
 {% block content %}
 
 <div class="col-12">
-    <div class="card p-5">
-        <h3 class="text-primary text-center px-5">Event {{object.id}}</h3>
+    <div class="card p-5 bg-success">
+        <h3 class="text-white text-center px-5">Event {{object.id}}</h3>
     </div>
 </div>
 
 <div class="col-10"></div>
-<div class="col-2"><button class='btn btn-success' type='button'> Confirm </button></div>
+<div class="col-2"><button class='btn btn-success' id="confirm" type='button'> Confirm </button></div>
 
-<div class="col-12">
+<div class="col-7">
     <div class="card mt-4 p-5">
-        <form>
+        <div class="row mb-3">
+            <div class="col-10"></div>
+            <div class="col-2">
+                <button type="button" id="edit" class="btn btn-icon btn-secondary float-right">
+                    <i class="fas fa-pencil-alt text-white"></i>
+                </button>
+            </div>
+        </div>
+        
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="id" id="id" value="{{object.id}}">
+
             <div class="row">
                 <div class="col-3">
-                    <h5 class="font-weight-bold">Identification</h5>
+                    <h5 class="font-weight-bold">Identification:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9" id="identification_slug">
                     <p>{{ object.identification }}</p>
                 </div>
             </div>
+            <hr>
             <div class="row">
                 <div class="col-3">
-                    <h5 class="font-weight-bold">Start Date</h5>
+                    <h5 class="font-weight-bold">Start Date:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9" id="start_date_slug">
                     <p>{{ object.start_date }}</p>
                 </div>
             </div>
+            <hr>
             <div class="row">
                 <div class="col-3">
-                    <h5 class="font-weight-bold">End Date</h5>
+                    <h5 class="font-weight-bold">End Date:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9" id="end_date_slug">
                     <p>{{ object.end_date }}</p>
                 </div>
             </div>
+            <hr>
             <div class="row">
                 <div class="col-3">
-                    <h5 class="font-weight-bold">Public Evidence</h5>
+                    <h5 class="font-weight-bold">Public Evidence:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9" id="public_evidence_slug">
                     <p>{{ object.public_evidence }}</p>
                 </div>
             </div>
+            <hr>
             <div class="row">
                 <div class="col-3">
-                    <h5 class="font-weight-bold">Private Evidence</h5>
+                    <h5 class="font-weight-bold">Private Evidence:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9" id="private_evidence_slug">
                     <p>{{ object.private_evidence }}</p>
                 </div>
             </div>
+            <hr>
             <div class="row">
                 <div class="col-3">
-                    <h5 class="font-weight-bold">Issue Type</h5>
+                    <h5 class="font-weight-bold">Issue Type:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9" id="issue_type_slug">
                     <p>{{ object.issue_type }}</p>
                 </div>
             </div>
+            <hr>
             <div class="row">
                 <div class="col-3">
-                    <h5 class="font-weight-bold">Domain</h5>
+                    <h5 class="font-weight-bold">Domain:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9" id="domain_slug">
                     <p>{{ object.domain }}</p>
                 </div>
             </div>
+            <hr>
             <div class="row">
                 <div class="col-3">
-                    <h5 class="font-weight-bold">ASN</h5>
+                    <h5 class="font-weight-bold">ASN:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9" id="asn_slug">
                     <p>{{ object.asn }}</p>
                 </div>
             </div>
-
-            falta confirmado, booleano de continuacion de eventos, relacion con casos, submediciones asociadas
+            <div class="row mt-3">
+                <div class="col-8"></div>
+                <div class="col-4">
+                    <button type="button" id="cancel" class="btn btn-sm btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submit" class="btn btn-sm btn-success">
+                        Submit
+                    </button>
+                </div>
+            </div>
         </form>
     </div>
 </div>
+
+<div class="col-5">
+    <div class="card mt-4 p-5">
+        {% if case.id %} 
+            <h4 class="mb-4">Related Case</h4> 
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Case id:</h5></div>
+                <div class="col-8"><p>{{ case.id }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Title:</h5></div>
+                <div class="col-8"><p>{{ case.title }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Description:</h5></div>
+                <div class="col-8"><p>{{ case.description }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Case Type:</h5></div>
+                <div class="col-8"><p>{{ case.case_type }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Start Date:</h5></div>
+                <div class="col-8"><p>{{ case.start_date }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">End Date:</h5></div>
+                <div class="col-8"><p>{{ case.end_date }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Category:</h5></div>
+                <div class="col-8"><p>{{ case.category }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Draft:</h5></div>
+                <div class="col-8"><p>{{ case.draft }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Twitter Search:</h5></div>
+                <div class="col-8"><p>{{ case.twitter_search }}</p></div>
+            </div>
+        {% else %}
+            <h4>No Case Related!</h4> 
+        {% endif %}
+    </div>
+</div>
+
+<div class="col-12">
+    <div class="card" id="events-card">
+        <div class="card-header">
+          <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#relatedSubmeasures" aria-expanded="true" aria-controls="relatedSubmeasures">Related Submeasures</a></h5>
+        </div>
+        <div class="collapse" id="relatedSubmeasures">
+            <div class="card-body p-3">
+                <table class="table table-striped mt-5 datatable" id="submeasures">
+                    <thead>
+                      <tr>
+                        <th class="text-center text-capitalize" scope="col">Measurement Id</th>
+                        <th class="text-center text-capitalize" scope="col">Start Time</th>
+                        <th class="text-center text-capitalize" scope="col">Country</th>
+                        <th class="text-center text-capitalize" scope="col">ASN</th>
+                        <th class="text-center text-capitalize" scope="col">Input</th>
+                        <th class="text-center text-capitalize" scope="col">Site</th>
+                        <th class="text-center text-capitalize" scope="col">Anomaly</th>
+                        <th class="text-center text-capitalize" scope="col">Flag</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submeasures %}
+                            <tr>
+                                <td><a href="{% url 'dashboard:measurement:detail' pk=sub.id %}" target="_blank">{{sub.id}}</a></td>
+                                <td>{{sub.start_time}}</td>
+                                <td>{{sub.probe_cc}}</td>
+                                <td>{{sub.probe_asn}}</td>
+                                <td>{{sub.input}}</td>
+                                <td>{{sub.site_name}}</td>
+                                <td>{{sub.measurement_anomaly}}</td>
+                                <td>{{sub.flag_type}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot></tfoot>
+                  </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 {% endblock content %}
 {% block custom_scripts %}
@@ -112,6 +238,110 @@
 
 <script>
 
+    $( "#edit" ).click(function() {
+        $( "#edit" ).hide();
+        $( "#confirm" ).hide();
+        var identification = `<input
+            id="identification"
+            class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
+            placeholder="Identification"
+            aria-label="Search identification"
+            value="{{ object.identification }}"
+            name="identification"
+            />`;
+        $( '#identification_slug').replaceWith(identification);
+        var start_date = `<input 
+            id="start_time" 
+            class="form-control w-75" 
+            type="date" 
+            value="{{ object.start_time }}" 
+            name="start_time"
+            />`;
+        $( '#start_date_slug').replaceWith(start_date);
+        var end_date = `<input 
+            id="end_date" 
+            class="form-control w-75" 
+            type="date" 
+            value="{{ object.end_date }}" 
+            name="end_date"
+            />`;
+        $( '#end_date_slug').replaceWith(end_date);
+        var public_evidence = `<input
+            id="public_evidence"
+            class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Public Evidence"
+            aria-label="Search public evidence"
+            value="{{ object.public_evidence }}"
+            name="public_evidence"
+            />`;
+        $( '#public_evidence_slug').replaceWith(public_evidence);
+        var private_evidence = `<input
+            id="private_evidence"
+            class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Public Evidence"
+            aria-label="Search public evidence"
+            value="{{ object.private_evidence }}"
+            name="private_evidence"
+            />`;
+        $( '#private_evidence_slug').replaceWith(private_evidence);
+        var domain = `<input
+            id="domain"
+            class="form-control additional-filter w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Domain"
+            aria-label="Search domain"
+            value="{{ object.domain }}"
+            name="domain"
+            />`;
+        $( '#domain_slug' ).replaceWith(domain);
+        var asn = `<select id="asn" class="custom-select additional-filter w-75" name="asn">
+                {% for asn in asns %}
+                <option value="{{ asn.asn }}" >
+                    {{ asn.asn }}
+                </option>
+                {% endfor %}
+            </select>`;
+        $( '#asn_slug' ).replaceWith(asn);
+        $("#asn").val('{{object.asn}}');
+        $( "#cancel" ).show();
+        $( "#submit" ).show();
+
+    });
+
+    $( "#cancel" ).click(function() {
+        $( "#edit" ).show();
+        $( "#confirm" ).show();
+        var identification = `<p>{{ object.identification }}</p>`;
+        $( '#identification_slug').replaceWith(identification);
+        var start_date = `<p>{{ object.start_date }}</p>`;
+        $( '#start_date_slug').replaceWith(start_date);
+        var end_date = `<p>{{ object.end_date }}</p>`;
+        $( '#end_date_slug').replaceWith(end_date);
+        var public_evidence = `<p>{{ object.public_evidence }}</p>`;
+        $( '#public_evidence_slug').replaceWith(public_evidence);
+        var private_evidence = `<p>{{ object.private_evidence }}</p>`;
+        $( '#private_evidence_slug').replaceWith(private_evidence);
+        var domain = `<p>{{ object.domain }}</p>`;
+        $( '#domain_slug' ).replaceWith(domain);
+        var asn = `<p>{{ object.asn }}</p>`;
+        $( '#asn_slug' ).replaceWith(asn);
+        $("#asn").val('{{object.asn}}');
+        $( "#cancel" ).hide();
+        $( "#submit" ).hide();
+    });
+
+    $(document).ready(function() {
+      $( "#cancel" ).hide();
+      $( "#submit" ).hide();
+
+      table = $("#submeasures").DataTable({
+        order: [[1, "desc"]],
+        searching: true,
+      });
+
+    });
 </script>
 {% endblock custom_scripts %}
 
