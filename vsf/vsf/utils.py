@@ -69,7 +69,7 @@ class VSFRequest(Request):
 
         return super().on_timeout(soft, timeout)
 
-    def on_failure(self, exc_info, send_failed_event, return_ok):
+    def on_failure(self, exc_info, send_failed_event=True, return_ok=False):
         name = self.task.vsf_name
         # If for some reason this task's name is not registered, register it
         if cache.get(name) is None:
@@ -77,7 +77,7 @@ class VSFRequest(Request):
         
         cache.set(name, ProcessState.FAILED)
 
-        return super().on_failure(exc_info, send_failed_event=send_failed_event, return_ok=return_ok)
+        return super().on_failure(exc_info, send_failed_event, return_ok)
 
 
 class VSFTask(Task):
