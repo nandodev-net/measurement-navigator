@@ -66,6 +66,10 @@ class Event(models.Model):
         default = IssueType.NONE
     )
 
+    it_continues = models.BooleanField(
+        default = True,
+    )
+
     domain  = models.ForeignKey(
                             to=Domain,
                             null=True,

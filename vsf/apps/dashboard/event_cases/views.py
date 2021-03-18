@@ -64,10 +64,12 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
         #Getting Category object
         category = Category.objects.filter(name = post['category'][0]).first()
         
+        print('HOLA',post['description_eng'][0] )
         try:
             new_case = Case(
                 title = post['title'][0],
                 description = post['description'][0],
+                description_eng = post['description_eng'][0],
                 start_date = post['start_date'][0],
                 end_date = post['end_date'][0],
                 case_type = post['case_type'][0].lower(),

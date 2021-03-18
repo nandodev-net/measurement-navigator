@@ -91,8 +91,6 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         asn = get.get("asn")
         if asn:
             prefill['asn'] = asn
-
-        print('veamos que hay aqui')
         
         if get != {}:
             flags = get.getlist('flags[]')
