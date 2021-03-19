@@ -154,7 +154,9 @@
         $("#sitesSelected tr").map(function (index, elem) {
             var categorySelected = $(this).find(":selected").text();
             var urlSelected = $(this).find("a").text();
-            urlSelected = urlSelected.replace(/\s+/g,'');
+            console.log(urlSelected);
+            urlSelected = urlSelected.replace(/\s{2,}/g, '').trim();
+            console.log(urlSelected);
             if (categorySelected && categorySelected !== 'None') {
                 association.push(
                     {
