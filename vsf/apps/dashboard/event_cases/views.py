@@ -1,6 +1,6 @@
 #Django imports
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
-from django.views.generic           import ListView
+from django.views.generic           import ListView, View
 from django.views.generic.edit import UpdateView, CreateView
 
 #Inheritance imports
@@ -138,6 +138,7 @@ class CasesData(BaseDatatableView):
         for case in qs:
             category = Category.objects.filter(id = case.category_id).get()
             response.append({
+                'id': case.id,
                 'title': case.title, 
                 'start_date': case.start_date, 
                 'end_date': case.end_date, 
@@ -238,3 +239,35 @@ class CaseCreateModalView(VSFLoginRequiredMixin, CreateView):
 
 
 
+class CaseDetailData(VSFLoginRequiredMixin, View):
+
+    """
+        Returns information about a specific case.
+        Expected GET Arguments:
+            - id: Case id.
+    """
+
+    def get(self, request, **kwargs):
+
+        get = self.request.GET or {}
+        caseId = get.get('id')
+
+        if caseId != None:
+            caseObj = Case.objects.get(id = caseId)
+            print(caseObj.events)
+            data = {
+                "title": caseObj.title,
+                "description": caseObj.description,
+                "description_eng": caseObj.description_eng,
+                "case_type": caseObj.case_type,
+                "start_date": caseObj.start_date,
+                "end_date": caseObj.end_date,
+                "category": caseObj.category.name,
+                "draft": caseObj.draft,
+                "twitter_search": caseObj.twitter_search,
+
+            }
+            
+            return JsonResponse(data, safe=False)
+        else:
+            return JsonResponse({})

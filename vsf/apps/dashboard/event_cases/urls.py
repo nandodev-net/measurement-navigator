@@ -27,4 +27,11 @@ urlpatterns = [
         views.CasesData.as_view(),
         name="data"
     ),
+
+    path(
+        'detail/',
+        views.CaseDetailData.as_view(),
+        name="detail"
+    ),
+    
 ]
