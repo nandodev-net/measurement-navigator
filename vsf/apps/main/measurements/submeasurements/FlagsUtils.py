@@ -380,9 +380,34 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
         
         SM.objects.filter(flagged=False).update(flagged=True)
             
-
-
-
-
-
-
+def update_event_dates():
+    """
+        Update start_date, end_date fields in 
+        event table following dates in its 
+        related submeasurements 
+    """
+    submeasurements = ['dns','http','tcp']
+    with connection.cursor() as cursor:
+        for subm in submeasurements:
+            cursor.execute(f"WITH\
+                            eventsXmeasurement as (\
+                                SELECT DISTINCT\
+                                    ev.id AS event_id,\
+                                    ms.raw_measurement_id AS rms_id\
+                                FROM events_event ev JOIN submeasurements_{subm} subms         ON  subms.event_id=ev.id\
+                                                        JOIN measurements_measurement ms       ON subms.measurement_id=ms.id    \
+                            ),\
+                            events_min_max_date as (\
+                                SELECT  ev.event_id as event_id, \
+                                        min(rms.measurement_start_time) as min_date, \
+                                        max(rms.measurement_start_time) as max_date \
+                                FROM eventsXmeasurement ev JOIN measurements_rawmeasurement rms   ON ev.rms_id=rms.id\
+                                GROUP BY ev.event_id\
+                            )\
+                            update events_event ev\
+                            SET \
+                                start_date=events_min_max_date.min_date,\
+                                end_date=events_min_max_date.max_date\
+                            FROM events_min_max_date\
+                            WHERE ev.id = events_min_max_date.event_id;"
+                        )
