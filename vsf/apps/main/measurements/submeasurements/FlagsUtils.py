@@ -411,3 +411,10 @@ def update_event_dates():
                             FROM events_min_max_date\
                             WHERE ev.id = events_min_max_date.event_id;"
                         )
+    
+    # now try to update title for every event
+    events = Event.objects.all().select_related("asn")
+
+    for event in events:
+        event.identification = event.generate_title()
+        event.save()
