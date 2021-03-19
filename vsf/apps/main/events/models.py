@@ -85,5 +85,16 @@ class Event(models.Model):
     # If true, then this event won't register new measurements
     closed = models.BooleanField(default=False) 
 
+    def generate_title(self) -> str:
+        """
+            This function will return a string that should be used as auto-title
+            for this event
+        """
+        min_date = self.start_date
+        asn = self.asn
+        type = self.issue_type
+        identification = f"{type} ISSUE FROM {min_date.strftime('%Y-%m-%d %H:%M:%S')}\ FOR ISP {asn.asn if asn else 'UNKNOWN_ASN'} ({asn.name if asn else 'UNKNOWN_ASN'})"
+        return identification
+
     def __str__(self):
         return u"%s" % self.identification

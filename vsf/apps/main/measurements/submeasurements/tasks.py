@@ -37,6 +37,12 @@ def count_flags_submeasurements():
 
 @shared_task(time_limit=3600, vsf_name = SUBMEASUREMENTS_TASKS.HARD_FLAGS, base=VSFTask)
 def hard_flag_task():
+    """
+        Task to perform a hard flag detecting algorithm. 
+        First flags should be counted, then the hard flag algorithm itself will run,
+        and finally we update every flag end and initial date
+    """
+
     name = SUBMEASUREMENTS_TASKS.HARD_FLAGS
     state = cache.get(name)
     result = {'error' : None, 'ran' : False}
@@ -58,8 +64,9 @@ def hard_flag_task():
         interval_size = 10
 
     try:
-        result['counted'] = count_flags_sql()
-        result['result']  = hard_flag(delta, minimum_measurements, interval_size)
+        result['counted'] = count_flags_sql()                                       # count flags
+        result['result']  = hard_flag(delta, minimum_measurements, interval_size)   # Perform a flag detecting algorithm
+        update_event_dates()                                                        # update events 
     except Exception as e:
         result['error'] = str(e)
 
