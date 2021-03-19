@@ -111,10 +111,10 @@
     </nav>
   </form>
 
-  <button type="button" id="createCaseTrigger" class="bs-modal btn btn-primary">
+  <!--<button type="button" id="createCaseTrigger" class="bs-modal btn btn-primary">
     <i class="fas fa-plus mr-2"></i>
     Create Case
-  </button>
+  </button>-->
     
   <div class="card rounded p-5 mt-4" style="width: 100%;">
       <table class="table table-striped mt-5 datatable"  id="cases-table">
@@ -135,7 +135,9 @@
       </table>
   </div>
   
-  {% include "includes/cases/create.html" %}
+  <!--{% include "includes/cases/create.html" %}-->
+  {% include "includes/events/detail.html" %}
+
 
 {% endblock content %}
 {% block custom_scripts %}
@@ -163,6 +165,31 @@
 
   });
 
+
+  $( '#cases-table' ).on('dblclick', 'tbody tr', function() {
+
+    var id = $( this ).attr( 'id' );
+    console.log(id);
+    $.ajax({
+      url    : "{% url 'dashboard:event_cases:detail' %}",
+      type   : "GET",
+      data   : { 'id': id },
+      success: function (json) {
+        
+        /*$( '#identification_detail' ).text(json["identification"]);
+        $( '#start_date_detail' ).text(json["start_date"]);
+        $( '#end_date_detail' ).text(json["end_date"]);
+        $( '#public_evidence_detail' ).text(json["public_evidence"]);
+        $( '#private_evidence_detail' ).text(json["private_evidence"]);
+        $( '#issue_type_detail' ).text(json["issue_type"]);
+        $( '#domain_detail' ).text(json["domain"]);
+        $( '#asn_detail' ).text(json["asn"]);*/
+      }
+    });
+    jQuery.noConflict();
+
+    $("#caseDetail").modal("show");
+  });
 
   $( '#createCaseTrigger' ).click(function (e) {
     jQuery.noConflict();
