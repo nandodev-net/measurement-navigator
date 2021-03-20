@@ -157,13 +157,15 @@ class EventsData(BaseDatatableView):
     def prepare_results(self, qs):
 
         response = []
+        print(qs)
+        print('11111111111')
         for event in qs:
 
             try:
                 case = event.cases.latest('id').title
             except:
                 case = None
-
+            print(event)
             response.append({
                 'id': event.id,
                 'identification': event.identification,
