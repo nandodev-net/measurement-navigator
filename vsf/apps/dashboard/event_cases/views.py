@@ -63,8 +63,7 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
 
         #Getting Category object
         category = Category.objects.filter(name = post['category'][0]).first()
-        
-        print('HOLA',post['description_eng'][0] )
+ 
         try:
             new_case = Case(
                 title = post['title'][0],
@@ -156,19 +155,50 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
     success_url = "/dashboard/cases/"
 
     def get_context_data(self, **kwargs):
-
+        
         context = super(CaseCreateView, self).get_context_data(**kwargs)
+        categories = Category.objects.all()
+        categoryNames = [cat.name for cat in categories]
+        context['categoryNames'] = categoryNames
         return context
 
     def post(self, request, *args, **kwargs):
+        post = request.POST
+        post = dict(request.POST)
 
-        self.object = None
-        form = self.get_form()
+        # Cleaning the draft data
+        draft = post['draft'][0]
+        draft = eval(draft.capitalize())
 
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
+        #Getting Events objects
+        events = post['events[]'] if 'events[]' in post.keys() else []
+        eventsObject = Event.objects.filter(id__in=events)
+
+        #Getting Category object
+        category = Category.objects.filter(name = post['category'][0]).first()
+        
+        print('HOLA',post['description_eng'][0] )
+        try:
+            new_case = Case(
+                title = post['title'][0],
+                description = post['description'][0],
+                description_eng = post['description_eng'][0],
+                start_date = post['start_date'][0],
+                end_date = post['end_date'][0],
+                case_type = post['case_type'][0].lower(),
+                category = category,
+                twitter_search = post['twitter_search'][0],
+                draft = draft
+            )     
+            
+            new_case.save()
+            new_case.events.set(eventsObject)
+            
+            return JsonResponse({'error' : None})
+
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()
 
     def form_valid(self, form):
         
@@ -254,7 +284,24 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
 
         if caseId != None:
             caseObj = Case.objects.get(id = caseId)
-            print(caseObj.events)
+            relatedEvents = caseObj.events.all()
+
+            events = [{
+                'id': event.id,
+                'identification': event.identification,
+                'confirmed': event.confirmed,
+                'start_date': event.start_date,
+                'end_date': event.end_date,
+                'public_evidence': event.public_evidence,
+                'private_evidence': event.private_evidence,
+                'issue_type': event.issue_type,
+                'it_continues': event.it_continues,
+                'domain': event.domain.domain_name,
+                'asn': event.asn.asn,
+                'closed': event.closed
+
+            } for event in relatedEvents]
+
             data = {
                 "title": caseObj.title,
                 "description": caseObj.description,
@@ -265,6 +312,7 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 "category": caseObj.category.name,
                 "draft": caseObj.draft,
                 "twitter_search": caseObj.twitter_search,
+                "events": events
 
             }
             
