@@ -79,7 +79,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
             print(e)
             return HttpResponseBadRequest()
 
-class EventsData(BaseDatatableView):
+class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
     columns = [ 
         'identification', 'confirmed', 'start_date', 'end_date', 
@@ -273,7 +273,7 @@ class EventDetailData(VSFLoginRequiredMixin, View):
         else:
             return JsonResponse({})
             
-class EventDetailView(DetailView):
+class EventDetailView(VSFLoginRequiredMixin, DetailView):
     template_name = 'events/detail.html'
     slug_field = 'pk'
     model = Event

@@ -216,7 +216,7 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
         context['error'] = None
         return context
 
-class MeasurementDetailView(DetailView):
+class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
     template_name = 'measurements/measurement-detail.html'
     slug_field = 'pk'
     model = MeasModels.Measurement
@@ -244,7 +244,7 @@ class MeasurementDetailView(DetailView):
         return context
 
 
-class ListMeasurementsBackEnd(BaseDatatableView):
+class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
     """
         This is the backend view for the ListMeasurementsDataTable view, who
         just renders the template
