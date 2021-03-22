@@ -157,25 +157,23 @@ class EventsData(BaseDatatableView):
     def prepare_results(self, qs):
 
         response = []
-        print(qs)
-        print('11111111111')
         for event in qs:
 
             try:
                 case = event.cases.latest('id').title
             except:
                 case = None
-            print(event)
+                
             response.append({
                 'id': event.id,
                 'identification': event.identification,
                 'issue_type': event.issue_type, 
                 'confirmed': event.confirmed, 
-                'start_date': event.start_date, 
-                'end_date': event.end_date, 
+                'start_date': event.start_date.strftime("%b. %d, %Y, %H:%M %p"), 
+                'end_date': event.end_date.strftime("%b. %d, %Y, %H:%M %p"), 
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
-                'case': case,
+                'case': case if case else "-No case related-",
                 "actions": {"confirmed": event.confirmed}
             })
 
