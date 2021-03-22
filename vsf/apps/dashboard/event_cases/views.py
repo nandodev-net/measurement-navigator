@@ -87,7 +87,7 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
             return HttpResponseBadRequest()
 
 
-class CasesData(BaseDatatableView):
+class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
     "Populate the cases datatable and manage its filters"
 
     columns = [

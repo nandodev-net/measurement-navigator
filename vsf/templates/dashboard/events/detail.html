@@ -219,7 +219,31 @@
                                 <td>{{sub.input}}</td>
                                 <td>{{sub.site_name}}</td>
                                 <td>{{sub.measurement_anomaly}}</td>
-                                <td>{{sub.flag_type}}</td>
+
+                                <td>
+                                    {% if sub.flag_type == "ok" %}
+                                        <div class="text-center text-success">
+                                            <i title="OK" class="far fa-thumbs-up"></i>
+                                        </div>
+                                    {% elif sub.flag_type == "hard" %}
+                                        <div class="text-center text-danger">
+                                            <i title="HARD" class="far fa-flag"></i>
+                                        </div>
+                                    {% elif sub.flag_type == "soft" %}
+                                        <div class="text-center text-warning">
+                                            <i title="SOFT" class="far fa-flag"></i>
+                                        </div>
+                                    {% elif sub.flag_type == "muted" %}
+                                        <div class="text-center text-secondary">
+                                            <i title="MUTED" class="far fa-flag"></i>
+                                        </div>
+                                    {% else%}
+                                        <div class="text-center text-dark">
+                                            <i title="MANUAL" class="far fa-flag"></i>
+                                        </div>
+                                    {% endif %}
+                                
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
