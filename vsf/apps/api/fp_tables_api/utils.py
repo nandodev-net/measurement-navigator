@@ -301,20 +301,7 @@ def update_measurement_table(
     for fp in fpMeasurements:
 
         # Ask for the measurement based on its report id
-        # Note that the 'limit' number needs to be high enough, so we don't need to paginate.
-        # ---- DEBUG, DELETE LATER @TODO --+
-        meas = {
-                    "report_id" : fp.report_id,
-                    "input" : fp.input,
-                    'test_name' : fp.test_name,
-                    'start_time':fp.measurement_start_time,
-                    "limit":5000,
-            } 
 
-        for (k,v) in meas.items():
-            print(k, " : ", v)
-
-        # ---------------------------------+
         try:
             req = requests.get(
                 measurements_url,
@@ -345,16 +332,12 @@ def update_measurement_table(
         if data == None:
             raise AttributeError("Unexpected data format from Ooni")
 
-        
-
         measurement = [d for d in data if 
                         dateparse.parse_datetime(d.get("measurement_start_time")) == fp.measurement_start_time or
                         dateparse.parse_datetime(d.get("measurement_start_time")) == (fp.measurement_start_time + datetime.timedelta(days=4)) # PQC
                         ]
 
-        print("data: ", data)
-
-        
+        print("data: ", data) 
 
         if len(measurement) != 1:
             print("Could not find measurement: ", fp.input, ", ", fp.measurement_start_time)
@@ -365,7 +348,6 @@ def update_measurement_table(
 
         # Get the measurement data
         measurement = measurement[0]
-
 
         # Update the url if it has changed
         new_url = measurement.get("measurement_url")
@@ -381,7 +363,6 @@ def update_measurement_table(
             fp.report_ready = None
             meas_to_save.append(fp)
             continue
-
 
         # If data could not be found or a network error ocurred,
         # mark this as incomplete and process the following measurements
@@ -405,8 +386,7 @@ def update_measurement_table(
         #     print("Measurement does not provides any id")
         #     fp.report_ready = None
         #     meas_to_save.append(fp)
-        #     continue
-            
+        #     continue    
 
         new_measurement = RawMeasurement(
             input=data['input'],
@@ -429,6 +409,7 @@ def update_measurement_table(
             test_keys= data['test_keys'],
             annotations= data['annotations']
         )
+        
         fp.report_ready = True
         new_measurements.append((new_measurement, fp))
         #new_measurements.append(new_measurement)

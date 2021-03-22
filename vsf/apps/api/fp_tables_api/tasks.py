@@ -14,7 +14,7 @@ class API_TASKS:
     UPDATE_FASTPATH = "update-fastpath"
     RECOVER_MEASUREMENTS = "recover-measurements"
 
-@shared_task(time_limit=3600, base=VSFTask, vsf_name = API_TASKS.UPDATE_FASTPATH)
+@shared_task(time_limit=7200, base=VSFTask, vsf_name = API_TASKS.UPDATE_FASTPATH)
 def fp_update(since : str = None, until : str = None, only_fastpath : bool = False):
     """
         Update the fast path table;
