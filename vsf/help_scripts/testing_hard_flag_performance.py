@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 config = Config.objects.all().first()
 
 if config:
-    interval = config.hardflag_timewindow
+    interval = timedelta(days=config.hardflag_timewindow) 
     min_meas = config.hardflag_minmeasurements
     interval_size = config.hardflag_interval_size
 else:
