@@ -136,7 +136,7 @@
   </div>
   
   <!--{% include "includes/cases/create.html" %}-->
-  {% include "includes/events/detail.html" %}
+  {% include "includes/cases/detail.html" %}
 
 
 {% endblock content %}
@@ -175,15 +175,26 @@
       type   : "GET",
       data   : { 'id': id },
       success: function (json) {
-        
-        /*$( '#identification_detail' ).text(json["identification"]);
+        $('#events > tbody').empty();
+        $( '#title_detail' ).text(json["title"]);
+        $( '#description_detail' ).text(json["description"]);
+        $( '#description_eng_detail' ).text(json["description_eng"]);
+        $( '#case_type_detail' ).text(json["case_type"]);
         $( '#start_date_detail' ).text(json["start_date"]);
         $( '#end_date_detail' ).text(json["end_date"]);
-        $( '#public_evidence_detail' ).text(json["public_evidence"]);
-        $( '#private_evidence_detail' ).text(json["private_evidence"]);
-        $( '#issue_type_detail' ).text(json["issue_type"]);
-        $( '#domain_detail' ).text(json["domain"]);
-        $( '#asn_detail' ).text(json["asn"]);*/
+        $( '#category_detail' ).text(json["category"]);
+        $( '#draft_detail' ).text(json["draft"]);
+        $( '#twitter_search_detail' ).text(json["twitter_search"]);
+        var eventsJson = json["events"];
+        var body = '';
+        eventsJson.forEach(el => {
+          var url = "{% url 'dashboard:events:detail' pk=1 %}".replace(1, el.id);
+          body = body + `<tr><td><a href=${url} target="_blank">${el.issue_type}</a></td><td>${el.confirmed}</td><td>${el.start_date}</td><td>${el.end_date}</td><td>${el.domain}</td><td>${el.asn}</td></tr>`;
+        });
+        console.log(body);
+        console.log('--------------');
+        $('#events > tbody').append(body);
+        /*var events = $("#events").DataTable();*/
       }
     });
     jQuery.noConflict();
