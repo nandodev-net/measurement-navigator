@@ -15,10 +15,37 @@
 
                 <div class="row">
                     <div class="col-3">
-                        <h5 class="font-weight-bold">Identification</h5>
+                        <h5 class="font-weight-bold">Title</h5>
                     </div>
                     <div class="col-9">
-                        <p id="identification_detail"></p>
+                        <p id="title_detail"></p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-3">
+                        <h5 class="font-weight-bold">Description</h5>
+                    </div>
+                    <div class="col-9">
+                        <p id="description_detail"></p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-3">
+                        <h5 class="font-weight-bold">Description English</h5>
+                    </div>
+                    <div class="col-9">
+                        <p id="description_eng_detail"></p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-3">
+                        <h5 class="font-weight-bold">Case Type</h5>
+                    </div>
+                    <div class="col-9">
+                        <p id="case_type_detail"></p>
                     </div>
                 </div>
                 <hr>
@@ -42,50 +69,55 @@
                 <hr>
                 <div class="row">
                     <div class="col-3">
-                        <h5 class="font-weight-bold">Public Evidence</h5>
+                        <h5 class="font-weight-bold">Category</h5>
                     </div>
                     <div class="col-9">
-                        <p id="public_evidence_detail"></p>
+                        <p id="category_detail"></p>
                     </div>
                 </div>
                 <hr>
                 <div class="row">
                     <div class="col-3">
-                        <h5 class="font-weight-bold">Private Evidence</h5>
+                        <h5 class="font-weight-bold">Draft</h5>
                     </div>
                     <div class="col-9">
-                        <p id="private_evidence_detail"></p>
+                        <p id="draft_detail"></p>
                     </div>
                 </div>
                 <hr>
                 <div class="row">
                     <div class="col-3">
-                        <h5 class="font-weight-bold">Issue Type</h5>
+                        <h5 class="font-weight-bold">Twitter Search</h5>
                     </div>
                     <div class="col-9">
-                        <p id="issue_type_detail"></p>
-                    </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-3">
-                        <h5 class="font-weight-bold">Domain</h5>
-                    </div>
-                    <div class="col-9">
-                        <p id="domain_detail"></p>
-                    </div>
-                </div>
-                <hr>
-                <div class="row">
-                    <div class="col-3">
-                        <h5 class="font-weight-bold">ASN</h5>
-                    </div>
-                    <div class="col-9">
-                        <p id="asn_detail"></p>
+                        <p id="twitter_seach_detail"></p>
                     </div>
                 </div>
                 <hr>
                 
+                <div class="card" id="events-card">
+                    <div class="card-header">
+                      <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#relatedEvents" aria-expanded="true" aria-controls="relatedEvents" class="">Related Events</a></h5>
+                    </div>
+                    <div class="collapse show" id="relatedEvents">
+                        <div class="card-body p-3">
+                            <table class="table table-striped mt-5 datatable" id="events">
+                                <thead>
+                                    <th class="text-center" scope="col">Event Type</th>
+                                    <th class="text-center" scope="col">Confirmed</th>
+                                    <th class="text-center" scope="col">Start Date</th>
+                                    <th class="text-center" scope="col">End Date</th>
+                                    <th class="text-center" scope="col">Domain</th>
+                                    <th class="text-center" scope="col">ASN</th>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                                <tfoot></tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 

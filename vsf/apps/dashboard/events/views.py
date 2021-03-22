@@ -36,17 +36,21 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         # ------------------ making prefill ------------------ #
         
         fields = [ 
-            'identification', 'confirmed', 'start_date', 'end_date', 
-            'public_evidence', 'private_evidence', 'issue_type', 'domain', 'asn'
+            'identification', 'confirmed', 'public_evidence', 'private_evidence', 
+            'issue_type', 'domain', 'asn'
         ]
 
         for field in fields:
             getter = get.get(field)
             prefillAux = getter if getter else ""
-            if field == 'start_date' and not prefill:
-                prefillAux = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-            elif field:
-                prefill[field] = prefillAux
+            prefill[field] = prefillAux
+
+        start_time = get.get("start_time") or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        prefill['start_time'] = start_time 
+        
+        end_time = get.get("end_time")
+        if end_time:
+            prefill['end_time'] = end_time
 
         # ---------------------------------------------------- #
 
@@ -91,13 +95,13 @@ class EventsData(BaseDatatableView):
 
         #--------- Filtering datetime fields ---------#
 
-        start_date = self.request.GET.get('start_date')
-        if start_date != None and start_date != "":
-            qs = qs.filter(start_date__gte = start_date)
+        start_time = self.request.GET.get('start_time')
+        if start_time != None and start_time != "":
+            qs = qs.filter(start_date__gte = start_time)
 
-        end_date = self.request.GET.get('end_date')
-        if end_date != None and end_date != "":
-            qs = qs.filter(end_date__lte = end_date)
+        end_time = self.request.GET.get('end_time')
+        if end_time != None and end_time != "":
+            qs = qs.filter(end_date__lte = end_time)
 
         #---------------------------------------------#
 
@@ -153,13 +157,15 @@ class EventsData(BaseDatatableView):
     def prepare_results(self, qs):
 
         response = []
+        print(qs)
+        print('11111111111')
         for event in qs:
 
             try:
                 case = event.cases.latest('id').title
             except:
                 case = None
-
+            print(event)
             response.append({
                 'id': event.id,
                 'identification': event.identification,
