@@ -188,8 +188,18 @@ def select( measurements : List[SubMeasurement],
             lo += 1
             hi = min(hi+1, n_meas-1)
             continue
+
+        # if you get a measurement with anomalies, check between lo, hi to see whether there's more than minimum_measurements
+        # anomalies
         max_in_date = _bin_search_max(measurements, start_time(measurements[lo]) + timedelta, lo, hi, start_time)
         n_anomalies = anomaly_count(lo, max_in_date)
+
+        # -- DEBUG ONLY -------------------- +
+        print("measurements checking: ")
+        for i in range(lo, max_in_date+1):
+            print(f"date: {measurements[i].start_time}, flag_type: {measurements[i].flag_type}, id: {measurements[i].id}")
+            
+        # ---------------------------------- +
         # If too many anomalies in this interval:
         if n_anomalies < minimum_measurements:
             lo += 1
