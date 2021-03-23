@@ -379,6 +379,14 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
                 merge(sub_group)
         
         SM.objects.filter(flagged=False).update(flagged=True)
+
+        return {
+            'arguments' : {
+                'interval_size' : interval_size,
+                'minimum_measurements' : minimum_measurements,
+                'time_window' : time_window
+            }
+        }
             
 def update_event_dates():
     """
