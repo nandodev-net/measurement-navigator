@@ -183,7 +183,7 @@
         <i class="fa fa-folder-plus"></i> Add to Case
       </button>
       <button type="button" class="btn btn-dark rounded mb-4" id="confirmTrigger">
-        <i class="fa fa-check"></i> Confirm Events
+        <i class="fa fa-check"></i> Confirm Toggle
 
       <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="detailNewTab">
         <i class="fas fa-info mr-1"></i> Details in New Tab
@@ -203,7 +203,6 @@
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
               <th class="text-center" scope="col">Related Case</th>
-              <th class="text-center" scope="col">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -405,7 +404,7 @@
                     if (data.error === null) {
                         Swal.fire({
                             icon: "success",
-                            title: "Successful Confirmed!",
+                            title: "Successful Confirm status change!",
                             confirmButtonColor: "#28a745",
                             confirmButtonText: "Continue"
                         }).then(result => {
@@ -581,29 +580,6 @@
             orderable: true,
             searchable: true,
           },
-          {
-            data: "actions",
-            orderable: false,
-            searchable: false,
-            render: function (data, type, row, meta) {
-              
-              var render = ``;
-
-              if ("{{user.is_analist}}" == "True"){
-                if (data.confirmed) {
-                  render = render + `<a href="">
-                      <button type="button" class="btn btn-sm btn-danger confirm-case">Deny</button>
-                    </a>`;
-                } else {
-                  render = render + `<a href="">
-                      <button type="button" class="btn btn-sm btn-success confirm-case">Confirm</button>
-                    </a>`;
-                }
-              }
-              return render;
-
-            },
-          }
         ],
         initComplete: function () {},
         buttons: [],

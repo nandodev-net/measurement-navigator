@@ -14,6 +14,7 @@ from datetime                                   import datetime, timedelta
 import json
 
 # Local imports
+from apps.main.measurements.models import Measurement
 from apps.main.events.models    import Event
 from apps.main.cases.models     import Case
 from apps.main.asns.models      import ASN
@@ -351,13 +352,69 @@ class EventConfirm(VSFLoginRequiredMixin, View):
         post = dict(request.POST)
         
         eventsIds = post['events[]']
-        print(eventsIds)
-
         eventsObjetcs = Event.objects.filter(id__in=eventsIds).all()
         try:
             for event in eventsObjetcs:
-                event.confirmed = True
+                if event.confirmed:
+                    event.confirmed = False
+                else:
+                    event.confirmed = True
                 event.save()
             return JsonResponse({'error' : None})
         except Exception as e:
             print(e)
+
+class EventsByMeasurement(VSFLoginRequiredMixin, View):
+    def get(self, request, **kwargs):
+        post = dict(request.GET)
+
+        measurementId = post['id']
+        event_list = []
+        event_json = []
+
+        try:
+            dns_objs = DNS.objects.filter(measurement__id = measurementId)
+            for instance in dns_objs:
+                if instance.event:
+                    event_list.append(instance.event)
+        except:
+            pass
+        try:
+            tcp_objs = TCP.objects.get(measurement__id = measurementId)
+            for instance in tcp_objs:
+                if instance.event:
+                    event_list.append(instance.event)
+        except:
+            pass
+        try:
+            http_objs = HTTP.objects.get(measurement__id = measurementId)
+            for instance in http_objs:
+                if instance.event:
+                    event_list.append(instance.event)           
+        except:
+            pass
+
+        if event_list:
+            for event in event_list:
+                event_row = {
+                    'id':event.id,
+                    'identification':event.identification,
+                    'event_type':event.issue_type,
+                    'confirmed':event.confirmed,
+                    'start_date':event.start_date,
+                    'end_date':event.end_date,
+                    'domain':event.domain,
+                    'asn':event.asn,
+                }
+                event_json.append(event_row)
+                
+            return JsonResponse(event_json)
+        else:
+            return JsonResponse({'error' : None})
+
+
+
+
+
+
+
