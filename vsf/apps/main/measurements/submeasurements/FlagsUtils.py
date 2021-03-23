@@ -384,7 +384,7 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
             'arguments' : {
                 'interval_size' : interval_size,
                 'minimum_measurements' : minimum_measurements,
-                'time_window' : time_window
+                'time_window' : str(time_window)
             }
         }
             
