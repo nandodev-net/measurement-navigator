@@ -146,9 +146,12 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
 
         asn = self.request.GET.get('asn')
-
         if asn != None and asn != "":
             qs = qs.filter(asn__asn = asn)
+
+        domain = self.request.GET.get('domain')
+        if domain != None and domain != "":
+            qs = qs.filter(domain__domain_name__contains = domain)
 
         #---------------------------------------------#
 

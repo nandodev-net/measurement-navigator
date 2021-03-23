@@ -362,7 +362,6 @@
 
     });
 
-
     $( '#confirmTrigger' ).click(function(e) {
       jQuery.noConflict();
 
@@ -429,10 +428,6 @@
             });
         }
     });
-
-
-
-
 
     $(document).ready(function() {
 
@@ -514,7 +509,6 @@
         ajax: {
           url: '{% url "dashboard:events:data" %}',
           data: function (data) {
-
             data.identification = $("#identification").val() ;
             data.confirmed = $("#confirmed").val();
             data.start_time = $("#start_time").val();
