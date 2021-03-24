@@ -263,9 +263,19 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     for measurement in measurements_with_flags:
         if measurement.flag_type == soft:
             soft_flags.append(measurement)
-        elif measurement.flag_type == hard and measurement.event and not measurement.event.closed:
+        elif measurement.flag_type == hard and measurement.event and not measurement.event.confirmed:
             hard_flags.append(measurement)
-            if (resulting_event is None): resulting_event = measurement.event
+            if resulting_event is None: resulting_event = measurement.event
+
+    # --- Debug Only ----------------- +
+    print("Soft flags: ")
+    for m in soft_flags:
+        print(f"id: {m.id}")
+
+    print("Hard flags: ")
+    for m in hard_flags: 
+        print(f"id: {m.id}")
+    # -------------------------------- +
 
     # merge all hard flags as one hard flag
     min_date : datetime = datetime.now(tz = pytz.utc) + timedelta(days=1)
@@ -289,7 +299,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
         # Update flag type and its event
         measurement.flag_type = SubMeasurement.FlagType.HARD
         measurement.event = resulting_event
-
+        measurement.flagged = True
+        
         meas_to_update.append(measurement)
         # update min date and max date
         start = start_time(measurement)
@@ -321,7 +332,11 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             SM_type = t
     
     if SM_type is None: raise TypeError(f"ERROR, THIS IS NOT A SUBMEASUREMENT {reference_measurement}")
-
+    # -- Debuf ------------------- +
+    print("Measurements to update:")
+    for m in meas_to_update:
+        print(f"id: {m.id}, type: {m.flag_type}")
+    # ---------------------------- +
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
     
 def hard_flag(time_window : timedelta = timedelta(days=2), minimum_measurements : int = 7, interval_size : int = 10):
