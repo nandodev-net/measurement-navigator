@@ -42,14 +42,16 @@ def count_flags_sql():
                                 {submsmnt}.flag_type as flag,\
                                 ms.domain_id as domain,\
                                 {submsmnt}.counted as counted,\
-                                rms.probe_asn as asn,\
+                                ms.asn_id as asn,\
                                 {submsmnt}.previous_counter as prev_counter\
                             FROM submeasurements_{submsmnt} {submsmnt}    JOIN measurements_measurement ms ON ms.id = {submsmnt}.measurement_id\
                                                             JOIN measurements_rawmeasurement rms ON rms.id = ms.raw_measurement_id\
                             ORDER BY domain, asn, start_time, prev_counter, {submsmnt}_id\
                         ),\
                         ms_to_update as (\
-                            SELECT DISTINCT ms.domain\
+                            SELECT DISTINCT \
+                            ms.domain, \
+                            ms.asn\
                             FROM measurements ms \
                             WHERE NOT ms.counted\
                         ),\
@@ -59,7 +61,8 @@ def count_flags_sql():
                                 ms.domain   as domain, \
                                 ms.flag     as flag, \
                                 SUM(CAST(ms.flag<>'ok' AS INT)) OVER (PARTITION BY ms.domain, ms.asn ORDER BY ms.start_time, ms.prev_counter, ms.{submsmnt}_id) as prev_counter\
-                            FROM measurements ms JOIN ms_to_update on ms_to_update.domain = ms.domain\
+                            FROM \
+                                measurements ms JOIN ms_to_update on ms_to_update.domain = ms.domain AND ms_to_update.asn=ms.asn\
                         )\
                     UPDATE submeasurements_{submsmnt} {submsmnt}\
                     SET \
@@ -198,7 +201,7 @@ def select( measurements : List[SubMeasurement],
         print("measurements checking: ")
         for i in range(lo, max_in_date+1):
             print(f"date: {measurements[i].start_time}, flag_type: {measurements[i].flag_type}, id: {measurements[i].id}")
-            
+
         # ---------------------------------- +
         # If too many anomalies in this interval:
         if n_anomalies < minimum_measurements:
@@ -321,7 +324,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
 
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
     
-def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements : int = 7, interval_size : int = 10):
+def hard_flag(time_window : timedelta = timedelta(days=2), minimum_measurements : int = 7, interval_size : int = 10):
     """
         This function evaluates the measurements and flags them properly in the database
         params:
@@ -384,7 +387,7 @@ def hard_flag(time_window : timedelta = timedelta(days=1), minimum_measurements 
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
         for group in groups:
-            weird_measurements = select(group, time_window,minimum_measurements, interval_size)
+            weird_measurements = select(group, time_window, minimum_measurements, interval_size)
             for sub_group in weird_measurements:
                 merge(sub_group)
         
