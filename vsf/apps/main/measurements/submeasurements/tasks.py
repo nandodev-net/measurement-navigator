@@ -59,8 +59,8 @@ def hard_flag_task():
         minimum_measurements = config.hardflag_minmeasurements 
         interval_size = config.hardflag_interval_size
     else:
-        delta = timedelta(days=1)
-        minimum_measurements = 3
+        delta = timedelta(days=2)
+        minimum_measurements = 7
         interval_size = 10
 
     try:
