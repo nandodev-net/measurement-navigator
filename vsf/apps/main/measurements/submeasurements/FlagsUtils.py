@@ -197,12 +197,6 @@ def select( measurements : List[SubMeasurement],
         max_in_date = _bin_search_max(measurements, start_time(measurements[lo]) + timedelta, lo, hi, start_time)
         n_anomalies = anomaly_count(lo, max_in_date)
 
-        # -- DEBUG ONLY -------------------- +
-        print("measurements checking: ")
-        for i in range(lo, max_in_date+1):
-            print(f"date: {measurements[i].start_time}, flag_type: {measurements[i].flag_type}, id: {measurements[i].id}")
-
-        # ---------------------------------- +
         # If too many anomalies in this interval:
         if n_anomalies < minimum_measurements:
             lo += 1
@@ -267,16 +261,6 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             hard_flags.append(measurement)
             if resulting_event is None: resulting_event = measurement.event
 
-    # --- Debug Only ----------------- +
-    print("Soft flags: ")
-    for m in soft_flags:
-        print(f"id: {m.id}")
-
-    print("Hard flags: ")
-    for m in hard_flags: 
-        print(f"id: {m.id}")
-    # -------------------------------- +
-
     # merge all hard flags as one hard flag
     min_date : datetime = datetime.now(tz = pytz.utc) + timedelta(days=1)
     max_date = datetime(year=2000, day=1, month=1, tzinfo=pytz.utc)
@@ -332,11 +316,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             SM_type = t
     
     if SM_type is None: raise TypeError(f"ERROR, THIS IS NOT A SUBMEASUREMENT {reference_measurement}")
-    # -- Debuf ------------------- +
-    print("Measurements to update:")
-    for m in meas_to_update:
-        print(f"id: {m.id}, type: {m.flag_type}")
-    # ---------------------------- +
+    
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
     
 def hard_flag(time_window : timedelta = timedelta(days=2), minimum_measurements : int = 7, interval_size : int = 10):
