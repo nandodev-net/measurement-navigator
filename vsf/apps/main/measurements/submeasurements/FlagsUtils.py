@@ -300,7 +300,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
         measurement.flag_type = SubMeasurement.FlagType.HARD
         measurement.event = resulting_event
         measurement.flagged = True
-        
+
         meas_to_update.append(measurement)
         # update min date and max date
         start = start_time(measurement)
@@ -408,13 +408,13 @@ def hard_flag(time_window : timedelta = timedelta(days=2), minimum_measurements 
         
         SM.objects.filter(flagged=False).update(flagged=True)
 
-        return {
-            'arguments' : {
-                'interval_size' : interval_size,
-                'minimum_measurements' : minimum_measurements,
-                'time_window' : str(time_window)
-            }
+    return {
+        'arguments' : {
+            'interval_size' : interval_size,
+            'minimum_measurements' : minimum_measurements,
+            'time_window' : str(time_window)
         }
+    }
             
 def update_event_dates():
     """
