@@ -1,7 +1,8 @@
 #Django imports
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
-from django.views.generic           import ListView, View
+from django.views.generic           import ListView, View, DetailView
 from django.views.generic.edit import UpdateView, CreateView
+from django.shortcuts               import get_object_or_404, redirect, render
 
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
@@ -85,7 +86,6 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()
-
 
 class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
     "Populate the cases datatable and manage its filters"
@@ -177,7 +177,6 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         #Getting Category object
         category = Category.objects.filter(name = post['category'][0]).first()
         
-        print('HOLA',post['description_eng'][0] )
         try:
             new_case = Case(
                 title = post['title'][0],
@@ -221,8 +220,6 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             )
         )
 
-
-
 class CaseCreateModalView(VSFLoginRequiredMixin, CreateView):
     model = Case
     queryset = Case.objects.all()
@@ -265,9 +262,6 @@ class CaseCreateModalView(VSFLoginRequiredMixin, CreateView):
                 form=form,
             )
         )
-
-
-
 
 class CaseDetailData(VSFLoginRequiredMixin, View):
 
@@ -319,3 +313,71 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
             return JsonResponse(data, safe=False)
         else:
             return JsonResponse({})
+
+
+class CaseDetailView(VSFLoginRequiredMixin, DetailView):
+    template_name = 'cases/detail.html'
+    slug_field = 'pk'
+    model = Case
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        category = context['object'].category.name
+        context['category'] = category
+
+        types = [ type_[1].lower() for type_ in context['object'].TYPE_CATEGORIES ]
+        context['types'] = types
+        
+        categories = Category.objects.all()
+        categoryNames = [cat.name for cat in categories]
+        context['categoryNames'] = categoryNames
+
+        relatedEvents = context['object'].events.all()
+
+        events = [{
+            'id': event.id,
+            'identification': event.identification,
+            'confirmed': event.confirmed,
+            'start_date': event.start_date,
+            'end_date': event.end_date,
+            'public_evidence': event.public_evidence,
+            'private_evidence': event.private_evidence,
+            'issue_type': event.issue_type,
+            'it_continues': event.it_continues,
+            'domain': event.domain.domain_name,
+            'asn': event.asn.asn,
+            'closed': event.closed
+
+        } for event in relatedEvents]
+        context['events'] = events
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        post = dict(request.POST)
+        print(post)
+        category = Category.objects.filter(name = post['category'][0]).first()
+
+        draft = post['draft'][0]
+        draft = eval(draft.capitalize())
+
+        try:
+
+            Case.objects.filter(title = post['title'][0]).update(
+                title = post['title'][0],
+                description = post['description'][0],
+                description_eng = post['description_eng'][0],
+                start_date = post['start_date'][0],
+                end_date = post['end_date'][0],
+                case_type = post['case_type'][0].lower(),
+                category = category,
+                twitter_search = post['twitter_search'][0],
+                draft = draft
+            )     
+            
+
+            return redirect('/dashboard/cases/detail/' + post['id'][0])
+
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()

@@ -261,7 +261,6 @@ class EventDetailData(VSFLoginRequiredMixin, View):
 
         if eventId != None:
             eventObj = Event.objects.get(id = eventId)
-            
             data = {
                 "identification": eventObj.identification,
                 "start_date": eventObj.start_date,
@@ -284,7 +283,7 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
+        print(context['object'].__dict__)
         issue_type = context['object'].issue_type
         queryStr = issue_type + '.objects.all()'
         submeasures = eval(queryStr)
@@ -343,7 +342,6 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()
-
 
 class EventConfirm(VSFLoginRequiredMixin, View):
 
