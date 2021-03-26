@@ -33,5 +33,11 @@ urlpatterns = [
         views.CaseDetailData.as_view(),
         name="detail"
     ),
+
+    path(
+        'detail/<int:pk>',
+        views.CaseDetailView.as_view(),
+        name="detail_page"
+    ),
     
 ]
