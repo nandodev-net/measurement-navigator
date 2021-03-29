@@ -156,8 +156,9 @@ def _event_creator(min_date : datetime, max_date : datetime, asn : ASN, domain :
 
 def select( measurements : List[SubMeasurement],
             timedelta : timedelta = timedelta(days=1), 
-            minimum_measurements : int = 7, 
-            interval_size : int = 10
+            event_openning_treshold : int = 7, 
+            interval_size : int = 10,
+            event_continue_treshold : int = 5
             ) -> List[List[SubMeasurement]]:
     """
         This aux function selects from a list of measurements
@@ -165,12 +166,26 @@ def select( measurements : List[SubMeasurement],
         and a time delta.
         Preconditions:
             measurements sorted by (date, previous_counter, id)
+        Params:
+            measurements : some measurements iterable and indexable container = measurements to groups
+            timedelta    : timedelta = how much time to consider when expanding events
+            event_openning_treshold : int = how many anomaly measurements are required to open a new event
+            interval_size : int = maximum ammount of measurements to consider when inspecting a possible event start
+            event_continue_treshold : int = how many anomaly measurements are required to expand an existent event with new measurements
+        Return:
+            A list of lists containing measurements that may be grouped together as a single event
     """
+
+    # Check input
+    assert interval_size > 0, "Interval size should be a possitive number"
+    assert event_openning_treshold > 0, "Minimum ammount of measurements to open an event should be a possitive number"
+    assert event_continue_treshold <= event_openning_treshold, "Continuation treshold should be less than or equal openning treshold"
+    assert event_continue_treshold > 0, "Continuation treshold should be a possitive number"
 
     # Measurement ammount, if not enough to fill a window or an interval, return an empty list
     n_meas : int = len(measurements)
 
-    if n_meas < minimum_measurements:
+    if n_meas < event_openning_treshold:
         return []
 
     # Resulting list
@@ -185,20 +200,20 @@ def select( measurements : List[SubMeasurement],
     # Pointers to start and end positions in our measurement window
     lo : int = 0
     hi : int = min(interval_size - 1, n_meas-1)
-    while n_meas - lo > minimum_measurements:
+    while n_meas - lo > event_openning_treshold:
         # Search for anomaly measurements
         if measurements[lo].flag_type == Flag.FlagType.OK:
             lo += 1
             hi = min(hi+1, n_meas-1)
             continue
 
-        # if you get a measurement with anomalies, check between lo, hi to see whether there's more than minimum_measurements
+        # if you get a measurement with anomalies, check between lo, hi to see whether there's more than event_openning_treshold
         # anomalies
         max_in_date = _bin_search_max(measurements, start_time(measurements[lo]) + timedelta, lo, hi, start_time)
         n_anomalies = anomaly_count(lo, max_in_date)
 
         # If too many anomalies in this interval:
-        if n_anomalies < minimum_measurements:
+        if n_anomalies < event_openning_treshold:
             lo += 1
             hi = min(hi+1, n_meas-1)
             continue
@@ -206,7 +221,7 @@ def select( measurements : List[SubMeasurement],
         # If too many anomalies, start a selecting process.
         current_block : List[Measurement] = []
 
-        while n_anomalies > 1:
+        while n_anomalies > event_continue_treshold:
 
             last_index = lo
             for i in range(lo, min(max_in_date + 1, n_meas)):
@@ -319,14 +334,19 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
     
-def hard_flag(time_window : timedelta = timedelta(days=2), minimum_measurements : int = 7, interval_size : int = 10):
+def hard_flag(
+            time_window : timedelta = timedelta(days=15.5), 
+            event_openning_treshold : int = 7, 
+            interval_size : int = 10, 
+            event_continue_treshold : int = 5
+            ):
     """
         This function evaluates the measurements and flags them properly in the database
         params:
             time_window =   The time interval in which the tagged measurements should be 
                             contained
-            minimum_measurements =  minimum ammount of too-near measurements to consider a hard
-                                    flag
+            event_openning_treshold =  minimum ammount of too-near measurements to consider a hard
+                                        flag
             interval_size = how many measurements to consider in each step of the algorithm
     """
 
@@ -335,7 +355,7 @@ def hard_flag(time_window : timedelta = timedelta(days=2), minimum_measurements 
     # For every submeasurement type...
     for (SM, label) in submeasurements:
 
-        # select every submeasurement such that partitioned by domain,
+        # select every submeasurement such that partitioned by (domain, asn),
         # there's at the least one measurement in its partition that's 
         # not flagged.
         # (so we can avoid run the logic over elements not recently updated)
@@ -376,13 +396,13 @@ def hard_flag(time_window : timedelta = timedelta(days=2), minimum_measurements 
                                                             JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
                                 ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
         groups = filter(
-                        lambda l:len(l) >= minimum_measurements,
+                        lambda l:len(l) >= event_openning_treshold,
                         Grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
                     )
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
         for group in groups:
-            weird_measurements = select(group, time_window, minimum_measurements, interval_size)
+            weird_measurements = select(group, time_window, event_openning_treshold, interval_size, event_continue_treshold)
             for sub_group in weird_measurements:
                 merge(sub_group)
         
@@ -391,7 +411,8 @@ def hard_flag(time_window : timedelta = timedelta(days=2), minimum_measurements 
     return {
         'arguments' : {
             'interval_size' : interval_size,
-            'minimum_measurements' : minimum_measurements,
+            'event_openning_treshold' : event_openning_treshold,
+            'event_continue_treshold' : event_continue_treshold,
             'time_window' : str(time_window)
         }
     }
