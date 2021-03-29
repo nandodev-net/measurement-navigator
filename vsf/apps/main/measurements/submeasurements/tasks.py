@@ -56,17 +56,19 @@ def hard_flag_task():
     config = Config.objects.all().first()
     if config:
         delta = timedelta(days=config.hardflag_timewindow)  
-        minimum_measurements = config.hardflag_minmeasurements 
+        openning_treshold = config.hardflag_openning_treshold 
+        continue_treshold = config.hardflag_continue_treshold
         interval_size = config.hardflag_interval_size
     else:
         delta = timedelta(days=2)
-        minimum_measurements = 7
+        openning_treshold = 7
+        continue_treshold = 4
         interval_size = 10
 
     try:
-        result['counted'] = count_flags_sql()                                       # count flags
-        result['result']  = hard_flag(delta, minimum_measurements, interval_size)   # Perform a flag detecting algorithm
-        update_event_dates()                                                        # update events 
+        result['counted'] = count_flags_sql()                                                       # count flags
+        result['result']  = hard_flag(delta, openning_treshold, interval_size, continue_treshold)   # Perform a flag detecting algorithm
+        update_event_dates()                                                                        # update events 
     except Exception as e:
         result['error'] = str(e)
 

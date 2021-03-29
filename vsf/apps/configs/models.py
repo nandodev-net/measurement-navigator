@@ -4,12 +4,17 @@ from django.core.exceptions import ValidationError
 class Config(models.Model):
 
     hardflag_timewindow = models.FloatField(
-        default=1,
+        default=15.5,
         verbose_name = 'Hard Flag Time Window',
     )
 
-    hardflag_minmeasurements = models.IntegerField(
+    hardflag_openning_treshold = models.IntegerField(
         default=7,
+        verbose_name = 'HardFlag Minimum Measurements',
+    )
+
+    hardflag_continue_treshold = models.IntegerField(
+        default=5,
         verbose_name = 'HardFlag Minimum Measurements',
     )
 
