@@ -24,6 +24,6 @@ class Config(models.Model):
     )
 
     def clean(self):
-            numPosts = Config.objects.all().count()
-            if numPosts > 1:
-                raise ValidationError("You can't create more than {} config instance, please edit the last one.".format(numPosts))
+            num_configs = Config.objects.all().count()
+            if num_configs > 1:
+                raise ValidationError("You can't create more than {} config instance, please edit the last one.".format(num_configs))
