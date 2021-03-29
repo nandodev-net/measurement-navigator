@@ -207,8 +207,9 @@
 
       var allowed = true;
       var eventsSelected = events.rows( { selected: true }).data().toArray();
+      console.log(eventsSelected);
       eventsSelected.forEach(element => {
-        if (element.case) {
+        if (element.case !== '-No case related-') {
           allowed = false;
           Swal.fire({
             icon: "warning",

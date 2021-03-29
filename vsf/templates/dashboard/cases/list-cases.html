@@ -111,15 +111,15 @@
     </nav>
   </form>
 
-  <!--<button type="button" id="createCaseTrigger" class="bs-modal btn btn-primary">
-    <i class="fas fa-plus mr-2"></i>
-    Create Case
-  </button>-->
+  <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="detailNewTab">
+    <i class="fas fa-info mr-1"></i> Details in New Tab
+  </button>
     
   <div class="card rounded p-5 mt-4" style="width: 100%;">
       <table class="table table-striped mt-5 datatable"  id="cases-table">
         <thead>
           <tr>
+            <th class="text-center" scope="col"> </th>
             <th class="text-center" scope="col">Title</th>
             <th class="text-center" scope="col">Start Date</th>
             <th class="text-center" scope="col">End Date</th>
@@ -148,6 +148,7 @@
   'use strict';
 
   var eventsTable;
+  var table;
 
   $("#urlForm").on("submit", function (event) {
     
@@ -175,6 +176,8 @@
       type   : "GET",
       data   : { 'id': id },
       success: function (json) {
+        var url = "{% url 'dashboard:event_cases:detail_page' pk=1 %}".replace(1, id);
+        $( '#link' ).attr("href", url);
         $('#events > tbody').empty();
         $( '#title_detail' ).text(json["title"]);
         $( '#description_detail' ).text(json["description"]);
@@ -265,9 +268,30 @@
 
   });
 
+
+  $( '#detailNewTab' ).click(function (event) {
+      var selectedRows = table.rows( { selected: true }).data().toArray().map(
+        (selected) => selected.id
+      );
+      if (selectedRows.length < 1) { 
+        Swal.fire({
+          icon: "warning",
+          title: "You must select at least one row to get the details.",
+          confirmButtonColor: "#ffc107",
+          confirmButtonText: "Continue",
+        });
+      } else {
+        selectedRows.forEach(function(id){
+          window.open("{% url 'dashboard:event_cases:detail_page' pk=1 %}".replace(1, id), '_blank')
+        });
+      }
+
+
+  });
+
   $(document).ready(function() { 
 
-    var table = $("#cases-table").DataTable({
+    table = $("#cases-table").DataTable({
       order: [[1, "desc"]],
       searching: true,
       processing: true,
@@ -288,7 +312,19 @@
         contentType: "application/json; charset=utf-8",  
         type: "GET",
       },
+      columnDefs: [ {
+            orderable: false,
+            className: 'select-checkbox',
+            targets:   0
+        } ],
       columns: [
+        {
+          data: 'id',
+          orderable: false,
+          render: function (data, type, row, meta) { 
+            return `<div class="p-2"></div>`
+          }
+        },
         {
           data: "title",
           orderable: true,
@@ -340,7 +376,7 @@
       initComplete: function () {},
       buttons: [],
       select: {
-        style: 'single'
+        style: 'multi'
       },
     });
 

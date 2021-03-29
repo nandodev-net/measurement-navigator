@@ -1,0 +1,286 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+{% block custom_stylesheet %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<style>
+  .pcoded-main-container {
+      width: -webkit-fill-available;
+  }
+</style>
+{% endblock custom_stylesheet %}
+
+{% block tab_title %} VSF - Case {{object.title}} {% endblock tab_title %}
+{% block title %} Cases {% endblock title %}
+{% block sub_title %} Case Detail {% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+  <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:event_cases:list_cases' %}">Case List</a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:event_cases:detail_page' object.id %}">Case Detail</a>
+</li>
+
+{% endblock route %}
+{% block content %}
+
+<div class="col-12">
+    <div class="card p-5 bg-success">
+      <h3 class="text-white text-center">{{object.title}}</h3>
+    </div>
+</div>
+
+<div class="col-12">
+
+</div>
+
+<div class="col-12">
+  <div class="card p-5">
+    <div class="row mb-3">
+      <div class="col-10"></div>
+      <div class="col-2">
+          <button type="button" id="edit" class="btn btn-icon btn-secondary float-right">
+              <i class="fas fa-pencil-alt text-white"></i>
+          </button>
+      </div>
+    </div>
+    <form method="POST"> 
+      {% csrf_token %}
+
+      <input type="hidden" name="id" id="id" value="{{object.id}}">
+
+      <div class="row">
+        <div class="col-3 font-weight-bold">Title</div>
+        <div class="col-9"><span id="title_slug">{{object.title}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-3 font-weight-bold">Description</div>
+        <div class="col-9"><span id="description_slug">{{object.description}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-3 font-weight-bold">Description English</div>
+        <div class="col-9"><span id="description_eng_slug">{{object.description_eng}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-3 font-weight-bold">Case Type</div>
+        <div class="col-9"><span id="case_type_slug">{{object.case_type}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-3 font-weight-bold">Start Date</div>
+        <div class="col-9"><span id="start_date_slug">{{object.start_date}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-3 font-weight-bold">End Date</div>
+        <div class="col-9"><span id="end_date_slug">{{object.end_date}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-3 font-weight-bold">Category</div>
+        <div class="col-9"><span id="category_slug">{{category}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-3 font-weight-bold">Draft</div>
+        <div class="col-9"><span id="draft_slug">{{object.draft}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
+        <div class="col-3 font-weight-bold">Twitter Search</div>
+        <div class="col-9"><span id="twitter_search_slug">{{object.twitter_search}}</span></div>
+      </div>
+      <div class="row mt-3">
+        <div class="col-8"></div>
+        <div class="col-4">
+            <button type="button" id="cancel" class="btn btn-sm btn-secondary">
+                Cancel
+            </button>
+            <button type="submit" id="submit" class="btn btn-sm btn-success">
+                Submit
+            </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="col-12">
+  <div class="card" id="events-card">
+      <div class="card-header">
+        <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#relatedEvents" aria-expanded="true" aria-controls="relatedEvents">Related Events</a></h5>
+      </div>
+      <div class="collapse show" id="relatedEvents">
+          <div class="card-body p-3">
+            <table class="table table-striped mt-5 datatable" id="events">
+              <thead>
+                  <th class="text-center" scope="col">Event Type</th>
+                  <th class="text-center" scope="col">Confirmed</th>
+                  <th class="text-center" scope="col">Start Date</th>
+                  <th class="text-center" scope="col">End Date</th>
+                  <th class="text-center" scope="col">Domain</th>
+                  <th class="text-center" scope="col">ASN</th>
+              </thead>
+              <tbody>
+                  {% for event in events %}
+                    <tr>
+                      <td>
+                        <a href="{% url 'dashboard:events:detail' event.id %}" target="_blank"> {{event.issue_type}} </a>
+                      </td>
+                      <td> {{event.confirmed}} </td>
+                      <td> {{event.start_date}} </td>
+                      <td> {{event.end_date}} </td>
+                      <td> {{event.domain}} </td>
+                      <td> {{event.asn}} </td>
+                    </tr>`
+                  {% endfor %}
+              </tbody>
+              <tfoot></tfoot>
+            </table>
+          </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+{% block custom_scripts %}
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+<script>
+  $( "#edit" ).click(function() {
+    $( "#edit" ).hide();
+
+    let monthsNumbers = {
+        "January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06", 
+        "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"
+    }
+
+    function parseDate (date) {
+        var splitted = date.split(", ");
+        var dayAndMonth = splitted[0].split(" ");
+        var month = dayAndMonth[0];
+        var day = dayAndMonth[1];
+        var year = splitted[1];
+
+        if (parseInt(day) < 10) {day = '0' + day;}
+        return year + "-" + monthsNumbers[month] + "-" + day;
+    }
+    var title = `<input value="{{ object.title }}" id="title" class="form-control w-75" type="text" aria-label="Title" name="title" required/>`;
+    $( '#title_slug').replaceWith(title);
+
+    var description = `<input value="{{ object.description }}" id="description" class="form-control w-75" type="text" aria-label="Description" name="description" />`;
+    $( '#description_slug').replaceWith(description);
+
+    var description_eng = `<input value="{{ object.description_eng }}" id="description_eng" class="form-control w-75" type="text" aria-label="Description English" name="description_eng" />`;
+    $( '#description_eng_slug').replaceWith(description_eng);
+
+    var case_type = `<select id="case_type" class="custom-select w-75" name="case_type">
+        {% for item in types %}
+          <option value="{{ item }}" >
+              {{ item }}
+          </option>
+        {% endfor %}
+      </select>`;
+    $( '#case_type_slug' ).replaceWith(case_type);
+    $("#case_type").val('{{object.case_type}}');
+
+    var parseStart_Date = parseDate("{{ object.start_date }}");
+    var start_date = `<input 
+        id="start_date" 
+        class="form-control w-75" 
+        type="date" 
+        value= ${parseStart_Date}
+        name="start_date"
+        />`;
+    $( '#start_date_slug' ).replaceWith(start_date);
+    
+    parseEnd_Date = parseDate("{{ object.end_date }}");
+    var end_date = `<input 
+        id="end_date" 
+        class="form-control w-75" 
+        type="date" 
+        value= ${parseEnd_Date}
+        name="end_date"
+        />`;
+    $( '#end_date_slug').replaceWith(end_date);
+
+    var category = `<select id="category" class="custom-select additional-filter w-75" name="category" required>
+        {% for cat in categoryNames %}
+          <option value="{{ cat }}">
+            {{ cat }}
+          </option>
+        {% endfor %}   
+      </select>`;
+    $( '#category_slug' ).replaceWith(category);
+    $("#category").val('{{object.category}}');
+
+    var draft = `<select id="draft" class="custom-select additional-filter w-75" name="draft" required>
+          <option value="True">
+            True
+          </option>
+          <option value="False">
+            False
+          </option>
+      </select>`;
+    $( '#draft_slug' ).replaceWith(draft);
+    $("#draft").val('{{object.draft}}');
+
+    var twitter_search = `<input value={{object.twitter_search}}" id="twitter_search" class="form-control w-75" type="text" aria-label="Twitter Search" name="twitter_search" />`;
+    $( '#twitter_search_slug' ).replaceWith(twitter_search);
+    $( "#cancel" ).show();
+    $( "#submit" ).show();
+
+  });
+
+  $( "#cancel" ).click(function() {
+      $( "#edit" ).show();
+
+      $( '#title' ).replaceWith(`<p>{{ object.title }}</p>`);
+      var description = `<p>{{ object.description }}</p>`;
+      $( '#description').replaceWith(description);
+      var description_eng = `<p>{{ object.description_eng }}</p>`;
+      $( '#description_eng').replaceWith(description_eng);
+      var case_type = `<p>{{ object.case_type }}</p>`;
+      $( '#case_type').replaceWith(case_type);
+      $("#case_type").val('{{object.case_type}}');
+      var start_date = `<p>{{ object.start_date }}</p>`;
+      $( '#start_date').replaceWith(start_date);
+      var end_date = `<p>{{ object.end_date }}</p>`;
+      $( '#end_date' ).replaceWith(end_date);
+      var category = `<p>{{ object.category }}</p>`;
+      $( '#category').replaceWith(category);
+      $("#category").val('{{object.category}}');
+      var draft = `<p>{{ object.draft }}</p>`;
+      $( '#draft').replaceWith(draft);
+      var twitter_search = `<p>{{ object.twitter_search }}</p>`;
+      $( '#twitter_search' ).replaceWith(twitter_search);
+
+      $( "#cancel" ).hide();
+      $( "#submit" ).hide();
+  });
+
+
+  $(document).ready(function() {
+    $( "#cancel" ).hide();
+    $( "#submit" ).hide();
+
+    eventsTable = $('#events').DataTable({
+      order: [[2, "desc"]],
+      searching: true,
+      select: {
+        style: 'multi'
+      },
+    });
+  });
+</script>
+{% endblock custom_scripts %}
+
