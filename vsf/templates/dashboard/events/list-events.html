@@ -345,6 +345,7 @@
       var selectedRows = events.rows( { selected: true }).data().toArray().map(
         (selected) => selected.id
       );
+
       if (selectedRows.length < 1) { 
         Swal.fire({
           icon: "warning",
