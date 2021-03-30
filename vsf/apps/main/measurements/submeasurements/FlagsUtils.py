@@ -221,11 +221,13 @@ def select( measurements : List[SubMeasurement],
         # If too many anomalies, start a selecting process.
         current_block : List[Measurement] = []
 
+        print(c.yellow(f"Openning new group"))
         while n_anomalies > event_continue_treshold:
-
+            print(c.green(f"\t Taking from {measurements[lo].start_time} to {measurements[max_in_date].start_time}"))
             last_index = lo
             for i in range(lo, min(max_in_date + 1, n_meas)):
                 if measurements[i].flag_type != SubMeasurement.FlagType.OK:
+                    print(c.blue(f"\t added {measurements[i].id}, flag: {measurements[i].flag_type}, "))
                     current_block.append(measurements[i])
                     last_index = i
 
@@ -234,11 +236,13 @@ def select( measurements : List[SubMeasurement],
             # search for anomaly measurements whose start time is within the given window 
             max_in_date = _bin_search_max(
                                 measurements, 
-                                start_time(measurements[last_index])+timedelta, 
+                                start_time(measurements[last_index]) + timedelta, 
                                 lo, 
                                 hi,
                                 start_time)
+
             n_anomalies = anomaly_count(last_index, max_in_date)
+            print(c.blue(f"next anomalie count: {n_anomalies}"))
 
             lo = min(lo+1, n_meas-1)
             hi = min(hi+1, n_meas-1)
