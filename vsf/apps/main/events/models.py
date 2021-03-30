@@ -6,7 +6,8 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from datetime import datetime  
+from datetime import datetime
+from django.db.models.base import Model  
 
 from django.db.models.deletion import SET_NULL
 
@@ -85,6 +86,20 @@ class Event(models.Model):
     # If true, then this event won't register new measurements
     closed = models.BooleanField(default=False) 
 
+    # Set up by user, with higher priority than automated start date
+    manual_start_date = models.DateTimeField(
+        null = True,
+        default = None,
+        blank= True
+    )
+
+    # Set up by user, with higher priority than automated start date
+    manual_end_date = models.DateTimeField(
+        null = True,
+        default = None,
+        blank= True
+    )
+
     def generate_title(self) -> str:
         """
             This function will return a string that should be used as auto-title
@@ -95,6 +110,24 @@ class Event(models.Model):
         type = self.issue_type
         identification = f"{type} ISSUE FROM {min_date.strftime('%Y-%m-%d %H:%M:%S')}\ FOR ISP {asn.asn if asn else 'UNKNOWN_ASN'} ({asn.name if asn else 'UNKNOWN_ASN'})"
         return identification
+
+    def get_start_date(self) -> datetime:
+        """
+            This function returns initial date for this event. If 
+            manual start date is null, return actual start date. Otherwise, 
+            return manual start date
+        """
+
+        return self.manual_start_date or self.start_date
+
+    def get_end_date(self) -> datetime:
+        """
+            This function returns initial date for this event. If 
+            manual start date is null, return actual start date. Otherwise, 
+            return manual start date
+        """
+
+        return self.manual_end_date or self.end_date
 
     def __str__(self):
         return u"%s" % self.identification
