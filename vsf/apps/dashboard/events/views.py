@@ -168,13 +168,23 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             except:
                 case = None
                 
+            # Compute start date
+            start_date = event.get_start_date()
+            if start_date:
+                start_date = start_date.strftime("%b. %d, %Y, %H:%M %p")
+
+            # Compute end date
+            end_date = event.get_end_date()
+            if end_date:
+                end_date = end_date.strftime("%b. %d, %Y, %H:%M %p")
+
             response.append({
                 'id': event.id,
                 'identification': event.identification,
                 'issue_type': event.issue_type, 
                 'confirmed': event.confirmed, 
-                'start_date': event.start_date.strftime("%b. %d, %Y, %H:%M %p"), 
-                'end_date': event.end_date.strftime("%b. %d, %Y, %H:%M %p"), 
+                'start_date': start_date, 
+                'end_date': end_date, 
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
                 'case': case if case else "-No case related-",
