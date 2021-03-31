@@ -6,7 +6,7 @@
 from django.db      import models
 from django.urls    import reverse
 from django.conf    import settings
-from datetime       import date as d
+from datetime       import date as d, datetime
 
 from django.db.models.deletion import SET_NULL
 
@@ -96,7 +96,34 @@ class Case(models.Model):
         blank=True,
         )
 
-                            
+    def get_start_date(self) -> datetime:
+        """
+            Get start date depending if it's set up to auto or 
+            manual. If start_date is null, then return minimum start_date from every related event.
+            Otherwise, return start_date
+
+            It may return None when there's no cases and manual date is set to None
+        """
+
+        if self.start_date:
+            return self.start_date
+
+        return min(e.get_start_date() for e in self.events.all()) 
+
+    def get_end_date(self) -> datetime:
+        """
+            Get end date depending if it's set up to auto or 
+            manual. If end_date is null, then return maximum end_date from every related event.
+            Otherwise, return start_date
+
+            It may return None when there's no cases and manual date is set to None
+        """
+
+        if self.end_date:
+            return self.end_date
+
+        return max(e.get_end_date() for e in self.events.all()) 
+
     def __str__(self):
         return self.title
 
