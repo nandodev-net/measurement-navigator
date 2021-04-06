@@ -37,8 +37,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         # ------------------ making prefill ------------------ #
         
         fields = [ 
-            'identification', 'confirmed', 'public_evidence', 'private_evidence', 
-            'issue_type', 'domain', 'asn'
+            'identification', 'confirmed', 'issue_type', 'domain', 'asn'
         ]
 
         for field in fields:
@@ -84,7 +83,7 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
     columns = [ 
         'identification', 'confirmed', 'start_date', 'end_date', 
-        'public_evidence', 'private_evidence', 'issue_type', 'domain', 'asn'
+        'issue_type', 'domain', 'asn'
     ]
 
     order_columns = columns
@@ -131,15 +130,6 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 qs = qs.filter(confirmed = 't') 
             else: 
                 qs = qs.filter(confirmed = 'f')
-
-
-        public_evidence = self.request.GET.get('public_evidence')
-        if public_evidence != None and public_evidence != "":
-            qs = qs.filter(public_evidence = public_evidence)
-
-        private_evidence = self.request.GET.get('private_evidence')
-        if private_evidence != None and private_evidence != "":
-            qs = qs.filter(private_evidence = private_evidence)
 
         issue_type = self.request.GET.get('issue_type')
         if issue_type != None and issue_type != "":
