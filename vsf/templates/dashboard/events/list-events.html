@@ -82,33 +82,9 @@
               </div>
             </div> 
           </div>
-
-          <div class="col-4 mt-3">
-            <input
-            id="public_evidence"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="Public Evidence"
-            aria-label="Search public evidence"
-            value="{{ prefill.public_evidence }}"
-            name="public_evidence"
-            />
-          </div>
-
-          <div class="col-4 mt-3">
-            <input
-            id="private_evidence"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="Private evidence"
-            aria-label="Search private evidence"
-            value="{{ prefill.private_evidence }}"
-            name="private_evidence"
-            />
-          </div>
           
-          <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark">
+          <div class="col-4 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
               <div class="col-5 mx-auto">
                 <label class="font-weight-bold text-white" for="site">Issue Type</label>
               </div>
@@ -142,9 +118,8 @@
             />
           </div>
 
-
           <div class="col-4 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+            <div class="row align-items-center rounded p-2 bg-dark">
               <div class="col-3 mx-auto">
                 <label class='font-weight-bold text-white' for="asn">
                   ASN
@@ -167,10 +142,13 @@
           </div>
 
 
-          <div class="col-1 my-auto">
+          <div class="col-4 my-auto ml-1">
             <button id="url-form-button" class="btn btn-outline-dark btn-block" type="submit">
               <i class="fa fa-search"></i>
             </button>
+          </div>
+
+          <div class="col-4 mx-auto my-auto">
           </div>
 
         </div> 
@@ -278,8 +256,6 @@
           $( '#identification_detail' ).text(json["identification"]);
           $( '#start_date_detail' ).text(json["start_date"]);
           $( '#end_date_detail' ).text(json["end_date"]);
-          $( '#public_evidence_detail' ).text(json["public_evidence"]);
-          $( '#private_evidence_detail' ).text(json["private_evidence"]);
           $( '#issue_type_detail' ).text(json["issue_type"]);
           $( '#domain_detail' ).text(json["domain"]);
           $( '#asn_detail' ).text(json["asn"]);
@@ -499,13 +475,13 @@
       }
 
       events = $('#events').DataTable({
+        order: [[ 3, "desc" ]],
         searching: true,
         processing: true,
         language: {
         },
         serverSide: true,
         rowId: "id",
-        order: [[3, "desc"]],
         ajax: {
           url: '{% url "dashboard:events:data" %}',
           data: function (data) {
@@ -513,8 +489,6 @@
             data.confirmed = $("#confirmed").val();
             data.start_time = $("#start_time").val();
             data.end_time = $("#end_time").val();
-            data.public_evidence = $("#public_evidence").val(); 
-            data.private_evidence = $("#private_evidence").val();
             data.issue_type = $("#issue_type").val();
             data.domain = $("#domain").val();
             data.asn = $("#asn").val();
