@@ -136,11 +136,12 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         response = []
         for case in qs:
             category = Category.objects.filter(id = case.category_id).get()
+
             response.append({
                 'id': case.id,
                 'title': case.title, 
-                'start_date': case.start_date, 
-                'end_date': case.end_date, 
+                'start_date': case.get_start_date(), 
+                'end_date': case.get_end_date(), 
                 'category': category.name, 
                 'draft': case.draft
             })
