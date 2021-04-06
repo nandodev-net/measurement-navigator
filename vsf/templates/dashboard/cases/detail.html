@@ -6,6 +6,9 @@
   .pcoded-main-container {
       width: -webkit-fill-available;
   }
+  a {
+    color: blue;
+  }
 </style>
 {% endblock custom_stylesheet %}
 
@@ -175,13 +178,13 @@
         return year + "-" + monthsNumbers[month] + "-" + day;
     }
     var title = `<input value="{{ object.title }}" id="title" class="form-control w-75" type="text" aria-label="Title" name="title" required/>`;
-    $( '#title_slug').replaceWith(title);
+    $( '#title_slug').empty().append(title)
 
     var description = `<input value="{{ object.description }}" id="description" class="form-control w-75" type="text" aria-label="Description" name="description" />`;
-    $( '#description_slug').replaceWith(description);
+    $( '#description_slug').empty().append(description);
 
     var description_eng = `<input value="{{ object.description_eng }}" id="description_eng" class="form-control w-75" type="text" aria-label="Description English" name="description_eng" />`;
-    $( '#description_eng_slug').replaceWith(description_eng);
+    $( '#description_eng_slug').empty().append(description_eng);
 
     var case_type = `<select id="case_type" class="custom-select w-75" name="case_type">
         {% for item in types %}
@@ -190,7 +193,7 @@
           </option>
         {% endfor %}
       </select>`;
-    $( '#case_type_slug' ).replaceWith(case_type);
+    $( '#case_type_slug' ).empty().append(case_type);
     $("#case_type").val('{{object.case_type}}');
 
     var parseStart_Date = parseDate("{{ object.start_date }}");
@@ -201,7 +204,7 @@
         value= ${parseStart_Date}
         name="start_date"
         />`;
-    $( '#start_date_slug' ).replaceWith(start_date);
+    $( '#start_date_slug' ).empty().append(start_date);
     
     parseEnd_Date = parseDate("{{ object.end_date }}");
     var end_date = `<input 
@@ -211,7 +214,7 @@
         value= ${parseEnd_Date}
         name="end_date"
         />`;
-    $( '#end_date_slug').replaceWith(end_date);
+    $( '#end_date_slug').empty().append(end_date);
 
     var category = `<select id="category" class="custom-select additional-filter w-75" name="category" required>
         {% for cat in categoryNames %}
@@ -220,7 +223,7 @@
           </option>
         {% endfor %}   
       </select>`;
-    $( '#category_slug' ).replaceWith(category);
+    $( '#category_slug' ).empty().append(category);
     $("#category").val('{{object.category}}');
 
     var draft = `<select id="draft" class="custom-select additional-filter w-75" name="draft" required>
@@ -231,11 +234,11 @@
             False
           </option>
       </select>`;
-    $( '#draft_slug' ).replaceWith(draft);
+    $( '#draft_slug' ).empty().append(draft);
     $("#draft").val('{{object.draft}}');
 
-    var twitter_search = `<input value={{object.twitter_search}}" id="twitter_search" class="form-control w-75" type="text" aria-label="Twitter Search" name="twitter_search" />`;
-    $( '#twitter_search_slug' ).replaceWith(twitter_search);
+    var twitter_search = `<input value="{{object.twitter_search}}" id="twitter_search" class="form-control w-75" type="text" aria-label="Twitter Search" name="twitter_search" />`;
+    $( '#twitter_search_slug' ).empty().append(twitter_search);
     $( "#cancel" ).show();
     $( "#submit" ).show();
 

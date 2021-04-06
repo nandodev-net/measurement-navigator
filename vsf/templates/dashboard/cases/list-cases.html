@@ -194,8 +194,6 @@
           var url = "{% url 'dashboard:events:detail' pk=1 %}".replace(1, el.id);
           body = body + `<tr><td><a href=${url} target="_blank">${el.issue_type}</a></td><td>${el.confirmed}</td><td>${el.start_date}</td><td>${el.end_date}</td><td>${el.domain}</td><td>${el.asn}</td></tr>`;
         });
-        console.log(body);
-        console.log('--------------');
         $('#events > tbody').append(body);
         /*var events = $("#events").DataTable();*/
       }
@@ -366,10 +364,7 @@
           orderable: false,
           searchable: true,
           render: function (data, type, row, meta) {
-            return `<a href="">
-              <button type="button" class="btn-sm btn-primary">Edit</button>
-            </a>
-            <button type="button" class="btn-sm btn-danger">Delete</button>`       
+            return `<button type="button" class="btn-sm btn-danger">Delete</button>`       
           },
         },
       ],
