@@ -195,7 +195,6 @@
           body = body + `<tr><td><a href=${url} target="_blank">${el.issue_type}</a></td><td>${el.confirmed}</td><td>${el.start_date}</td><td>${el.end_date}</td><td>${el.domain}</td><td>${el.asn}</td></tr>`;
         });
         $('#events > tbody').append(body);
-        /*var events = $("#events").DataTable();*/
       }
     });
     jQuery.noConflict();
@@ -208,6 +207,9 @@
     $('#createCase').modal('show'); 
   });
   
+  $(' #opendetailmodal ').on('click', function () {
+
+  })
 
   $( '#submit_case' ).click(function (e) {
 
@@ -364,7 +366,13 @@
           orderable: false,
           searchable: true,
           render: function (data, type, row, meta) {
-            return `<button type="button" class="btn-sm btn-danger">Delete</button>`       
+            var url = "{% url 'dashboard:event_cases:detail_page' 1 %}".replace(1, row.id);
+            
+            return `
+            <a href=${url} target='_blank' id="link">
+                <button type="button" class="btn btn-sm btn-primary confirm-case">Detail in new Tab</button>
+            </a>
+            <button type="button" class="btn-sm btn-danger">Delete</button>`       
           },
         },
       ],
