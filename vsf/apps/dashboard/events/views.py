@@ -304,6 +304,10 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
             } for sub in submeasuresRelated
         ]
 
+        issueTypes = Event.IssueType.choices
+        issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
+        context['issueTypes'] = issueTypes
+        
         caseRelated = Case.objects.filter(events = context['object']).first()
         context['case'] = caseRelated.__dict__ if caseRelated else {}
         context['case']['category'] = caseRelated.category.name if caseRelated else ""

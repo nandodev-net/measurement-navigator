@@ -2,6 +2,11 @@
 {% load static %}
 {% block custom_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<style>
+    table a {
+        color: blue;
+    }
+</style>
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Event {{object.id}} {% endblock tab_title %}
@@ -45,15 +50,14 @@
 
 
 <div class="col-1"></div>
-<div class="col-11">
+<div class="col-2">
     {% if object.it_continues %}
         <h5 class="mb-5">It continues: <i class="fas fa-circle-notch ml-2 text-success"></i></h5>
     {% else %}
         <h5 class="mb-5">It continues: <i class="fas fa-circle-notch ml-2 text-danger"></i></h5>
     {% endif %}
 </div>
-
-<div class="col-10"></div>
+<div class="col-7"></div>
 {% if object.confirmed  %}
     <div class="col-2"><button class='btn btn-danger' id="confirmTrigger" type='button'> Deny </button></div>
 {% else %}
@@ -81,8 +85,8 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">Identification:</h5>
                 </div>
-                <div class="col-9" id="identification_slug">
-                    <p>{{ object.identification }}</p>
+                <div class="col-9">
+                    <p><span id="identification_slug">{{ object.identification }}</span></p>
                 </div>
             </div>
             <hr>
@@ -90,8 +94,8 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">Start Date:</h5>
                 </div>
-                <div class="col-9" id="start_date_slug">
-                    <p>{{ object.start_date }}</p>
+                <div class="col-9">
+                    <p><span id="start_date_slug">{{ object.start_date }}</span></p>
                 </div>
             </div>
             <hr>
@@ -99,8 +103,8 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">End Date:</h5>
                 </div>
-                <div class="col-9" id="end_date_slug">
-                    <p>{{ object.end_date }}</p>
+                <div class="col-9">
+                    <p><span id="end_date_slug">{{ object.end_date }}</span></p>
                 </div>
             </div>
             <hr>
@@ -108,8 +112,8 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">Public Evidence:</h5>
                 </div>
-                <div class="col-9" id="public_evidence_slug">
-                    <p>{{ object.public_evidence }}</p>
+                <div class="col-9">
+                    <p><span id="public_evidence_slug">{{ object.public_evidence }}</span></p>
                 </div>
             </div>
             <hr>
@@ -117,8 +121,8 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">Private Evidence:</h5>
                 </div>
-                <div class="col-9" id="private_evidence_slug">
-                    <p>{{ object.private_evidence }}</p>
+                <div class="col-9">
+                    <p><span id="private_evidence_slug">{{ object.private_evidence }}</span></p>
                 </div>
             </div>
             <hr>
@@ -126,8 +130,8 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">Issue Type:</h5>
                 </div>
-                <div class="col-9" id="issue_type_slug">
-                    <p>{{ object.issue_type }}</p>
+                <div class="col-9">
+                    <p><span id="issue_type_slug">{{ object.issue_type }}</span></p>
                 </div>
             </div>
             <hr>
@@ -135,8 +139,8 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">Domain:</h5>
                 </div>
-                <div class="col-9" id="domain_slug">
-                    <p>{{ object.domain }}</p>
+                <div class="col-9">
+                    <p><span id="domain_slug">{{ object.domain }}</span></p>
                 </div>
             </div>
             <hr>
@@ -144,8 +148,8 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">ASN:</h5>
                 </div>
-                <div class="col-9" id="asn_slug">
-                    <p>{{ object.asn }}</p>
+                <div class="col-9">
+                    <p><span id="asn_slug">{{ object.asn }}</span></p>
                 </div>
             </div>
             <div class="row mt-3">
@@ -327,17 +331,18 @@
         $( "#confirmTrigger" ).hide();
 
         let monthsNumbers = {
-            "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04", "May": "05", "Jun": "06", 
-            "Jul": "07", "Aug": "08", "Sep": "09", "Oct": "10", "Nov": "11", "De": "12"
+            "Jan.": "01", "Feb.": "02", "March": "03", "April": "04", "May": "05", "June": "06", 
+            "Jul.": "07", "Aug.": "08", "Sept.": "09", "October": "10", "November": "11", "December": "12"
         }
 
         function parseDate (date) {
             var splitted = date.split(", ");
-            var dayAndMonth = splitted[0].split(". ");
+            var dayAndMonth = splitted[0].split(" ");
             var month = dayAndMonth[0];
             var day = dayAndMonth[1];
             var year = splitted[1];
 
+            if (parseInt(day) < 10) {day = '0' + day;}
             return year + "-" + monthsNumbers[month] + "-" + day;
         }
         var identification = `<input
@@ -348,7 +353,7 @@
             value="{{ object.identification }}"
             name="identification"
             />`;
-        $( '#identification_slug').replaceWith(identification);
+        $( '#identification_slug' ).empty().append(identification);
         var parseStart_Date = parseDate("{{ object.start_date }}");
         var start_date = `<input 
             id="start_time" 
@@ -357,7 +362,7 @@
             value= ${parseStart_Date}
             name="start_time"
             />`;
-        $( '#start_date_slug').replaceWith(start_date);
+        $( '#start_date_slug').empty().append(start_date);
         parseEnd_Date = parseDate("{{ object.end_date }}");
         var end_date = `<input 
             id="end_date" 
@@ -366,7 +371,7 @@
             value= ${parseEnd_Date}
             name="end_date"
             />`;
-        $( '#end_date_slug').replaceWith(end_date);
+        $( '#end_date_slug').empty().append(end_date);
         var public_evidence = `<input
             id="public_evidence"
             class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
@@ -376,7 +381,7 @@
             value="{{ object.public_evidence }}"
             name="public_evidence"
             />`;
-        $( '#public_evidence_slug').replaceWith(public_evidence);
+        $( '#public_evidence_slug').empty().append(public_evidence);
         var private_evidence = `<input
             id="private_evidence"
             class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
@@ -386,7 +391,21 @@
             value="{{ object.private_evidence }}"
             name="private_evidence"
             />`;
-        $( '#private_evidence_slug').replaceWith(private_evidence);
+        $( '#private_evidence_slug').empty().append(private_evidence);
+
+
+        var issue_type = `
+            <select class="custom-select additional-filter" id="issue_type" name="issue_type">
+                {% for issue in issueTypes %}
+                    <option value="{{ issue.name }}">
+                        {{ issue.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            `;
+        $( '#issue_type_slug' ).empty().append(issue_type)
+        $("#issue_type").val('{{object.issue_type}}');
+
         var domain = `<input
             id="domain"
             class="form-control additional-filter w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
@@ -396,7 +415,7 @@
             value="{{ object.domain }}"
             name="domain"
             />`;
-        $( '#domain_slug' ).replaceWith(domain);
+        $( '#domain_slug' ).empty().append(domain);
         var asn = `<select id="asn" class="custom-select additional-filter w-75" name="asn">
                 {% for asn in asns %}
                 <option value="{{ asn.asn }}" >
@@ -404,7 +423,7 @@
                 </option>
                 {% endfor %}
             </select>`;
-        $( '#asn_slug' ).replaceWith(asn);
+        $( '#asn_slug' ).empty().append(asn);
         $("#asn").val('{{object.asn}}');
         $( "#cancel" ).show();
         $( "#submit" ).show();
@@ -415,19 +434,19 @@
         $( "#edit" ).show();
         $( "#confirmTrigger" ).show();
         var identification = `<p>{{ object.identification }}</p>`;
-        $( '#identification_slug').replaceWith(identification);
+        $( '#identification_slug').empty().append(identification);
         var start_date = `<p>{{ object.start_date }}</p>`;
-        $( '#start_date_slug').replaceWith(start_date);
+        $( '#start_date_slug').empty().append(start_date);
         var end_date = `<p>{{ object.end_date }}</p>`;
-        $( '#end_date_slug').replaceWith(end_date);
+        $( '#end_date_slug').empty().append(end_date);
         var public_evidence = `<p>{{ object.public_evidence }}</p>`;
-        $( '#public_evidence_slug').replaceWith(public_evidence);
+        $( '#public_evidence_slug').empty().append(public_evidence);
         var private_evidence = `<p>{{ object.private_evidence }}</p>`;
-        $( '#private_evidence_slug').replaceWith(private_evidence);
+        $( '#private_evidence_slug').empty().append(private_evidence);
         var domain = `<p>{{ object.domain }}</p>`;
-        $( '#domain_slug' ).replaceWith(domain);
+        $( '#domain_slug' ).empty().append(domain);
         var asn = `<p>{{ object.asn }}</p>`;
-        $( '#asn_slug' ).replaceWith(asn);
+        $( '#asn_slug' ).empty().append(asn);
         $("#asn").val('{{object.asn}}');
         $( "#cancel" ).hide();
         $( "#submit" ).hide();
