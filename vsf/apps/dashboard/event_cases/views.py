@@ -364,7 +364,7 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
 
         try:
 
-            Case.objects.filter(title = post['title'][0]).update(
+            Case.objects.filter(id = post['id'][0]).update(
                 title = post['title'][0],
                 description = post['description'][0],
                 description_eng = post['description_eng'][0],
