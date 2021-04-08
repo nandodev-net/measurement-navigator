@@ -55,6 +55,10 @@ class SubMeasurement(models.Model):
         verbose_name = 'confirmed?'
     )
 
+    # If ooni tells that this type of measurement is the blocking reason
+    # If true, it is, if false, it is not, if null, we know nothing
+    ooni_reason_for_blocking = models.NullBooleanField(default=None)
+
     # The following fields are required for the hard flag logic:
     # The 'previous_counter' field stores an integer 'N' such that 
     # N = the ammount of measurements such that each measurement m holds:
@@ -69,6 +73,7 @@ class SubMeasurement(models.Model):
     # If this measurement was counted 
     counted = models.BooleanField(default=False)
     
+
     def save(   self, 
                 force_insert=False, 
                 force_update=False, 

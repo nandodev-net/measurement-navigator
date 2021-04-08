@@ -71,6 +71,12 @@ def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
     dns_consistency         = test_keys['dns_consistency']
     dns_experiment_failure  = test_keys['dns_experiment_failure']
     client_resolver         = test_keys.get('client_resolver')
+    ooni_blocking           = test_keys.get('blocking')
+
+    # check if this was a reason for blocking
+    if ooni_blocking or ooni_blocking == '':
+        ooni_blocking = ooni_blocking == 'dns'
+
     cr = {} # control resolver information
     try:
         cr['failure'] = control_resolver['dns']['failure']
@@ -103,7 +109,8 @@ def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
             dns_consistency= dns_consistency,
             inconsistent= inconsistent,
             jsons=jsonf,
-            client_resolver=client_resolver
+            client_resolver=client_resolver,
+            ooni_reason_for_blocking=ooni_blocking
         )
         new_dns.append(dns)
 
@@ -124,6 +131,9 @@ def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
     failures            = test_keys['failures']
     control_resolver    = test_keys['control']
     client_resolver     = test_keys.get('client_resolver')
+    ooni_blocking       = test_keys.get("blocking")
+    if ooni_blocking or ooni_blocking == "":
+        ooni_blocking = ooni_blocking == "dns"
 
     new_dns : List[DNS] = []
     # Control resolver ip addres:
@@ -197,7 +207,8 @@ def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
                         inconsistent=is_inconsistent,
                         hostname=query['hostname'],
                         jsons=jsonf,
-                        client_resolver=client_resolver
+                        client_resolver=client_resolver,
+                        ooni_reason_for_blocking=ooni_blocking
                     )
 
                 else:
@@ -210,7 +221,8 @@ def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
                         dns_consistency=dns_consistency,
                         hostname=query['hostname'],
                         jsons=jsonf,
-                        client_resolver=client_resolver
+                        client_resolver=client_resolver,
+                        ooni_reason_for_blocking=ooni_blocking
                     )
 
                 new_dns.append(dns)
@@ -234,6 +246,10 @@ def create_http_from_web_conn(measurement : RawMeasurement) -> HTTP:
     headers_match       = test_keys['headers_match']
     body_length_match   = test_keys['body_length_match']
     body_proportion     = test_keys['body_proportion']
+    ooni_blocking = test_keys.get("blocking")
+
+    if ooni_blocking or ooni_blocking == "":
+        ooni_blocking = ooni_blocking == "http-diff" or ooni_blocking == "http-failure"
 
     # There's some cases where the measurement is not valuable, 
     # for example when the experiment failed to connect,
@@ -250,6 +266,7 @@ def create_http_from_web_conn(measurement : RawMeasurement) -> HTTP:
             headers_match=headers_match,
             body_length_match=body_length_match,
             body_proportion=body_proportion,
+            ooni_reason_for_blocking=ooni_blocking
         )
         return http
     
@@ -263,6 +280,11 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
 
     tcp_connect = test_keys["tcp_connect"]
 
+    # Check if ooni says this is a reason for blocking
+    ooni_blocking = test_keys.get('blocking')
+    if ooni_blocking or ooni_blocking=="":
+        ooni_blocking = ooni_blocking == "tcp_ip"
+
     new_tcp = []
     for tcp_connect_item in tcp_connect:
         try:
@@ -274,7 +296,8 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
                     status_blocked=tcp_connect_item['status']['blocked'],
                     status_failure=tcp_connect_item['status']['failure'],
                     status_success=tcp_connect_item['status']['success'],
-                    ip=tcp_connect_item['ip']
+                    ip=tcp_connect_item['ip'],
+                    ooni_reason_for_blocking = ooni_blocking
                 ))
         except:
             pass
@@ -388,10 +411,15 @@ def check_dns_from_web_conn(dns : DNS) -> bool:
         This function asserts that the measurements type is 
         web_connectivity.
     """
-    return  dns.inconsistent or\
-            (   
-                dns.inconsistent == False and\
-                dns.failure == "no_answer"
+    return  dns.ooni_reason_for_blocking == True or\
+            (
+                dns.failure != None and \
+                dns.control_resolver_failure == None \
+                
+            )  or \
+            (
+                dns.ooni_reason_for_blocking == None and\
+                dns.dns_consistency != "consistent"
             )
 
 def check_dns_from_dns_cons(dns : DNS) -> bool:
@@ -399,19 +427,12 @@ def check_dns_from_dns_cons(dns : DNS) -> bool:
         Checks if the given submeasurement of type DNS should have a soft flag. 
         This function asserts that the measurement type is dns_consistency
     """
-    if dns.inconsistent:
-        return True
-    
-    if  dns.control_resolver_failure not in [None, ''] or\
-        dns.failure not in [None, ''] or\
-        not dns.control_resolver_answers:
-        return False
+   
+    if dns.ooni_reason_for_blocking: return True
 
-    return  dns.\
-            measurement.\
-            raw_measurement.\
-            test_keys.get('errors', default={}).\
-            get(dns.resolver_hostname) == "no_answer"
+    return  dns.failure != None and\
+            dns.control_resolver_failure == None 
+                
 
 def check_http(http : HTTP, body_proportion_limit : float = 1.0) -> bool:
     """
@@ -420,17 +441,14 @@ def check_http(http : HTTP, body_proportion_limit : float = 1.0) -> bool:
         param: body_proportion_limit = A tolerance ratio to accept a http_measurement as
         invalid
     """
-    return (not http.headers_match and\
-            not http.body_length_match or\
-            not http.status_code_match) or\
-            http.body_proportion < body_proportion_limit 
+    return http.ooni_reason_for_blocking == True
 
 def check_tcp(tcp : TCP) -> bool:
     """
         Checks if the given submeasurement of type DNS Ssho
     """
 
-    return tcp.status_blocked 
+    return tcp.ooni_reason_for_blocking == True 
 
 # @TODO format later
 from .FlagsUtils import count_flags_sql, hard_flag
