@@ -108,7 +108,7 @@ class Case(models.Model):
         if self.start_date:
             return self.start_date
 
-        return min(e.get_start_date() for e in self.events.all()) 
+        return min(e.get_start_date() for e in self.events.all()) if self.events.all() else '' 
 
     def get_end_date(self) -> datetime:
         """
@@ -122,7 +122,7 @@ class Case(models.Model):
         if self.end_date:
             return self.end_date
 
-        return max(e.get_end_date() for e in self.events.all()) 
+        return max(e.get_end_date() for e in self.events.all()) if self.events.all() else '' 
 
     def __str__(self):
         return self.title

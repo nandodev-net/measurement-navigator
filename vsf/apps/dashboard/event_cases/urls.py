@@ -35,6 +35,18 @@ urlpatterns = [
     ),
 
     path(
+        'event_remove/',
+        views.EventsUnlinking.as_view(),
+        name="event_remove"
+    ),
+
+    path(
+        'case_delete/',
+        views.CaseDeleteView.as_view(),
+        name="case_delete"
+    ),
+
+    path(
         'detail/<int:pk>',
         views.CaseDetailView.as_view(),
         name="detail_page"

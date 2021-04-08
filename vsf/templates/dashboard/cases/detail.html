@@ -63,12 +63,12 @@
       <hr>
       <div class="row">
         <div class="col-3 font-weight-bold">Description</div>
-        <div class="col-9"><span id="description_slug">{{object.description}}</span></div>
+        <div class="col-9"><span id="description_slug"><textarea id="description" class="form-control w-75" type="text" aria-label="Description" name="description" disabled>{{ object.description }}</textarea></span></div>
       </div>
       <hr>
       <div class="row">
         <div class="col-3 font-weight-bold">Description English</div>
-        <div class="col-9"><span id="description_eng_slug">{{object.description_eng}}</span></div>
+        <div class="col-9"><span id="description_eng_slug"><textarea id="description_eng" class="form-control w-75" type="text" aria-label="Description English" name="description_eng" disabled>{{ object.description_eng }}</textarea></span></div>
       </div>
       <hr>
       <div class="row">
@@ -114,6 +114,9 @@
     </form>
   </div>
 </div>
+<button type="button" class="btn btn-dark rounded ml-1 mb-4" id="unassociateBtn">
+    <i class="fas fa-info mr-1"></i> Unassign Events
+  </button>
 
 <div class="col-12">
   <div class="card" id="events-card">
@@ -124,6 +127,7 @@
           <div class="card-body p-3">
             <table class="table table-striped mt-5 datatable" id="events">
               <thead>
+                  <th class="text-center" scope="col">ID</th>
                   <th class="text-center" scope="col">Event Type</th>
                   <th class="text-center" scope="col">Confirmed</th>
                   <th class="text-center" scope="col">Start Date</th>
@@ -134,6 +138,7 @@
               <tbody>
                   {% for event in events %}
                     <tr>
+                      <td> {{event.id}} </td>
                       <td>
                         <a href="{% url 'dashboard:events:detail' event.id %}" target="_blank"> {{event.issue_type}} </a>
                       </td>
@@ -180,10 +185,10 @@
     var title = `<input value="{{ object.title }}" id="title" class="form-control w-75" type="text" aria-label="Title" name="title" required/>`;
     $( '#title_slug').empty().append(title)
 
-    var description = `<input value="{{ object.description }}" id="description" class="form-control w-75" type="text" aria-label="Description" name="description" />`;
+    var description = `<textarea id="description" class="form-control w-75" type="text" aria-label="Description" name="description">{{ object.description }}</textarea>`;
     $( '#description_slug').empty().append(description);
 
-    var description_eng = `<input value="{{ object.description_eng }}" id="description_eng" class="form-control w-75" type="text" aria-label="Description English" name="description_eng" />`;
+    var description_eng = `<textarea id="description_eng" class="form-control w-75" type="text" aria-label="Description English" name="description_eng">{{ object.description_eng }}</textarea>`;
     $( '#description_eng_slug').empty().append(description_eng);
 
     var case_type = `<select id="case_type" class="custom-select w-75" name="case_type">
@@ -248,9 +253,9 @@
       $( "#edit" ).show();
 
       $( '#title' ).replaceWith(`<p>{{ object.title }}</p>`);
-      var description = `<p>{{ object.description }}</p>`;
+      var description = `<textarea style="width:50%;" disabled>{{ object.description }}</textarea>`;
       $( '#description').replaceWith(description);
-      var description_eng = `<p>{{ object.description_eng }}</p>`;
+      var description_eng = `<textarea style="width:50%;" disabled>{{ object.description_eng }}</textarea>`;
       $( '#description_eng').replaceWith(description_eng);
       var case_type = `<p>{{ object.case_type }}</p>`;
       $( '#case_type').replaceWith(case_type);
@@ -278,11 +283,72 @@
 
     eventsTable = $('#events').DataTable({
       order: [[2, "desc"]],
+      columnDefs: [
+            {
+                "targets": [ 0 ],
+                "visible": false,
+                "searchable": false
+            },
+        ],
       searching: true,
       select: {
         style: 'multi'
       },
     });
+
+    $( '#unassociateBtn' ).click(function (event) {
+      var eventsSelected = eventsTable.rows( { selected: true }).data().toArray();
+      var eventsSelected = eventsTable.rows( { selected: true }).data().toArray().map((selected) => (
+        selected[0][0]
+      ));
+      var case_id = $("#id").val()
+      console.log(case_id)
+      console.log(eventsSelected)
+      $.ajax({
+        type: "GET",
+        url: '{% url "dashboard:event_cases:event_remove" %}',
+        data: {events: eventsSelected, case: case_id},
+        success: function(data) {
+
+          if (eventsSelected.length > 0) {
+            Swal.fire({
+                icon: "success",
+                title: "Successful unlinking!",
+                confirmButtonColor: "#28a745",
+                confirmButtonText: "Continue"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+          } else {
+            console.log(data)
+            Swal.fire({
+                icon: "error",
+                title: "Bad request.",
+                text: `Select at least one event.`,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+            });
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $("associateModal").modal("hide");
+          Swal.fire({
+              icon: "error",
+              title: "There was an error!",
+              text: `${ textStatus }, ${ errorThrown }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+      });
+      
+
+    });
+
+
+
   });
 </script>
 {% endblock custom_scripts %}
