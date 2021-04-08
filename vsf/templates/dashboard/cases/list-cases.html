@@ -111,10 +111,12 @@
     </nav>
   </form>
 
-  <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="detailNewTab">
+  <!-- <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="detailNewTab">
     <i class="fas fa-info mr-1"></i> Details in New Tab
+  </button> -->
+  <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="deletecaseBtn">
+    <i class="fas fa-info mr-1"></i> Delete Cases
   </button>
-    
   <div class="card rounded p-5 mt-4" style="width: 100%;">
       <table class="table table-striped mt-5 datatable"  id="cases-table">
         <thead>
@@ -371,8 +373,7 @@
             return `
             <a href=${url} target='_blank' id="link">
                 <button type="button" class="btn btn-sm btn-primary confirm-case">Detail in new Tab</button>
-            </a>
-            <button type="button" class="btn-sm btn-danger">Delete</button>`       
+            </a>`       
           },
         },
       ],
@@ -392,7 +393,56 @@
     });
   });
 
+  $( '#deletecaseBtn' ).click(function (event) {
+      var casesSelected = table.rows( { selected: true }).data().toArray();
+      console.log('HOO',casesSelected)
+      var casesSelected = table.rows( { selected: true }).data().toArray().map((selected) => (
+        selected.id
+      ));
 
+      console.log('AAA',casesSelected)
+      $.ajax({
+        type: "GET",
+        url: '{% url "dashboard:event_cases:case_delete" %}',
+        data: {cases: casesSelected},
+        success: function(data) {
+
+          if (casesSelected.length > 0) {
+            Swal.fire({
+                icon: "success",
+                title: "Successful Delete!",
+                confirmButtonColor: "#28a745",
+                confirmButtonText: "Continue"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+          } else {
+            console.log(data)
+            Swal.fire({
+                icon: "error",
+                title: "Bad request.",
+                text: `Select at least one event.`,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+            });
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $("associateModal").modal("hide");
+          Swal.fire({
+              icon: "error",
+              title: "There was an error!",
+              text: `${ textStatus }, ${ errorThrown }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+      });
+      
+
+    });
 
 </script>
 {% endblock custom_scripts %}

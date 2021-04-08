@@ -44,13 +44,13 @@
           <div class="col-6">
             <div class="form-group">
               <label class="floating-label font-weight-bold" for="description">Description</label>
-              <input id="description" class="form-control" type="text" aria-label="Description" name="description" />
+              <textarea id="description" class="form-control" type="text" aria-label="Description" name="description" ></textarea>
             </div>
           </div>
           <div class="col-6">
             <div class="form-group">
               <label class="floating-label font-weight-bold" for="description_eng">Description English</label>
-              <input id="description_eng" class="form-control" type="text" aria-label="Description English" name="description_eng" />
+              <textarea id="description_eng" class="form-control" type="text" aria-label="Description English" name="description_eng" ></textarea>
             </div>
           </div>
         </div>
@@ -249,7 +249,7 @@
                 confirmButtonText: "Continue"
               }).then(result => {
                 if (result.isConfirmed) {
-                  location.reload();
+                    window.location = "{% url 'dashboard:event_cases:list_cases' %}";
                 }
               });
             } else {
