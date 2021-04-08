@@ -411,16 +411,10 @@ def check_dns_from_web_conn(dns : DNS) -> bool:
         This function asserts that the measurements type is 
         web_connectivity.
     """
-    return  dns.ooni_reason_for_blocking == True or\
-            (
-                dns.failure != None and \
-                dns.control_resolver_failure == None \
-                
-            )  or \
-            (
-                dns.ooni_reason_for_blocking == None and\
-                dns.dns_consistency != "consistent"
-            )
+    if dns.ooni_reason_for_blocking: return True
+
+    return  dns.failure != None and\
+            dns.control_resolver_failure == None 
 
 def check_dns_from_dns_cons(dns : DNS) -> bool:
     """
