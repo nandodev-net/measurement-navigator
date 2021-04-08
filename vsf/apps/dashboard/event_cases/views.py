@@ -179,18 +179,28 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         category = Category.objects.filter(name = post['category'][0]).first()
         
         try:
-            new_case = Case(
-                title = post['title'][0],
-                description = post['description'][0],
-                description_eng = post['description_eng'][0],
-                start_date = post['start_date'][0],
-                end_date = post['end_date'][0],
-                case_type = post['case_type'][0].lower(),
-                category = category,
-                twitter_search = post['twitter_search'][0],
-                draft = draft
-            )     
-            
+            if post['start_date'][0] and post['end_date'][0]:
+                new_case = Case(
+                    title = post['title'][0],
+                    description = post['description'][0],
+                    description_eng = post['description_eng'][0],
+                    start_date = post['start_date'][0] if post['start_date'][0] else None ,
+                    end_date = post['end_date'][0] if post['end_date'][0] else None,
+                    case_type = post['case_type'][0].lower(),
+                    category = category,
+                    twitter_search = post['twitter_search'][0],
+                    draft = draft
+                )
+            else:
+                new_case = Case(
+                    title = post['title'][0],
+                    description = post['description'][0],
+                    description_eng = post['description_eng'][0],
+                    case_type = post['case_type'][0].lower(),
+                    category = category,
+                    twitter_search = post['twitter_search'][0],
+                    draft = draft
+                )
             new_case.save()
             new_case.events.set(eventsObject)
             
@@ -382,3 +392,35 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()
+
+
+class EventsUnlinking(VSFLoginRequiredMixin, View):
+    def get(self, request, **kwargs):
+
+        get = self.request.GET or {}
+        events = get.getlist('events[]')
+        case_id = get.get('case')
+        case_object = get_object_or_404(Case, pk=case_id)
+        
+        case_object.events.remove(*case_object.events.filter(id__in=events))
+        case_object.save()
+
+        return HttpResponse("OK")
+        
+
+class CaseDeleteView(VSFLoginRequiredMixin, View):
+    def get(self, request, **kwargs):
+
+        get = self.request.GET or {}
+        cases = get.getlist('cases[]')
+
+        for case_id in cases:
+            case = get_object_or_404(Case, pk=case_id)
+            to_be_orphaned_as = [event for event in case.events.all()]
+            if len(to_be_orphaned_as)>0:
+                for event in to_be_orphaned_as:
+                    case.events.remove(event)
+            case.delete()
+
+        return HttpResponse("OK")
+
