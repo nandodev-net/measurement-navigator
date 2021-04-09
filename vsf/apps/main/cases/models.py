@@ -108,21 +108,29 @@ class Case(models.Model):
         if self.start_date:
             return self.start_date
 
-        return min(e.get_start_date() for e in self.events.all()) if self.events.all() else '' 
+        # if no events, return None.
+        if (events := self.events.all()):
+            return min(e.get_end_date() for e in events)
+        else:
+            return None 
 
     def get_end_date(self) -> datetime:
         """
             Get end date depending if it's set up to auto or 
             manual. If end_date is null, then return maximum end_date from every related event.
-            Otherwise, return start_date
+            Otherwise, return start_date.
 
-            It may return None when there's no cases and manual date is set to None
+            It may return None when there's no events and manual date is set to None
         """
 
         if self.end_date:
             return self.end_date
 
-        return max(e.get_end_date() for e in self.events.all()) if self.events.all() else '' 
+        # if no events, return None.
+        if (events := self.events.all()):
+            return max(e.get_end_date() for e in events)
+        else:
+            return None
 
     def __str__(self):
         return self.title
