@@ -21,6 +21,8 @@ class CaseDataSerializer(serializers.ModelSerializer):
         class created to define the format of
         serialization for the Case model.
     """
+    start_date = serializers.ReadOnlyField(source='get_start_date')
+    end_date = serializers.ReadOnlyField(source='get_end_date')
     class Meta:
         model = Case
         fields = [
@@ -36,6 +38,9 @@ class CaseDetailDataSerializer(serializers.ModelSerializer):
         serialization for a instance of Case model.
     """
     events = EventDataSerializer(many=True, read_only=True)
+    start_date = serializers.ReadOnlyField(source='get_start_date')
+    end_date = serializers.ReadOnlyField(source='get_end_date')
+
     class Meta:
         model = Case
         fields = [
