@@ -5,6 +5,7 @@
 
 # Django imports: 
 from django.db import models
+from model_utils.models import TimeStampedModel
 from django.contrib.postgres.fields import JSONField
 from django.db.models.deletion import SET_NULL
 
@@ -17,7 +18,7 @@ from apps.main.sites.models         import Domain
 from apps.main.asns.models          import ASN
 
 
-class RawMeasurement(models.Model):
+class RawMeasurement(TimeStampedModel):
     """
         This models holds the information provided by an ooni
         measurement. We may not work with this model directly, instead, 
@@ -114,7 +115,7 @@ class RawMeasurement(models.Model):
 
         
 
-class Measurement(models.Model):
+class Measurement(TimeStampedModel):
     """
         This model is an abstraction layer for 
         the RawMeasurement model, which contains the information 

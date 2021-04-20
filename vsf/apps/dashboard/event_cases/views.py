@@ -13,6 +13,7 @@ from django.views.generic.edit      import FormView
 from apps.main.cases.models import Case, Category
 from apps.main.events.models import Event
 from .forms import CaseForm, CaseCreateForm
+from ..utils import *
 
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
@@ -119,10 +120,17 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
 
         if title != None and title != "":
             qs = qs.filter(title__contains = title)
+
         if start_date != None and start_date != "":
-            qs = qs.filter(start_date__gte = start_date)
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+            utc_start_time = utc_aware_date(start_date)
+            qs = qs.filter(start_date__gte = utc_start_time)
+
         if end_date != None and end_date != "":
-            qs = qs.filter(end_date__lte = end_date)
+            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+            utc_end_date = utc_aware_date(end_date)
+            qs = qs.filter(end_date__lte = utc_end_date)
+
         if category != None and category != "":
             qs = qs.filter(category__name = category)
         if draft in ['true', 'false']:
@@ -295,8 +303,8 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 'id': event.id,
                 'identification': event.identification,
                 'confirmed': event.confirmed,
-                'start_date': event.start_date,
-                'end_date': event.end_date,
+                'start_date': event.start_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
+                'end_date': event.end_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
                 'public_evidence': event.public_evidence,
                 'private_evidence': event.private_evidence,
                 'issue_type': event.issue_type,
@@ -312,8 +320,8 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 "description": caseObj.description,
                 "description_eng": caseObj.description_eng,
                 "case_type": caseObj.case_type,
-                "start_date": caseObj.start_date,
-                "end_date": caseObj.end_date,
+                "start_date": caseObj.start_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
+                "end_date": caseObj.end_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
                 "category": caseObj.category.name,
                 "draft": caseObj.draft,
                 "twitter_search": caseObj.twitter_search,
@@ -349,8 +357,8 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
             'id': event.id,
             'identification': event.identification,
             'confirmed': event.confirmed,
-            'start_date': event.start_date,
-            'end_date': event.end_date,
+            'start_date': event.start_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
+            'end_date': event.end_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
             'public_evidence': event.public_evidence,
             'private_evidence': event.private_evidence,
             'issue_type': event.issue_type,

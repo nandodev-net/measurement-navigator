@@ -4,6 +4,8 @@ from django.db import models
 # Django imports
 from django.db                      import models
 from django.utils                   import timezone
+from model_utils.models import TimeStampedModel
+
 
 # Third party imports
 import uuid
@@ -11,7 +13,7 @@ import uuid
 # Application imports
 from apps.main.events.models import Event
 
-class Flag(models.Model):
+class Flag(TimeStampedModel):
     """
         A flag entry identifies a measurement that has some kind of 
         issue. A measurement with no flag is a regular measurement,

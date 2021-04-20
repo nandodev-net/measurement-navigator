@@ -1,10 +1,11 @@
 from django.db import models
+from model_utils.models import TimeStampedModel
 from django.contrib.postgres.fields import JSONField
 
 
 # Create your models here.
 
-class ASN(models.Model):
+class ASN(TimeStampedModel):
     """
         This model represents an ASN that may have more than 
         one Measurement related  
