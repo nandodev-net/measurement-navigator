@@ -77,8 +77,9 @@ THIRD_PARTY_APPS = [
     'django_celery_results',
     'django_celery_beat',
     'django_sass',
+    'ckeditor',
+    'django_wysiwyg'
 ]
-
 
 INSTALLED_APPS = INSTALLED_APPS + DJANGO_APPS + API_APPS + THIRD_PARTY_APPS
 
@@ -196,6 +197,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
      os.path.join(BASE_DIR, 'static'),
 )
+
+CKEDITOR_BASEPATH = BASE_DIR + STATIC_URL + '/plugins/ckeditor'
 
 STATIC_ROOT = os.path.join(os.path.dirname(BASE_DIR), 'static')
 

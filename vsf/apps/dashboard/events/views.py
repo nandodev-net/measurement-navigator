@@ -108,25 +108,9 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             utc_end_time = utc_aware_date(end_time)
             qs = qs.filter(end_date__lte = utc_end_time)
 
-        #---------------------------------------------#
-
-        #------- Another type of data filtering ------#
-
-        # Check later
-        """filters = {
-            key: value
-            for key, value in self.request.GET.items()
-            if key in [ 
-                'identification', 'confirmed', 'public_evidence', 
-                'private_evidence', 'issue_type', 'domain', 'asn'
-            ] and value != None and value != ""
-        }
-        qs.filter(**filters)"""
-
         identification = self.request.GET.get('identification')
         if identification != None and identification != "":
             qs = qs.filter(identification = identification)
-
 
         confirmed = self.request.GET.get('confirmed')
         
@@ -149,8 +133,13 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         if domain != None and domain != "":
             qs = qs.filter(domain__domain_name__contains = domain)
 
-        #---------------------------------------------#
-
+        case = self.request.GET.get('case')
+        print(case)
+        print('--------')
+        case_events = Case.objects.filter(id = case).first().events
+        print(case_events)
+        print('--------')
+        qs.difference(case_events)
         return qs
 
     def prepare_results(self, qs):

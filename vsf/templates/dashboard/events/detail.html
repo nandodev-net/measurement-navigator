@@ -443,6 +443,8 @@
         $( '#public_evidence_slug').empty().append(public_evidence);
         var private_evidence = `<p>{{ object.private_evidence }}</p>`;
         $( '#private_evidence_slug').empty().append(private_evidence);
+        var issue_type = `<p>{{ object.issue_type }}</p>`;
+        $( '#issue_type_slug').empty().append(issue_type);
         var domain = `<p>{{ object.domain }}</p>`;
         $( '#domain_slug' ).empty().append(domain);
         var asn = `<p>{{ object.asn }}</p>`;
