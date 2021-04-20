@@ -216,20 +216,25 @@
 
       $( '#selectedEvents-tbody' ).empty();
       var rSelected = events.rows( { selected: true }).data().toArray();
-
+      var anyRelated = false;
 
       rSelected.forEach(event => {
+        if  (event.case !== '-No case related-') {
+          anyRelated = true;
+        }
+
         $( '#selectedEvents-tbody' ).append(
           `<tr>
-            <td>${event[0]}</td>
-            <td>${event[1]}</td>
-            <td>${event[2]}</td>
-            <td>${event[3]}</td>
-            <td>${event[4]}</td>
-            <td>${event[5]}</td>
+            <td>${event.issue_type}</td>
+            <td>${event.confirmed}</td>
+            <td>${event.start_date}</td>
+            <td>${event.end_date}</td>
+            <td>${event.domain}</td>
+            <td>${event.asn}</td>
           </tr>`
         );
       });
+      console.log(anyRelated);
 
       if (rSelected.length === 0){
         Swal.fire({
@@ -238,7 +243,15 @@
             confirmButtonColor: "#dc3545",
             confirmButtonText: "Continue"
         });
-      } else {
+      } else if ( anyRelated ) {
+        Swal.fire({
+            icon: "error",
+            title: "You must select events with any link to an existing case",
+            confirmButtonColor: "#dc3545",
+            confirmButtonText: "Continue"
+        });
+      }
+      else {
         $( '#associateModal' ).modal('show');
       }   
     });
