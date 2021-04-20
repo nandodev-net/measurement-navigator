@@ -98,13 +98,13 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
         start_time = self.request.GET.get('start_time')
         if start_time != None and start_time != "":
-            start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d')
+            start_time = datetime.strptime(start_time, '%Y-%m-%d')
             utc_start_time = utc_aware_date(start_time)
             qs = qs.filter(start_date__gte = utc_start_time)
 
         end_time = self.request.GET.get('end_time')
         if end_time != None and end_time != "":
-            end_time = datetime.datetime.strptime(end_time, '%Y-%m-%d')
+            end_time = datetime.strptime(end_time, '%Y-%m-%d')
             utc_end_time = utc_aware_date(end_time)
             qs = qs.filter(end_date__lte = utc_end_time)
 
