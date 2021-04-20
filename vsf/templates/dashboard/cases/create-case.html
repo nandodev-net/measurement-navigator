@@ -1,6 +1,8 @@
 {% extends 'extends/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
+{% load wysiwyg %}
+{% wysiwyg_setup %}
 
 {% block custom_stylesheet %}
 <style>
@@ -51,6 +53,7 @@
             <div class="form-group">
               <label class="floating-label font-weight-bold" for="description_eng">Description English</label>
               <textarea id="description_eng" class="form-control" type="text" aria-label="Description English" name="description_eng" ></textarea>
+              {% wysiwyg_editor "description_eng" %}
             </div>
           </div>
         </div>

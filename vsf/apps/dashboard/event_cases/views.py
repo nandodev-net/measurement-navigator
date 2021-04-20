@@ -432,3 +432,48 @@ class CaseDeleteView(VSFLoginRequiredMixin, View):
 
         return HttpResponse("OK")
 
+
+class EditEvents(VSFLoginRequiredMixin, DetailView):
+
+    """
+        Edit events related to one case.
+        Expected GET Arguments:
+            - id: Case id.
+    """
+    template_name = 'cases/edit-events.html'
+    slug_field = 'pk'
+    model = Case
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        relatedEvents = context['object'].events.all()
+        
+        events = [{
+            'id': event.id,
+            'identification': event.identification,
+            'confirmed': event.confirmed,
+            'start_date': event.start_date,
+            'end_date': event.end_date,
+            'public_evidence': event.public_evidence,
+            'private_evidence': event.private_evidence,
+            'issue_type': event.issue_type,
+            'it_continues': event.it_continues,
+            'domain': event.domain.domain_name,
+            'asn': event.asn.asn,
+            'closed': event.closed
+
+        } for event in relatedEvents]
+        context['events'] = events
+        
+        return context
+
+    def post(self, request, *args, **kwargs):
+        post = dict(request.POST)
+        print(post)
+
+        try:
+            print('holi')
+            return HttpResponse("OK")
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()

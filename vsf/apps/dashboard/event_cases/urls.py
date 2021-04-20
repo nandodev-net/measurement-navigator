@@ -51,5 +51,11 @@ urlpatterns = [
         views.CaseDetailView.as_view(),
         name="detail_page"
     ),
+
+    path(
+        'detail/<int:pk>/editEvents/',
+        views.EditEvents.as_view(),
+        name="edit_events"
+    ),
     
 ]
