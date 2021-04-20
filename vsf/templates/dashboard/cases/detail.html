@@ -37,9 +37,6 @@
     </div>
 </div>
 
-<div class="col-12">
-
-</div>
 
 <div class="col-12">
   <div class="card p-5">
@@ -114,9 +111,21 @@
     </form>
   </div>
 </div>
-<button type="button" class="btn btn-dark rounded ml-1 mb-4" id="unassociateBtn">
+
+<div class="col-10">
+  <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="unassociateBtn">
     <i class="fas fa-info mr-1"></i> Unassign Events
   </button>
+</div>
+
+<div class="col-2">
+  <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="associateEvents">
+    <a href="{% url 'dashboard:event_cases:edit_events' object.id %}" target="_blank"> 
+      <i class="fas fa-plus text-white"></i> <span class="text-white">Edit Events</span>
+    </a>
+  </button>
+</div>
+
 
 <div class="col-12">
   <div class="card" id="events-card">
