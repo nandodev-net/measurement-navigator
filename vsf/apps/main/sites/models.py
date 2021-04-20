@@ -1,8 +1,10 @@
 from django.db                      import models
+from model_utils.models import TimeStampedModel
+
 from django.contrib.postgres.fields import JSONField
 
 
-class SiteCategory(models.Model):
+class SiteCategory(TimeStampedModel):
 
     class CodeType(models.TextChoices):
         """
@@ -110,7 +112,7 @@ class SiteCategory(models.Model):
         return str(self.code) + " : " + str(self.category_spa)
 
 
-class Site(models.Model):
+class Site(TimeStampedModel):
     """
         This model represents a Site that may have more than 
         one URL related  
@@ -138,7 +140,7 @@ class Site(models.Model):
     def __str__(self) -> str:
         return f"[{self.name}]"
 
-class URL(models.Model):
+class URL(TimeStampedModel):
     """
         This model represents a simple URL that may (or not) be related
         to some site. Every url starts without a site until the user sets its  
@@ -166,7 +168,7 @@ class URL(models.Model):
     # The format for this json should be { "references" : [FastPath.tid] }
     fp_references = JSONField(default=dict)
 
-class Domain(models.Model):
+class Domain(TimeStampedModel):
     """
     A domain is used to group multiple measurements to its corresponding 
     domain.

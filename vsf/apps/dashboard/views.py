@@ -1,4 +1,6 @@
 # Django imports
+import datetime
+import pytz
 from django.shortcuts               import redirect, HttpResponseRedirect
 from django.db.models.query         import QuerySet
 from django.core.paginator          import Paginator, Page
@@ -13,6 +15,7 @@ from apps.main.asns                             import models as AsnModels
 from apps.main.ooni_fp.fp_tables                import models as fp_models
 from vsf.views                                  import VSFLoginRequiredMixin, VSFLogin
 import json
+from .utils import *
 
 # Aux views
 class VSFListPaginate(TemplateView):
@@ -86,11 +89,15 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
         # Apply the necessary filters
         since = req.get('since')
         if(since != None and since != ""):
-            fp_inbox = fp_inbox.filter(measurement_start_time__gte=since)
+            since = datetime.datetime.strptime(since, '%Y-%m-%d')
+            utc_since = utc_aware_date(since)
+            fp_inbox = fp_inbox.filter(measurement_start_time__gte=utc_since)
 
         until = req.get('until')
         if(until != None and until != ""):
-            fp_inbox = fp_inbox.filter(measurement_start_time__lte=until)
+            until = datetime.datetime.strptime(until, '%Y-%m-%d')
+            utc_until = utc_aware_date(until)
+            fp_inbox = fp_inbox.filter(measurement_start_time__lte=utc_until)
 
         test_name = req.get('testName')
         if (test_name != None and test_name != ""):
@@ -150,7 +157,7 @@ class GetMeasurement(VSFLoginRequiredMixin, View):
                 'scores' : obj.scores,
                 'test_name' : obj.test_name,
                 'report_ready' : obj.report_ready,
-                'catch_date' : obj.catch_date
+                'catch_date' : obj.catch_date.astimezone(CARACAS).strftime("%Y-%m-%d")
             }
             return JsonResponse(data, safe=False)
         else:

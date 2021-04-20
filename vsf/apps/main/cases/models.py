@@ -4,6 +4,7 @@
 """
 # Django imports
 from django.db      import models
+from model_utils.models import TimeStampedModel
 from django.urls    import reverse
 from django.conf    import settings
 from datetime       import date as d, datetime
@@ -15,7 +16,7 @@ from apps.main.events.models import Event
 from apps.main.sites.models import Domain 
 
 
-class Category(models.Model):
+class Category(TimeStampedModel):
     name = models.CharField(max_length=30, unique=True)
     display_name = models.CharField(max_length=50)
  
@@ -30,7 +31,7 @@ class Category(models.Model):
         verbose_name_plural = "Categories"
 
 
-class Case(models.Model):
+class Case(TimeStampedModel):
 
     TYPE_CATEGORIES = (
         ('bloqueo', 'Bloqueo'),
@@ -136,7 +137,7 @@ class Case(models.Model):
         return self.title
 
 
-class Update(models.Model):
+class Update(TimeStampedModel):
     TYPE = (
         ('info', 'Info'),
         ('grave', 'Grave'),
@@ -156,7 +157,6 @@ class Update(models.Model):
         related_name='updates',
         null=True, blank=True
     )
-    created = models.DateField(default=d.today)
 
     def __str__(self):
         return self.title

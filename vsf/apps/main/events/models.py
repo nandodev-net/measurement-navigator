@@ -4,7 +4,7 @@
 
 # coding=utf-8
 from __future__ import unicode_literals
-
+from model_utils.models import TimeStampedModel
 from django.db import models
 from datetime import datetime
 from django.db.models.base import Model  
@@ -14,7 +14,7 @@ from django.db.models.deletion import SET_NULL
 from apps.main.sites.models     import Domain 
 from apps.main.asns.models      import ASN
 
-class Event(models.Model):
+class Event(TimeStampedModel):
 
     class IssueType(models.TextChoices):
         """
