@@ -22,6 +22,7 @@ from apps.main.measurements.submeasurements.models import DNS, HTTP, TCP
 from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
 from .forms                     import EventForm
+from ..utils import *
 
 
 class EventsList(VSFLoginRequiredMixin, ListView):
@@ -97,11 +98,15 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
         start_time = self.request.GET.get('start_time')
         if start_time != None and start_time != "":
-            qs = qs.filter(start_date__gte = start_time)
+            start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d')
+            utc_start_time = utc_aware_date(start_time)
+            qs = qs.filter(start_date__gte = utc_start_time)
 
         end_time = self.request.GET.get('end_time')
         if end_time != None and end_time != "":
-            qs = qs.filter(end_date__lte = end_time)
+            end_time = datetime.datetime.strptime(end_time, '%Y-%m-%d')
+            utc_end_time = utc_aware_date(end_time)
+            qs = qs.filter(end_date__lte = utc_end_time)
 
         identification = self.request.GET.get('identification')
         if identification != None and identification != "":
@@ -150,12 +155,12 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             # Compute start date
             start_date = event.get_start_date()
             if start_date:
-                start_date = start_date.strftime("%b. %d, %Y, %H:%M %p")
+                start_date = start_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p")
 
             # Compute end date
             end_date = event.get_end_date()
             if end_date:
-                end_date = end_date.strftime("%b. %d, %Y, %H:%M %p")
+                end_date = end_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p")
 
             response.append({
                 'id': event.id,
@@ -252,8 +257,8 @@ class EventDetailData(VSFLoginRequiredMixin, View):
             eventObj = Event.objects.get(id = eventId)
             data = {
                 "identification": eventObj.identification,
-                "start_date": eventObj.start_date,
-                "end_date": eventObj.end_date,
+                "start_date": eventObj.start_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
+                "end_date": eventObj.end_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
                 "public_evidence": eventObj.public_evidence,
                 "private_evidence": eventObj.private_evidence,
                 "issue_type": eventObj.issue_type,
@@ -280,7 +285,7 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
         
         context['submeasures'] = [
             {
-                'start_time': sub.measurement.raw_measurement.measurement_start_time,
+                'start_time': sub.measurement.raw_measurement.measurement_start_time.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
                 'probe_cc': sub.measurement.raw_measurement.probe_cc,
                 'probe_asn': sub.measurement.raw_measurement.probe_asn,
                 'input': sub.measurement.raw_measurement.input,
@@ -392,7 +397,7 @@ class EventsByMeasurement(VSFLoginRequiredMixin, View):
                     'identification':event.identification,
                     'event_type':event.issue_type,
                     'confirmed':event.confirmed,
-                    'start_date':event.start_date,
+                    'start_date':event.start_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
                     'end_date':event.end_date,
                     'domain':event.domain,
                     'asn':event.asn,

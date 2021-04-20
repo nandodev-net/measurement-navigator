@@ -1,7 +1,9 @@
 from django.db import models
+from model_utils.models import TimeStampedModel
+
 from django.core.exceptions import ValidationError
 
-class Config(models.Model):
+class Config(TimeStampedModel):
 
     hardflag_timewindow = models.FloatField(
         default=15.5,

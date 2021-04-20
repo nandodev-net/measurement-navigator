@@ -1,5 +1,7 @@
 #   django imports
 from django.db                      import models
+from model_utils.models import TimeStampedModel
+
 from django.contrib.postgres.fields import JSONField
 from django.utils 					import timezone
 
@@ -14,7 +16,7 @@ from django.utils 					import timezone
 	The ones whose measurement_id starts with 'temp-fid' are the ones that comes from the fast path
 """
 
-class FastPath(models.Model):
+class FastPath(TimeStampedModel):
 	"""
 		This table represents data as it comes from the ooni fast path.
 		Almost every field comes in the measurement report given by the

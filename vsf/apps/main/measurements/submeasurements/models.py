@@ -1,6 +1,7 @@
 
 # Django imports
 from django.db                      import models
+from model_utils.models import TimeStampedModel
 from django.contrib.postgres.fields import JSONField
 
 # third party imports
@@ -12,7 +13,7 @@ from apps.main.measurements.flags.models                 import Flag
 from apps.main.events.models                             import Event
 
 # Create your models here.
-class SubMeasurement(models.Model):
+class SubMeasurement(TimeStampedModel):
     """
     Base class for a sub measurement. Depending on its type, 
     each measurement may have multiple sub measurements. This 
@@ -91,7 +92,7 @@ class SubMeasurement(models.Model):
     class Meta:
         abstract = True # When abstract is True, django wont make a table for this model
 
-class DNSJsonFields(models.Model):
+class DNSJsonFields(TimeStampedModel):
     """
         Test model to check performance penalty for json data storage
     """
