@@ -1,11 +1,12 @@
 # Django imports
 from django.db import models
+from model_utils.models import TimeStampedModel
 
 # Third party imports
 from typing import List
 
 # Create your models here.
-class Input(models.Model):
+class Input(TimeStampedModel):
     """
         An input is an entry formed by an url and an ASN,
         then we feed such pair into the ooni api to get agregated data.
@@ -80,7 +81,7 @@ class Input(models.Model):
         # So we don't request data twice for each input
         unique_together = ('input', 'asn')
 
-class EarlyAlertConfig(models.Model):
+class EarlyAlertConfig(TimeStampedModel):
     """
         Config parameters to take in consideration when computing 
         database updating logic
@@ -112,7 +113,7 @@ class EarlyAlertConfig(models.Model):
     def __str__(self) -> str:
         return f"[days: {self.days_before_now}, hours: {self.hours_before_now}, minutes: {self.minutes_before_now}]{' On' if self.is_current_config else ''}"
 
-class Emails(models.Model):
+class Emails(TimeStampedModel):
     """
         Emails to be notified when an event is triggered
     """
