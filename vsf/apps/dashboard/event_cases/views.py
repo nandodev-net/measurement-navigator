@@ -122,12 +122,12 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(title__contains = title)
 
         if start_date != None and start_date != "":
-            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
             utc_start_time = utc_aware_date(start_date)
             qs = qs.filter(start_date__gte = utc_start_time)
 
         if end_date != None and end_date != "":
-            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
             utc_end_date = utc_aware_date(end_date)
             qs = qs.filter(end_date__lte = utc_end_date)
 
