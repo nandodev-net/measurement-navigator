@@ -224,23 +224,34 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        flagsDNS = [subm.flag_type for subm in context['measurement'].dns_list.all()]
-        flagsHTTP = [subm.flag_type for subm in context['measurement'].http_list.all()]
-        flagsTCP = [subm.flag_type for subm in context['measurement'].tcp_list.all()]
+        measurement = context['measurement']
 
-        context['rawmeasurement'] = context['measurement'].raw_measurement
-        context['rawmeasurement'].test_keys = context['measurement'].raw_measurement.test_keys
-        context['rawmeasurement'].test_helpers = json.dumps(context['measurement'].raw_measurement.test_helpers)
+        events = []
+        for subm in measurement.dns_list.all(): 
+            if subm.event: events.append(subm.event) 
+        for subm in measurement.http_list.all(): 
+            if subm.event: events.append(subm.event) 
+        for subm in measurement.tcp_list.all(): 
+            if subm.event: events.append(subm.event) 
+
+        flagsDNS = [subm.flag_type for subm in measurement.dns_list.all()]
+        flagsHTTP = [subm.flag_type for subm in measurement.http_list.all()]
+        flagsTCP = [subm.flag_type for subm in measurement.tcp_list.all()]
+
+        context['rawmeasurement'] = measurement.raw_measurement
+        context['rawmeasurement'].test_keys = measurement.raw_measurement.test_keys
+        context['rawmeasurement'].test_helpers = json.dumps(measurement.raw_measurement.test_helpers)
         context['rawmeasurement'].flags = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
-
-        if context['measurement'].raw_measurement.test_name == 'web_connectivity':
-            context['rawmeasurement'].hasTcpConnections = len(context['measurement'].raw_measurement.test_keys['tcp_connect']) > 0
-            context['rawmeasurement'].platform = context['measurement'].raw_measurement.annotations['platform']
-            context['rawmeasurement'].engine = context['measurement'].raw_measurement.annotations['engine_name'] + ' (' + context['measurement'].raw_measurement.annotations['engine_version'] + ')'
-            context['rawmeasurement'].hasHttpRequests = len(context['measurement'].raw_measurement.test_keys['requests']) > 0            
-            context['rawmeasurement'].annotations = json.dumps(context['measurement'].raw_measurement.annotations)
-            context['rawmeasurement'].urlFlag = '/static/img/flags/' + context['measurement'].raw_measurement.probe_cc.lower() + '.svg'
-            context['rawmeasurement'].rawjson = serializers.serialize('json', [context['measurement'].raw_measurement])
+        context['events'] = events 
+        
+        if measurement.raw_measurement.test_name == 'web_connectivity':
+            context['rawmeasurement'].hasTcpConnections = len(measurement.raw_measurement.test_keys['tcp_connect']) > 0
+            context['rawmeasurement'].platform = measurement.raw_measurement.annotations['platform']
+            context['rawmeasurement'].engine = measurement.raw_measurement.annotations['engine_name'] + ' (' + measurement.raw_measurement.annotations['engine_version'] + ')'
+            context['rawmeasurement'].hasHttpRequests = len(measurement.raw_measurement.test_keys['requests']) > 0            
+            context['rawmeasurement'].annotations = json.dumps(measurement.raw_measurement.annotations)
+            context['rawmeasurement'].urlFlag = '/static/img/flags/' + measurement.raw_measurement.probe_cc.lower() + '.svg'
+            context['rawmeasurement'].rawjson = serializers.serialize('json', [measurement.raw_measurement])
         return context
 
 

@@ -469,11 +469,24 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
 
     def post(self, request, *args, **kwargs):
         post = dict(request.POST)
+        caseID = post['case'][0]
+        case = get_object_or_404(Case, pk=caseID)
+
         print(post)
 
         try:
-            print('holi')
-            return HttpResponse("OK")
+            if 'eventsToDelete[]' in post:
+                for eventID in post['eventsToDelete[]']:
+                    event = Event.objects.get(id = eventID)
+                    case.events.remove(event)
+            
+            if 'eventsSelected[]' in post:
+                newEvents = Event.objects.filter(id__in=post['eventsSelected[]']).all()
+                print(newEvents)
+                case.events.add(*newEvents)
+                    
+
+            return JsonResponse({'error' : None})
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()

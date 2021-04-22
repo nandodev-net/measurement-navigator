@@ -98,7 +98,7 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
         start_time = self.request.GET.get('start_time')
         if start_time != None and start_time != "":
-            start_time = datetime.datetime.strptime(start_time, '%Y-%m-%d')
+            start_time = datetime.strptime(start_time, '%Y-%m-%d')
             utc_start_time = utc_aware_date(start_time)
             qs = qs.filter(start_date__gte = utc_start_time)
 
@@ -134,12 +134,10 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(domain__domain_name__contains = domain)
 
         case = self.request.GET.get('case')
-        print(case)
-        print('--------')
-        case_events = Case.objects.filter(id = case).first().events
-        print(case_events)
-        print('--------')
-        qs.difference(case_events)
+        if case != None:
+            case_events = Case.objects.filter(id = case).first().events.all()
+            qs = qs.difference(case_events)
+            
         return qs
 
     def prepare_results(self, qs):
