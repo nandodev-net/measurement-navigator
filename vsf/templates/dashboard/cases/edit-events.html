@@ -123,42 +123,68 @@
 <script>
 
 $( '#confirm' ).click(function (e) {
-  var eventsSelected = events.rows( { selected: true }).data().toArray().map((selected) => (
-    selected.id
-  ));
+  var eventsSelected = []
+  var eventsToDelete = []
+  var permit = true;
 
-  var eventsToDelete = $('.del:checkbox:checked').toArray().map((selected) => (
-    selected.id
-  ));
-
-  $.ajax({
-    type: "POST",
-    url: "{% url 'dashboard:event_cases:edit_events' object.id %}",
-    data: {eventsSelected: eventsSelected, eventsToDelete: eventsToDelete, csrfmiddlewaretoken: "{{ csrf_token }}"},
-    success: function(data) {
-      if (data.error === null) {
-        Swal.fire({
-            icon: "success",
-            title: "Successful linking!",
-            confirmButtonColor: "#28a745",
-            confirmButtonText: "Continue"
-        }).then(result => {
-            if (result.isConfirmed) {
-                location.reload();
-            }
-        });
-      } else {
-        console.log(data)
-        Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: `${ data.error }`,
-            confirmButtonColor: "#dc3545",
-            confirmButtonText: "Continue"
-        });
-      }
-    }
+  selectedOnes = events.rows( { selected: true }).data().toArray();
+  selectedOnes.forEach(element => {
+    if (element.case != "-No case related-") {
+      permit = false;
+      Swal.fire({
+          icon: "error",
+          title: "You must select events without any relationship with another cases",
+          confirmButtonColor: "#dc3545",
+          confirmButtonText: "Continue"
+      });
+    } 
   });
+
+  eventsSelected = selectedOnes.map((selected) => (
+    selected.id
+  ));
+
+  
+  eventsToDelete = $('.del:checkbox:checked').toArray().map((selected) => (
+    selected.id
+  ));
+
+  if (permit) {
+
+    $.ajax({
+      type: "POST",
+      url: "{% url 'dashboard:event_cases:edit_events' object.id %}",
+      data: {
+        eventsSelected: eventsSelected, 
+        eventsToDelete: eventsToDelete, 
+        case: "{{object.id}}",
+        csrfmiddlewaretoken: "{{ csrf_token }}"
+      },
+      success: function(data) {
+        if (data.error === null) {
+          Swal.fire({
+              icon: "success",
+              title: "Edit Successful!",
+              confirmButtonColor: "#28a745",
+              confirmButtonText: "Continue"
+          }).then(result => {
+              if (result.isConfirmed) {
+                  location.reload();
+              }
+          });
+        } else {
+          console.log(data)
+          Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: `${ data.error }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+      }
+    });
+  }
 });
 
 var eventsBelonged;

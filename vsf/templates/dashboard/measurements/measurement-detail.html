@@ -5,6 +5,8 @@
 <link rel=stylesheet
   href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
 />
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+
 <style>
     .pcoded-main-container {
         width: auto;
@@ -12,7 +14,7 @@
     #header {
         width: 270%;
     }
-    #header-runtime, #failures-card, #dns-card, #tcp-card, #http-card, #generalInfo, #raw-card {
+    #header-runtime, #failures-card, #dns-card, #tcp-card, #http-card, #generalInfo, #raw-card, #events-card {
         width: -webkit-fill-available;;
     }
 </style>
@@ -242,15 +244,73 @@
         </div>
     {% endif %}
 
+    <div class="card py-0 px-5 mt-2" id="events-card">
+        <div class="card-header">
+            <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events" aria-expanded="true" aria-controls="events">Events</a></h5>
+        </div>
+        <div class="collapse" id="events">
+            <div class="card-body">
+                <table class="table table-striped mt-5 datatable" id="events-table">
+                <thead>
+                    <tr>
+                    <th class="text-center" scope="col">Event Type</th>
+                    <th class="text-center" scope="col">Confirmed</th>
+                    <th class="text-center" scope="col">Start Date</th>
+                    <th class="text-center" scope="col">End Date</th>
+                    <th class="text-center" scope="col">Domain</th>
+                    <th class="text-center" scope="col">ASN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                        <tr>
+                            <td>{{event.issue_type}}</td>
+                            <td>
+                                {% if event.confirmed %}
+                                    <div class="text-success w-100 text-center">
+                                        <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="text-danger w-100 text-center">
+                                        <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>{{event.start_date}}</td>
+                            <td>{{event.end_date}}</td>
+                            <td>{{event.domain}}</td>
+                            <td>{{event.asn}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}
 
 {% block custom_scripts %}
 
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
 <script>
 
     $(document).ready(function() {
+        
+        $('#events-table').DataTable({
+            order: [[ 2, "desc" ]],
+            searching: true,
+            language: {
+            },
+            buttons: [],
+            select: {
+            style: 'multi',
+            },
+        });
+
         if ('{{rawmeasurement.test_name}}' === 'web_connectivity') {
             if ('{{rawmeasurement.test_keys.accessible}}' === 'False') {
                 $( '#header' ).attr("class", "card p-5 bg-danger")
@@ -280,12 +340,15 @@
             rawParsed = JSON.parse(raw);
             rawParsed[0]['fields']['annotations'] = JSON.parse(rawParsed[0]['fields']['annotations']);
             rawParsed[0]['fields']['test_helpers'] = JSON.parse(rawParsed[0]['fields']['test_helpers']);
+            jQuery.noConflict();
             $("#raw-data").jsonViewer(rawParsed[0]['fields'], {
                 collapsed: true,
                 rootCollapsable: false
             });
 
         }
+
+        
 
     });
 </script>
