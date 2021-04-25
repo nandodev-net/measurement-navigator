@@ -152,6 +152,7 @@
   var eventsTable;
   var table;
 
+  /* Filter Form */
   $("#urlForm").on("submit", function (event) {
     
     event.preventDefault();
@@ -169,6 +170,7 @@
   });
 
 
+  /* Detail Case Trigger with double click */
   $( '#cases-table' ).on('dblclick', 'tbody tr', function() {
 
     var id = $( this ).attr( 'id' );
@@ -179,7 +181,8 @@
       data   : { 'id': id },
       success: function (json) {
         var url = "{% url 'dashboard:event_cases:detail_page' pk=1 %}".replace(1, id);
-        $( '#link' ).attr("href", url);
+        console.log(url);
+        $( '#linkdetail' ).attr("href", url);
         $('#events > tbody').empty();
         $( '#title_detail' ).text(json["title"]);
         $( '#description_detail' ).text(json["description"]);
@@ -203,74 +206,7 @@
 
     $("#caseDetail").modal("show");
   });
-
-  $( '#createCaseTrigger' ).click(function (e) {
-    jQuery.noConflict();
-    $('#createCase').modal('show'); 
-  });
   
-  $(' #opendetailmodal ').on('click', function () {
-
-  })
-
-  $( '#submit_case' ).click(function (e) {
-
-    var eventsID = eventsTable.rows( { selected: true }).data().toArray().map(
-      (selected) => selected.DT_RowId
-    );
-    var data = {
-      title: $( '#title_new' ).val(), 
-      description: $( '#description_new' ).val(), 
-      description_eng: $( '#description_eng_new' ).val(),
-      start_date: $( '#start_date_new' ).val(), end_date: $( '#end_date_new' ).val(),
-      case_type: $( '#case_type_new option:selected' ).val(), 
-      category: $( '#category_new option:selected' ).val(),
-      twitter_search: $( '#twitter_search_new' ).val(), draft: $( '#draft_new' ).is(":checked"),
-      events: eventsID, csrfmiddlewaretoken: "{{ csrf_token }}"
-    }
-
-    $.ajax({
-      type: "POST",
-      url: "{% url 'dashboard:event_cases:list_cases' %}",
-      data: data,
-      success: function(data) {
-        if (data.error === null) {
-          Swal.fire({
-            icon: "success",
-            title: "Successful Creation!",
-            confirmButtonColor: "#28a745",
-            confirmButtonText: "Continue"
-          }).then(result => {
-            if (result.isConfirmed) {
-              location.reload();
-            }
-          });
-        } else {
-          Swal.fire({
-            icon: "error",
-            title: "Error!",
-            text: `${ data.error }`,
-            confirmButtonColor: "#dc3545",
-            confirmButtonText: "Continue"
-          });
-        }
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown) {
-        $("createCase").modal("hide");
-
-        Swal.fire({
-          icon: "error",
-          title: "There was an error!",
-          text: `${ textStatus }, ${ errorThrown }`,
-          confirmButtonColor: "#dc3545",
-          confirmButtonText: "Continue"
-        });
-      }
-    });
-
-  });
-
-
   $( '#detailNewTab' ).click(function (event) {
       var selectedRows = table.rows( { selected: true }).data().toArray().map(
         (selected) => selected.id
@@ -384,13 +320,13 @@
       },
     });
 
-    eventsTable = $('#events').DataTable({
+    /*eventsTable = $('#events').DataTable({
       order: [[2, "desc"]],
       searching: true,
       select: {
         style: 'multi'
       },
-    });
+    });*/
   });
 
   $( '#deletecaseBtn' ).click(function (event) {
