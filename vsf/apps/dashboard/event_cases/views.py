@@ -33,7 +33,7 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
         events = Event.objects.all()
 
         fields = [ 
-            'title', 'start_date', 'end_date', 'category', 'draft'
+            'title', 'start_date', 'end_date', 'category', 'published'
         ]
 
         for field in fields:
@@ -55,9 +55,9 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
         post = request.POST
         post = dict(request.POST)
 
-        # Cleaning the draft data
-        draft = post['draft'][0]
-        draft = eval(draft.capitalize())
+        # Cleaning the published data
+        published = post['published'][0]
+        published = eval(published.capitalize())
 
         #Getting Events objects
         events = post['events[]'] if 'events[]' in post.keys() else []
@@ -76,7 +76,7 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
                 case_type = post['case_type'][0].lower(),
                 category = category,
                 twitter_search = post['twitter_search'][0],
-                draft = draft
+                published = published
             )     
             
             new_case.save()
@@ -96,7 +96,7 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         'start_date',
         'end_date',
         'category',
-        'draft'
+        'published'
     ]
 
     order_columns = [
@@ -104,7 +104,7 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         'start_date',
         'end_date',
         'category',
-        'draft'
+        'published'
     ]
 
     def get_initial_queryset(self):
@@ -116,7 +116,7 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         get = self.request.GET or {}
 
         title, start_date, end_date = get.get('title'), get.get('start_date'), get.get('end_date')
-        category, draft =  get.get('category'), get.get('draft')
+        category, published =  get.get('category'), get.get('published')
 
         if title != None and title != "":
             qs = qs.filter(title__contains = title)
@@ -133,8 +133,8 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
 
         if category != None and category != "":
             qs = qs.filter(category__name = category)
-        if draft in ['true', 'false']:
-            qs = qs.filter(draft = eval(draft.capitalize()))
+        if published in ['true', 'false']:
+            qs = qs.filter(published = eval(published.capitalize()))
             pass
         
         return qs
@@ -151,7 +151,7 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
                 'start_date': case.get_start_date(), 
                 'end_date': case.get_end_date(), 
                 'category': category.name, 
-                'draft': case.draft
+                'published': case.published
             })
 
         return response
@@ -175,9 +175,9 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         post = request.POST
         post = dict(request.POST)
 
-        # Cleaning the draft data
-        draft = post['draft'][0]
-        draft = eval(draft.capitalize())
+        # Cleaning the published data
+        published = post['published'][0]
+        published = eval(published.capitalize())
 
         #Getting Events objects
         events = post['events[]'] if 'events[]' in post.keys() else []
@@ -197,7 +197,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
                     case_type = post['case_type'][0].lower(),
                     category = category,
                     twitter_search = post['twitter_search'][0],
-                    draft = draft
+                    published = published
                 )
             else:
                 new_case = Case(
@@ -207,7 +207,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
                     case_type = post['case_type'][0].lower(),
                     category = category,
                     twitter_search = post['twitter_search'][0],
-                    draft = draft
+                    published = published
                 )
             new_case.save()
             new_case.events.set(eventsObject)
@@ -323,7 +323,7 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 'start_date': caseObj.start_date, # event.start_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
                 'end_date': caseObj.end_date, # event.end_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
                 "category": caseObj.category.name,
-                "draft": caseObj.draft,
+                "published": caseObj.published,
                 "twitter_search": caseObj.twitter_search,
                 "events": events
 
@@ -377,8 +377,8 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
         print(post)
         category = Category.objects.filter(name = post['category'][0]).first()
 
-        draft = post['draft'][0]
-        draft = eval(draft.capitalize())
+        published = post['published'][0]
+        published = eval(published.capitalize())
 
         try:
 
@@ -386,12 +386,12 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
                 title = post['title'][0],
                 description = post['description'][0],
                 description_eng = post['description_eng'][0],
-                start_date = post['start_date'][0],
-                end_date = post['end_date'][0],
+                start_date = post['start_date'][0] or None,
+                end_date = post['end_date'][0] or None,
                 case_type = post['case_type'][0].lower(),
                 category = category,
                 twitter_search = post['twitter_search'][0],
-                draft = draft
+                published = published
             )     
             
 

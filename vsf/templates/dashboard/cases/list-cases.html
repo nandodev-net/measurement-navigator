@@ -89,13 +89,13 @@
           <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-primary ml-1">
               <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="draft">Draft</label>
+                <label class="font-weight-bold text-white" for="published">Published</label>
               </div>
               <div class="col-8 mx-auto">
-                <select id="draft" class="custom-select additional-filter" name="draft">
+                <select id="published" class="custom-select additional-filter" name="published">
                   <option selected value="">Any</option>
-                  <option {% if prefill.draft == 'false' %} selected {% endif %} value="false">False</option>
-                  <option {% if prefill.draft == 'true' %} selected {% endif %} value="true">True</option>
+                  <option {% if prefill.published == 'false' %} selected {% endif %} value="false">False</option>
+                  <option {% if prefill.published == 'true' %} selected {% endif %} value="true">True</option>
                 </select>
               </div>
             </div>   
@@ -126,7 +126,7 @@
             <th class="text-center" scope="col">Start Date</th>
             <th class="text-center" scope="col">End Date</th>
             <th class="text-center" scope="col">Category</th>
-            <th class="text-center" scope="col">Draft</th>
+            <th class="text-center" scope="col">Published</th>
             {% if user.is_editor %}
               <th class="text-center" scope="col">Actions</th>
             {% endif %}
@@ -160,7 +160,7 @@
     let data = {
       title: $("#title").val(), start_date: $("#start_date").val(),
       end_date: $("#end_date").val(), category: $("#category").val(), 
-      draft: $('#draft').val()
+      published: $('#published').val()
     };
 
     let urlSearch = "{% url 'dashboard:event_cases:list_cases' %}";
@@ -191,7 +191,7 @@
         $( '#start_date_detail' ).text(json["start_date"]);
         $( '#end_date_detail' ).text(json["end_date"]);
         $( '#category_detail' ).text(json["category"]);
-        $( '#draft_detail' ).text(json["draft"]);
+        $( '#published_detail' ).text(json["published"]);
         $( '#twitter_search_detail' ).text(json["twitter_search"]);
         var eventsJson = json["events"];
         var body = '';
@@ -245,7 +245,7 @@
           data.start_date = $("#start_date").val();
           data.end_date = $("#end_date").val();
           data.category = $("#category").val();
-          data.draft = $('#draft').val();
+          data.published = $('#published').val();
         },
         contentType: "application/json; charset=utf-8",  
         type: "GET",
@@ -284,7 +284,7 @@
           searchable: true,
         },
         {
-          data: "draft",
+          data: "published",
           orderable: false,
           searchable: true,
           render: function (data, type, row, meta) {
