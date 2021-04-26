@@ -4,6 +4,7 @@ from django.shortcuts               import get_object_or_404, redirect, render
 from django.http.response           import HttpResponseBadRequest
 from django.http                    import JsonResponse
 from django.core.serializers.json   import DjangoJSONEncoder
+from django.db.models               import Q
 
 # Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
@@ -34,8 +35,6 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         get, prefill = self.request.GET or {}, {}
         issueTypes = Event.IssueType.choices
         issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
-
-        # ------------------ making prefill ------------------ #
         
         fields = [ 
             'identification', 'confirmed', 'issue_type', 'domain', 'asn'
@@ -53,8 +52,6 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         if end_time:
             prefill['end_time'] = end_time
 
-        # ---------------------------------------------------- #
-
         context = super().get_context_data()
         context['prefill'] = prefill
         context['issueTypes'] = issueTypes
@@ -63,6 +60,10 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
+        """
+            This post requests refers to the -add event to case- feature
+            which is implemented in the events list page
+        """ 
         post = dict(request.POST)
         
         eventsIds = post['events[]']
@@ -98,15 +99,23 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
         start_time = self.request.GET.get('start_time')
         if start_time != None and start_time != "":
+
             start_time = datetime.strptime(start_time, '%Y-%m-%d')
             utc_start_time = utc_aware_date(start_time)
-            qs = qs.filter(start_date__gte = utc_start_time)
+            qs = qs.filter(
+                Q(start_date__gte = utc_start_time) | 
+                Q(manual_start_date__gte = utc_start_time)
+            )
+
 
         end_time = self.request.GET.get('end_time')
         if end_time != None and end_time != "":
             end_time = datetime.strptime(end_time, '%Y-%m-%d')
             utc_end_time = utc_aware_date(end_time)
-            qs = qs.filter(end_date__lte = utc_end_time)
+            qs = qs.filter(
+                Q(end_date__gte = utc_end_time) | 
+                Q(manual_end_date__gte = utc_end_time)
+            )
 
         identification = self.request.GET.get('identification')
         if identification != None and identification != "":
@@ -275,7 +284,6 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print(context['object'].__dict__)
         issue_type = context['object'].issue_type
         queryStr = issue_type + '.objects.all()'
         submeasures = eval(queryStr)
@@ -308,7 +316,7 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
 
     def post(self, request, *args, **kwargs):
         post = dict(request.POST)
-
+        print(post)
         identification = post['identification'][0]
         start_date = post['start_time'][0]
         end_date = post['end_date'][0]
@@ -317,16 +325,26 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
         domain = post['domain'][0]
         asn = post['asn'][0]
 
-
+        event = Event.objects.get(id = post['id'][0])
 
         try:
             domainId = Domain.objects.filter(domain_name = domain).first().id 
             asnId = ASN.objects.filter(asn = asn).first().id 
 
-            Event.objects.filter(identification = identification).update(
+            if (( event.start_date != start_date and event.manual_start_date == None ) or 
+                (event.manual_start_date != start_date and event.manual_start_date )):
+                Event.objects.filter(id = post['id'][0]).update(
+                    manual_start_date = start_date
+                )
+
+            if (( event.end_date != end_date and event.manual_end_date == None ) or 
+                (event.manual_end_date != end_date and event.manual_end_date )):
+                Event.objects.filter(id = post['id'][0]).update(
+                    manual_end_date = end_date
+                )
+
+            Event.objects.filter(id = post['id'][0]).update(
                 identification = identification,
-                start_date = start_date,
-                end_date = end_date,
                 public_evidence = public_evidence,
                 private_evidence = private_evidence,
                 domain = domainId,
