@@ -125,8 +125,8 @@
           </div>
           <div class="col-3">
             <div class="custom-control custom-switch mt-3 ml-5">
-              <input type="checkbox" class="custom-control-input" id="draft_new">
-              <label class="custom-control-label font-weight-bold" for="draft_new">Draft</label>
+              <input type="checkbox" class="custom-control-input" id="published_new">
+              <label class="custom-control-label font-weight-bold" for="published_new">Published</label>
             </div>
           </div>
         </div>
@@ -235,7 +235,7 @@
           start_date: $( '#start_date' ).val(), end_date: $( '#end_date' ).val(),
           case_type: $( '#case_type option:selected' ).val(), 
           category: $( '#category option:selected' ).val(),
-          twitter_search: $( '#twitter_search' ).val(), draft: $( '#draft' ).is(":checked"),
+          twitter_search: $( '#twitter_search' ).val(), published: $( '#published' ).is(":checked"),
           events: eventsID, csrfmiddlewaretoken: "{{ csrf_token }}"
         }
 

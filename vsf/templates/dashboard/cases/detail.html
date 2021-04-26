@@ -89,8 +89,8 @@
       </div>
       <hr>
       <div class="row">
-        <div class="col-3 font-weight-bold">Draft</div>
-        <div class="col-9"><span id="draft_slug">{{object.draft}}</span></div>
+        <div class="col-3 font-weight-bold">Published</div>
+        <div class="col-9"><span id="published_slug">{{object.published}}</span></div>
       </div>
       <hr>
       <div class="row">
@@ -240,7 +240,7 @@
     $( '#category_slug' ).empty().append(category);
     $("#category").val('{{object.category}}');
 
-    var draft = `<select id="draft" class="custom-select additional-filter w-75" name="draft" required>
+    var published = `<select id="published" class="custom-select additional-filter w-75" name="published" required>
           <option value="True">
             True
           </option>
@@ -248,8 +248,8 @@
             False
           </option>
       </select>`;
-    $( '#draft_slug' ).empty().append(draft);
-    $("#draft").val('{{object.draft}}');
+    $( '#published_slug' ).empty().append(published);
+    $("#published").val('{{object.published}}');
 
     var twitter_search = `<input value="{{object.twitter_search}}" id="twitter_search" class="form-control w-75" type="text" aria-label="Twitter Search" name="twitter_search" />`;
     $( '#twitter_search_slug' ).empty().append(twitter_search);
@@ -276,8 +276,8 @@
       var category = `<p>{{ object.category }}</p>`;
       $( '#category').replaceWith(category);
       $("#category").val('{{object.category}}');
-      var draft = `<p>{{ object.draft }}</p>`;
-      $( '#draft').replaceWith(draft);
+      var published = `<p>{{ object.published }}</p>`;
+      $( '#published').replaceWith(published);
       var twitter_search = `<p>{{ object.twitter_search }}</p>`;
       $( '#twitter_search' ).replaceWith(twitter_search);
 
