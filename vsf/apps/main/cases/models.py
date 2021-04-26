@@ -81,8 +81,8 @@ class Case(TimeStampedModel):
         on_delete=models.DO_NOTHING,
         )
 
-    draft = models.BooleanField(
-        default=True,
+    published = models.BooleanField(
+        default=False,
         )
 
     events = models.ManyToManyField(
