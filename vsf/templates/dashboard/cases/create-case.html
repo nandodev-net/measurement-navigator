@@ -1,8 +1,6 @@
 {% extends 'extends/base.html' %}
 {% load static %}
 {% load widget_tweaks %}
-{% load wysiwyg %}
-{% wysiwyg_setup %}
 
 {% block custom_stylesheet %}
 <style>
@@ -53,7 +51,6 @@
             <div class="form-group">
               <label class="floating-label font-weight-bold" for="description_eng">Description English</label>
               <textarea id="description_eng" class="form-control" type="text" aria-label="Description English" name="description_eng" ></textarea>
-              {% wysiwyg_editor "description_eng" %}
             </div>
           </div>
         </div>
@@ -182,6 +179,8 @@
   <script>
     var events; 
 
+
+
     $(".form-control").each(function() {
         formmat($(this));
     });
@@ -209,8 +208,8 @@
     $( '#submit_case' ).click(function (e) {
 
       var allowed = true;
-      var eventsSelected = events.rows( { selected: true }).data().toArray();
-      console.log(eventsSelected);
+      var eventsSelected = events.rows({ selected: true }).data().toArray();
+
       eventsSelected.forEach(element => {
         if (element.case !== '-No case related-') {
           allowed = false;
@@ -278,6 +277,7 @@
       }
     });
 
+
     $(document).ready(function() {
       events = $('#events').DataTable({
         searching: true,
@@ -300,7 +300,6 @@
             data.issue_type = $("#issue_type").val();
             data.domain = $("#domain").val();
             data.asn = $("#asn").val();
-            console.log(data);
           },
           contentType: "application/json; charset=utf-8",  
           type: "GET",

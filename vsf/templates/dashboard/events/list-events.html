@@ -488,7 +488,9 @@
       }
 
       events = $('#events').DataTable({
-        order: [[ 0, "asc" ]],
+        rowReorder: {
+          selector: 'td:nth-child(1)'
+        },
         searching: true,
         processing: true,
         language: {
@@ -510,7 +512,7 @@
           type: "GET",
         },
         columnDefs: [ {
-            orderable: false,
+            orderable: true,
             className: 'select-checkbox',
             targets:   0
         } ],
