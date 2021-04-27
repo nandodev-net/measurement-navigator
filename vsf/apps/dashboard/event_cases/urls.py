@@ -57,5 +57,11 @@ urlpatterns = [
         views.EditEvents.as_view(),
         name="edit_events"
     ),
+
+    path(
+        'publish/',
+        views.CasePublish.as_view(),
+        name="publish"
+    ),
     
 ]
