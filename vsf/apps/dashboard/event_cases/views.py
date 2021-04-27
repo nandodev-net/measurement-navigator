@@ -166,6 +166,10 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         categories = Category.objects.all()
         categoryNames = [cat.name for cat in categories]
         context['categoryNames'] = categoryNames
+
+        x = datetime.fromisoformat('2021-03-02 00:00:00+00:00')
+        print(x)
+        print('trololo')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -180,32 +184,40 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         events = post['events[]'] if 'events[]' in post.keys() else []
         eventsObject = Event.objects.filter(id__in=events)
 
+        early_start_date = post['start_date'][0]
+        oldest_start_date = post['end_date'][0]
+
+        start_dates, end_dates = [], []
+        for i in eventsObject:
+            start_dates.append(i.get_start_date())
+            end_dates.append(i.get_end_date())
+
+        if post['start_date'][0] == None or post['start_date'][0] == "": 
+            early_start_date = min(start_dates)
+
+        if post['end_date'][0] == None or post['end_date'][0] == "": 
+            oldest_start_date = max(end_dates)
+
+
+
+        print(early_start_date)
+        print(oldest_start_date)
+        
         #Getting Category object
         category = Category.objects.filter(name = post['category'][0]).first()
         
         try:
-            if post['start_date'][0] and post['end_date'][0]:
-                new_case = Case(
-                    title = post['title'][0],
-                    description = post['description'][0],
-                    description_eng = post['description_eng'][0],
-                    start_date = post['start_date'][0] if post['start_date'][0] else None ,
-                    end_date = post['end_date'][0] if post['end_date'][0] else None,
-                    case_type = post['case_type'][0].lower(),
-                    category = category,
-                    twitter_search = post['twitter_search'][0],
-                    published = published
-                )
-            else:
-                new_case = Case(
-                    title = post['title'][0],
-                    description = post['description'][0],
-                    description_eng = post['description_eng'][0],
-                    case_type = post['case_type'][0].lower(),
-                    category = category,
-                    twitter_search = post['twitter_search'][0],
-                    published = published
-                )
+            new_case = Case(
+                title = post['title'][0],
+                description = post['description'][0],
+                description_eng = post['description_eng'][0],
+                start_date = early_start_date,
+                end_date = oldest_start_date,
+                case_type = post['case_type'][0].lower(),
+                category = category,
+                twitter_search = post['twitter_search'][0],
+                published = published
+            )
             new_case.save()
             new_case.events.set(eventsObject)
             
