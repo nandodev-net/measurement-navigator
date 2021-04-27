@@ -30,8 +30,6 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
 
         categories = Category.objects.all()
         categoryNames = [cat.name for cat in categories]
-        events = Event.objects.all()
-
         fields = [ 
             'title', 'start_date', 'end_date', 'category', 'published'
         ]
@@ -47,7 +45,6 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
         context = super().get_context_data()
         context['prefill'] = prefill
         context['categoryNames'] = categoryNames
-        context['events'] = events
         return context
     
 
