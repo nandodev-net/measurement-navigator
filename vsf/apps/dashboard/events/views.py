@@ -285,7 +285,7 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         issue_type = context['object'].issue_type
-        queryStr = issue_type + '.objects.all()'
+        queryStr = issue_type.upper() + '.objects.all()'
         submeasures = eval(queryStr)
         submeasuresRelated = submeasures.filter(event = context['object'].id)
         

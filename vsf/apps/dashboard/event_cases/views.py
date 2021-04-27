@@ -386,8 +386,6 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
         print(post)
         category = Category.objects.filter(name = post['category'][0]).first()
 
-        published = post['published'][0]
-        published = eval(published.capitalize())
 
         try:
 
@@ -400,7 +398,6 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
                 case_type = post['case_type'][0].lower(),
                 category = category,
                 twitter_search = post['twitter_search'][0],
-                published = published
             )     
             
 
@@ -499,3 +496,23 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()
+
+
+class CasePublish(VSFLoginRequiredMixin, View):
+
+    def post(self, request, **kwargs):
+        
+        post = dict(request.POST)
+        
+        casesIds = post['cases[]']
+        casesObjetcs = Case.objects.filter(id__in=casesIds).all()
+        try:
+            for case in casesObjetcs:
+                if case.published:
+                    case.published = False
+                else:
+                    case.published = True
+                case.save()
+            return JsonResponse({'error' : None})
+        except Exception as e:
+            print(e)

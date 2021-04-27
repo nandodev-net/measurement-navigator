@@ -117,6 +117,10 @@
   <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="deletecaseBtn">
     <i class="fas fa-info mr-1"></i> Delete Cases
   </button>
+  <button type="button" class="btn btn-dark rounded mb-4 ml-1"  id="publishTrigger">
+    <i class="fa fa-check"></i> Publish Toggle
+    </button>
+
   <div class="card rounded p-5 mt-4" style="width: 100%;">
       <table class="table table-striped mt-5 datatable"  id="cases-table">
         <thead>
@@ -331,7 +335,6 @@
 
   $( '#deletecaseBtn' ).click(function (event) {
       var casesSelected = table.rows( { selected: true }).data().toArray();
-      console.log('HOO',casesSelected)
       var casesSelected = table.rows( { selected: true }).data().toArray().map((selected) => (
         selected.id
       ));
@@ -347,6 +350,57 @@
             Swal.fire({
                 icon: "success",
                 title: "Successful Delete!",
+                confirmButtonColor: "#28a745",
+                confirmButtonText: "Continue"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+          } else {
+            console.log(data)
+            Swal.fire({
+                icon: "error",
+                title: "Bad request.",
+                text: `Select at least one event.`,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+            });
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $("associateModal").modal("hide");
+          Swal.fire({
+              icon: "error",
+              title: "There was an error!",
+              text: `${ textStatus }, ${ errorThrown }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+      });
+      
+
+    });
+
+
+    $( '#publishTrigger' ).click(function (event) {
+      var casesSelected = table.rows( { selected: true }).data().toArray();
+      var casesSelected = table.rows( { selected: true }).data().toArray().map((selected) => (
+        selected.id
+      ));
+
+      console.log('AAA',casesSelected)
+      $.ajax({
+        type: "POST",
+        url: '{% url "dashboard:event_cases:publish" %}',
+        data: {cases: casesSelected , csrfmiddlewaretoken: "{{ csrf_token }}"},
+        success: function(data) {
+
+          if (casesSelected.length > 0) {
+            Swal.fire({
+                icon: "success",
+                title: "Successful Publish status change!",
                 confirmButtonColor: "#28a745",
                 confirmButtonText: "Continue"
             }).then(result => {
