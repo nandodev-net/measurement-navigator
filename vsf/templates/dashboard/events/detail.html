@@ -2,6 +2,8 @@
 {% load static %}
 {% block custom_stylesheet %}
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datepicker/datetimepicker.css' %}" /> 
+
 <style>
     table a {
         color: blue;
@@ -291,6 +293,9 @@
 {% block custom_scripts %}
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"></script>
+<script type="text/javascript" src="{% static 'plugins/datepicker/datetimepicker.js' %}"></script>  
+
 
 <script>
     $( '#confirmTrigger' ).click(function(e) {
@@ -343,7 +348,16 @@
             var year = splitted[1];
 
             if (parseInt(day) < 10) {day = '0' + day;}
-            return year + "-" + monthsNumbers[month] + "-" + day;
+
+            var time = splitted[2].split(" ")[0].split(":");
+            dayornight = splitted[2].split(" ")[1]
+            hour = time[0]
+            if (dayornight == "p.m.") {hour = parseInt(hour) + 12;}
+            minutes = "00"
+            if (time.length === 2) {minutes = time[1]}
+            if (hour === 'midnight' ) {hour = "00"}
+             
+            return year + "-" + monthsNumbers[month] + "-" + day + " " + hour + ":" + minutes;
         }
         var identification = `<input
             id="identification"
@@ -355,23 +369,35 @@
             />`;
         $( '#identification_slug' ).empty().append(identification);
         var parseStart_Date = parseDate("{{ object.start_date }}");
-        var start_date = `<input 
-            id="start_time" 
-            class="form-control w-75" 
-            type="date" 
-            value= ${parseStart_Date}
-            name="start_time"
-            />`;
-        $( '#start_date_slug').empty().append(start_date);
+        var start_date = `
+        <div id="start_date_picker"></div>
+        <input 
+        type="hidden" 
+        class="form-control w-75" 
+        id="start_date" 
+        value="${parseStart_Date}" 
+        name="start_date"
+        />`
+
+        $( '#start_date_slug' ).empty().append(start_date);
+        $('#start_date_picker').dateTimePicker({
+            selectData: parseStart_Date
+        });
+        
         parseEnd_Date = parseDate("{{ object.end_date }}");
-        var end_date = `<input 
-            id="end_date" 
-            class="form-control w-75" 
-            type="date" 
-            value= ${parseEnd_Date}
-            name="end_date"
-            />`;
+        var end_date = `
+        <div id="end_date_picker"> </div>
+        <input 
+        type="hidden"
+        class="form-control w-75"  
+        id="end_date" 
+        value="${parseEnd_Date}" 
+        name="end_date" 
+        />`;
         $( '#end_date_slug').empty().append(end_date);
+        $('#end_date_picker').dateTimePicker({
+            selectData: parseEnd_Date
+        });
         var public_evidence = `<input
             id="public_evidence"
             class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"

@@ -185,7 +185,14 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         eventsObject = Event.objects.filter(id__in=events)
 
         early_start_date = post['start_date'][0]
+        if early_start_date:
+            early_start_date = datetime.strptime(early_start_date, '%Y-%m-%d %H:%M')
         oldest_start_date = post['end_date'][0]
+        if oldest_start_date:
+            oldest_start_date = datetime.strptime(oldest_start_date, '%Y-%m-%d %H:%M')
+
+        
+        print(oldest_start_date)
 
         start_dates, end_dates = [], []
         for i in eventsObject:
@@ -199,9 +206,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             oldest_start_date = max(end_dates)
 
 
-
-        print(early_start_date)
-        print(oldest_start_date)
+        
         
         #Getting Category object
         category = Category.objects.filter(name = post['category'][0]).first()
@@ -450,10 +455,34 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
     slug_field = 'pk'
     model = Case
 
+
     def get_context_data(self, **kwargs):
+        get, prefill = self.request.GET or {}, {}
         context = super().get_context_data(**kwargs)
         relatedEvents = context['object'].events.all()
+
+        fields = [ 
+            'identification', 'confirmed', 'issue_type', 'domain', 'asn'
+        ]
+
+        for field in fields:
+            getter = get.get(field)
+            prefillAux = getter if getter else ""
+            prefill[field] = prefillAux
+
+        start_time = get.get("start_time")
+        print(start_time)
+        print('auxilioo')
+        if start_time:
+            prefill['start_time'] = start_time 
         
+        end_time = get.get("end_time")
+        if end_time:
+            prefill['end_time'] = end_time
+
+        context['prefill'] = prefill
+
+
         events = [{
             'id': event.id,
             'identification': event.identification,

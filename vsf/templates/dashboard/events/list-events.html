@@ -182,6 +182,7 @@
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
               <th class="text-center" scope="col">Related Case</th>
+              <th class="text-center" scope="col">Id</th>
             </tr>
           </thead>
           <tbody>
@@ -489,9 +490,7 @@
       }
 
       events = $('#events').DataTable({
-        rowReorder: {
-          selector: 'td:nth-child(1)'
-        },
+        order: [[6, "asc"]],
         searching: true,
         processing: true,
         language: {
@@ -512,11 +511,18 @@
           contentType: "application/json; charset=utf-8",  
           type: "GET",
         },
-        columnDefs: [ {
+        columnDefs: [ 
+          {
             orderable: true,
             className: 'select-checkbox',
             targets:   0
-        } ],
+          },
+          {
+            "targets": [ 8 ],
+            "visible": false,
+            "searchable": false
+          } 
+        ],
         columns: [
           {
             data: 'id',
@@ -570,6 +576,10 @@
             data: "case",
             orderable: true,
             searchable: true,
+          },
+          {
+            data: 'id',
+            orderable: true
           },
         ],
         initComplete: function () {},
