@@ -318,7 +318,7 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
         post = dict(request.POST)
         print(post)
         identification = post['identification'][0]
-        start_date = post['start_time'][0]
+        start_date = post['start_date'][0]
         end_date = post['end_date'][0]
         public_evidence = post['public_evidence'][0]
         private_evidence = post['private_evidence'][0]
