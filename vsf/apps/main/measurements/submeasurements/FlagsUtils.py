@@ -268,6 +268,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     hard_flags : List[SubMeasurement] = [] # Measurements with hard flag 
     soft = SubMeasurement.FlagType.SOFT
     hard = SubMeasurement.FlagType.HARD
+    muted = SubMeasurement.FlagType.MUTED
 
     start_time = lambda m: m.start_time
 
@@ -279,6 +280,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
         elif measurement.flag_type == hard and measurement.event and not measurement.event.confirmed:
             hard_flags.append(measurement)
             if resulting_event is None: resulting_event = measurement.event
+        elif measurement.flag_type == muted:
+            continue
 
     # merge all hard flags as one hard flag
     min_date : datetime = datetime.now(tz = pytz.utc) + timedelta(days=1)

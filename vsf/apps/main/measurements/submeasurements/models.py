@@ -73,7 +73,6 @@ class SubMeasurement(TimeStampedModel):
 
     # If this measurement was counted 
     counted = models.BooleanField(default=False)
-    
 
     def save(   self, 
                 force_insert=False, 
@@ -149,3 +148,9 @@ class TCP(SubMeasurement):
 
     class Meta:
         default_related_name = 'tcp_list'
+
+
+class Tor(SubMeasurement):
+    pass
+    class Meta:
+        default_related_name = 'tor_list'
