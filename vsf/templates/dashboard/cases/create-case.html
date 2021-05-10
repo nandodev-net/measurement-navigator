@@ -9,6 +9,7 @@
   }
 </style>
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datepicker/datetimepicker.css' %}" /> 
 
 
 {% endblock custom_stylesheet %}
@@ -62,7 +63,8 @@
             </label>
           </div>
           <div class="col-4">
-            <input id="start_date" class="form-control mr-2" type="date" name="start_date"/>
+            <div id="start_date_picker"> </div>
+            <input type="hidden" id="start_date" value="" name="start_date">
           </div>
           <div class="col-2">
             <label class='font-weight-bold mt-2'>
@@ -70,7 +72,8 @@
             </label>
           </div>
           <div class="col-4">
-            <input id="end_date" class="form-control mr-2 additional-filter" type="date" name="end_date"/>
+            <div id="end_date_picker"> </div>
+            <input type="hidden" id="end_date" value="" name="end_date">
           </div>
         </div>
 
@@ -171,14 +174,19 @@
   </div>
 
 
+  
+
+
 {% endblock content %}
 {% block custom_scripts %}
 
   <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
-  <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>  
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"></script>
+  <script type="text/javascript" src="{% static 'plugins/datepicker/datetimepicker.js' %}"></script>  
+
   <script>
     var events; 
-
 
 
     $(".form-control").each(function() {
@@ -279,6 +287,9 @@
 
 
     $(document).ready(function() {
+
+      $('#start_date_picker').dateTimePicker();
+      $('#end_date_picker').dateTimePicker();
       events = $('#events').DataTable({
         searching: true,
         processing: true,
