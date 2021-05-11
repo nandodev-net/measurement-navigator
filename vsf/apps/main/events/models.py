@@ -84,7 +84,9 @@ class Event(TimeStampedModel):
                             ) 
 
     # If true, then this event won't register new measurements
-    closed = models.BooleanField(default=False) 
+    closed = models.BooleanField(default=False)
+
+    muted = models.BooleanField(default=False) 
 
     # Set up by user, with higher priority than automated start date
     manual_start_date = models.DateTimeField(

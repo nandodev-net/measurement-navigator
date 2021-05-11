@@ -19,7 +19,7 @@ from apps.main.measurements.models import Measurement
 from apps.main.events.models    import Event
 from apps.main.cases.models     import Case
 from apps.main.asns.models      import ASN
-from apps.main.measurements.submeasurements.models import DNS, HTTP, TCP
+from apps.main.measurements.submeasurements.models import DNS, HTTP, TCP, SubMeasurement
 from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
 from .forms                     import EventForm
@@ -375,6 +375,63 @@ class EventConfirm(VSFLoginRequiredMixin, View):
             return JsonResponse({'error' : None})
         except Exception as e:
             print(e)
+
+
+class EventMute(VSFLoginRequiredMixin, View):
+
+    def post(self, request, **kwargs):
+        
+        post = dict(request.POST)
+        
+        eventsIds = post['events[]']
+        eventsObjetcs = Event.objects.filter(id__in=eventsIds).all()
+        try:
+            for event in eventsObjetcs:
+                dns = DNS.objects.filter(event=event)
+                http = HTTP.objects.filter(event=event)
+                tcp = TCP.objects.filter(event=event)
+                if event.muted: 
+                    if len(dns) > 0:
+                        for dns_sm in dns:
+                            dns_sm.flag_type = SubMeasurement.FlagType.HARD
+                            dns_sm.save() 
+
+                    if len(http) > 0:
+                        for http_sm in http:
+                            http_sm.flag_type = SubMeasurement.FlagType.HARD   
+                            http_sm.save() 
+
+
+                    if len(tcp) > 0:
+                        for tcp_sm in tcp:
+                            tcp_sm.flag_type = SubMeasurement.FlagType.HARD
+                            tcp_sm.save()               
+
+                    event.muted = False
+                    event.save()
+                else:
+                    if len(dns) > 0:
+                        for dns_sm in dns:
+                            dns_sm.flag_type = SubMeasurement.FlagType.MUTED
+                            dns_sm.save()
+
+                    if len(http) > 0:
+                        for http_sm in http:
+                            http_sm.flag_type = SubMeasurement.FlagType.MUTED  
+                            http_sm.save() 
+
+                    if len(tcp) > 0:
+                        for tcp_sm in tcp:
+                            tcp_sm.flag_type = SubMeasurement.FlagType.MUTED    
+                            tcp_sm.save()               
+
+                    event.muted = True
+                    event.save()
+
+            return JsonResponse({'error' : None})
+        except Exception as e:
+            print(e)
+
 
 class EventsByMeasurement(VSFLoginRequiredMixin, View):
     def get(self, request, **kwargs):
