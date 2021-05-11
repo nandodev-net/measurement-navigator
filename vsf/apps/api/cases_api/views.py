@@ -1,10 +1,12 @@
 from django.http import Http404
-
+import datetime
+import pytz
 from rest_framework.views import APIView
 from rest_framework import status, generics
 from rest_framework.response import Response
 from django.shortcuts import render
 
+from apps.api.utils import utc_aware_date
 from apps.main.cases.models import Case, Category
 from .serializers import CategoryDataSerializer, CaseDataSerializer, CaseDetailDataSerializer, CaseActiveNumberSerializer
 
@@ -33,6 +35,32 @@ class ListCases(generics.GenericAPIView):
 
     def get(self, request):
         cases = Case.objects.all()
+        cases_json = CaseDataSerializer(cases, many=True)
+        return Response(cases_json.data, status=status.HTTP_200_OK)
+
+
+class ListCasesByDate(generics.GenericAPIView):
+    """
+        class created to provide response to endpoint listing
+        all case instances in the database
+    """
+    serializer_class = CaseDataSerializer
+    queryset = Case.objects.all()
+
+    def get(self, start_date, end_date, request):
+        cases = Case.objects.all()
+
+        if start_date is not None and start_date != "":
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+            utc_start_date = utc_aware_date(start_date)
+            cases = cases.filter(created__gte=utc_start_date)
+
+        if end_date is not None and end_date != "":
+            end_date = datetime.datetime.strptime(end_date, '%Y-%m-%d')
+            utc_end_date = utc_aware_date(end_date)
+            cases = cases.filter(created__lte=utc_end_date + datetime.timedelta(hours=24))
+
+
         cases_json = CaseDataSerializer(cases, many=True)
         return Response(cases_json.data, status=status.HTTP_200_OK)
 
