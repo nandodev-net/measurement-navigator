@@ -1,6 +1,6 @@
 from django.conf.urls import include
 from django.urls import path
-from .views import EventsList, EventsData, EventUpdateView, EventDetailData, EventConfirm, EventDetailView, EventsByMeasurement
+from .views import EventsList, EventsData, EventUpdateView, EventDetailData, EventConfirm, EventMute, EventDetailView, EventsByMeasurement
 
 app_name = 'events'
 
@@ -33,6 +33,11 @@ urlpatterns = [
         'confirm/',
         EventConfirm.as_view(),
         name="confirm"
+    ),
+    path(
+        'mute/',
+        EventMute.as_view(),
+        name="mute"
     ),
     path(
         'detail/<int:pk>',
