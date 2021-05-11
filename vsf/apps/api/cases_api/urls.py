@@ -33,4 +33,9 @@ urlpatterns = [
         views.CaseActiveNumber.as_view(), 
         name='case_active_num'),
 
+    path(
+        'case-by-date/<str:start_date>/<str:end_date>', 
+        views.ListCasesByDate.as_view(), 
+        name='case_by_date'),
+
 ]

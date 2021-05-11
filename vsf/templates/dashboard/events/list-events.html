@@ -490,7 +490,7 @@
       }
 
       events = $('#events').DataTable({
-        order: [[6, "asc"]],
+        order: [[8, "asc"]],
         searching: true,
         processing: true,
         language: {
@@ -507,6 +507,7 @@
             data.issue_type = $("#issue_type").val();
             data.domain = $("#domain").val();
             data.asn = $("#asn").val();
+            
           },
           contentType: "application/json; charset=utf-8",  
           type: "GET",
@@ -517,11 +518,6 @@
             className: 'select-checkbox',
             targets:   0
           },
-          {
-            "targets": [ 8 ],
-            "visible": false,
-            "searchable": false
-          } 
         ],
         columns: [
           {
