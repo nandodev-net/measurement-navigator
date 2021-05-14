@@ -201,6 +201,7 @@
   <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
 
+  
 
   <script type="text/javascript">
     
@@ -491,7 +492,7 @@
       }
 
       events = $('#events').DataTable({
-        order: [[0, "desc"]],
+        order: [[0, "asc"]],
         searching: true,
         processing: true,
         language: {
@@ -519,6 +520,10 @@
             className: 'select-checkbox',
             targets:   1
           },
+          { 
+            type: "num", 
+            targets: 0 
+          }
         ],
         columns: [
           {
@@ -585,7 +590,6 @@
             orderable: true,
             searchable: false,
             render: function (data, type, row, meta) {
-              console.log(data);
               if (data === 'active') {
                 return `<div class="text-success w-100 text-center">
                           <i class="fas fa-check text-success" title="Active"></i>
