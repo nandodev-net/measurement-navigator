@@ -354,24 +354,27 @@ var events;
 var eventsBelonged;
 
 $( '#events' ).on('click', 'tbody tr', function() {
-  $( '#selectedEvents-tbody' ).empty();
-  var rSelected = events.rows( { selected: true }).data().toArray();
-
-  if (rSelected.length != 0) {
-    rSelected.forEach(event => {
-      $('#selectedEvents-tbody').append(
-          `<tr>
-            <td>${event['issue_type']}</td>
-            <td>${event['confirmed']}</td>
-            <td>${event['start_date']}</td>
-            <td>${event['end_date']}</td>
-            <td>${event['domain']}</td>
-            <td>${event['asn']}</td>
-          </tr>`
-      );
-    });
-  }
-
+  
+  setTimeout( function() {
+    $( '#selectedEvents-tbody' ).empty();
+    var rSelected = events.rows( { selected: true }).data().toArray();
+    var eventsSelected = events.rows( { selected: true }).data().toArray();
+    console.log(events.rows('.selected').data().toArray());
+    if (rSelected.length != 0) {
+      rSelected.forEach(event => {
+        $('#selectedEvents-tbody').append(
+            `<tr>
+              <td>${event['issue_type']}</td>
+              <td>${event['confirmed']}</td>
+              <td>${event['start_date']}</td>
+              <td>${event['end_date']}</td>
+              <td>${event['domain']}</td>
+              <td>${event['asn']}</td>
+            </tr>`
+        );
+      });
+    }
+  }, 100);
 
 });
 
