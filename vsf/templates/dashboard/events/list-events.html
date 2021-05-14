@@ -175,6 +175,7 @@
           <thead>
             <tr>
               <th class="text-center" scope="col"> </th>
+              <th class="text-center" scope="col">Id</th>
               <th class="text-center" scope="col">Event Type</th>
               <th class="text-center" scope="col">Confirmed</th>
               <th class="text-center" scope="col">Start Date</th>
@@ -182,7 +183,7 @@
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
               <th class="text-center" scope="col">Related Case</th>
-              <th class="text-center" scope="col">Id</th>
+              
             </tr>
           </thead>
           <tbody>
@@ -490,7 +491,7 @@
       }
 
       events = $('#events').DataTable({
-        order: [[8, "asc"]],
+        order: [[1, "asc"]],
         searching: true,
         processing: true,
         language: {
@@ -526,6 +527,11 @@
             render: function (data, type, row, meta) { 
               return `<div class="p-2"></div>`
             }
+          },
+          {
+            data: 'id',
+            orderable: true,
+            searchable: true,
           },
           {
             data: "issue_type",
@@ -572,10 +578,6 @@
             data: "case",
             orderable: true,
             searchable: true,
-          },
-          {
-            data: 'id',
-            orderable: true
           },
         ],
         initComplete: function () {},
