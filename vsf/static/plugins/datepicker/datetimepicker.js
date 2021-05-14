@@ -7,7 +7,7 @@
             dateFormat: "YYYY-MM-DD HH:mm",
             showTime: true,
             locale: 'en',
-            positionShift: { top: 20, left: 0},
+            positionShift: { top: 50, left: 0},
             title: "Select Date and Time",
             buttonTitle: "Select"
         }, options);
@@ -49,6 +49,7 @@
                     $s.addClass('fa fa-clock-o ico-size');
                     elem.append($s);
                 }
+                console.log('updateMainElemGlobal');
             }
             elem.on('click', function () {
                 var $win = $('<div>');
@@ -133,6 +134,7 @@
                     $div.removeClass('cursorily');
                     old.bind('click', changeDate);
                     $div.unbind('click');
+                    console.log('changeDate');
                     // console.log(selectDate.format('DD-MM-YYYY'));
                 }
 
@@ -178,7 +180,8 @@
 
                 function attachChangeTime() {
                     var $angles = $($content).find('i[id^="angle-"]');
-                    // $angles.bind('click', changeTime);
+                    console.log('aaaaa')
+                    //$angles.bind('click', changeTime);
                     $angles.bind('mouseup', function () {
                         mousedown = false;
                         timeout = 800;
@@ -198,6 +201,7 @@
                     if (arr[1] == 'down') {
                         increment = -1;
                     }
+                    console.log('changeTime');
                     appendIncrement(arr[2], increment);
                     setTimeout(function () {
                         autoIncrement($el);
@@ -211,6 +215,7 @@
                         }
                         changeTime(el);
                     }
+                    console.log('autoIncrement');
                 }
 
                 function appendIncrement(typeDigits, increment) {
@@ -224,6 +229,8 @@
                         val = 0;
                     }
                     $i.text(formatDigits(val));
+                    updateDate();
+                    console.log('appendIncrement');
                 }
 
                 function formatDigits(val) {
@@ -326,7 +333,7 @@
                     }
                     return $c;
                 }
-                function updateDate() {
+                function autoIncrement() {
                     if (settings.showTime) {
                         $('#time-line').text(lastSelected.format(settings.dateFormat));
                     }
@@ -336,6 +343,7 @@
                         $content.remove();
                         $win.remove();
                     }
+                    console.log('autoIncrement');
                 }
 
                 function updateMainElem() {
@@ -345,6 +353,8 @@
                         arrF[0] = 'DD/MM/YY';
                         arrF[1] = 'HH:mm';
                     }
+                    console.log(arrF[1]);
+                    console.log('aaaaaaaaaaaa');
                     var $s = $('<span>');
                     $s.text(lastSelected.format(arrF[0]));
                     elem.empty();
