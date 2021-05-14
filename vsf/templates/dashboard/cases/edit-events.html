@@ -355,7 +355,7 @@ var eventsBelonged;
 
 $( '#events' ).on('click', 'tbody tr', function() {
   $( '#selectedEvents-tbody' ).empty();
-  var rSelected = events.rows( { selected: false }).data().toArray();
+  var rSelected = events.rows( { selected: true }).data().toArray();
 
   if (rSelected.length != 0) {
     rSelected.forEach(event => {
