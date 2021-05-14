@@ -7,7 +7,7 @@
             dateFormat: "YYYY-MM-DD HH:mm",
             showTime: true,
             locale: 'en',
-            positionShift: { top: 20, left: 0},
+            positionShift: { top: 30, left: 0},
             title: "Select Date and Time",
             buttonTitle: "Select"
         }, options);
