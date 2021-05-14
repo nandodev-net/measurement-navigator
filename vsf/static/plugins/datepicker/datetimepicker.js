@@ -199,13 +199,13 @@
                     if (arr[1] == 'down') {
                         increment = -1;
                     }
-
-                    lastSelected.hour(parseInt($hour.text()) + 1);
-                    lastSelected.minute(parseInt($minute.text()) + 1);
-                    selectDate.hour(parseInt($hour.text()) + 1);
-                    selectDate.minute(parseInt($minute.text()) + 1);
                     
                     appendIncrement(arr[2], increment);
+
+                    lastSelected.hour(parseInt($hour.text()));
+                    lastSelected.minute(parseInt($minute.text()));
+                    selectDate.hour(parseInt($hour.text()));
+                    selectDate.minute(parseInt($minute.text()));
                     updateDate();
                     setTimeout(function () {
                         autoIncrement($el);
