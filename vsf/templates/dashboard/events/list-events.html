@@ -174,8 +174,8 @@
         <table class="table table-striped mt-5 datatable" id="events">
           <thead>
             <tr>
-              <th class="text-center" scope="col"> </th>
               <th class="text-center" scope="col">Id</th>
+              <th class="text-center" scope="col"> </th>
               <th class="text-center" scope="col">Event Type</th>
               <th class="text-center" scope="col">Confirmed</th>
               <th class="text-center" scope="col">Start Date</th>
@@ -183,7 +183,7 @@
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
               <th class="text-center" scope="col">Related Case</th>
-              
+              <th class="text-center" scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -491,7 +491,7 @@
       }
 
       events = $('#events').DataTable({
-        order: [[1, "asc"]],
+        order: [[0, "desc"]],
         searching: true,
         processing: true,
         language: {
@@ -517,10 +517,15 @@
           {
             orderable: true,
             className: 'select-checkbox',
-            targets:   0
+            targets:   1
           },
         ],
         columns: [
+          {
+            data: 'identificator',
+            orderable: true,
+            searchable: true,
+          },
           {
             data: 'id',
             orderable: false,
@@ -528,11 +533,7 @@
               return `<div class="p-2"></div>`
             }
           },
-          {
-            data: 'id',
-            orderable: true,
-            searchable: true,
-          },
+          
           {
             data: "issue_type",
             orderable: true,
@@ -578,6 +579,27 @@
             data: "case",
             orderable: true,
             searchable: true,
+          },
+          {
+            data: "status",
+            orderable: true,
+            searchable: false,
+            render: function (data, type, row, meta) {
+              console.log(data);
+              if (data === 'active') {
+                return `<div class="text-success w-100 text-center">
+                          <i class="fas fa-check text-success" title="Active"></i>
+                        </div>`
+              } else if (data === 'muted') {
+                return `<div class="text-secundary w-100 text-center">
+                          <i class="fas fa-volume-mute text-success" title="Muted"></i>
+                        </div>`
+              } else {
+                return `<div class="text-danger w-100 text-center">
+                          <i class="fas fa-times text-default" title="Closed"></i>
+                        </div>`
+              }
+            },
           },
         ],
         initComplete: function () {},

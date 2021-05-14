@@ -169,7 +169,14 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             if end_date:
                 end_date = end_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p")
 
+            status = "active"
+            if event.muted:
+                status = "muted"
+            if event.closed:
+                status = "closed"
+                
             response.append({
+                'identificator': event.id,
                 'id': event.id,
                 'identification': event.identification,
                 'issue_type': event.issue_type, 
@@ -179,7 +186,8 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
                 'case': case if case else "-No case related-",
-                "actions": {"confirmed": event.confirmed}
+                "actions": {"confirmed": event.confirmed},
+                "status": status
             })
 
         return response
@@ -262,6 +270,7 @@ class EventDetailData(VSFLoginRequiredMixin, View):
 
         if eventId != None:
             eventObj = Event.objects.get(id = eventId)
+
             data = {
                 "identification": eventObj.identification,
                 "start_date": eventObj.start_date.astimezone(CARACAS).strftime("%b. %d, %Y, %H:%M %p"),
@@ -271,6 +280,7 @@ class EventDetailData(VSFLoginRequiredMixin, View):
                 "issue_type": eventObj.issue_type,
                 "domain": eventObj.domain.domain_name,
                 "asn": eventObj.asn.asn,
+
             }
             
             return JsonResponse(data, safe=False)
@@ -285,6 +295,14 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         issue_type = context['object'].issue_type
+
+        status = "active"
+        if context['object'].muted:
+            status = "muted"
+        if context['object'].closed:
+            status = "closed"
+        context['status'] = status 
+        
         queryStr = issue_type.upper() + '.objects.all()'
         submeasures = eval(queryStr)
         submeasuresRelated = submeasures.filter(event = context['object'].id)
