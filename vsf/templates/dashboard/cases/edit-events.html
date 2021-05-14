@@ -227,6 +227,32 @@
     <div class="col-12">
       <div class="card">
         <div class="card-header">
+          <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events-selected-card" aria-expanded="true" aria-controls="events-selected-card">Selected Events</a></h5>
+        </div>
+        <div class="collapse show" id="events-selected-card">
+          <div class="card-body p-3">
+            <table class="table table-striped mt-5 datatable" id="events-selected">
+              <thead>
+                <tr>
+                  <th class="text-center" scope="col">Event Type</th>
+                  <th class="text-center" scope="col">Confirmed</th>
+                  <th class="text-center" scope="col">Start Date</th>
+                  <th class="text-center" scope="col">End Date</th>
+                  <th class="text-center" scope="col">Domain</th>
+                  <th class="text-center" scope="col">ASN</th>
+                </tr>
+              </thead>
+              <tbody id="selectedEvents-tbody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
           <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events-card" aria-expanded="true" aria-controls="events-card">All Events</a></h5>
         </div>
         <div class="collapse show" id="events-card">
@@ -324,13 +350,40 @@ $( '#confirm' ).click(function (e) {
   }
 });
 
-var eventsBelonged;
 var events;
+var eventsBelonged;
+
+$( '#events' ).on('click', 'tbody tr', function() {
+  $( '#selectedEvents-tbody' ).empty();
+  var rSelected = events.rows( { selected: false }).data().toArray();
+
+  if (rSelected.length != 0) {
+    rSelected.forEach(event => {
+      $('#selectedEvents-tbody').append(
+          `<tr>
+            <td>${event['issue_type']}</td>
+            <td>${event['confirmed']}</td>
+            <td>${event['start_date']}</td>
+            <td>${event['end_date']}</td>
+            <td>${event['domain']}</td>
+            <td>${event['asn']}</td>
+          </tr>`
+      );
+    });
+  }
+
+
+});
+
+
+
 $(document).ready(function() {
   eventsBelonged = $('#eventsBelonged').DataTable({
     order: [[ 2, "desc" ]],
     searching: true
   });
+
+  eventsSelected = $('#events-selected').DataTable();
 
   events = $('#events').DataTable({
     order: [[ 3, "desc" ]],
