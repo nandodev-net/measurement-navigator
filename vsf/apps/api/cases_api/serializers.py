@@ -28,6 +28,10 @@ class CaseDataSerializer(serializers.ModelSerializer):
         fields = [
             'id', 
             'title', 
+            'description',
+            'twitter_search',
+            'category',
+            'case_type',
             'start_date', 
             'end_date'
             ]
