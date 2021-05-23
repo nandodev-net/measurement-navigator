@@ -144,7 +144,7 @@ class Case(TimeStampedModel):
         if len(self.description) < 61:
             return self.description
         else:
-            return self.description[61]
+            return self.description[:61]
 
     def get_twitter_keywords(self) -> list:
         return self.twitter_search.split(' ')
