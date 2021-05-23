@@ -147,7 +147,25 @@ class Case(TimeStampedModel):
             return self.description[:61]
 
     def get_twitter_keywords(self) -> list:
-        return self.twitter_search.split(' ')
+        keywords = self.twitter_search.split(' ')
+        if len(keywords) > 2:
+            filtred_keywords = keywords[:2]
+            filtred_keywords.append('+' + str(len(keywords[2:])))
+            return filtred_keywords
+        else:
+            return keywords
+
+    def get_start_date_beautify(self) -> str:
+        start_date = self.get_start_date()
+        if start_date:
+            return beautifyDate(start_date)
+        else: return None
+
+    def get_end_date_beautify(self) -> str:
+        end_date = self.get_end_date()
+        if end_date:
+            return beautifyDate(end_date)
+        else: return None
 
     def __str__(self):
         return self.title
@@ -176,3 +194,10 @@ class Update(TimeStampedModel):
 
     def __str__(self):
         return self.title
+
+def beautifyDate(_date) -> str:
+    months = {'1': 'enero', '2': 'febrero', '3': 'marzo', '4': 'abril',
+        '5': 'mayo', '6': 'junio', '7': 'julio', '8': 'agosto', '9': 'septiembre',
+        '10': 'octubre', '11': 'noviembre', '12': 'diciembre'
+    }
+    return months[str(_date.month)] + ' ' + str(_date.day) + ', ' + str(_date.year)

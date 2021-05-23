@@ -26,6 +26,8 @@ class CaseDataSerializer(serializers.ModelSerializer):
     case_expired = serializers.ReadOnlyField(source='is_case_expired')
     short_description = serializers.ReadOnlyField(source='get_short_description')
     twitter_keywords = serializers.ReadOnlyField(source='get_twitter_keywords')
+    start_date_beautify = serializers.ReadOnlyField(source='get_start_date_beautify')
+    end_date_beautify = serializers.ReadOnlyField(source='get_end_date_beautify')
 
     class Meta:
         model = Case
@@ -40,7 +42,9 @@ class CaseDataSerializer(serializers.ModelSerializer):
             'end_date',
             'case_expired',
             'short_description',
-            'twitter_keywords'
+            'twitter_keywords',
+            'start_date_beautify',
+            'end_date_beautify'
         ]
         depth = 1
 
