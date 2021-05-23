@@ -6,7 +6,6 @@ from rest_framework import serializers
 from apps.main.cases.models import Case, Category
 from apps.api.events_api.serializers import EventDataSerializer
 
-
 class CategoryDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
@@ -23,6 +22,11 @@ class CaseDataSerializer(serializers.ModelSerializer):
     """
     start_date = serializers.ReadOnlyField(source='get_start_date')
     end_date = serializers.ReadOnlyField(source='get_end_date')
+    category = CategoryDataSerializer(read_only=True)
+    case_expired = serializers.ReadOnlyField(source='is_case_expired')
+    short_description = serializers.ReadOnlyField(source='get_short_description')
+    twitter_keywords = serializers.ReadOnlyField(source='get_twitter_keywords')
+
     class Meta:
         model = Case
         fields = [
@@ -33,8 +37,12 @@ class CaseDataSerializer(serializers.ModelSerializer):
             'category',
             'case_type',
             'start_date', 
-            'end_date'
-            ]
+            'end_date',
+            'case_expired',
+            'short_description',
+            'twitter_keywords'
+        ]
+        depth = 1
 
 class CaseDetailDataSerializer(serializers.ModelSerializer):
     """

@@ -8,6 +8,7 @@ from model_utils.models import TimeStampedModel
 from django.urls    import reverse
 from django.conf    import settings
 from datetime       import date as d, datetime
+from django.utils   import timezone
 
 from django.db.models.deletion import SET_NULL
 
@@ -132,6 +133,21 @@ class Case(TimeStampedModel):
             return max(e.get_end_date() for e in events)
         else:
             return None
+
+    def is_case_expired(self) -> bool:
+        if self.get_end_date():
+            return timezone.now() < self.get_end_date()
+        else:
+            return None
+
+    def get_short_description(self) -> str:
+        if len(self.description) < 61:
+            return self.description
+        else:
+            return self.description[61]
+
+    def get_twitter_keywords(self) -> list:
+        return self.twitter_search.split(' ')
 
     def __str__(self):
         return self.title
