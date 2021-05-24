@@ -56,6 +56,10 @@ class CaseDetailDataSerializer(serializers.ModelSerializer):
     events = EventDataSerializer(many=True, read_only=True)
     start_date = serializers.ReadOnlyField(source='get_start_date')
     end_date = serializers.ReadOnlyField(source='get_end_date')
+    category = CategoryDataSerializer(read_only=True)
+    case_expired = serializers.ReadOnlyField(source='is_case_expired')
+    start_date_beautify = serializers.ReadOnlyField(source='get_start_date_beautify')
+    end_date_beautify = serializers.ReadOnlyField(source='get_end_date_beautify')
 
     class Meta:
         model = Case
@@ -66,9 +70,13 @@ class CaseDetailDataSerializer(serializers.ModelSerializer):
             'start_date',
             'end_date',
             'category',
+            'case_type',
             'events',
             'twitter_search',
-            ]
+            'case_expired',
+            'start_date_beautify',
+            'end_date_beautify'
+        ]
 
 class CaseActiveNumberSerializer(serializers.Serializer):
     total_cases = serializers.IntegerField()

@@ -136,7 +136,7 @@ class Case(TimeStampedModel):
 
     def is_case_expired(self) -> bool:
         if self.get_end_date():
-            return timezone.now() < self.get_end_date()
+            return timezone.now() > self.get_end_date()
         else:
             return None
 
