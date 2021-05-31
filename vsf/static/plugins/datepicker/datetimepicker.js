@@ -1,4 +1,4 @@
-﻿(function ($) {
+﻿﻿(function ($) {
     'use strict';
     $.fn.dateTimePicker = function (options) {
 
@@ -7,7 +7,7 @@
             dateFormat: "YYYY-MM-DD HH:mm",
             showTime: true,
             locale: 'en',
-            positionShift: { top: 20, left: 0},
+            positionShift: { top: 30, left: 0},
             title: "Select Date and Time",
             buttonTitle: "Select"
         }, options);
@@ -191,6 +191,7 @@
 
                 function changeTime(el) {
                     var $el = this || el;
+                    
                     $el = $($el);
                     ///angle-up-hour angle-up-minute angle-down-hour angle-down-minute
                     var arr = $el.attr('id').split('-');
@@ -198,9 +199,17 @@
                     if (arr[1] == 'down') {
                         increment = -1;
                     }
+                    
                     appendIncrement(arr[2], increment);
+
+                    lastSelected.hour(parseInt($hour.text()));
+                    lastSelected.minute(parseInt($minute.text()));
+                    selectDate.hour(parseInt($hour.text()));
+                    selectDate.minute(parseInt($minute.text()));
+                    updateDate();
                     setTimeout(function () {
                         autoIncrement($el);
+                        
                     }, timeout);
                 }
 
@@ -378,4 +387,3 @@
     }
 
 }(jQuery));
-// fa-caret-down

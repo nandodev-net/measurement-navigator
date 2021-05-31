@@ -1,6 +1,6 @@
 from django.conf.urls import include
 from django.urls import path
-from .views import ListDNSTemplate, ListDNSBackEnd, ListHTTPTemplate, ListHTTPBackEnd, ListTCPTemplate, ListTCPBackEnd
+from .views import *
 
 app_name = 'submeasurements'
 
@@ -35,6 +35,11 @@ urlpatterns = [
         'tcp_data/',
         ListTCPBackEnd.as_view(),
         name='list_tcp_data'
+    ),
+    path(
+        'tor/',
+        ListTorTemplate.as_view(),
+        name='list_tor'
     ),
 
 ]
