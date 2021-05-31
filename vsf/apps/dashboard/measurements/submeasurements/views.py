@@ -184,7 +184,6 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
 
         return qs
 
-
 class ListDNSTemplate(ListSubMeasurementTemplate):
     """
         This is the template view that renders the html with the dynamic table
@@ -324,7 +323,6 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             return {'isOk' : True, 'json' : out}
         except:
             return {'isOk' : False, 'json' : cr_answers}
-
 
 class ListHTTPTemplate(ListSubMeasurementTemplate):
     """
@@ -577,3 +575,20 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
                 'ip' : item.ip,
             })
         return json_data
+
+class ListTorTemplate(ListSubMeasurementTemplate):
+    """
+        This is the front-end view for showing the TOR submeasurement
+        table. 
+    """
+    template_name = "measurements/list-tor.html"
+    SubMeasurement = SubMeasModels.Tor
+
+    def get_context_data(self, **kwargs):
+
+        context =  super().get_context_data()
+        prefill = context['prefill']
+        get = self.request.GET or {}
+        
+        context['prefill'] = prefill
+        return context

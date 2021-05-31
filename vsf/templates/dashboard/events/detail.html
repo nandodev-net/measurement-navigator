@@ -60,7 +60,44 @@
     {% endif %}
 
 </div>
-<div class="col-6"></div>
+<div class="col-2 ">
+    <h5>Status: </h5> 
+    <div class="d-inline-flex">
+        {% if status == 'active' %}
+            <span class="badge badge-primary d-inline-flex mr-2">
+                <i class="fas fa-check mr-3 mt-1" title="Active"></i><h5 class="text-white">Active</h5> 
+            </span>
+            
+        {% else %}
+            <span class="badge badge-secondary d-inline-flex mr-2">
+                <i class="fas fa-check mr-3 mt-1" title="Not Active"></i><h5 class="text-white">Active</h5> 
+            </span>
+        {% endif %}
+
+        {% if status == 'muted' %}
+            <span class="badge badge-primary d-inline-flex mr-2">
+                <i class="fas fa-volume-mute mr-3 mt-1" title="Muted"></i><h5 class="text-white">Muted</h5> 
+            </span>
+        {% else %}
+            <span class="badge badge-secondary d-inline-flex mr-2">
+                <i class="fas fa-volume-mute mr-3 mt-1" title="Not Muted"></i><h5 class="text-white">Muted</h5> 
+            </span>
+        {% endif %}
+
+        {% if status == 'closed' %}
+            <span class="badge badge-primary d-inline-flex mr-2">
+                <i class="fas fa-times mr-3 mt-1" title="Closed"></i><h5 class="text-white">Closed</h5> 
+            </span>
+        {% else %}
+            <span class="badge badge-secondary d-inline-flex mr-2">
+                <i class="fas fa-times mr-3 mt-1" title="Not Closed"></i><h5 class="text-white">Closed</h5> 
+            </span>
+        {% endif %}
+    </div>
+    
+
+</div>
+<div class="col-4"></div>
 {% if object.muted  %}
 <div class="col-1"><button class='btn btn-success' id="muteTrigger" type='button'> Unmute </button></div>
 {% else %}
