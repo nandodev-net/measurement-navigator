@@ -493,11 +493,12 @@
 
       events = $('#events').DataTable({
         order: [[0, "asc"]],
+        orderMulti: true,
         searching: true,
         processing: true,
         language: {
         },
-        serverSide: true,
+        serverSide: false,
         rowId: "id",
         ajax: {
           url: '{% url "dashboard:events:data" %}',
