@@ -84,11 +84,14 @@ class EventsList(VSFLoginRequiredMixin, ListView):
 class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
     columns = [ 
-        'identification', 'confirmed', 'start_date', 'end_date', 
-        'issue_type', 'domain', 'asn'
+        'id', 'issue_type', 'confirmed', 'start_date', 'end_date', 
+        'domain__domain_name', 'asn__asn', 'actions', 'status'
     ]
 
-    order_columns = columns
+    order_columns = [ 
+        'id', 'issue_type', 'confirmed', 'start_date', 'end_date', 
+        'domain__domain_name', 'asn__asn', 'actions', 'status'
+    ]
 
     def get_initial_queryset(self):
         return Event.objects.all()
@@ -176,9 +179,8 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 status = "closed"
                 
             response.append({
-                'identificator': event.id,
                 'id': event.id,
-                'identification': event.identification,
+                'identificator': event.id,
                 'issue_type': event.issue_type, 
                 'confirmed': event.confirmed, 
                 'start_date': start_date, 
