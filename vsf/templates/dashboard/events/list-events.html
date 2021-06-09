@@ -182,8 +182,6 @@
               <th class="text-center" scope="col">End Date</th>
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
-              <th class="text-center" scope="col">Related Case</th>
-              <th class="text-center" scope="col">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -493,7 +491,6 @@
 
       events = $('#events').DataTable({
         order: [[0, "asc"]],
-        orderMulti: true,
         searching: true,
         processing: true,
         language: {
@@ -517,14 +514,9 @@
         },
         columnDefs: [ 
           {
-            orderable: true,
             className: 'select-checkbox',
             targets:   1
           },
-          { 
-            type: "num", 
-            targets: 0 
-          }
         ],
         columns: [
           {
@@ -539,7 +531,6 @@
               return `<div class="p-2"></div>`
             }
           },
-          
           {
             data: "issue_type",
             orderable: true,
@@ -580,31 +571,6 @@
             data: "asn",
             orderable: false,
             searchable: true,
-          },
-          {
-            data: "case",
-            orderable: true,
-            searchable: true,
-          },
-          {
-            data: "status",
-            orderable: true,
-            searchable: false,
-            render: function (data, type, row, meta) {
-              if (data === 'active') {
-                return `<div class="text-success w-100 text-center">
-                          <i class="fas fa-check text-success" title="Active"></i>
-                        </div>`
-              } else if (data === 'muted') {
-                return `<div class="text-secundary w-100 text-center">
-                          <i class="fas fa-volume-mute text-success" title="Muted"></i>
-                        </div>`
-              } else {
-                return `<div class="text-danger w-100 text-center">
-                          <i class="fas fa-times text-default" title="Closed"></i>
-                        </div>`
-              }
-            },
           },
         ],
         initComplete: function () {},
