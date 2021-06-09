@@ -84,13 +84,13 @@ class EventsList(VSFLoginRequiredMixin, ListView):
 class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
     columns = [ 
-        'id', 'issue_type', 'confirmed', 'start_date', 'end_date', 
-        'domain__domain_name', 'asn__asn', 'actions', 'status'
+        'id', 'identification', 'issue_type', 'confirmed', 'start_date', 'end_date', 
+        'domain__domain_name', 'asn__asn'
     ]
 
     order_columns = [ 
-        'id', 'issue_type', 'confirmed', 'start_date', 'end_date', 
-        'domain__domain_name', 'asn__asn', 'actions', 'status'
+        'id', '', 'issue_type', 'confirmed', 'start_date', 'end_date', 
+        'domain__domain_name', 'asn__asn'
     ]
 
     def get_initial_queryset(self):
@@ -183,13 +183,10 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 'identificator': event.id,
                 'issue_type': event.issue_type, 
                 'confirmed': event.confirmed, 
-                'start_date': start_date, 
-                'end_date': end_date, 
+                'start_date': event.start_date, 
+                'end_date': event.end_date, 
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
-                'case': case if case else "-No case related-",
-                "actions": {"confirmed": event.confirmed},
-                "status": status
             })
 
         return response
