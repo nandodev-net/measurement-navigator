@@ -9,7 +9,7 @@
             locale: 'en',
             positionShift: { top: 30, left: 0},
             title: "Select Date and Time",
-            buttonTitle: "Select"
+            buttonTitle: "Done"
         }, options);
         moment.locale(settings.locale);
         var elem = this;
@@ -61,6 +61,10 @@
                 $content.css({top: (offset.top + settings.positionShift.top) + "px", left: (offset.left + settings.positionShift.left) + "px"});
                 feelDates(selectDate);
                 $win.on('click', function () {
+                    $content.remove();
+                    $win.remove();
+                })
+                $('#forceClose').on('click', function () {
                     $content.remove();
                     $win.remove();
                 })
@@ -162,6 +166,11 @@
                         selectDate.minute(parseInt($minute.text()));
                     }
                     updateDate();
+                    $content.remove();
+                    $win.remove();
+                }
+
+                function forceClose() {
                     $content.remove();
                     $win.remove();
                 }
@@ -304,9 +313,15 @@
                     else {
                         $c.addClass("dtp_modal-content-no-time");
                     }
-                    var $el = $('<div>');
-                    $el.addClass("dtp_modal-title");
-                    $el.text(settings.title);
+                    var $el = `<div class="dtp_modal-title">
+                        <h5 class="modal-title" id="">
+                            ${settings.title}
+                        </h5>
+                        <button type="button" id="forceClose" class="close" aria-label="Close" style="margin-top: -5%;">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>`;
+
                     $c.append($el);
                     $el = $('<div>');
                     $el.addClass('dtp_modal-cell-date');
