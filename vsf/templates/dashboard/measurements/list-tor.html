@@ -77,7 +77,7 @@
               <div class="col-6 mx-auto">
                 <label class="font-weight-bold text-white" for="dir-port-accesible">Dir. Port Accesible</label>
               </div>
-              <div class="col-6 mx-auto">
+              <div class="col-5 mx-auto">
                 <input
                   id="dir-port-accesible"
                   class="additional-filter"
@@ -87,14 +87,18 @@
                   step="1"
                   value="{{prefill.dir_port_accesible}}"
                   name="dir_port_accesible"
+                  onchange="updatedir(this.value);"
                 />
+              </div>
+              <div vlass="col-1 mx-auto">
+                <p id='valuedir' class="text-white mb-1">50%</p>
               </div>
             </div> 
           </div>
 
           <div class="col-4 mt-1">
             <div class="row align-items-center rounded p-3 bg-dark ">
-              <div class="col-6 mx-auto">
+              <div class="col-5 mx-auto">
                 <label class="font-weight-bold text-white" for="obfs4-accesible">OBFS4 Accesible</label>
               </div>
               <div class="col-6 mx-auto">
@@ -107,7 +111,11 @@
                   step="1"
                   value="{{prefill.obfs4_accesible}}"
                   name="obfs4_accesible"
+                  onchange="updateobfs4(this.value);"
                 />
+              </div>
+              <div vlass="col-1 mx-auto">
+                <p id='valueobfs4' class="text-white mb-1">50%</p>
               </div>
             </div> 
           </div>
@@ -131,7 +139,6 @@
             <tr>
               <th class="text-center text-capitalize" scope="col">Start Time</th>
               <th class="text-center text-capitalize" scope="col">ASN</th>
-              <th class="text-center text-capitalize" scope="col">IP</th>
               <th class="text-center text-capitalize" scope="col">Dir Port Total</th>
               <th class="text-center text-capitalize" scope="col">Dir Port Accesible</th>
               <th class="text-center text-capitalize" scope="col">OBSF4 Total</th>
@@ -139,7 +146,7 @@
             </tr>
           </thead>
 
-          <tbody id='tcp-tbody'>
+          <tbody id='tor-tbody'>
           </tbody>
 
           <tfoot></tfoot>
@@ -161,6 +168,14 @@
 <script>
   'use strict';
   var torList;
+
+  function updateobfs4(val) {
+    $('#valueobfs4').text(val + '%'); 
+  }
+
+  function updatedir(val) {
+    $('#valuedir').text(val + '%'); 
+  }
 
   $(document).ready(function() {
     torList = $('#tor-list').DataTable();
