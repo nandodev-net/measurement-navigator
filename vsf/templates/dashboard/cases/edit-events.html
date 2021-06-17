@@ -267,7 +267,6 @@
                   <th class="text-center" scope="col">End Date</th>
                   <th class="text-center" scope="col">Domain</th>
                   <th class="text-center" scope="col">ASN</th>
-                  <th class="text-center" scope="col">Related Case</th>
                 </tr>
               </thead>
               <tbody>
@@ -284,41 +283,27 @@
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
 <script>
+  var selected = [];
+  var events;
+  var eventsBelonged;
+  var eventsSelected;
 
-$( '#confirm' ).click(function (e) {
-  var eventsSelected = []
-  var eventsToDelete = []
-  var permit = true;
 
-  selectedOnes = events.rows( { selected: true }).data().toArray();
-  selectedOnes.forEach(element => {
-    if (element.case != "-No case related-") {
-      permit = false;
-      Swal.fire({
-          icon: "error",
-          title: "You must select events without any relationship with another cases",
-          confirmButtonColor: "#dc3545",
-          confirmButtonText: "Continue"
-      });
-    } 
-  });
-
-  eventsSelected = selectedOnes.map((selected) => (
-    selected.id
-  ));
-
-  
-  eventsToDelete = $('.del:checkbox:checked').toArray().map((selected) => (
-    selected.id
-  ));
-
-  if (permit) {
+  $( '#confirm' ).click(function (e) {
+    var eventsSelected = []
+    var eventsToDelete = []
+    
+    var permit = true;
+    
+    eventsToDelete = $('.del:checkbox:checked').toArray().map((selected) => (
+      selected.id
+    ));
 
     $.ajax({
       type: "POST",
       url: "{% url 'dashboard:event_cases:edit_events' object.id %}",
       data: {
-        eventsSelected: eventsSelected, 
+        eventsSelected: selected, 
         eventsToDelete: eventsToDelete, 
         case: "{{object.id}}",
         csrfmiddlewaretoken: "{{ csrf_token }}"
@@ -347,12 +332,34 @@ $( '#confirm' ).click(function (e) {
         }
       }
     });
-  }
-});
+    
+  });
 
-var events;
-var eventsBelonged;
+  
+  $( '#events' ).on('click', 'tbody tr', function() {
+      var id = this.id;
+      var index = $.inArray(id, selected);
+      var row = events.rows("#" + id).data().toArray();
 
+      if ( index === -1 ) {
+          selected.push( id );
+          eventsSelected.row.add([
+            row[0].issue_type,
+            row[0].confirmed,
+            row[0].start_date,
+            row[0].end_date,
+            row[0].domain,
+            row[0].asn,
+          ]).node().id = id;
+          eventsSelected.draw();
+      } else {
+          selected.splice( index, 1 );
+          eventsSelected.row('#' + id).remove().draw();
+      }
+
+      $(this).toggleClass('selected');
+  });
+/*
 $( '#events' ).on('click', 'tbody tr', function() {
   
   setTimeout( function() {
@@ -376,7 +383,7 @@ $( '#events' ).on('click', 'tbody tr', function() {
     }
   }, 100);
 
-});
+});*/
 
 
 
@@ -395,6 +402,11 @@ $(document).ready(function() {
     language: {
     },
     serverSide: true,
+    rowCallback: function( row, data ) {
+      if ( $.inArray(data.id, selected) !== -1 ) {
+          $(row).addClass('selected');
+      }
+    },
     rowId: "id",
     ajax: {
       url: '{% url "dashboard:events:data" %}',
@@ -465,11 +477,6 @@ $(document).ready(function() {
       {
         data: "asn",
         orderable: false,
-        searchable: true,
-      },
-      {
-        data: "case",
-        orderable: true,
         searchable: true,
       },
     ],
