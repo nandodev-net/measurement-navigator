@@ -357,136 +357,110 @@
           eventsSelected.row('#' + id).remove().draw();
       }
 
+      console.log(selected);
       $(this).toggleClass('selected');
   });
-/*
-$( '#events' ).on('click', 'tbody tr', function() {
-  
-  setTimeout( function() {
-    $( '#selectedEvents-tbody' ).empty();
-    var rSelected = events.rows( { selected: true }).data().toArray();
-    var eventsSelected = events.rows( { selected: true }).data().toArray();
-    console.log(events.rows('.selected').data().toArray());
-    if (rSelected.length != 0) {
-      rSelected.forEach(event => {
-        $('#selectedEvents-tbody').append(
-            `<tr>
-              <td>${event['issue_type']}</td>
-              <td>${event['confirmed']}</td>
-              <td>${event['start_date']}</td>
-              <td>${event['end_date']}</td>
-              <td>${event['domain']}</td>
-              <td>${event['asn']}</td>
-            </tr>`
-        );
-      });
-    }
-  }, 100);
 
-});*/
+  $(document).ready(function() {
+    eventsBelonged = $('#eventsBelonged').DataTable({
+      order: [[ 2, "desc" ]],
+      searching: true
+    });
 
+    eventsSelected = $('#events-selected').DataTable();
 
-
-$(document).ready(function() {
-  eventsBelonged = $('#eventsBelonged').DataTable({
-    order: [[ 2, "desc" ]],
-    searching: true
-  });
-
-  eventsSelected = $('#events-selected').DataTable();
-
-  events = $('#events').DataTable({
-    order: [[ 3, "desc" ]],
-    searching: true,
-    processing: true,
-    language: {
-    },
-    serverSide: true,
-    rowCallback: function( row, data ) {
-      if ( $.inArray(data.id, selected) !== -1 ) {
-          $(row).addClass('selected');
-      }
-    },
-    rowId: "id",
-    ajax: {
-      url: '{% url "dashboard:events:data" %}',
-      data: function (data) {
-
-        data.case = "{{object.id}}";
-        data.identification = $("#identification").val() ;
-        data.confirmed = $("#confirmed").val();
-        data.start_time = $("#start_time").val();
-        data.end_time = $("#end_time").val();
-        data.issue_type = $("#issue_type").val();
-        data.domain = $("#domain").val();
-        data.asn = $("#asn").val();
-
+    events = $('#events').DataTable({
+      order: [[ 3, "desc" ]],
+      searching: true,
+      processing: true,
+      language: {
       },
-      contentType: "application/json; charset=utf-8",  
-      type: "GET",
-    },
-    columnDefs: [ {
-        orderable: false,
-        className: 'select-checkbox',
-        targets:   0
-    } ],
-    columns: [
-      {
-        data: 'id',
-        orderable: false,
-        render: function (data, type, row, meta) { 
-          return `<div class="p-2"></div>`
+      serverSide: true,
+      rowCallback: function( row, data ) {
+        if ( $.inArray(data.id, selected) !== -1 ) {
+            $(row).addClass('selected');
         }
       },
-      {
-        data: "issue_type",
-        orderable: true,
-        searchable: true,
+      rowId: "id",
+      ajax: {
+        url: '{% url "dashboard:events:data" %}',
+        data: function (data) {
+
+          data.case = "{{object.id}}";
+          data.identification = $("#identification").val() ;
+          data.confirmed = $("#confirmed").val();
+          data.start_time = $("#start_time").val();
+          data.end_time = $("#end_time").val();
+          data.issue_type = $("#issue_type").val();
+          data.domain = $("#domain").val();
+          data.asn = $("#asn").val();
+
+        },
+        contentType: "application/json; charset=utf-8",  
+        type: "GET",
       },
-      {
-        data: "confirmed",
-        orderable: true,
-        searchable: false,
-        render: function (data, type, row, meta) {
-          if (data) {
-            return `<div class="text-success w-100 text-center">
-                      <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
-                    </div>`
-          } else {
-            return `<div class="text-danger w-100 text-center">
-                      <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
-                    </div>`
+      columnDefs: [ {
+          orderable: false,
+          className: 'select-checkbox',
+          targets:   0
+      } ],
+      columns: [
+        {
+          data: 'id',
+          orderable: false,
+          render: function (data, type, row, meta) { 
+            return `<div class="p-2"></div>`
           }
         },
+        {
+          data: "issue_type",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "confirmed",
+          orderable: true,
+          searchable: false,
+          render: function (data, type, row, meta) {
+            if (data) {
+              return `<div class="text-success w-100 text-center">
+                        <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                      </div>`
+            } else {
+              return `<div class="text-danger w-100 text-center">
+                        <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                      </div>`
+            }
+          },
+        },
+        {
+          data: "start_date",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "end_date",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "domain",
+          orderable: false,
+          searchable: true,
+        },
+        {
+          data: "asn",
+          orderable: false,
+          searchable: true,
+        },
+      ],
+      initComplete: function () {},
+      buttons: [],
+      select: {
+        style: 'multi',
+        
       },
-      {
-        data: "start_date",
-        orderable: true,
-        searchable: true,
-      },
-      {
-        data: "end_date",
-        orderable: true,
-        searchable: true,
-      },
-      {
-        data: "domain",
-        orderable: false,
-        searchable: true,
-      },
-      {
-        data: "asn",
-        orderable: false,
-        searchable: true,
-      },
-    ],
-    initComplete: function () {},
-    buttons: [],
-    select: {
-      style: 'multi',
-      
-    },
-  });  
-})  
+    });  
+  })  
 </script>
 {% endblock custom_scripts %}
