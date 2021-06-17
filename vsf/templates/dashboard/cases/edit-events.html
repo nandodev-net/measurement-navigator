@@ -383,8 +383,9 @@
         console.log(data);
         console.log($.inArray(data.id, selected));
         console.log(selected);
+        console.log(data.id);
         console.log('-----------');
-        if ( $.inArray(data.id, selected) !== -1 ) {
+        if ( $.inArray(data.id.toString(), selected) !== -1 ) {
             $(row).addClass('selected');
         }
       },
