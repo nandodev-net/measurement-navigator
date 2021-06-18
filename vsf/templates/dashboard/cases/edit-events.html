@@ -267,7 +267,6 @@
                   <th class="text-center" scope="col">End Date</th>
                   <th class="text-center" scope="col">Domain</th>
                   <th class="text-center" scope="col">ASN</th>
-                  <th class="text-center" scope="col">Related Case</th>
                 </tr>
               </thead>
               <tbody>
@@ -282,43 +281,31 @@
 {% endblock content %}
 {% block custom_scripts %}
 <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
 <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
 <script>
+  var selected = [];
+  var events;
+  var eventsBelonged;
+  var eventsSelected;
 
-$( '#confirm' ).click(function (e) {
-  var eventsSelected = []
-  var eventsToDelete = []
-  var permit = true;
 
-  selectedOnes = events.rows( { selected: true }).data().toArray();
-  selectedOnes.forEach(element => {
-    if (element.case != "-No case related-") {
-      permit = false;
-      Swal.fire({
-          icon: "error",
-          title: "You must select events without any relationship with another cases",
-          confirmButtonColor: "#dc3545",
-          confirmButtonText: "Continue"
-      });
-    } 
-  });
-
-  eventsSelected = selectedOnes.map((selected) => (
-    selected.id
-  ));
-
-  
-  eventsToDelete = $('.del:checkbox:checked').toArray().map((selected) => (
-    selected.id
-  ));
-
-  if (permit) {
+  $( '#confirm' ).click(function (e) {
+    var eventsSelected = []
+    var eventsToDelete = []
+    
+    var permit = true;
+    
+    eventsToDelete = $('.del:checkbox:checked').toArray().map((selected) => (
+      selected.id
+    ));
 
     $.ajax({
       type: "POST",
       url: "{% url 'dashboard:event_cases:edit_events' object.id %}",
       data: {
-        eventsSelected: eventsSelected, 
+        eventsSelected: selected, 
         eventsToDelete: eventsToDelete, 
         case: "{{object.id}}",
         csrfmiddlewaretoken: "{{ csrf_token }}"
@@ -347,139 +334,141 @@ $( '#confirm' ).click(function (e) {
         }
       }
     });
-  }
-});
-
-var events;
-var eventsBelonged;
-
-$( '#events' ).on('click', 'tbody tr', function() {
-  
-  setTimeout( function() {
-    $( '#selectedEvents-tbody' ).empty();
-    var rSelected = events.rows( { selected: true }).data().toArray();
-    var eventsSelected = events.rows( { selected: true }).data().toArray();
-    console.log(events.rows('.selected').data().toArray());
-    if (rSelected.length != 0) {
-      rSelected.forEach(event => {
-        $('#selectedEvents-tbody').append(
-            `<tr>
-              <td>${event['issue_type']}</td>
-              <td>${event['confirmed']}</td>
-              <td>${event['start_date']}</td>
-              <td>${event['end_date']}</td>
-              <td>${event['domain']}</td>
-              <td>${event['asn']}</td>
-            </tr>`
-        );
-      });
-    }
-  }, 100);
-
-});
-
-
-
-$(document).ready(function() {
-  eventsBelonged = $('#eventsBelonged').DataTable({
-    order: [[ 2, "desc" ]],
-    searching: true
+    
   });
 
-  eventsSelected = $('#events-selected').DataTable();
+  
+  $( '#events' ).on('click', 'tbody tr', function() {
+      var id = this.id;
+      var index = $.inArray(id, selected);
+      var row = events.rows("#" + id).data().toArray();
 
-  events = $('#events').DataTable({
-    order: [[ 3, "desc" ]],
-    searching: true,
-    processing: true,
-    language: {
-    },
-    serverSide: true,
-    rowId: "id",
-    ajax: {
-      url: '{% url "dashboard:events:data" %}',
-      data: function (data) {
+      if ( index === -1 ) {
+          selected.push( id );
+          eventsSelected.row.add([
+            row[0].issue_type,
+            row[0].confirmed,
+            row[0].start_date,
+            row[0].end_date,
+            row[0].domain,
+            row[0].asn,
+          ]).node().id = id;
+          eventsSelected.draw();
+      } else {
+          selected.splice( index, 1 );
+          eventsSelected.row('#' + id).remove().draw();
+      }
 
-        data.case = "{{object.id}}";
-        data.identification = $("#identification").val() ;
-        data.confirmed = $("#confirmed").val();
-        data.start_time = $("#start_time").val();
-        data.end_time = $("#end_time").val();
-        data.issue_type = $("#issue_type").val();
-        data.domain = $("#domain").val();
-        data.asn = $("#asn").val();
+      console.log(selected);
+      $(this).toggleClass('selected');
+  });
 
+  $(document).ready(function() {
+    eventsBelonged = $('#eventsBelonged').DataTable({
+      order: [[ 2, "desc" ]],
+      searching: true
+    });
+
+    eventsSelected = $('#events-selected').DataTable();
+
+    events = $('#events').DataTable({
+      order: [[ 3, "desc" ]],
+      searching: true,
+      processing: true,
+      language: {
       },
-      contentType: "application/json; charset=utf-8",  
-      type: "GET",
-    },
-    columnDefs: [ {
-        orderable: false,
-        className: 'select-checkbox',
-        targets:   0
-    } ],
-    columns: [
-      {
-        data: 'id',
-        orderable: false,
-        render: function (data, type, row, meta) { 
-          return `<div class="p-2"></div>`
+      serverSide: true,
+      rowCallback: function( row, data ) {
+        console.log('-----------');
+        console.log(data);
+        console.log($.inArray(data.id, selected));
+        console.log(selected);
+        console.log(data.id);
+        console.log('-----------');
+        if ( $.inArray(data.id.toString(), selected) !== -1 ) {
+            $(row).addClass('selected');
         }
       },
-      {
-        data: "issue_type",
-        orderable: true,
-        searchable: true,
+      rowId: "id",
+      ajax: {
+        url: '{% url "dashboard:events:data" %}',
+        data: function (data) {
+
+          data.case = "{{object.id}}";
+          data.identification = $("#identification").val() ;
+          data.confirmed = $("#confirmed").val();
+          data.start_time = $("#start_time").val();
+          data.end_time = $("#end_time").val();
+          data.issue_type = $("#issue_type").val();
+          data.domain = $("#domain").val();
+          data.asn = $("#asn").val();
+
+        },
+        contentType: "application/json; charset=utf-8",  
+        type: "GET",
       },
-      {
-        data: "confirmed",
-        orderable: true,
-        searchable: false,
-        render: function (data, type, row, meta) {
-          if (data) {
-            return `<div class="text-success w-100 text-center">
-                      <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
-                    </div>`
-          } else {
-            return `<div class="text-danger w-100 text-center">
-                      <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
-                    </div>`
+      columnDefs: [ {
+          orderable: false,
+          className: 'select-checkbox',
+          targets:   0
+      } ],
+      columns: [
+        {
+          data: 'id',
+          orderable: false,
+          render: function (data, type, row, meta) { 
+            return `<div class="p-2"></div>`
           }
         },
+        {
+          data: "issue_type",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "confirmed",
+          orderable: true,
+          searchable: false,
+          render: function (data, type, row, meta) {
+            if (data) {
+              return `<div class="text-success w-100 text-center">
+                        <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                      </div>`
+            } else {
+              return `<div class="text-danger w-100 text-center">
+                        <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                      </div>`
+            }
+          },
+        },
+        {
+          data: "start_date",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "end_date",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "domain",
+          orderable: false,
+          searchable: true,
+        },
+        {
+          data: "asn",
+          orderable: false,
+          searchable: true,
+        },
+      ],
+      initComplete: function () {},
+      buttons: [],
+      select: {
+        style: 'multi',
+        
       },
-      {
-        data: "start_date",
-        orderable: true,
-        searchable: true,
-      },
-      {
-        data: "end_date",
-        orderable: true,
-        searchable: true,
-      },
-      {
-        data: "domain",
-        orderable: false,
-        searchable: true,
-      },
-      {
-        data: "asn",
-        orderable: false,
-        searchable: true,
-      },
-      {
-        data: "case",
-        orderable: true,
-        searchable: true,
-      },
-    ],
-    initComplete: function () {},
-    buttons: [],
-    select: {
-      style: 'multi',
-      
-    },
-  });  
-})  
+    });  
+  })  
 </script>
 {% endblock custom_scripts %}
