@@ -183,48 +183,8 @@
       <div class="collapse navbar-collapse">
         
         <ul class="navbar-nav ml-auto mr-5">
-          <li class='mr-5'>
-            <!-- <div class="dropdown drp-tmz mr-5">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                <i class="fas fa-globe-americas"></i> Choose Timezone
-              </a>
-              <div class="dropdown-menu dropdown-menu-left profile-notification">
-                <ul class="pro-body">
-                  <li>
-                    <a href="" class="dropdown-item">
-                      <i class="#"></i> -4 UTC
-                    </a>
-                  </li>
-                  <li>
-                    <a href="" class="dropdown-item">
-                      <i class="#"></i> 0 UTC
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div> -->
 
-            <li class='mr-5'>
-                <div class="dropdown drp-tmz mr-5">
-                  <li href="#" class="dropdown-toggle" data-toggle="dropdown">
-                    <i class="fas fa-globe-americas"></i> Choose Timezone
-                  </li>
-                  <li class="nav-item col-7 mx-auto">
-                    <select id="tz_selector" class="w-100" name="tz_selector">
-                                {% if request.session.system_tz == "1" %}
-                                    <option value="1" selected>UTC (0)</option>
-                                    <option value="2">Caracas (utc -4)</option>
-                                {% else %}
-                                    <option value="1" >UTC (0)</option>
-                                    <option value="2" selected>Caracas (utc -4)</option>
-                                {% endif %}
-                    </select>
-                </li>
-                </div>
-              </li>
-          </li>
-
-          <li class="ml-5">
+          <li class="mr-5">
             <div class="dropdown drp-user">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="feather icon-user"></i> {{user.username}}
@@ -250,6 +210,22 @@
               </div>
             </div>
           </li>
+
+          <li class=''>
+              <div class="dropdown drp-tmz mr-5">
+                  <select id="tz_selector" class="w-100" name="tz_selector">
+                      {% if request.session.system_tz == "1" %}
+                          <option value="1" selected>UTC (0)</option>
+                          <option value="2">Caracas (utc -4)</option>
+                      {% else %}
+                          <option value="1" >UTC (0)</option>
+                          <option value="2" selected>Caracas (utc -4)</option>
+                      {% endif %}
+                  </select>
+              </div>
+          </li>
+
+          
         </ul>
       </div>
     </header>
