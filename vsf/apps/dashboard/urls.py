@@ -40,6 +40,11 @@ urlpatterns = [
         name='login'
     ),
     path(
+        'set_tz/',
+        views.TZoneSelectorView.as_view(),
+        name='set_tz'
+    ),
+    path(
         '',
         include('django.contrib.auth.urls')
     ),

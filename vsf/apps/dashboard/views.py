@@ -13,7 +13,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 # Local imports
 from apps.main.asns                             import models as AsnModels
 from apps.main.ooni_fp.fp_tables                import models as fp_models
-from vsf.views                                  import VSFLoginRequiredMixin, VSFLogin
+from vsf.views                                  import VSFLoginRequiredMixin, VSFLogin, TZoneSelectorView
 import json
 from .utils import *
 
@@ -75,6 +75,7 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
 
 
     def get_context_data(self, **kwargs):
+        print('HOLAAAA')
         # Get parent context:
         context = super().get_context_data(**kwargs)
 
@@ -90,13 +91,13 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
         since = req.get('since')
         if(since != None and since != ""):
             since = datetime.datetime.strptime(since, '%Y-%m-%d')
-            utc_since = utc_aware_date(since)
+            utc_since = utc_aware_date(since, self.request.session['system_tz'])
             fp_inbox = fp_inbox.filter(measurement_start_time__gte=utc_since)
 
         until = req.get('until')
         if(until != None and until != ""):
             until = datetime.datetime.strptime(until, '%Y-%m-%d')
-            utc_until = utc_aware_date(until)
+            utc_until = utc_aware_date(until, self.request.session['system_tz'])
             fp_inbox = fp_inbox.filter(measurement_start_time__lte=utc_until)
 
         test_name = req.get('testName')

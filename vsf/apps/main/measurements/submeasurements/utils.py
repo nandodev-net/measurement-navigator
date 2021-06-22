@@ -31,7 +31,8 @@ def create_sub_measurements(measurement : RawMeasurement) -> Tuple[List[SubMeasu
     count = {
         "dns"  : 0,
         "http" : 0,
-        "tcp"  : 0
+        "tcp"  : 0,
+        "tor"  : 0,
     }
     if measurement.test_name == RawMeasurement.TestTypes.WEB_CONNECTIVITY :
         dns  = [meas for meas in create_dns_from_webconn(measurement) if meas != None] 
@@ -115,6 +116,7 @@ def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
         new_dns.append(dns)
 
     return new_dns
+
 
 def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
     """
@@ -271,6 +273,7 @@ def create_http_from_web_conn(measurement : RawMeasurement) -> HTTP:
         return http
     
     return None
+
 
 def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
     """

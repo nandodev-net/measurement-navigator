@@ -184,7 +184,7 @@
         
         <ul class="navbar-nav ml-auto mr-5">
           <li class='mr-5'>
-            <div class="dropdown drp-tmz mr-5">
+            <!-- <div class="dropdown drp-tmz mr-5">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                 <i class="fas fa-globe-americas"></i> Choose Timezone
               </a>
@@ -202,8 +202,28 @@
                   </li>
                 </ul>
               </div>
-            </div>
+            </div> -->
+
+            <li class='mr-5'>
+                <div class="dropdown drp-tmz mr-5">
+                  <li href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    <i class="fas fa-globe-americas"></i> Choose Timezone
+                  </li>
+                  <li class="nav-item col-7 mx-auto">
+                    <select id="tz_selector" class="w-100" name="tz_selector">
+                                {% if request.session.system_tz == "1" %}
+                                    <option value="1" selected>UTC (0)</option>
+                                    <option value="2">Caracas (utc -4)</option>
+                                {% else %}
+                                    <option value="1" >UTC (0)</option>
+                                    <option value="2" selected>Caracas (utc -4)</option>
+                                {% endif %}
+                    </select>
+                </li>
+                </div>
+              </li>
           </li>
+
           <li class="ml-5">
             <div class="dropdown drp-user">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">
@@ -274,6 +294,27 @@
         <script src="{% static 'js/plugins/bootstrap.min.js' %}"></script>
         <script src="{% static 'js/plugins/sweetalert.js' %}"></script>
         <script src="{% static 'js/jquery.json-viewer.js' %}"></script>
+        <script>
+
+            $('#tz_selector').change(function(){
+                console.log('SETEO', $('#tz_selector').val())
+                let data = {
+                        tz: $('#tz_selector').val()
+                };
+
+                $.ajax({
+                    url: "{% url 'dashboard:set_tz' %}",
+                    contentType: "application/json; charset=utf-8",
+                    type: "GET",
+                    data: data,
+                    success: function (metricsJson) {
+                        console.log(metricsJson.system_tz)
+                        location.reload();
+                    }
+                })
+            });
+        
+        </script>
 
     {% endblock scripts %}
     {% block custom_scripts %}
