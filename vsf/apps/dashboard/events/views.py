@@ -104,7 +104,7 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         if start_time != None and start_time != "":
 
             start_time = datetime.strptime(start_time, '%Y-%m-%d')
-            utc_start_time = utc_aware_date(start_time)
+            utc_start_time = utc_aware_date(start_time, self.request.session['system_tz'])
             qs = qs.filter(
                 Q(start_date__gte = utc_start_time) | 
                 Q(manual_start_date__gte = utc_start_time)
@@ -114,7 +114,7 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         end_time = self.request.GET.get('end_time')
         if end_time != None and end_time != "":
             end_time = datetime.strptime(end_time, '%Y-%m-%d')
-            utc_end_time = utc_aware_date(end_time)
+            utc_end_time = utc_aware_date(end_time, self.request.session['system_tz'])
             qs = qs.filter(
                 Q(end_date__gte = utc_end_time) | 
                 Q(manual_end_date__gte = utc_end_time)

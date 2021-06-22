@@ -151,6 +151,10 @@ class TCP(SubMeasurement):
 
 
 class Tor(SubMeasurement):
-    pass
+    dir_port_total = models.IntegerField(default=0)
+    dir_port_accessible = models.IntegerField(default=0)
+    obfs4_total = models.IntegerField(default=0)
+    obfs4_accessible = models.IntegerField(default=0)
+
     class Meta:
         default_related_name = 'tor_list'
