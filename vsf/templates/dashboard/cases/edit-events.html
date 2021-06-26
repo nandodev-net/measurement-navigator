@@ -240,6 +240,7 @@
                   <th class="text-center" scope="col">End Date</th>
                   <th class="text-center" scope="col">Domain</th>
                   <th class="text-center" scope="col">ASN</th>
+                  <th class="text-center" scope="col"></th>
                 </tr>
               </thead>
               <tbody id="selectedEvents-tbody">
@@ -352,6 +353,9 @@
             row[0].end_date,
             row[0].domain,
             row[0].asn,
+            `<button type='button' class='btn pt-0' id=${id}>
+              <i class="fas fa-trash text-danger"></i>
+            </button>`
           ]).node().id = id;
           eventsSelected.draw();
       } else {
@@ -359,8 +363,19 @@
           eventsSelected.row('#' + id).remove().draw();
       }
 
-      console.log(selected);
       $(this).toggleClass('selected');
+  });
+
+  $( '#events-selected' ).on('click', 'tbody tr button', function() {
+      var id = this.id;
+      var index = $.inArray(id, selected);
+      var row = events.rows("#" + id).data().toArray();
+
+      selected.splice( index, 1 );
+      eventsSelected.row('#' + id).remove().draw();
+      
+      $( '#events #' + id).removeClass('selected');
+
   });
 
   $(document).ready(function() {
@@ -379,12 +394,6 @@
       },
       serverSide: true,
       rowCallback: function( row, data ) {
-        console.log('-----------');
-        console.log(data);
-        console.log($.inArray(data.id, selected));
-        console.log(selected);
-        console.log(data.id);
-        console.log('-----------');
         if ( $.inArray(data.id.toString(), selected) !== -1 ) {
             $(row).addClass('selected');
         }
