@@ -75,7 +75,6 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
 
 
     def get_context_data(self, **kwargs):
-        print('HOLAAAA')
         # Get parent context:
         context = super().get_context_data(**kwargs)
 

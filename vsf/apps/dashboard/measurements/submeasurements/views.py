@@ -18,6 +18,7 @@ from apps.main.measurements.flags               import models as FlagModels
 
 # DELETE LATER, DEBUG ONLY @TODO
 from vsf.utils                                  import Colors as c
+from ...utils import *
 
 class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
     """
@@ -56,10 +57,8 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         if last_measurement_date is None:
             last_measurement_date = "No measurements yet"
         else:
-            last_measurement_date = datetime.strftime(
-                                                last_measurement_date["measurement__raw_measurement__measurement_start_time"],
-                                                "%Y-%m-%d %H:%M:%S"
-                                            )
+            last_measurement_date = utc_aware_date(last_measurement_date["measurement__raw_measurement__measurement_start_time"], self.request.session['system_tz'])
+            last_measurement_date = datetime.strftime(last_measurement_date, "%Y-%m-%d %H:%M:%S")
 
         # Compute flag types
         flag_types = []
@@ -264,7 +263,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         json_data = []
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
+                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
                 'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
                 'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
@@ -443,7 +442,7 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
 
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
+                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
                 'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
                 'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
@@ -560,7 +559,7 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
 
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':item.measurement.raw_measurement.measurement_start_time,
+                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
                 'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
                 'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
