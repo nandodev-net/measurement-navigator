@@ -20,6 +20,7 @@ from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
 from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMModels
+from ..utils import *
 
 
 # --- MEASUREMENTS VIEWS --- #
@@ -146,7 +147,10 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         if last_measurement_date is None:
             last_measurement_date = "No measurements yet"
         else:
-            last_measurement_date = datetime.strftime(last_measurement_date["raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
+            print('ultima', last_measurement_date["raw_measurement__measurement_start_time"])
+            last_measurement_date = utc_aware_date(last_measurement_date["raw_measurement__measurement_start_time"], self.request.session['system_tz'])
+            last_measurement_date = datetime.strftime(last_measurement_date, "%Y-%m-%d %H:%M:%S")
+            
         
         context = super().get_context_data()
         context['test_types'] = test_types
@@ -346,7 +350,7 @@ class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             flagsTCP  = any(subm.flag_type != ok_flag for subm in item.tcp_list.all())
 
             json_data.append({
-                'raw_measurement__measurement_start_time':item.raw_measurement.measurement_start_time,
+                'raw_measurement__measurement_start_time':utc_aware_date(item.raw_measurement.measurement_start_time, self.request.session['system_tz']),
                 'raw_measurement__probe_cc':item.raw_measurement.probe_cc,
                 'raw_measurement__probe_asn':item.raw_measurement.probe_asn,
                 'raw_measurement__input':item.raw_measurement.input,
