@@ -24219,3 +24219,9 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
 .field-wrap {
     width: -webkit-fill-available;
 }
+
+#tz_selector {
+    background-color: #343a40;
+    border-color: #343a40;
+    color: white;
+}
