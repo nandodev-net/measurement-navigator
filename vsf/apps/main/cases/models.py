@@ -98,6 +98,25 @@ class Case(TimeStampedModel):
         blank=True,
         )
 
+    def get_sites(self) -> dict:
+
+        sites = {}
+        for e in self.events.all():
+            if e.domain.site:
+                sites[e.domain.site.name] = e.domain.site.category
+
+        return sites
+
+    def get_asns(self) -> dict:
+        asns = {}
+        for e in self.events.all():
+            if e.domain.site and e.domain.site.name in asns:
+                asns[e.domain.site.name].add(e.asn.name)
+            else:
+                if e.domain.site:
+                    asns[e.domain.site.name] = {}
+        return asns
+
     def get_start_date(self) -> datetime:
         """
             Get start date depending if it's set up to auto or 
