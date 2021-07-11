@@ -32,7 +32,7 @@
 
 {% block content %}
   <form id="urlForm">
-    <nav class="navbar navbar-light bg-light mb-5">
+    <nav class="navbar navbar-light bg-light">
       <div class="container-fluid">
         <div class="row">
           <div class="col-3">
@@ -150,7 +150,6 @@
             </div>   
           </div>
 
-
           <!-- IP -->
           <div class="col-3 mt-3">
             <input
@@ -177,7 +176,7 @@
             />
           </div>
 
-          <div class="col-4 mt-3">
+          <div class="col-2 mt-3">
             <div class="row align-items-center rounded p-2 bg-dark">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold text-white" for="status-success">Success</label>
@@ -195,7 +194,7 @@
           </div>
 
           <div class="col-6 mt-3">
-            <div class="row align-items-center rounded px-2 py-3 bg-dark ml-1">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
               <div class="col-3 mx-auto">
                 <label class="font-weight-bold text-white" for="flag">Flag Type</label>
               </div>
@@ -211,19 +210,26 @@
             </div> 
           </div>
 
-
           <div class="col-2 my-auto">
             <button id="url-form-button" class="btn btn-outline-dark btn-block" type="submit">
               <i class="fa fa-search"></i>
             </button>
           </div>
 
+          <div class="col-2">
+            {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+          </div>
+
         </div>
       </div>
-      <!-- copy-to-clipboard component for search fields -->
-      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
     </nav>
-
+    <div class="mb-5">
+      <small>
+        Dynamic loading of filters
+      </small>
+      <input class='ml-2' id='dynamic' type="checkbox" value="">
+    </div>
+    
     <div class="row mb-5">
       <div class="col-6">
         <h4><strong>Last DNS Measurement from:</strong> {{last_measurement_date}}</h4>
@@ -289,6 +295,13 @@
     window.open(url, '_blank');
   });
   
+  $(' .additional-filter ').change( function() {
+    let check = $( '#dynamic' ).is(':checked');
+    if (check) {
+      table.ajax.reload();
+    }
+  });
+
   $( '#tcp-list' ).on('dblclick', 'tbody tr', function() {
     var id = $( this ).attr( 'id' );
     var urlBlank = "{% url 'dashboard:measurement:detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', id);

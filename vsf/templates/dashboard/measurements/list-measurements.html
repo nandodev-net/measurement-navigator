@@ -22,7 +22,7 @@
 
 {% block content %}
   <form id="urlForm">
-    <nav class="navbar navbar-light bg-light mb-5">
+    <nav class="navbar navbar-light bg-light">
       <div class="container-fluid">
         <div class="row">
           <div class="col-3">
@@ -51,7 +51,7 @@
             </div> 
           </div>
 
-          <div class="col-6">
+          <div class="col-3">
             <div class="row align-items-center rounded p-2 bg-dark ml-1">
               <div class="col-3 mx-auto">
                 <label class='font-weight-bold text-white' for="asn">
@@ -74,8 +74,8 @@
             </div> 
           </div>
           
-          <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark">
+          <div class="col-3">
+            <div class="row align-items-center rounded p-2 ml-1 bg-dark">
               <div class="col-5 mx-auto">
                 <label class="font-weight-bold text-white" for="test-name">Test Type</label>
               </div>
@@ -93,7 +93,7 @@
           </div>
               
           <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+            <div class="row align-items-center rounded p-2 bg-dark">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
               </div>
@@ -111,9 +111,7 @@
             </div> 
           </div>
               
-
-              
-          <div class="col-6 mt-3">
+          <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-dark ml-1">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold text-white" for="site">Site</label>
@@ -145,8 +143,8 @@
             />
           </div>
 
-          <div class="col-5 mt-3 ">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+          <div class="col-7 mt-3 ">
+            <div class="row align-items-center rounded p-2 bg-dark">
               <div class="col-3 mx-auto">
                 <label class="font-weight-bold text-white" for="flag">Flag Existence</label>
               </div>
@@ -163,18 +161,25 @@
             </div> 
           </div>
 
-          <div class="col-2 my-auto mx-auto">
-            <button id="url-form-button" class="btn btn-outline-dark btn-block" type="submit">
+          <div class="col-3 mt-3  mx-auto">
+            <button id="url-form-button" class="btn btn-outline-dark btn-block py-2 pb-3 pt-3" type="submit">
               <i class="fa fa-search"></i>
             </button>
           </div>
 
+          <div class="col-2">
+            {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+          </div>
         </div> 
       </div>   
-    
-      <!-- copy-to-clipboard component for search fields -->
-      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+
     </nav>
+    <div class="mb-5">
+      <small>
+        Dynamic loading of filters
+      </small>
+      <input class='ml-2' id='dynamic' type="checkbox" value="">
+    </div>
 
     <div class="row mb-3">
       <div class="col-6">
@@ -382,6 +387,13 @@
       urls.forEach(function(url){
         window.open(url, '_blank');
       });
+    }
+  });
+
+  $(' .additional-filter ').change( function() {
+    let check = $( '#dynamic' ).is(':checked');
+    if (check) {
+      table.ajax.reload();
     }
   });
 

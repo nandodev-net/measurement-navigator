@@ -5,44 +5,30 @@
   include, it should be included in the same template as this one
 -->
 
-<div class="w-100 gutter-padding mt-3">
-  <div class="row align-items-center rounded p-2">
-    <div class="col-2 mx-auto">
-      <label class="font-weight-bold text-gray">Search Url</label>
+<div class="d-flex justify-content-around align-items-center">
+  <div class="">
+    <input
+      type="text"
+      name="copy-search-url"
+      id="copy-search-url"
+      style="position: absolute;left: -999em;"
+      readonly
+    />
+  </div>
+  <div class="p-3">
+    <a id="copy-search-url-btn" href="#" class="btn btn-dark">
+      <i class="fas fa-copy"></i>
+    </a>
+  </div>
+  <div>
+    <div class="gutter-margin rounded alert-success py-2 px-3" id="copy-clipboard-success" hidden>
+      <i class="fas fa-check"></i>
     </div>
-    <div class="col-9 w-100 mx-auto">
-      <input
-        class="border-top-0 border-left-0 border-right-0 bg-transparent w-100"
-        type="text"
-        name="copy-search-url"
-        id="copy-search-url"
-        readonly
-        value=""
-      />
-    </div>
-    <div class="col-1 mx-auto">
-      <a id="copy-search-url-btn" href="#" class="btn btn-dark">
-        <i class="fas fa-copy"></i>
-      </a>
-    </div>
-  
+    
+    <div class="gutter-margin rounded alert-danger py-2 px-3" id="copy-clipboard-error" hidden>
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>    
   </div>
 </div>
 
-<div
-  class="w-100 gutter-margin mt-3 rounded alert-success p-2"
-  id="copy-clipboard-success"
-  hidden
->
-  Succesfully copied to clipboard!
-  <i class="fas fa-check"></i>
-</div>
 
-<div
-  class="w-100 gutter-margin mt-3 rounded alert-danger p-2"
-  id="copy-clipboard-error"
-  hidden
->
-  Error copying to clipboard!
-  <i class="fas fa-exclamation-triangle"></i>
-</div>
