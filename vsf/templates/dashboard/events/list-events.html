@@ -22,7 +22,7 @@
 {% block content %}
 
   <form id="urlForm">
-    <nav class="navbar navbar-light bg-light mb-5">
+    <nav class="navbar navbar-light bg-light">
       <div class="container-fluid">
         <div class="row">
 
@@ -141,21 +141,27 @@
             </div> 
           </div>
 
-
           <div class="col-4 my-auto ml-1">
             <button id="url-form-button" class="btn btn-outline-dark btn-block" type="submit">
               <i class="fa fa-search"></i>
             </button>
           </div>
 
-          <div class="col-4 mx-auto my-auto">
+          <div class="col-3">
+            {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
           </div>
 
         </div> 
       </div>   
-      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+      
     </nav>
-    
+    <div class="mb-5">
+      <small>
+        Dynamic loading of filters
+      </small>
+      <input class='ml-2' id='dynamic' type="checkbox" value="">
+    </div>
+
     {% if user.is_analist %} 
       <button type="button" class="btn btn-dark rounded mb-4" id="associateTrigger">
         <i class="fa fa-folder-plus"></i> Add to Case
@@ -212,6 +218,12 @@
         $(this).modal('show');
       });
     }
+    $(' .additional-filter ').change( function() {
+      let check = $( '#dynamic' ).is(':checked');
+      if (check) {
+        events.ajax.reload();
+      }
+    });
 
     $( '#associateTrigger' ).click(function(e) {
       jQuery.noConflict();

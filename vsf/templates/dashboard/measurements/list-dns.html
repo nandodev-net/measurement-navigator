@@ -34,7 +34,7 @@
 
 {% block content %}
   <form id="urlForm">
-    <nav class="navbar navbar-light bg-light mb-5">
+    <nav class="navbar navbar-light bg-light">
       <div class="container-fluid">
         <div class="row">
 
@@ -147,7 +147,7 @@
             </div>   
           </div>
         
-          <div class="col-5 mt-3">
+          <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-dark">
               <div class="col-3 mx-auto">
                 <label class="font-weight-bold text-white" for="flag">Flag Type</label>
@@ -164,7 +164,7 @@
             </div> 
           </div>
 
-          <div class="col-6 mt-3 my-auto">
+          <div class="col-4 mt-3 my-auto">
             <input
               id="input"
               class="form-control mr-2 additional-filter w-100 border-top-0 border-left-0 border-right-0 bg-transparent"
@@ -176,17 +176,25 @@
             />
           </div>
 
-          <div class="col-1 my-auto">
+          <div class="col-2 my-auto">
             <button id="url-form-button" class="btn btn-outline-dark btn-block" type="submit">
               <i class="fa fa-search"></i>
             </button>
           </div>
 
+          <div class="col-2">
+            {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+          </div>
         </div>
-
       </div>
-      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
     </nav>
+    <div class="mb-5">
+      <small>
+        Dynamic loading of filters
+      </small>
+      <input class='ml-2' id='dynamic' type="checkbox" value="">
+    </div>
+
 
     <div class="row mb-5">
       <div class="col-6">
@@ -255,6 +263,12 @@
     window.open(url, '_blank');
   });
 
+  $(' .additional-filter ').change( function() {
+    let check = $( '#dynamic' ).is(':checked');
+    if (check) {
+      table.ajax.reload();
+    }
+  });
 
   $( '#dns-list' ).on('dblclick', 'tbody tr', function() {
     var id = $( this ).attr( 'id' );

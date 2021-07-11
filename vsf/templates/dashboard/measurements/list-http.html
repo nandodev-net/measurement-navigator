@@ -30,7 +30,7 @@
 
 {% block content %}
   <form id="urlForm">
-    <nav class="navbar navbar-light bg-light mb-5">
+    <nav class="navbar navbar-light bg-light">
       <div class="container-fluid">
         <div class="row">
           <div class="col-3">
@@ -167,7 +167,7 @@
             </div>   
           </div>
 
-          <div class="col-6 mt-3">
+          <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-dark">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold text-white" for="body-length-match">Body Length</label>
@@ -184,7 +184,7 @@
             </div>   
           </div>
 
-          <div class="col-6 mt-3">
+          <div class="col-4 mt-3">
             <div class="row align-items-center rounded p-2 bg-dark ml-1">
               <div class="col-6 mx-auto">
                 <label class="font-weight-bold text-white" for="body-proportion-min">Min. Body Proportion</label>
@@ -204,8 +204,8 @@
             </div> 
           </div>
 
-          <div class="col-5 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark">
+          <div class="col-4 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
               <div class="col-6 mx-auto">
                 <label class="font-weight-bold text-white" for="body-proportion-max">Max. Body Proportion</label>
               </div>
@@ -224,8 +224,8 @@
             </div> 
           </div>
 
-          <div class="col-5 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+          <div class="col-7 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark">
               <div class="col-3 mx-auto">
                 <label class="font-weight-bold text-white" for="flag">Flag Type</label>
               </div>
@@ -241,17 +241,26 @@
             </div> 
           </div>
 
-          <div class="col-2 my-auto">
+          <div class="col-3 my-auto">
             <button id="url-form-button" class="btn btn-outline-dark btn-block my-auto" type="submit">
               <i class="fa fa-search"></i>
             </button>
           </div>
 
+          <div class="col-2">
+            {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+          </div>
         </div>
       </div>
-      <!-- copy-to-clipboard component for search fields -->
-      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+      
     </nav>
+    <div class="mb-5">
+      <small>
+        Dynamic loading of filters
+      </small>
+      <input class='ml-2' id='dynamic' type="checkbox" value="">
+    </div>
+
 
     <div class="row mb-5">
       <div class="col-6">
@@ -320,6 +329,12 @@
   $("#detailed-measurement-page").click(function() {
     var url = $(this).attr('alt');
     window.open(url, '_blank');
+  });
+  $(' .additional-filter ').change( function() {
+    let check = $( '#dynamic' ).is(':checked');
+    if (check) {
+      table.ajax.reload();
+    }
   });
   
   $( '#http-list' ).on('dblclick', 'tbody tr', function() {

@@ -21,6 +21,8 @@
     // When click in copy url btn, copy to clip board
     $("#copy-search-url-btn").click(function (e) {
       e.preventDefault();
+      
+
       // Get the text element whose value is going to get copied into clipboard
       let $textArea = $("#copy-search-url");
 
@@ -30,6 +32,7 @@
       $textArea.focus();
       $textArea.select();
 
+      
       // Status messages
       let $successMessage = $("#copy-clipboard-success");
       let $errorMessage = $("#copy-clipboard-error");
@@ -37,6 +40,7 @@
       // Try to copy into clipboard
       try {
         var success = document.execCommand("copy");
+
 
         // If everything ok, show a success message and
         // remove it after a few seconds
@@ -63,6 +67,7 @@
       // base url
       let url = "{{request.build_absolute_uri}}?";
 
+
       // Get params by name and value
       let params = {};
       let $filters = $(".additional-filter");
@@ -74,7 +79,6 @@
 
       // Serialize object into query string
       let args = $.param(params);
-
       // Update field value
       $("#copy-search-url").val(url + args);
     }
