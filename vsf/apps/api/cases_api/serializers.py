@@ -20,31 +20,23 @@ class CaseDataSerializer(serializers.ModelSerializer):
         class created to define the format of
         serialization for the Case model.
     """
-    start_date = serializers.ReadOnlyField(source='get_start_date')
-    end_date = serializers.ReadOnlyField(source='get_end_date')
+    
     category = CategoryDataSerializer(read_only=True)
-    case_expired = serializers.ReadOnlyField(source='is_case_expired')
-    short_description = serializers.ReadOnlyField(source='get_short_description')
-    twitter_keywords = serializers.ReadOnlyField(source='get_twitter_keywords')
     start_date_beautify = serializers.ReadOnlyField(source='get_start_date_beautify')
     end_date_beautify = serializers.ReadOnlyField(source='get_end_date_beautify')
+    sites = serializers.ReadOnlyField(source='get_sites')
+    asns = serializers.ReadOnlyField(source='get_asns')
 
     class Meta:
         model = Case
         fields = [
             'id', 
-            'title', 
-            'description',
-            'twitter_search',
-            'category',
-            'case_type',
-            'start_date', 
-            'end_date',
-            'case_expired',
-            'short_description',
-            'twitter_keywords',
             'start_date_beautify',
-            'end_date_beautify'
+            'end_date_beautify',
+            'sites',
+            'category',
+            'title', 
+            'asns'
         ]
         depth = 1
 
