@@ -150,7 +150,10 @@ class TCP(SubMeasurement):
         default_related_name = 'tcp_list'
 
 
-class Tor(SubMeasurement):
+class TOR(SubMeasurement):
+    """
+        Model for TOR submeasurement, part of tor tests
+    """
     dir_port_total = models.IntegerField(default=0)
     dir_port_accessible = models.IntegerField(default=0)
     obfs4_total = models.IntegerField(default=0)
