@@ -9,7 +9,7 @@ from django.core.paginator               import Paginator
 from typing import Dict, List, Tuple
 
 # Local imports
-from .models                             import DNS, DNSJsonFields, HTTP, TCP, SubMeasurement
+from .models                             import DNS, DNSJsonFields, HTTP, TCP, SubMeasurement, TOR
 from apps.main.measurements.models       import RawMeasurement
 from apps.main.measurements.flags.models import Flag
 
@@ -48,6 +48,13 @@ def create_sub_measurements(measurement : RawMeasurement) -> Tuple[List[SubMeasu
         
     elif measurement.test_name == RawMeasurement.TestTypes.DNS_CONSISTENCY :
         return (create_dns_from_dns_cons(measurement), count)
+
+    elif measurement.test_name == RawMeasurement.TestTypes.TOR :
+        tor = create_tor_from_tor(measurement)
+        count['tor'] = len(tor)
+        return (tor, count)
+
+        return True
 
     return ([], count)
 
@@ -307,6 +314,40 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
 
     return new_tcp
 
+
+def create_tor_from_tor(measurement : RawMeasurement) -> TOR:
+    """
+        This function creates an TOR submeasurement based
+        on a measurement. This is necesary for creating the 
+        submeasurements related to a single measurment. 
+        Note that this function may return None in some cases, 
+        when the measurement is meaningless due to an TOR test 
+        failure.
+    """
+    test_keys           = measurement.test_keys
+    # Get relevant data from test_keys
+    dir_port_total = test_keys['dir_port_total']
+    dir_port_accessible = test_keys['dir_port_accessible']
+    obfs4_total = test_keys['obfs4_total']
+    obfs4_accessible = test_keys['obfs4_accessible']
+
+    if     (dir_port_total  is not None) and (
+            dir_port_accessible  is not None) and (
+            obfs4_total      is not None) and (
+            obfs4_accessible    is not None):
+        
+        tor = Tor(
+            measurement=None,
+            dir_port_total=dir_port_total,
+            dir_port_accessible=dir_port_accessible,
+            obfs4_total=obfs4_total,
+            obfs4_accessible=obfs4_accessible,
+        )
+        return tor
+    
+    return None
+
+
 # -- Flag Checking -------------------------------------------------------+
 
 def soft_flag(since=None, until=None, limit : int = None, page_size : int = 1000, absolute : bool = False):
@@ -328,7 +369,7 @@ def soft_flag(since=None, until=None, limit : int = None, page_size : int = 1000
     assert isinstance(page_size, int), "Limit argument should be an integer number"
     assert page_size > 0, "Limit argument should be a positive number"
 
-    meas_types = [DNS, TCP, HTTP]
+    meas_types = [DNS, TCP, HTTP, TOR]
 
     tagged = 0
     not_tagged = 0
