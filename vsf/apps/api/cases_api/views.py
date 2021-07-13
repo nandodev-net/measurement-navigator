@@ -8,7 +8,7 @@ from django.shortcuts import render
 
 from apps.api.utils import utc_aware_date
 from apps.main.cases.models import Case, Category
-from .serializers import CategoryDataSerializer, CaseDataSerializer, CaseDetailDataSerializer, CaseActiveNumberSerializer
+from .serializers import *
 
 
 class ListCategories(generics.GenericAPIView):
@@ -116,3 +116,17 @@ class CaseActiveNumber(generics.GenericAPIView):
         }
         cases_json = CaseActiveNumberSerializer(cases_json)
         return Response(cases_json.data, status=status.HTTP_200_OK)
+
+class BlockedCasesNumber(generics.GenericAPIView):
+    """
+        class used to show the number of open cases
+        related to an internet blockage 
+    """
+    queryset = Case.objects.all()
+
+    def get(self, request):
+        cases = Case.objects.filter(case_type='bloqueo').count()
+        cases_json = {'total_cases': cases}
+        cases_json = BlockedCasesNumberSerializer(cases_json)
+        return Response(cases_json.data, status=status.HTTP_200_OK)
+
