@@ -26,6 +26,7 @@ class CaseDataSerializer(serializers.ModelSerializer):
     end_date_beautify = serializers.ReadOnlyField(source='get_end_date_beautify')
     sites = serializers.ReadOnlyField(source='get_sites')
     asns = serializers.ReadOnlyField(source='get_asns')
+    case_expired = serializers.ReadOnlyField(source='is_case_expired')
 
     class Meta:
         model = Case
@@ -36,7 +37,8 @@ class CaseDataSerializer(serializers.ModelSerializer):
             'sites',
             'category',
             'title', 
-            'asns'
+            'asns',
+            'case_expired'
         ]
         depth = 1
 
@@ -64,7 +66,8 @@ class CaseDetailDataSerializer(serializers.ModelSerializer):
             'title',
             'asns',
             'description',
-            'category'
+            'category',
+            'case_expired'
             
         ]
 
