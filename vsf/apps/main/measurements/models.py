@@ -104,7 +104,9 @@ class RawMeasurement(TimeStampedModel):
             for m in RawMeasurement.objects.all(id=self.id):
                 m.delete()
             return
+
         (sub_measurements,_) = create_sub_measurements(self)
+
 
         for sb in sub_measurements:
             sb.measurement = measurement

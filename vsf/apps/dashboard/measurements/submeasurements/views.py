@@ -581,7 +581,7 @@ class ListTorTemplate(ListSubMeasurementTemplate):
         table. 
     """
     template_name = "measurements/list-tor.html"
-    SubMeasurement = SubMeasModels.Tor
+    SubMeasurement = SubMeasModels.TOR
 
     def get_context_data(self, **kwargs):
 
