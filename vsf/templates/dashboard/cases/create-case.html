@@ -218,18 +218,6 @@
       var allowed = true;
       var eventsSelected = events.rows({ selected: true }).data().toArray();
 
-      eventsSelected.forEach(element => {
-        if (element.case !== '-No case related-') {
-          allowed = false;
-          Swal.fire({
-            icon: "warning",
-            title: "One of your selected events is already associated with one case",
-            confirmButtonColor: "#343a40",
-            confirmButtonText: "Continue"
-          });
-        }
-      });
-
       if (allowed) {
         var eventsID = events.rows( { selected: true }).data().toArray().map((selected) => (
           selected.id
