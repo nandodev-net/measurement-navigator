@@ -12,6 +12,12 @@ urlpatterns = [
         ),
 
     path(
+        'quantity', 
+        views.BlockedCasesNumber.as_view(), 
+        name='quantity'
+        ),
+
+    path(
         'categories', 
         views.ListCategories.as_view(), 
         name='list_categories'
