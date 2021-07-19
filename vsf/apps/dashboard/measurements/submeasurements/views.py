@@ -57,8 +57,8 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         if last_measurement_date is None:
             last_measurement_date = "No measurements yet"
         else:
-            last_measurement_date = utc_aware_date(last_measurement_date["measurement__raw_measurement__measurement_start_time"], self.request.session['system_tz'])
-            last_measurement_date = datetime.strftime(last_measurement_date, "%Y-%m-%d %H:%M:%S")
+            ##last_measurement_date = utc_aware_date(last_measurement_date["measurement__raw_measurement__measurement_start_time"], self.request.session['system_tz'])
+            last_measurement_date = datetime.strftime(last_measurement_date["measurement__raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
 
         # Compute flag types
         flag_types = []
