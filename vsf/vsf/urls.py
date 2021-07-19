@@ -14,6 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 # Django imports
+import debug_toolbar
 from django.contrib     import admin
 from django.conf        import settings
 from django.conf.urls   import url, include
@@ -43,6 +44,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
+    path('__debug__/', include(debug_toolbar.urls)),
     path('dashboard/',      include('apps.dashboard.urls',         namespace = 'dashboard')),
     path('sites/',          include('apps.main.sites.urls',        namespace = 'sites')),
     path('api/',            include('apps.api.urls',               namespace = 'api')),

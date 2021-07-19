@@ -44,6 +44,7 @@ DJANGO_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'debug_toolbar',
 ]
 
 
@@ -96,12 +97,19 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", "http://coruscant.estarguars.org"
 ]
 
+INTERNAL_IPS = [
+    '127.0.0.1',
+    env.str('VSF_PRODUCTION_HOST1'), 
+    env.str('VSF_PRODUCTION_HOST2'), 
+    env.str('VSF_PRODUCTION_HOST3')
+]
 
 ROOT_URLCONF = 'vsf.urls'
 
