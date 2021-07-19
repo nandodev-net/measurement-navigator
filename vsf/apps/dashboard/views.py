@@ -75,6 +75,12 @@ class Dashboard(VSFLoginRequiredMixin, VSFListPaginate):
 
 
     def get_context_data(self, **kwargs):
+
+        try:
+            self.request.session['system_tz'] = self.request.session['system_tz'] 
+        except:
+            self.request.session['system_tz'] = "2"
+
         # Get parent context:
         context = super().get_context_data(**kwargs)
 
