@@ -21,8 +21,6 @@ class VSFLogin(LoginView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        self.request.session['system_tz'] = "2"
-        print('\n\n Asigne',self.request.session['system_tz'], '\n\n' )
         return context
 
 
