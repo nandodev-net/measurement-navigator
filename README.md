@@ -19,7 +19,7 @@ Different types of sub-measurements are implemented, some test measurement types
 
 Sub-measurements can be as simple as a few common attributes and one or two attributes taken from measurement_keys, or something more complex with attributes calculated at the time, depending on what's usually needed for a quick assessment or what attributes are important to filter.
 
-** measurement_name = > sub-measurement type**
+**measurement_name = > sub-measurement type**
 
 Web_connecitivy => DNS, HTTP, TCP
 Tor => Tor
