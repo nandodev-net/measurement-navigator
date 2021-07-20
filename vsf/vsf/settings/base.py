@@ -232,22 +232,3 @@ CACHES = {
 
 # Url for the ooni api to get a set of measurements
 OONI_MEASUREMENTS_URL = "https://api.ooni.io/api/v1/measurements"
-
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'debugX.log')
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-    },
-}
