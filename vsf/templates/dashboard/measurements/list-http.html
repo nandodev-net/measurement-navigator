@@ -24,7 +24,7 @@
   <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements</a>
 </li>
 <li class="breadcrumb-item active">
-  <a href="{% url 'dashboard:submeasurement:list_http' %}">HTTP List</a>
+  <a href="{% url 'dashboard:submeasurement:list_http' %}"><strong>HTTP List</strong></a>
 </li>
 {% endblock route %}
 
@@ -33,36 +33,49 @@
     <nav class="navbar navbar-light bg-light">
       <div class="container-fluid">
         <div class="row">
+
+          <div class="col-6">
+            <input
+              id="input"
+              class="form-control additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+              type="search"
+              placeholder="URL"
+              aria-label="Search URL"
+              name="input"
+              value="{{prefill.input}}"
+            />
+          </div>
+
           <div class="col-3">
-            <div class="row align-items-center rounded p-2 bg-dark">
+            <div class="row align-items-center">
               <div class="col-3 mx-auto">
-                <label class='font-weight-bold text-white'>
+                <label class='font-weight-bold'>
                   Since
                 </label>
               </div>
               <div class="col-9 mx-auto">
-                <input id="since" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
+                <input id="since" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
               </div>
             </div> 
           </div>
 
           <div class="col-3">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+            <div class="row align-items-center ml-1">
               <div class="col-3 mx-auto">
-                <label class='font-weight-bold text-white'>
+                <label class='font-weight-bold'>
                   Until
                 </label>
               </div>
               <div class="col-9 mx-auto">
-                <input id="until" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
+                <input id="until" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.until }}" name='until'/>
               </div>
             </div> 
           </div>
 
-          <div class="col-6">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1 w-100">
+          <div class="col-3 mt-3">
+            <div class="row align-items-center w-100">
               <div class="col-3 mx-auto">
-                <label class='font-weight-bold text-white' for="asn">
+                <label class='font-weight-bold' for="asn">
                   ASN
                 </label>
               </div>
@@ -83,9 +96,9 @@
           </div>
 
           <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark">
+            <div class="row align-items-center">
               <div class="col-3 mx-auto">
-                <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
+                <label class="font-weight-bold" for="anomaly-state">Anomaly</label>
               </div>
               <div class="col-9 mx-auto">
                 <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
@@ -99,22 +112,11 @@
             </div> 
           </div>
 
-          <div class="col-6 mt-3">
-            <input
-              id="input"
-              class="form-control additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
-              type="search"
-              placeholder="URL"
-              aria-label="Search URL"
-              name="input"
-              value="{{prefill.input}}"
-            />
-          </div>
 
           <div class="col-3 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark mr-1">
+            <div class="row align-items-center mr-1">
               <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="site">Site</label>
+                <label class="font-weight-bold" for="site">Site</label>
               </div>
               <div class="col-8 mx-auto">
                 <select class="custom-select additional-filter" id="site" name="site">
@@ -132,10 +134,10 @@
           </div>
 
 
-          <div class="col-6 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark">
+          <div class="col-3 mt-3">
+            <div class="row align-items-center">
               <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="status-code-match">Status Code</label>
+                <label class="font-weight-bold" for="status-code-match">Status Code</label>
               </div>
               <div class="col-8 mx-auto">
                 <select id="status-code-match" class="custom-select additional-filter" name="status_code_match">
@@ -149,10 +151,10 @@
             </div>   
           </div>
 
-          <div class="col-6 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+          <div class="col-3 mt-3">
+            <div class="row align-items-center">
               <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="headers-match">Headers</label>
+                <label class="font-weight-bold" for="headers-match">Headers</label>
               </div>
               <div class="col-8 mx-auto">
                 <select id="headers-match" class="custom-select additional-filter" name="headers_match">
@@ -167,12 +169,12 @@
             </div>   
           </div>
 
-          <div class="col-4 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark">
-              <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="body-length-match">Body Length</label>
+          <div class="col-3 mt-3">
+            <div class="row align-items-center">
+              <div class="col-5 mx-auto">
+                <label class="font-weight-bold" for="body-length-match">Body Length</label>
               </div>
-              <div class="col-8 mx-auto">
+              <div class="col-7 mx-auto">
                 <select id="body-length-match" class="custom-select additional-filter" name="body_length_match">
                   <option selected value="">Any</option>
                   <option {% if prefill.body_length_match == 'false' %} selected {% endif %}
@@ -184,10 +186,10 @@
             </div>   
           </div>
 
-          <div class="col-4 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+          <div class="col-6 mt-3">
+            <div class="row align-items-center">
               <div class="col-6 mx-auto">
-                <label class="font-weight-bold text-white" for="body-proportion-min">Min. Body Proportion</label>
+                <label class="font-weight-bold" for="body-proportion-min">Min. Body Proportion</label>
               </div>
               <div class="col-6 mx-auto">
                 <input
@@ -204,10 +206,10 @@
             </div> 
           </div>
 
-          <div class="col-4 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+          <div class="col-6 mt-3">
+            <div class="row align-items-center">
               <div class="col-6 mx-auto">
-                <label class="font-weight-bold text-white" for="body-proportion-max">Max. Body Proportion</label>
+                <label class="font-weight-bold" for="body-proportion-max">Max. Body Proportion</label>
               </div>
               <div class="col-6 mx-auto">
                 <input
@@ -224,10 +226,10 @@
             </div> 
           </div>
 
-          <div class="col-7 mt-3">
-            <div class="row align-items-center rounded p-2 bg-dark">
+          <div class="col-6 mt-3">
+            <div class="row align-items-center">
               <div class="col-3 mx-auto">
-                <label class="font-weight-bold text-white" for="flag">Flag Type</label>
+                <label class="font-weight-bold" for="flag">Flag Type</label>
               </div>
               <div class="col-9 mx-auto">
                 <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
@@ -241,25 +243,33 @@
             </div> 
           </div>
 
-          <div class="col-3 my-auto">
-            <button id="url-form-button" class="btn btn-outline-dark btn-block my-auto" type="submit">
-              <i class="fa fa-search"></i>
-            </button>
-          </div>
+          <div class="col-4"></div>
 
           <div class="col-2">
             {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
           </div>
+
+
+          <div class="col-4 mt-4">
+            <small>
+              <strong>Dynamic loading of filters</strong>
+            </small>
+            <input class='ml-2' id='dynamic' type="checkbox" value="">
+          </div>
+
+
+          <div class="col-2 my-auto">
+            <button id="url-form-button" class="btn btn-blue float-right" type="submit">
+              <i class="fa fa-search"></i> <strong>Search</strong>
+            </button>
+          </div>
+
+
         </div>
       </div>
       
     </nav>
-    <div class="mb-5">
-      <small>
-        Dynamic loading of filters
-      </small>
-      <input class='ml-2' id='dynamic' type="checkbox" value="">
-    </div>
+
 
 
     <div class="row mb-5">

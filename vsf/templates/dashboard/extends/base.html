@@ -181,7 +181,6 @@
         </a>
       </div>
       <div class="collapse navbar-collapse">
-        
         <ul class="navbar-nav ml-auto mr-5">
 
           <li class="mr-5">
@@ -230,6 +229,23 @@
       </div>
     </header>
 
+
+    <div class='float-right mr-5 pr-5'>
+      {% block site_route %}
+      <ul class="breadcrumb bg-dark mr-4">
+        {% block route %}
+        <li class="breadcrumb-item">
+            <a href="{% url home %}" class="">
+                <i class="feather icon-home"></i>
+            </a>
+        </li>
+        <li class="breadcrumb-item active"><strong>Static Navigation</strong></li>
+        {% endblock route %}
+      </ul>
+      {% endblock site_route %}
+    </div>
+
+
     <div class="pcoded-main-container">
       <div class="pcoded-content">
           <div class="page-header">
@@ -238,22 +254,11 @@
                       <div class="col-md-12">
                           <div class="page-header-title">
                             <h5 class="m-b-10">{% block title %}Title{% endblock title %}</h5>
-                            <small class="text-secondary">
+                            <small class="text-white sub_title">
                                 {% block sub_title %}{% endblock sub_title %}
                             </small>
                           </div>
-                          {% block site_route %}
-                          <ul class="breadcrumb">
-                            {% block route %}
-                            <li class="breadcrumb-item">
-                                <a href="{% url home %}">
-                                    <i class="feather icon-home"></i>
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active">Static Navigation</li>
-                            {% endblock route %}
-                          </ul>
-                          {% endblock site_route %}
+
                       </div>
                   </div>
               </div>
