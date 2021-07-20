@@ -427,8 +427,22 @@ def check_submeasurement(submeasurement : SubMeasurement) -> bool:
         return check_http(submeasurement)
     elif isinstance(submeasurement, DNS):
         return check_dns(submeasurement)
+    elif isinstance(submeasurement, TOR):
+        return check_tor_from_tor(submeasurement)
 
     return False
+
+def check_tor_from_tor(tor : TOR) -> bool:
+    test_keys           = measurement.test_keys
+    dir_port_total = test_keys['dir_port_total']
+    dir_port_accessible = test_keys['dir_port_accessible']
+    obfs4_total = test_keys['obfs4_total']
+    obfs4_accessible = test_keys['obfs4_accessible']
+
+    if (int(dir_port_accessible) <= int(dir_port_total)//2) or (int(obfs4_total) <= int(obfs4_accessible)//2):
+        return True
+    else:
+        return False
 
 def check_dns(dns : DNS) -> bool:
     """
