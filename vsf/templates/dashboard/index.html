@@ -19,7 +19,7 @@
   <a href="{% url home %}"><i class="feather icon-home"></i></a>
 </li>
 <li class="breadcrumb-item active">
-  <a href="{% url home %}">Fastpath</a>
+  <a href="{% url home %}"><strong>Fastpath</strong></a>
 </li>
 {% endblock route %}
 
@@ -28,34 +28,51 @@
   <nav class="navbar navbar-light bg-light rounded p-4">
     <div class="container-fluid">
       <div class="row">
+
+
+        <div class="col-3 p-2">
+          <input
+            id="input"
+            class="form-control mr-2 border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="URL"
+            aria-label="Search URL"
+          />
+        </div>
+
+
         <div class="col-3">
-          <div class="row align-items-center rounded p-2 bg-dark">
+          <div class="row align-items-center rounded p-2">
             <div class="col-3 mx-auto">
-              <label class='font-weight-bold text-white'>
+              <label class='font-weight-bold'>
                 Since
               </label>
             </div>
             <div class="col-9 mx-auto">
-              <input id="since" class="text-white form-control mr-2" type="date" />
+              <input id="since" class="text-secondary form-control mr-2" type="date" />
             </div>
           </div>            
         </div>
+
+
         <div class="col-3">
-          <div class="row align-items-center rounded p-2 bg-dark ml-1">
+          <div class="row align-items-center rounded p-2 ml-1">
             <div class="col-3 mx-auto">
-              <label class='font-weight-bold text-white'>
+              <label class='font-weight-bold'>
                 Until
               </label>
             </div>
             <div class="col-9 mx-auto">
-              <input id="until" class="text-white form-control mr-2" type="date" />
+              <input id="until" class="text-secondary form-control mr-2" type="date" />
             </div>
           </div>
         </div>
+
+
         <div class="col-3">
-          <div class="row align-items-center rounded p-2 bg-dark ml-1">
+          <div class="row align-items-center rounded p-2 ml-1">
             <div class="col-3 mx-auto">
-              <label class="font-weight-bold text-white" for="asn">ASN</label>
+              <label class="font-weight-bold" for="asn">ASN</label>
             </div>
             <div class="col-9 mx-auto">
               <select class="custom-select" id="asn">
@@ -68,10 +85,11 @@
           </div>
         </div>
 
-        <div class="col-3">
-          <div class="row align-items-center rounded p-2 bg-dark ml-1">
+
+        <div class="col-3 mt-3">
+          <div class="row align-items-center rounded p-2">
             <div class="col-6 mx-auto">
-              <label class="font-weight-bold text-white" for="data-ready">Data Ready</label>
+              <label class="font-weight-bold" for="data-ready">Data Ready</label>
             </div>
             <div class="col-6 mx-auto">
               <select class="custom-select" id="data-ready">
@@ -85,10 +103,11 @@
           </div>
         </div>
 
-        <div class="col-4 mt-3">
-          <div class="row align-items-center rounded p-2 bg-dark">
+
+        <div class="col-3 mt-3">
+          <div class="row align-items-center rounded p-2">
             <div class="col-4 mx-auto">
-              <label class="font-weight-bold text-white" for="test-name">Test Type</label>
+              <label class="font-weight-bold" for="test-name">Test Type</label>
             </div>
             <div class="col-8 mx-auto">
               <select class="custom-select" id="test-name">
@@ -122,10 +141,11 @@
           </div>
         </div>
 
+
         <div class="col-3 mt-3">
-          <div class="row align-items-center rounded p-2 bg-dark ml-1">
+          <div class="row align-items-center rounded p-2 ml-1">
             <div class="col-5 mx-auto">
-              <label class="font-weight-bold text-white" for="anomaly-state">Anomaly</label>
+              <label class="font-weight-bold" for="anomaly-state">Anomaly</label>
             </div>
             <div class="col-7 mx-auto">
               <select class="custom-select" id="anomaly-state">
@@ -137,22 +157,14 @@
           </div>
         </div>
 
-        <div class="col-3 mt-3 p-2">
-          <input
-            id="input"
-            class="form-control mr-2 border-top-0 border-left-0 border-right-0 bg-transparent"
-            type="search"
-            placeholder="URL"
-            aria-label="Search URL"
-          />
-        </div>
-        <div class="col-2 mt-3 p-2">
+
+        <div class="col-3 mt-3 p-2 pr-4">
           <button
             id="url-form-button"
-            class="btn btn-outline-dark btn-block"
+            class="btn btn-blue float-right"
             type="submit"
           >
-            <i class="fa fa-search"></i>
+            <i class="fa fa-search"></i> <strong>Search</strong>
           </button>
         </div>
       </div>
@@ -229,7 +241,7 @@
             <button
               id="{{ measurement.id }}"
               type="button"
-              class="btn btn-dark detail-btn"
+              class="btn btn-blue detail-btn"
               data-toggle="modal"
               data-target="#modalCompleteInfo"
               aria-label="modalDetailedInfo"

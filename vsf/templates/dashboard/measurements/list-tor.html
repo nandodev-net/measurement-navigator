@@ -26,7 +26,7 @@
   <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements</a>
 </li>
 <li class="breadcrumb-item active">
-  <a href="{% url 'dashboard:submeasurement:list_tor' %}">TOR List</a>
+  <a href="{% url 'dashboard:submeasurement:list_tor' %}"><strong>TOR List</strong></a>
 </li>
 {% endblock route %}
 
@@ -36,23 +36,23 @@
       <div class="container-fluid">
         <div class="row w-100">
 
-          <div class="col-4">
-            <div class="row align-items-center rounded p-2 bg-dark">
+          <div class="col-3">
+            <div class="row align-items-center">
               <div class="col-3 mx-auto">
-                <label class='font-weight-bold text-white'>
+                <label class='font-weight-bold'>
                   Since
                 </label>
               </div>
               <div class="col-9 mx-auto">
-                <input id="since" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
+                <input id="since" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.since }}" name="since"/>
               </div>
             </div> 
           </div>
 
-          <div class="col-4">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1 w-100">
+          <div class="col-3">
+            <div class="row align-items-center ml-1 w-100">
               <div class="col-3 mx-auto">
-                <label class='font-weight-bold text-white' for="asn">
+                <label class='font-weight-bold' for="asn">
                   ASN
                 </label>
               </div>
@@ -72,10 +72,10 @@
             </div> 
           </div>
           
-          <div class="col-4 ">
-            <div class="row align-items-center rounded p-3 bg-dark ml-1">
+          <div class="col-6 ">
+            <div class="row align-items-center ml-1">
               <div class="col-6 mx-auto">
-                <label class="font-weight-bold text-white" for="dir-port-accesible">Dir. Port Accesible</label>
+                <label class="font-weight-bold" for="dir-port-accesible">Dir. Port Accesible</label>
               </div>
               <div class="col-5 mx-auto">
                 <input
@@ -91,15 +91,15 @@
                 />
               </div>
               <div vlass="col-1 mx-auto">
-                <p id='valuedir' class="text-white mb-1">50%</p>
+                <p id='valuedir' class="text-secondary mb-1">50%</p>
               </div>
             </div> 
           </div>
 
-          <div class="col-4 mt-1">
-            <div class="row align-items-center rounded p-3 bg-dark ">
+          <div class="col-4 mt-3">
+            <div class="row align-items-center">
               <div class="col-5 mx-auto">
-                <label class="font-weight-bold text-white" for="obfs4-accesible">OBFS4 Accesible</label>
+                <label class="font-weight-bold" for="obfs4-accesible">OBFS4 Accesible</label>
               </div>
               <div class="col-6 mx-auto">
                 <input
@@ -115,21 +115,32 @@
                 />
               </div>
               <div vlass="col-1 mx-auto">
-                <p id='valueobfs4' class="text-white mb-1">50%</p>
+                <p id='valueobfs4' class="text-secondary mb-1">50%</p>
               </div>
             </div> 
           </div>
 
+          <div class="col-2">
+            {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+          </div>
+
+
+          <div class="col-4 mt-4">
+            <small>
+              <strong>Dynamic loading of filters</strong>
+            </small>
+            <input class='ml-2' id='dynamic' type="checkbox" value="">
+          </div>
+
+
           <div class="col-2 my-auto">
-            <button id="url-form-button" class="btn btn-outline-dark btn-block" type="submit">
-              <i class="fa fa-search"></i>
+            <button id="url-form-button" class="btn btn-blue float-right" type="submit">
+              <i class="fa fa-search"></i> <strong>Search</strong>
             </button>
           </div>
 
         </div>
       </div>
-      <!-- copy-to-clipboard component for search fields -->
-      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
     </nav>
 
     <div class="card rounded p-5" id="">

@@ -3094,20 +3094,20 @@ fieldset:disabled a.btn {
 
 .btn-dark {
     color: #fff;
-    background-color: #343a40;
-    border-color: #343a40;
+    background-color: #323A40;
+    border-color: #323A40;
 }
 
 .btn-dark:hover {
     color: #fff;
-    background-color: #23272b;
-    border-color: #1d2124;
+    background-color: #B9B9B9;
+    border-color: #B9B9B9;
 }
 
 .btn-dark:focus, .btn-dark.focus {
     color: #fff;
-    background-color: #23272b;
-    border-color: #1d2124;
+    background-color: #B9B9B9;
+    border-color: #B9B9B9;
     box-shadow: 0 0 0 0rem rgba(82, 88, 93, 0.5);
 }
 
@@ -22317,11 +22317,11 @@ pre[class*=language-]:before {
 }
 
 .form-control:focus {
-    border-bottom-color: transparent;
+    color: #275B82;
+    border-bottom: 3px solid #275B82;
     background-size: 100% 100%, 100% 100%;
     transition-duration: 0.3s;
     box-shadow: none;
-    background-image: linear-gradient(to top, #343a40 2px, rgba(70, 128, 255, 0) 2px), linear-gradient(to top, #ced4da 1px, rgba(206, 212, 218, 0) 1px);
 }
 
 .form-group {
@@ -24225,3 +24225,33 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
     border-color: #343a40;
     color: white;
 }
+
+.btn-blue {
+    color: #fff;
+    background-color: #00BDF8;
+    border-color: #00BDF8;
+    border-radius: 2px;
+}
+
+.btn-blue:hover {
+    background-color: #323A40;
+    border-color: #323A40; 
+    color: white;
+}
+
+body > div.float-right.mr-5.pr-5 > ul > li.breadcrumb-item.active > a,
+body > div.float-right.mr-5.pr-5 > ul > li:nth-child(1) > a > i,
+body > div.float-right.mr-5.pr-5 > ul > li:nth-child(2) > a {
+    color: white !important;
+}
+
+
+input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: black;
+    opacity: 1; /* Firefox */
+}
+
+.sub_title {
+    text-decoration: underline;
+}
+  
