@@ -25,10 +25,11 @@
       <div class="container-fluid">
         <div class="row">
 
-          <div class="col-4">
+
+          <div class="col-3">
             <input
             id="title"
-            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent text-primary"
             type="search"
             placeholder="Title"
             aria-label="Search title"
@@ -37,40 +38,42 @@
             />
           </div>
 
-          <div class="col-4">
-            <div class="row align-items-center rounded p-2 bg-dark">
+
+          <div class="col-3">
+            <div class="row align-items-center">
               <div class="col-4 mx-auto">
-                <label class='font-weight-bold text-white'>
+                <label class='font-weight-bold '>
                   Start Date
                 </label>
               </div>
               <div class="col-8 mx-auto">
-                <input id="start_date" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.start_date }}" name="start_date"/>
+                <input id="start_date" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.start_date }}" name="start_date"/>
               </div>
             </div> 
           </div>
 
-          <div class="col-4">
-            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+
+          <div class="col-3">
+            <div class="row align-items-center ml-1">
               <div class="col-4 mx-auto">
-                <label class='font-weight-bold text-white'>
+                <label class='font-weight-bold'>
                   End Date
                 </label>
               </div>
               <div class="col-8 mx-auto">
-                <input id="end_date" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.end_date }}" name="end_date"/>
+                <input id="end_date" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.end_date }}" name="end_date"/>
               </div>
             </div> 
           </div>
       
-          <div class="col-4 mt-3">
-            <div class="row align-items-center rounded p-2 bg-primary ml-1">
-              <div class="col-5 mx-auto">
-                <label class='font-weight-bold text-white' for="category">
+          <div class="col-3">
+            <div class="row align-items-center ml-1">
+              <div class="col-4 mx-auto">
+                <label class='font-weight-bold' for="category">
                   Category
                 </label>
               </div>
-              <div class="col-7 mx-auto">
+              <div class="col-8 mx-auto">
                 <select id="category" class="custom-select additional-filter" name="category">
                   <option selected value="">Choose Category</option>
                   {% for cat in categoryNames %}
@@ -84,12 +87,10 @@
             </div> 
           </div>
 
-
-
-          <div class="col-4 mt-3">
-            <div class="row align-items-center rounded p-2 bg-primary ml-1">
+          <div class="col-3 mt-3">
+            <div class="row align-items-center ml-1">
               <div class="col-4 mx-auto">
-                <label class="font-weight-bold text-white" for="published">Published</label>
+                <label class="font-weight-bold" for="published">Published</label>
               </div>
               <div class="col-8 mx-auto">
                 <select id="published" class="custom-select additional-filter" name="published">
@@ -101,9 +102,11 @@
             </div>   
           </div>
 
+          <div class="col-6"></div>
+
           <div class="col-3 my-auto mx-auto">
-            <button id="url-form-button" class="btn btn-outline-primary btn-block" type="submit">
-              <i class="fa fa-search"></i>
+            <button id="url-form-button" class="btn btn-blue btn-block" type="submit">
+              <i class="fa fa-search"></i> <bold>Search</bold>
             </button>
           </div>
         </div> 
@@ -312,7 +315,7 @@
             
             return `
             <a href=${url} target='_blank' id="link">
-                <button type="button" class="btn btn-sm btn-primary confirm-case">Detail in new Tab</button>
+                <button type="button" class="btn btn-sm btn-blue confirm-case">Detail in new Tab</button>
             </a>`       
           },
         },
