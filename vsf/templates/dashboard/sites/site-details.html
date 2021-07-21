@@ -1,0 +1,175 @@
+<!--
+  ========================================
+  MAIN LISTING PAGES
+  ========================================
+ -->
+
+{% extends 'extends/base.html' %}
+{% load static %}
+
+{% block custom_stylesheet %}
+    <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+{% endblock custom_stylesheet %} 
+
+{% with home='dashboard:home' %}
+
+{% block tab_title %} VSF - Sites {% endblock tab_title %}
+{% block title %} {{ site.name }} {% endblock title %}
+{% block sub_title %} {{ site.description }} {% endblock sub_title %}
+
+{% block route %}
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:home' %}">Home</a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:site:list_sites' %}">Sites</a>
+</li>
+<li class="breadcrumb-item active">{{ site.name }}</li>
+{% endblock route %}
+
+{% block content %}
+<div class="container">
+  <div class="row">
+    <div class="col-6">
+      <div class="card rounded p-3">
+        <h4>Description in Spanish:</h4>
+        <p>
+          {{ site.description_spa }}
+        </p>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card rounded p-3">
+        <h4>Description in English:</h4>
+        <p>
+          {{ site.description_eng }}
+        </p>
+      </div>
+    </div>
+    <div class="col-12 mt-5">
+        <div class="card rounded p-3">
+            <h4>Category:</h4>
+            <p>
+              {{ site.category }}
+            </p>
+          </div>
+
+    </div> 
+    <div class="col-12 mt-5">
+      <div class="card rounded p-3">
+        <form>
+          <table class="table table-striped mt-5" id="sites-detail-list">
+            <thead>
+              <tr>
+                <th scope="col">Domain</th>
+                <th scope="col">Remove from site</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for domain in domains %}
+              <tr>
+                <td>
+                  <a
+                    href="{% url 'dashboard:measurement:list_measurements'%}?input={{ domain.domain_name }}"
+                    title="Measurements for this url"
+                  >
+                    {{ domain.domain_name }}
+                  </a>
+                </td>
+                <td>
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger delete-site"
+                    id='{{ domain.domain_name }}''
+                  ><i class="fa fa-trash"></i> 
+                </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td class="text-center" colspan="2">
+                  <div class="alert alert-danger" role="alert">No sites to show!</div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %} 
+
+
+{% block custom_scripts %}
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+<script>
+  'use strict';
+
+  $(document).ready(function() {
+      /* Creating datatables */
+      $('#sites-detail-list').DataTable();
+
+      $('.delete-site').click(function ( event ) {
+
+        event.preventDefault();
+        let urlToDelete = event.target.id;
+        let urlToPost = '{% url "sites:remove_from_site" %}';
+
+        let data = {
+          url                : urlToDelete,
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+        };
+        
+        Swal.fire({
+          icon              : "warning",
+          title             : 'Do you want delete this site?',
+          showDenyButton    : true,
+          confirmButtonText : `Yes`,
+          confirmButtonColor: "#ffc107",
+          denyButtonText    : `No`,
+        }).then( result => {
+          if ( result.isConfirmed ) {
+
+            $.ajax({
+              type      : "POST",
+              url       : urlToPost,
+              data      : data,
+              success: function ( data, status ) {
+
+                Swal.fire({
+                  icon              : "success",
+                  title             : "The operation was successful!",
+                  confirmButtonColor: "#28a745",
+                  confirmButtonText : "Continue"
+                }).then((result) => {
+
+                  if ( result.isConfirmed ) {
+
+                    location.reload();
+                  }
+                });
+              },
+              error: function ( jq, status, error ) {
+
+                Swal.fire({
+                  icon              : "error",
+                  title             : "There was an error!",
+                  text              : `${ status }: ${ error }`,
+                  confirmButtonColor: "#dc3545",
+                  confirmButtonText : "Continue"
+                });
+              }
+            });
+          }
+        });
+        });
+
+  });
+</script>
+{% endblock custom_scripts %}
+
+{% endwith %}

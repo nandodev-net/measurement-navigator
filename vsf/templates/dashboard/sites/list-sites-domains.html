@@ -1,0 +1,302 @@
+{% extends 'extends/base.html' %} 
+{% load static %} {% block custom_stylesheet %}
+    <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+    <style>
+        .pcoded-main-container {
+            width: 100% !important;
+        }
+        #domains-list-card{
+            width: 130%;
+        }
+        body > div.swal2-container.swal2-center.swal2-backdrop-show > div {
+            z-index: 1000000;
+        }
+    </style>
+{% endblock custom_stylesheet %} 
+{% with home='dashboard:home' %} 
+{% block tab_title %} VSF - Domains {% endblock tab_title %} 
+{% block title %} Domains {% endblock title %} 
+{% block sub_title %} List of all available domains and their corresponding sites. You can also create sites from here {% endblock sub_title %} 
+
+{% block route %}
+<li class="breadcrumb-item">
+    <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item active">
+    <a href="{% url 'dashboard:sites:list_domains' %}"> Domains</a>
+</li>
+{% endblock route %} 
+
+{% block content %}
+<div>
+    <form id="sitesForm">
+        <button type="button" class="btn btn-dark rounded mb-4" data-toggle="modal" data-target="#associateUrl">
+        <i class="fa fa-plus"></i> 
+        Create site
+        </button>
+
+        <button type="button" class="btn btn-dark rounded mb-4" id="addToSite" data-toggle="modal" data-target="#submitConfirmationModal">
+        <i class="fa fa-folder-plus"></i> 
+        Add to Site
+        </button>
+
+    </form>
+    <div class="card rounded p-5" id="domains-list-card">
+        <table class="table table-striped mt-5 datatable" id="domains-list">
+            <thead>
+                <tr>
+                    <th class="text-center" scope="col">Domain</th>
+                    <th class="text-center" scope="col">Site</th>
+                    <th class="text-center" scope="col">Measurements Quantity</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for domain in domains %}
+                <tr id="{{domain.id}}" alt="{{ domain.domain }}">
+                    <td class="text-center">
+                        <a class="text-info" href="{% url 'dashboard:measurement:list_measurements'%}?input={{ domain.domain }}">
+                            {{ domain.domain }}
+                        </a>
+                    </td>
+                    <td class="text-center">
+                        {% if domain.site_id != -1 %}
+                            <a class="text-info" href="{% url 'dashboard:sites:site_details' id=domain.site_id %}">
+                                {{ domain.site_name }}
+                            </a> 
+                        {% else %}
+                            <a class="text-info" href="#"> 
+                                {{ domain.site_name }}
+                            </a> 
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ domain.measurement_count }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td class="text-center" colspan="4">
+                        <div class="alert alert-danger" role="alert">No domains to show!</div>
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+            <tfoot>
+            </tfoot>
+
+        </table>
+    </div>
+</div>
+
+{% include "includes/sites-includes/submit-sites-modal.html" %} 
+{% endblock content %} 
+
+{% block custom_scripts %}
+
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+<script>
+    'use strict';
+
+    $(document).ready(function() {
+
+        /* Creating datatables */
+        var domains = $('#domains-list').DataTable({
+            select: {
+                style: 'multi'
+            },
+        });
+        $('domains-related-sites-list').DataTable();
+        var sites = $(' #sites-list ').DataTable({
+            autoWidth: false,
+            searching: true,
+            processing: true,
+            language: {
+            },
+            serverSide: true,
+            rowId: "id",
+            ajax: {
+                url: "{% url 'dashboard:site:sites' %}",
+                data: function (data) {
+                },
+                contentType: "application/json; charset=utf-8",  
+                type: "GET"
+            },
+            columns: [
+                {
+                    data: "name",
+                    orderable: true,
+                    searchable: true,
+                },
+            ],
+            initComplete: function () {},
+            buttons: [],
+            select: {
+                style: 'single'
+            },
+        });
+
+        /* Save site only if all inputs are filled */
+        $("#vsf-sites-input, #vsf-description-input").on("change paste keyup", function() {
+            if ($("#vsf-sites-input").val() === "" || $("#vsf-description-input").val() === "") {
+                $("#create-sites-btn").attr('disabled', true);
+            } else {
+                $("#create-sites-btn").attr('disabled', false);
+            }
+        });
+
+        /* Event triggered for creating a site */
+        $("#create-sites-btn").click(function(event) {
+
+            let $form = $("#site-creation-form");
+            let data = $form.serialize();
+            let url = '{% url "sites:create_site" %}';
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                success: function(data, status) {
+
+                    if (data.error === null) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "The site has been created!",
+                            confirmButtonColor: "#28a745",
+                            confirmButtonText: "Continue"
+                        }).then((result) => {
+                            sites.ajax.reload();
+
+                            if (result.isConfirmed) {
+                                $('#close-create-site-modal').click();
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "warning",
+                            title: "The name's site is already in use!",
+                            confirmButtonColor: "#ffc107",
+                            confirmButtonText: "Continue"
+                        })
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "There was an error!",
+                        text: `${ textStatus }: ${ errorThrown }`,
+                        confirmButtonColor: "#dc3545",
+                        confirmButtonText: "Continue"
+                    });
+                }
+            });
+        });
+
+        let selectedPages = []; /*Array where we are going to store the selected pages*/
+        /*Actions when we trigger the submit sites button*/
+
+        $("#addToSite").click(function() {
+
+            var rSelected = domains.rows( { selected: true }).data().toArray().map((selected) => ({
+                url: selected[0],
+                id: selected.DT_RowId
+            }));
+
+            let $table = $("#vsf-grouped-sites");
+
+            $table.empty();
+
+            rSelected.forEach(page => {
+                $table.append(
+                    `<tr>
+                        <td class='text-black'>
+                        ${ page.url }
+                        </td>
+                    </tr>`);
+            });
+
+            if (rSelected.length === 0) {
+                $table.append(
+                    `<tr>
+                        <td class="text-center">
+                        <div class="alert alert-danger" role="alert">No sites to show!</div>
+                        </td>
+                    </tr>`
+                );
+            }
+
+            selectedPages = rSelected;
+
+            
+
+        });
+
+
+        $("#submitConfirmationBtn").click(function(event) {
+
+            event.preventDefault();
+            if (selectedPages.length === 0)return;
+
+            let pagesIds = selectedPages.map(v => v.id);
+            let url = "{% url 'dashboard:site:list_domains' %}";
+            var site = sites.rows({ selected: true }).data().toArray();
+            
+            if (site.length === 0) return;
+
+            site = site[0].associated;
+
+            let data = {
+                domains: pagesIds,
+                site: site,
+                csrfmiddlewaretoken: "{{ csrf_token }}"
+            };
+            jQuery.noConflict();
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: data,
+                success: function(data) {
+
+                    if (data.error === null) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Successful linking!",
+                            confirmButtonColor: "#28a745",
+                            confirmButtonText: "Continue"
+                        }).then(result => {
+
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    } else {
+
+                        Swal.fire({
+                            icon: "error",
+                            title: "You have selected one or some pages that have already been associated with a domain",
+                            text: `${ data.error }`,
+                            confirmButtonColor: "#dc3545",
+                            confirmButtonText: "Continue"
+                        });
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+
+                    $("submitConfirmationModal").modal("hide");
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "There was an error!",
+                        text: `${ textStatus }, ${ errorThrown }`,
+                        confirmButtonColor: "#dc3545",
+                        confirmButtonText: "Continue"
+                    });
+                }
+            });
+        });
+
+    })
+</script>
+
+{% endblock custom_scripts %} {% endwith %}

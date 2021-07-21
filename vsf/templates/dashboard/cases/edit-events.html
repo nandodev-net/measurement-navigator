@@ -1,0 +1,483 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+{% block custom_stylesheet %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<style>
+  .pcoded-main-container {
+      width: -webkit-fill-available;
+  }
+  table a {
+    color: blue;
+  }
+  .btn {
+    border: 1px solid white;
+  }
+  #upper-card {
+    border-bottom: 1px solid gray;
+  }
+
+</style>
+{% endblock custom_stylesheet %}
+
+{% block tab_title %} VSF - Case {{object.title}} {% endblock tab_title %}
+{% block title %} Cases {% endblock title %}
+{% block sub_title %} Edit Events of Case {% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+  <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:event_cases:list_cases' %}">Case List</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'dashboard:event_cases:detail_page' object.id %}">Case Detail</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'dashboard:event_cases:edit_events' object.id %}">Edit Events</a>
+</li>
+
+{% endblock route %}
+{% block content %}
+
+
+  <button class="btn btn-primary mb-4 ml-3" id="confirm" type="button">Confirm Edition</button>
+
+  <div class="col-12" id="upper-card">
+      <div class="card" id="relatedEvents-card">
+          <div class="card-header">
+            <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#relatedEvents" aria-expanded="true" aria-controls="relatedEvents">Related Events</a></h5>
+          </div>
+          <div class="collapse show" id="relatedEvents">
+              <div class="card-body p-3">
+                <table class="table table-striped mt-5 datatable" id="eventsBelonged">
+                  <thead>
+                      <th class="text-center" scope="col">Event Type</th>
+                      <th class="text-center" scope="col">Confirmed</th>
+                      <th class="text-center" scope="col">Start Date</th>
+                      <th class="text-center" scope="col">End Date</th>
+                      <th class="text-center" scope="col">Domain</th>
+                      <th class="text-center" scope="col">ASN</th>
+                      <th class="text-center" scope="col">Remove from this case?</th>
+                  </thead>
+                  <tbody>
+                      {% for event in events %}
+                        <tr id="{{event.id}}">
+                          <td>
+                            <a href="{% url 'dashboard:events:detail' event.id %}" target="_blank"> {{event.issue_type}} </a>
+                          </td>
+                          <td> {{event.confirmed}} </td>
+                          <td> {{event.start_date}} </td>
+                          <td> {{event.end_date}} </td>
+                          <td> {{event.domain}} </td>
+                          <td> {{event.asn}} </td>
+                          <td>
+                            <input class="form-check-input del" type="checkbox" value="" id="{{event.id}}">
+                          </td>
+                        </tr>
+                      {% endfor %}
+                  </tbody>
+                  <tfoot></tfoot>
+                </table>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <hr>
+  <h4 class="p-3">
+    General Event List
+  </h4>
+  <form id="urlForm">
+    <nav class="navbar navbar-light bg-light mb-5">
+      <div class="container-fluid">
+        <div class="row">
+
+          <div class="col-4">
+            <input
+            id="identification"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Identification"
+            aria-label="Search identification"
+            value="{{ prefill.identification }}"
+            name="identification"
+            />
+          </div>
+
+          <div class="col-4">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+              <div class="col-5 mx-auto">
+                <label class='font-weight-bold text-white' for="confirmed">
+                  Confirmed
+                </label>
+              </div>
+              <div class="col-7 mx-auto">
+                <select id="confirmed" class="custom-select additional-filter" name="confirmed">
+                  <option value="">Any Confirmation</option>
+                  
+                  <option {% if prefill.confirmed == "true" %} selected {% endif %} value="true">True</option>
+                  <option {% if prefill.confirmed == "false" %} selected {% endif %} value="false">False</option>
+                  
+                </select>
+              </div>
+            </div> 
+          </div>
+
+          <div class="col-4">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+              <div class="col-5 mx-auto">
+                <label class='font-weight-bold text-white'>
+                  Start Time
+                </label>
+              </div>
+              <div class="col-7 mx-auto">
+                <input id="start_time" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.start_time }}" name="start_time"/>
+              </div>
+            </div> 
+          </div>
+
+          <div class="col-4 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark">
+              <div class="col-5 mx-auto">
+                <label class='font-weight-bold text-white'>
+                  End Time
+                </label>
+              </div>
+              <div class="col-7 mx-auto">
+                <input id="end_time" class="text-white form-control mr-2 additional-filter" type="date" value="{{ prefill.end_time }}" name="end_time"/>
+              </div>
+            </div> 
+          </div>
+          
+          <div class="col-4 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark ml-1">
+              <div class="col-5 mx-auto">
+                <label class="font-weight-bold text-white" for="site">Issue Type</label>
+              </div>
+              <div class="col-7 mx-auto">
+                <select class="custom-select additional-filter" id="issue_type" name="issue_type">
+                  <option selected value="">
+                    Any Issue
+                  </option>
+                  {% for issue in issueTypes %}
+                    <option 
+                    {% if issue.name == prefill.issue_type %} selected {% endif %}
+                    value="{{ issue.name }}" 
+                    >
+                    {{ issue.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>   
+          </div>
+
+          <div class="col-4 mt-3">
+            <input
+            id="domain"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Domain"
+            aria-label="Search domain"
+            value="{{ prefill.domain }}"
+            name="domain"
+            />
+          </div>
+
+          <div class="col-4 mt-3">
+            <div class="row align-items-center rounded p-2 bg-dark">
+              <div class="col-3 mx-auto">
+                <label class='font-weight-bold text-white' for="asn">
+                  ASN
+                </label>
+              </div>
+              <div class="col-9 mx-auto">
+                <select id="asn" class="custom-select additional-filter" name="asn">
+                  <option value="">Any ASN</option>
+                  {% for asn in asns %}
+                    <option 
+                    {% if asn.asn == prefill.asn %} selected {% endif %}
+                    value="{{ asn.asn }}" 
+                    >
+                    {{ asn.asn }} - {{ asn.name }}
+                    </option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div> 
+          </div>
+
+
+          <div class="col-4 my-auto ml-1">
+            <button id="url-form-button" class="btn btn-outline-dark btn-block" type="submit">
+              <i class="fa fa-search"></i>
+            </button>
+          </div>
+
+          <div class="col-4 mx-auto my-auto">
+          </div>
+
+        </div> 
+      </div>   
+      {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
+    </nav>
+
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events-selected-card" aria-expanded="true" aria-controls="events-selected-card">Selected Events</a></h5>
+        </div>
+        <div class="collapse show" id="events-selected-card">
+          <div class="card-body p-3">
+            <table class="table table-striped mt-5 datatable" id="events-selected">
+              <thead>
+                <tr>
+                  <th class="text-center" scope="col">Event Type</th>
+                  <th class="text-center" scope="col">Confirmed</th>
+                  <th class="text-center" scope="col">Start Date</th>
+                  <th class="text-center" scope="col">End Date</th>
+                  <th class="text-center" scope="col">Domain</th>
+                  <th class="text-center" scope="col">ASN</th>
+                  <th class="text-center" scope="col"></th>
+                </tr>
+              </thead>
+              <tbody id="selectedEvents-tbody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events-card" aria-expanded="true" aria-controls="events-card">All Events</a></h5>
+        </div>
+        <div class="collapse show" id="events-card">
+          <div class="card-body p-3">
+            <table class="table table-striped mt-5 datatable" id="events">
+              <thead>
+                <tr>
+                  <th class="text-center" scope="col"> </th>
+                  <th class="text-center" scope="col">Event Type</th>
+                  <th class="text-center" scope="col">Confirmed</th>
+                  <th class="text-center" scope="col">Start Date</th>
+                  <th class="text-center" scope="col">End Date</th>
+                  <th class="text-center" scope="col">Domain</th>
+                  <th class="text-center" scope="col">ASN</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+{% endblock content %}
+{% block custom_scripts %}
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/select/1.3.3/js/dataTables.select.min.js"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+<script>
+  var selected = [];
+  var events;
+  var eventsBelonged;
+  var eventsSelected;
+
+
+  $( '#confirm' ).click(function (e) {
+    var eventsSelected = []
+    var eventsToDelete = []
+    
+    var permit = true;
+    
+    eventsToDelete = $('.del:checkbox:checked').toArray().map((selected) => (
+      selected.id
+    ));
+
+    $.ajax({
+      type: "POST",
+      url: "{% url 'dashboard:event_cases:edit_events' object.id %}",
+      data: {
+        eventsSelected: selected, 
+        eventsToDelete: eventsToDelete, 
+        case: "{{object.id}}",
+        csrfmiddlewaretoken: "{{ csrf_token }}"
+      },
+      success: function(data) {
+        if (data.error === null) {
+          Swal.fire({
+              icon: "success",
+              title: "Edit Successful!",
+              confirmButtonColor: "#28a745",
+              confirmButtonText: "Continue"
+          }).then(result => {
+              if (result.isConfirmed) {
+                  location.reload();
+              }
+          });
+        } else {
+          console.log(data)
+          Swal.fire({
+              icon: "error",
+              title: "Error",
+              text: `${ data.error }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+      }
+    });
+    
+  });
+
+  
+  $( '#events' ).on('click', 'tbody tr', function() {
+      var id = this.id;
+      var index = $.inArray(id, selected);
+      var row = events.rows("#" + id).data().toArray();
+
+      if ( index === -1 ) {
+          selected.push( id );
+          eventsSelected.row.add([
+            row[0].issue_type,
+            row[0].confirmed,
+            row[0].start_date,
+            row[0].end_date,
+            row[0].domain,
+            row[0].asn,
+            `<button type='button' class='btn pt-0' id=${id}>
+              <i class="fas fa-trash text-danger"></i>
+            </button>`
+          ]).node().id = id;
+          eventsSelected.draw();
+      } else {
+          selected.splice( index, 1 );
+          eventsSelected.row('#' + id).remove().draw();
+      }
+
+      $(this).toggleClass('selected');
+  });
+
+  $( '#events-selected' ).on('click', 'tbody tr button', function() {
+      var id = this.id;
+      var index = $.inArray(id, selected);
+      var row = events.rows("#" + id).data().toArray();
+
+      selected.splice( index, 1 );
+      eventsSelected.row('#' + id).remove().draw();
+      
+      $( '#events #' + id).removeClass('selected');
+
+  });
+
+  $(document).ready(function() {
+    eventsBelonged = $('#eventsBelonged').DataTable({
+      order: [[ 2, "desc" ]],
+      searching: true
+    });
+
+    eventsSelected = $('#events-selected').DataTable();
+
+    events = $('#events').DataTable({
+      order: [[ 3, "desc" ]],
+      searching: true,
+      processing: true,
+      language: {
+      },
+      serverSide: true,
+      rowCallback: function( row, data ) {
+        if ( $.inArray(data.id.toString(), selected) !== -1 ) {
+            $(row).addClass('selected');
+        }
+      },
+      rowId: "id",
+      ajax: {
+        url: '{% url "dashboard:events:data" %}',
+        data: function (data) {
+
+          data.case = "{{object.id}}";
+          data.identification = $("#identification").val() ;
+          data.confirmed = $("#confirmed").val();
+          data.start_time = $("#start_time").val();
+          data.end_time = $("#end_time").val();
+          data.issue_type = $("#issue_type").val();
+          data.domain = $("#domain").val();
+          data.asn = $("#asn").val();
+
+        },
+        contentType: "application/json; charset=utf-8",  
+        type: "GET",
+      },
+      columnDefs: [ {
+          orderable: false,
+          className: 'select-checkbox',
+          targets:   0
+      } ],
+      columns: [
+        {
+          data: 'id',
+          orderable: false,
+          render: function (data, type, row, meta) { 
+            return `<div class="p-2"></div>`
+          }
+        },
+        {
+          data: "issue_type",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "confirmed",
+          orderable: true,
+          searchable: false,
+          render: function (data, type, row, meta) {
+            if (data) {
+              return `<div class="text-success w-100 text-center">
+                        <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                      </div>`
+            } else {
+              return `<div class="text-danger w-100 text-center">
+                        <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                      </div>`
+            }
+          },
+        },
+        {
+          data: "start_date",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "end_date",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "domain",
+          orderable: false,
+          searchable: true,
+        },
+        {
+          data: "asn",
+          orderable: false,
+          searchable: true,
+        },
+      ],
+      initComplete: function () {},
+      buttons: [],
+      select: {
+        style: 'multi',
+        
+      },
+    });  
+  })  
+</script>
+{% endblock custom_scripts %}

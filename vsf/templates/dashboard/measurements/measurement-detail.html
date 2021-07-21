@@ -1,0 +1,355 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+
+{% block custom_stylesheet %}
+<link rel=stylesheet
+  href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
+/>
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+
+<style>
+    .pcoded-main-container {
+        width: auto;
+    }
+    #header {
+        width: 270%;
+    }
+    #header-runtime, #failures-card, #dns-card, #tcp-card, #http-card, #generalInfo, #raw-card, #events-card {
+        width: -webkit-fill-available;;
+    }
+</style>
+{% endblock custom_stylesheet %}
+
+
+{% block tab_title %} VSF - Measurement Detail {% endblock tab_title %}
+{% block title %} Measurement Detail {% endblock title %}
+{% block sub_title %} Specific details of the measurement with id: {{ rawmeasurement.id }}{% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+    <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements List</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'dashboard:measurement:detail' pk=rawmeasurement.id %}">Measurement Detail</a>
+</li>
+
+{% endblock route %}
+
+{% block content %}
+
+    <div class="card p-5 bg-success" id="header">  
+        <div class="row mb-5">
+            <div class="col-3"></div>
+            <div class="col-6">
+                {% if rawmeasurement.test_name == 'web_connectivity' %}
+                    {% if rawmeasurement.test_keys.accessible %}
+                        <h1 class="text-center text-white font-weight-bold "> OK </h1>
+                    {% else %}
+                        <h1 class="text-center text-white font-weight-bold "> ? Error </h1>
+                    {% endif %}
+                    <h3 class="text-center text-white">{{rawmeasurement.input}}</h3>
+                {% endif %}
+            </div>
+            <div class="col-3"></div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-4">
+                <img class="ml-4" height="100px" src="{{rawmeasurement.urlFlag}}" />
+            </div>
+            <div class="col-4">
+            </div>
+            <div class="col-4">
+            </div>
+        </div>
+
+        <div class="row ">
+            <div class="col-4">
+                <h3 class="text-white ml-4">Venezuela</h3>
+                <h5 class="font-weight-bold text-white ml-4">Country</h5>
+            </div>
+            <div class="col-4">
+                <h3 class="text-white">{{rawmeasurement.probe_asn}}</h3>
+                <h5 class="font-weight-bold text-white">Network</h5>
+            </div>
+            <div class="col-4">
+                <h3 class="text-white ml-4">{{rawmeasurement.test_start_time}}</h3>
+                <h5 class="font-weight-bold text-white ml-4">Date & Time</h5>
+            </div>
+        </div>
+    </div>
+
+    {% if rawmeasurement.test_name == 'web_connectivity' %}
+        <div class="row" id="header-runtime">
+            <div class="col-9">
+                <h4 class="ml-4">Web Connectivity Test</h4>
+            </div>
+            <div class="col-3">
+                <h4 class="">Runtime: {{rawmeasurement.test_runtime}}</h4>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if rawmeasurement.test_name == 'web_connectivity' %}
+        <div class="card py-0 px-5 mt-5" id="failures-card">
+            <div class="card-header">
+                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#failures" aria-expanded="true" aria-controls="failures">Failures</a></h5>
+            </div>
+            <div class="collapse" id="failures">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <p class="font-weight-bold">HTTP Experiment</p>
+                        </div>
+                        <div class="col-9">
+                            <div id="http-experiment">
+                                <i class="fas fa-check"></i> null
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <p class="font-weight-bold">DNS Experiment</p>
+                        </div>
+                        <div class="col-9">
+                            <div id="dns-experiment">
+                                <i class="fas fa-check"></i> null
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <p class="font-weight-bold">Control</p>
+                        </div>
+                        <div class="col-9">
+                            <div id="control-experiment">
+                                <i class="fas fa-check"></i> null
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+
+    {% if rawmeasurement.test_name == 'web_connectivity' %}
+        <div class="card py-0 px-5 mt-3" id="dns-card">
+            <div class="card-header">
+                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#dns" aria-expanded="true" aria-controls="dns">DNS Queries</a></h5>
+            </div>
+            <div class="collapse" id="dns">
+                <div class="card-body">
+                    <p><strong>Resolver: </strong> {{rawmeasurement.test_keys.client_resolver}}</p>
+                    {% for query in rawmeasurement.test_keys.queries %}
+                        <div class="border-bottom border-top py-4">
+                            <p><strong>Query: </strong> IN {{query.query_type}} {{query.hostname}}</p>
+                            <p><strong>Engine: </strong> {{query.engine}} </p>
+
+                            {% if query.failure %}
+                                <i class="fas fa-times mr-2"></i> {{query.failure}}
+                            {% else %}
+                                <i class="fas fa-check mr-2"></i> null
+                            {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if rawmeasurement.test_name == 'web_connectivity' %}
+        <div class="card py-0 px-5 mt-3" id="tcp-card">
+            <div class="card-header">
+                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#tcp" aria-expanded="true" aria-controls="tcp">TCP Connections</a></h5>
+            </div>
+            <div class="collapse" id="tcp">
+                <div class="card-body">
+                    {% if rawmeasurement.hasTcpConnections %}
+                        {% for connection in rawmeasurement.test_keys.tcp_connect %}
+                            {% if connection.status.success %}
+                                <p> Connection to <strong>{{connection.ip}}</strong> succeeded.</p>
+                            {% elif connection.status.failure %}
+                                <p> Connection to <strong>{{connection.ip}}</strong> failed.</p>
+                            {% else %}
+                                <p> Connection to <strong>{{connection.ip}}</strong> was blocked.</p>
+                            {% endif %}
+                            
+                        {% endfor %}
+                    {% else %}
+                        <p>No data</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if rawmeasurement.test_name == 'web_connectivity' %}
+        <div class="card py-0 px-5 mt-3" id="http-card">
+            <div class="card-header">
+                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#http" aria-expanded="true" aria-controls="http">HTTP Requests</a></h5>
+            </div>
+            <div class="collapse" id="http">
+                <div class="card-body">
+                    {% if rawmeasurement.hasHttpRequests %}
+                        {% for req in rawmeasurement.test_keys.requests %}
+                            <h5 class="font-weight-bold">URL</h5>
+                            <div class="shadow-none p-3 mb-5 bg-light rounded">{{req.request.url}}</div>
+                            <h5 class="font-weight-bold">Response Headers</h5>
+                            <div class="shadow-none p-3 mb-5 bg-light rounded">
+                                {% for key, value in req.response.headers.items %}
+                                    <strong>{{key}}: </strong> {{value}}<br>
+                                {% endfor %}
+                            </div>
+                            <h5 class="font-weight-bold">Response Body</h5>
+                            <div class="shadow-none p-3 mb-5 bg-light rounded">
+                                {{req.response.body}}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No data</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if rawmeasurement.test_name == 'web_connectivity' %}
+        <div class="shadow-none p-3 mb-2 bg-secondary rounded" id="generalInfo">
+            <p class="text-white"><bold>Report ID: </bold> {{rawmeasurement.report_id}}</p>
+
+            <p class="text-white"><bold>Platform: </bold> {{rawmeasurement.platform}}</p>
+
+            <p class="text-white"><bold>Software Name:</bold> {{rawmeasurement.software_name}} ({{rawmeasurement.software_version}})</p>
+
+            <p class="text-white"><bold>Measurement Engine: </bold> {{rawmeasurement.engine}} </p>
+        </div>
+    {% endif %}
+
+    {% if rawmeasurement.test_name == 'web_connectivity' %}
+        <div class="card py-0 px-5 mt-3" id="raw-card">
+            <div class="card-header">
+                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#raw" aria-expanded="true" aria-controls="raw">Raw Measurement Data</a></h5>
+            </div>
+            <div class="collapse" id="raw">
+                <div class="card-body">
+                    <pre id="raw-data"> {{rawmeasurement.rawjson}} </pre>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card py-0 px-5 mt-2" id="events-card">
+        <div class="card-header">
+            <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events" aria-expanded="true" aria-controls="events">Events</a></h5>
+        </div>
+        <div class="collapse" id="events">
+            <div class="card-body">
+                <table class="table table-striped mt-5 datatable" id="events-table">
+                <thead>
+                    <tr>
+                    <th class="text-center" scope="col">Event Type</th>
+                    <th class="text-center" scope="col">Confirmed</th>
+                    <th class="text-center" scope="col">Start Date</th>
+                    <th class="text-center" scope="col">End Date</th>
+                    <th class="text-center" scope="col">Domain</th>
+                    <th class="text-center" scope="col">ASN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events %}
+                        <tr>
+                            <td>{{event.issue_type}}</td>
+                            <td>
+                                {% if event.confirmed %}
+                                    <div class="text-success w-100 text-center">
+                                        <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                                    </div>
+                                {% else %}
+                                    <div class="text-danger w-100 text-center">
+                                        <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td>{{event.start_date}}</td>
+                            <td>{{event.end_date}}</td>
+                            <td>{{event.domain}}</td>
+                            <td>{{event.asn}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+{% block custom_scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+<script>
+
+    $(document).ready(function() {
+        
+        $('#events-table').DataTable({
+            order: [[ 2, "desc" ]],
+            searching: true,
+            language: {
+            },
+            buttons: [],
+            select: {
+            style: 'multi',
+            },
+        });
+
+        if ('{{rawmeasurement.test_name}}' === 'web_connectivity') {
+            if ('{{rawmeasurement.test_keys.accessible}}' === 'False') {
+                $( '#header' ).attr("class", "card p-5 bg-danger")
+            }
+            
+            if ('{{rawmeasurement.test_keys.http_experiment_failure}}' !== 'None') {
+                $( '#http-experiment' ).empty();
+                $( '#http-experiment' ).append(
+                    '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.http_experiment_failure}}'
+                );
+            }
+            if ('{{rawmeasurement.test_keys.dns_experiment_failure}}' !== 'None') {
+                $( '#dns-experiment' ).empty();
+                $( '#dns-experiment' ).append(
+                    '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.dns_experiment_failure}}'
+                );
+            }
+            if ('{{rawmeasurement.test_keys.control_failure}}' !== 'None') {
+                $( '#control-experiment' ).empty();
+                $( '#control-experiment' ).append(
+                    '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.control_failure}}'
+                );
+            }
+
+
+            var raw = $('#raw-data').text();
+            rawParsed = JSON.parse(raw);
+            rawParsed[0]['fields']['annotations'] = JSON.parse(rawParsed[0]['fields']['annotations']);
+            rawParsed[0]['fields']['test_helpers'] = JSON.parse(rawParsed[0]['fields']['test_helpers']);
+            jQuery.noConflict();
+            $("#raw-data").jsonViewer(rawParsed[0]['fields'], {
+                collapsed: true,
+                rootCollapsable: false
+            });
+
+        }
+
+        
+
+    });
+</script>
+{% endblock custom_scripts %}

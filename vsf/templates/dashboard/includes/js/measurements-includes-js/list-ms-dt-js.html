@@ -1,0 +1,324 @@
+<script>
+  $(document).ready(function () {
+    "use strict";
+
+    let id;
+
+    let oTable = $(".datatable").DataTable({
+      order: [[2, "desc"]],
+      
+      columns: [
+        /*
+            =====================================
+            ROW DESCRIPTIONS
+            =====================================
+        */
+        {
+          data: "raw_measurement__input",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "raw_measurement__test_name",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "raw_measurement__measurement_start_time",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "raw_measurement__probe_asn",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "raw_measurement__probe_cc",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "site_name",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "anomaly",
+          orderable: true,
+          searchable: true,
+        },
+      ],
+      searching: true,
+      processing: true,
+      serverSide: true,
+      language: {
+      },
+      rowId: "id",
+      dom: "Blrtip",
+      ajax: {
+        /*
+            =====================================
+            CONFIGURATION FOR THE AJAX REQUEST TO THE SERVER
+            =====================================
+            */
+        url: '{% url "dashboard:measurement:list_measurements_data" %}',
+        data: function (data) {
+          /*
+                =====================================
+                ADD ADDITIONAL DATA TO THE DATA PASSED TO THE SERVER
+                =====================================
+            */
+
+          let site = $("#site").val();
+          let since = $("#since").val();
+          let until = $("#until").val();
+          let testName = $("#test-name").val();
+          let input = $("#input").val();
+          let asn = $("#asn").val();
+          let anomaly = $("#anomaly-state").val();
+          let country = "";
+
+          if (site) data.site = site;
+
+          if (since) data.since = since;
+
+          if (until) data.until = until;
+
+          if (testName) data.test_name = testName;
+
+          if (input) data.input = input;
+
+          if (asn) data.asn = asn;
+
+          if (anomaly) data.anomaly = anomaly;
+
+          if (country) data.country = country;
+        },
+        type: "GET",
+      },
+      initComplete: function () {
+        /*
+            =====================================
+            THIS FUNCTION COLLECTS THE DATA IN THE ROWS INPUT FIELDS
+            WHENEVER ONE OF THEM CHANGES
+            =====================================
+            this.api()
+            .columns()
+            .every(function () {
+
+                let that = this;
+
+                $(".filter-input", this.footer()).on("change clear", function () {
+
+                if ( that.search() !== this.value ) {
+
+                    that.search( this.value ).draw();
+                }
+                });
+            });
+            */
+      },
+      select: true,
+      buttons: [
+        {
+          text: "Get Measurement Data",
+          action: function (e, dt, node, config) {
+            /*
+                =====================================
+                THIS FUNCTION IS CALLED WHENEVER THE 'GET MEASUREMENT DATA' BUTTON IS TRIGGERED
+                =====================================
+                */
+            let data = dt.rows({ selected: true }).data();
+
+            if (data.length === 0) {
+              Swal.fire({
+                icon: "warning",
+                title: "There is nothing selected!",
+                confirmButtonColor: "#ffc107",
+                confirmButtonText: "Continue",
+              });
+
+              return;
+            }
+
+            id = data[0].id;
+
+            $.ajax({
+              type: "GET",
+              url: '{% url "measurements:get_measurement" %}',
+              data: { id: id },
+              success: function (measurementData) {
+                $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
+                  collapsed: true,
+                  rootCollapsable: false
+                });
+                $("#bucket-date-detailed").text(measurementData["bucket_date"]);
+                $("#data-format-version-detailed").text(
+                  measurementData["data_format_version"]
+                );
+                $("#input-detailed").text(measurementData["input"]);
+                $("#measurement-start-time-detailed").text(
+                  measurementData["measurement_start_time"]
+                );
+                $("#options-detailed").text(measurementData["options"]);
+                $("#probe-asn-detailed").text(measurementData["probe_asn"]);
+                $("#probe-cc-detailed").text(measurementData["probe_cc"]);
+                $("#probe-ip-detailed").text(measurementData["probe_ip"]);
+                $("#report-filename-detailed").text(
+                  measurementData["report_filename"]
+                );
+                $("#report-id-detailed").text(measurementData["report_id"]);
+                $("#software-name-detailed").text(
+                  measurementData["software_name"]
+                );
+                $("#software-version-detailed").text(
+                  measurementData["software_version"]
+                );
+                $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
+                  collapsed: true,
+                  rootCollapsable: false
+                });
+                $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
+                  collapsed: true,
+                  rootCollapsable: false
+                });
+                $("#test-name-detailed").text(measurementData["test_name"]);
+                $("#test-runtime-detailed").text(
+                  measurementData["test_runtime"]
+                );
+                $("#test-start-time-detailed").text(
+                  measurementData["test_start_time"]
+                );
+                $("#test-version-detailed").text(
+                  measurementData["test_version"]
+                );
+
+                $("#modalMeasurementInfo").modal("show");
+              },
+              error: function (jqXHR, textStatus, errorThrown) {
+                Swal.fire({
+                  icon: "warning",
+                  title: "There is an error in the inputs!",
+                  confirmButtonColor: "#28a745",
+                  confirmButtonText: "Continue",
+                });
+              },
+            });
+          },
+          enabled: false,
+        },
+      ],
+    });
+
+    /*
+    =====================================
+    TRIGGERED WHEN A CUSTOM FILTER IS SELECTED
+    =====================================
+    */
+    $(".additional-filter").change((e) => oTable.draw());
+
+    /*
+    =====================================
+    REQUIRED TO PERFORM ROW SELECTION
+    =====================================
+    */
+    oTable.on("select deselect", (e) => {
+      let selectedRows = oTable.rows({ selected: true }).count();
+      oTable.button(0).enable(selectedRows === 1);
+    });
+
+    /*
+    =====================================
+    URL TO DETAILED INFO MEASUREMENT
+    =====================================
+    */
+    $("#detailed-measurement-page").on("click", function ( event ) {
+      event.preventDefault();
+
+      let urlSearch = '{% url "dashboard:measurement:details" %}?id=';
+
+      let url = urlSearch + id;
+
+      let win = window.open(url, '_blank');
+
+      win.focus();
+    });
+
+    /*
+    =====================================
+    DISPLAY MODAL WITH DOUBLE CLICK
+    =====================================
+    */
+    $( '#my-table' ).on('dblclick', 'tbody tr', function() {
+
+      console.log('test');
+
+      id = $( this ).attr( 'id' );
+
+      $.ajax({
+        type: "GET",
+        url: '{% url "measurements:get_measurement" %}',
+        data: { id: id },
+        success: function (measurementData) {
+          console.log(measurementData);
+
+          $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#bucket-date-detailed").text(measurementData["bucket_date"]);
+          $("#data-format-version-detailed").text(
+            measurementData["data_format_version"]
+          );
+          $("#input-detailed").text(measurementData["input"]);
+          $("#measurement-start-time-detailed").text(
+            measurementData["measurement_start_time"]
+          );
+          $("#options-detailed").text(measurementData["options"]);
+          $("#probe-asn-detailed").text(measurementData["probe_asn"]);
+          $("#probe-cc-detailed").text(measurementData["probe_cc"]);
+          $("#probe-ip-detailed").text(measurementData["probe_ip"]);
+          $("#report-filename-detailed").text(
+            measurementData["report_filename"]
+          );
+          $("#report-id-detailed").text(measurementData["report_id"]);
+          $("#software-name-detailed").text(
+            measurementData["software_name"]
+          );
+          $("#software-version-detailed").text(
+            measurementData["software_version"]
+          );
+          $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
+            collapsed: true,
+            rootCollapsable: false
+          });
+          $("#test-name-detailed").text(measurementData["test_name"]);
+          $("#test-runtime-detailed").text(
+            measurementData["test_runtime"]
+          );
+          $("#test-start-time-detailed").text(
+            measurementData["test_start_time"]
+          );
+          $("#test-version-detailed").text(
+            measurementData["test_version"]
+          );
+
+          $("#modalMeasurementInfo").modal("show");
+        },
+        error: function (jqXHR, textStatus, errorThrown) {
+          Swal.fire({
+            icon: "warning",
+            title: "There is an error in the inputs!",
+            confirmButtonColor: "#28a745",
+            confirmButtonText: "Continue",
+          });
+        },
+      });
+    });
+  });
+</script>
