@@ -273,6 +273,7 @@ class EventDetailData(VSFLoginRequiredMixin, View):
 
             data = {
                 "identification": eventObj.identification,
+                'confirmed': eventObj.confirmed,
                 "start_date": datetime.strftime(utc_aware_date(eventObj.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 "end_date": datetime.strftime(utc_aware_date(eventObj.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 "public_evidence": eventObj.public_evidence,
