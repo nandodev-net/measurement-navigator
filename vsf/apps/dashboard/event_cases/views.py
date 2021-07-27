@@ -215,6 +215,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         try:
             new_case = Case(
                 title = post['title'][0],
+                title_eng = post['title_eng'][0],
                 description = post['description'][0],
                 description_eng = post['description_eng'][0],
                 start_date = early_start_date,
@@ -281,6 +282,7 @@ class CaseCreateModalView(VSFLoginRequiredMixin, CreateView):
         self.object = Case(
 
             title = form.cleaned_data['title'],
+            title_eng = form.cleaned_data['title_eng'],
             case_type = form.cleaned_data['case_type'],
             start_date = form.cleaned_data['start_date'],
             end_date = form.cleaned_data['end_date'],
@@ -332,6 +334,7 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
 
             data = {
                 "title": caseObj.title,
+                "title_eng": caseObj.title_eng,
                 "description": caseObj.description,
                 "description_eng": caseObj.description_eng,
                 "case_type": caseObj.case_type,
@@ -397,6 +400,7 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
 
             Case.objects.filter(id = post['id'][0]).update(
                 title = post['title'][0],
+                title_eng = post['title_eng'][0],
                 description = post['description'][0],
                 description_eng = post['description_eng'][0],
                 start_date = post['start_date'][0] or None,
