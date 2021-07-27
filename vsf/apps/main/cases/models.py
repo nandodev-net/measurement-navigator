@@ -48,6 +48,12 @@ class Case(TimeStampedModel):
         max_length=100
         )
 
+    title_eng = models.CharField(
+        max_length=100,
+        null=True, 
+        blank=True
+    )
+
     description = models.TextField(
         null=True, 
         blank=True,

@@ -69,6 +69,11 @@
       </div>
       <hr>
       <div class="row">
+        <div class="col-3 font-weight-bold">Title English</div>
+        <div class="col-9"><span id="title_eng_slug">{{object.title_eng}}</span></div>
+      </div>
+      <hr>
+      <div class="row">
         <div class="col-3 font-weight-bold">Description</div>
         <div class="col-9"><span id="description_slug"><textarea id="description" class="form-control w-75" type="text" aria-label="Description" name="description" disabled>{{ object.description }}</textarea></span></div>
       </div>
@@ -243,8 +248,12 @@
         
         return year + "-" + monthsNumbers[month] + "-" + day + " " + hour + ":" + minutes;
     }
+
     var title = `<input value="{{ object.title }}" id="title" class="form-control w-75" type="text" aria-label="Title" name="title" required/>`;
     $( '#title_slug').empty().append(title)
+
+    var title_eng = `<input value="{{ object.title_eng }}" id="title_eng" class="form-control w-75" type="text" aria-label="Title" name="title_eng" required/>`;
+    $( '#title_eng_slug').empty().append(title_eng)
 
     var description = `<textarea id="description" class="form-control w-75" type="text" aria-label="Description" name="description">{{ object.description }}</textarea>`;
     $( '#description_slug').empty().append(description);

@@ -24255,3 +24255,6 @@ input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     text-decoration: underline;
 }
   
+.with-overflow {
+    max-width: 1250px;
+}

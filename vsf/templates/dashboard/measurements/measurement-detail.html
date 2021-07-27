@@ -17,6 +17,27 @@
     #header-runtime, #failures-card, #dns-card, #tcp-card, #http-card, #generalInfo, #raw-card, #events-card {
         width: -webkit-fill-available;;
     }
+    .btn-header-link {
+        display: block;
+        text-align: left;
+        border-bottom: none;
+    }
+    .btn-header-link:after {
+        content: "\f107";
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        float: right;
+        margin-top: -5%;
+        font-size: 2rem;
+    }
+    .btn-header-link.collapsed:after {
+        content: "\f106";
+        float: right;
+    }
+    .card-header {
+        border-bottom: none !important;
+    }
+
 </style>
 {% endblock custom_stylesheet %}
 
@@ -96,9 +117,12 @@
 
     {% if rawmeasurement.test_name == 'web_connectivity' %}
         <div class="card py-0 px-5 mt-5" id="failures-card">
-            <div class="card-header">
-                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#failures" aria-expanded="true" aria-controls="failures">Failures</a></h5>
-            </div>
+            <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#failures" aria-expanded="true" aria-controls="failures"> 
+                <div class="card-header">
+                    <h5 class="mb-0">Failures</h5>
+                </div>
+            </a>
+
             <div class="collapse" id="failures">
                 <div class="card-body">
                     <div class="row">
@@ -139,9 +163,12 @@
 
     {% if rawmeasurement.test_name == 'web_connectivity' %}
         <div class="card py-0 px-5 mt-3" id="dns-card">
-            <div class="card-header">
-                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#dns" aria-expanded="true" aria-controls="dns">DNS Queries</a></h5>
-            </div>
+            <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#dns" aria-expanded="true" aria-controls="dns">
+                <div class="card-header">
+                    <h5 class="mb-0">DNS Queries</h5>
+                </div>
+            </a>
+
             <div class="collapse" id="dns">
                 <div class="card-body">
                     <p><strong>Resolver: </strong> {{rawmeasurement.test_keys.client_resolver}}</p>
@@ -165,9 +192,11 @@
 
     {% if rawmeasurement.test_name == 'web_connectivity' %}
         <div class="card py-0 px-5 mt-3" id="tcp-card">
-            <div class="card-header">
-                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#tcp" aria-expanded="true" aria-controls="tcp">TCP Connections</a></h5>
-            </div>
+            <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#tcp" aria-expanded="true" aria-controls="tcp">
+                <div class="card-header">
+                    <h5 class="mb-0">TCP Connections</h5>
+                </div>
+            </a>
             <div class="collapse" id="tcp">
                 <div class="card-body">
                     {% if rawmeasurement.hasTcpConnections %}
@@ -191,9 +220,11 @@
 
     {% if rawmeasurement.test_name == 'web_connectivity' %}
         <div class="card py-0 px-5 mt-3" id="http-card">
-            <div class="card-header">
-                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#http" aria-expanded="true" aria-controls="http">HTTP Requests</a></h5>
-            </div>
+            <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#http" aria-expanded="true" aria-controls="http">
+                <div class="card-header">
+                    <h5 class="mb-0">HTTP Requests</h5>
+                </div>
+            </a>
             <div class="collapse" id="http">
                 <div class="card-body">
                     {% if rawmeasurement.hasHttpRequests %}
@@ -233,9 +264,11 @@
 
     {% if rawmeasurement.test_name == 'web_connectivity' %}
         <div class="card py-0 px-5 mt-3" id="raw-card">
-            <div class="card-header">
-                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#raw" aria-expanded="true" aria-controls="raw">Raw Measurement Data</a></h5>
-            </div>
+            <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#raw" aria-expanded="true" aria-controls="raw">
+                <div class="card-header">
+                    <h5 class="mb-0">Raw Measurement Data</h5>
+                </div>
+            </a>
             <div class="collapse" id="raw">
                 <div class="card-body">
                     <pre id="raw-data"> {{rawmeasurement.rawjson}} </pre>
@@ -245,9 +278,11 @@
     {% endif %}
 
     <div class="card py-0 px-5 mt-2" id="events-card">
-        <div class="card-header">
-            <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events" aria-expanded="true" aria-controls="events">Events</a></h5>
-        </div>
+        <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#events" aria-expanded="true" aria-controls="events">
+            <div class="card-header">
+                <h5 class="mb-0">Events</h5>
+            </div>
+        </a>
         <div class="collapse" id="events">
             <div class="card-body">
                 <table class="table table-striped mt-5 datatable" id="events-table">
@@ -298,8 +333,11 @@
 
 <script>
 
+
     $(document).ready(function() {
-        
+
+
+
         $('#events-table').DataTable({
             order: [[ 2, "desc" ]],
             searching: true,
