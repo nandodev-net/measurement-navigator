@@ -1,7 +1,9 @@
 {% extends 'extends/base.html' %}
 {% load static %}
 {% block custom_stylesheet %}
-<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" />
+<link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+ 
 {% endblock custom_stylesheet %}
 
 {% block tab_title %} VSF - Events {% endblock tab_title %}
@@ -148,7 +150,7 @@
 
           <div class="col-4 mt-4">
             <small>
-              <strong>Dynamic loading of filters</strong>
+              <strong>Autoload filters</strong>
             </small>
             <input class='ml-2' id='dynamic' type="checkbox" value="">
           </div>
@@ -208,6 +210,7 @@
 {% block custom_scripts %}
   <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
   <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+  <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
 
   
 
@@ -216,12 +219,14 @@
     'use strict';
     var events; 
     var casesTable;
+    var idLastSaved;
 
     function open_edit_modal(url){
       $('#edit_event').load(url, function(){
         $(this).modal('show');
       });
     }
+
     $(' .additional-filter ').change( function() {
       let check = $( '#dynamic' ).is(':checked');
       if (check) {
@@ -277,6 +282,7 @@
     $( '#events' ).on('dblclick', 'tbody tr', function() {
 
       var id = $( this ).attr( 'id' );
+      idLastSaved = id;
 
       $.ajax({
         url    : "{% url 'dashboard:events:get' %}",
@@ -291,12 +297,29 @@
           $( '#domain_detail' ).text(json["domain"]);
           $( '#asn_detail' ).text(json["asn"]);
           $( '#link' ).attr("href", url);
+          if (json['confirmed']) {
+            $( '#confirm_toggle' ).attr("checked", "checked");
+          }
+          console.log($( '#confirm_toggle' ));
         }
       });
       jQuery.noConflict();
       
       $("#eventDetail").modal("show");
+      
     });
+
+    $('#confirm_toggle').change(function() {
+
+      $.ajax({
+        type: "POST",
+        url: "{% url 'dashboard:events:confirm' %}",
+        data: { events: [idLastSaved] , csrfmiddlewaretoken: "{{ csrf_token }}"},
+      });  
+      events.ajax.reload() 
+
+    });
+
 
     $( '#associateBtn' ).click(function (event) {
       var eventsSelected = events.rows( { selected: true }).data().toArray();
