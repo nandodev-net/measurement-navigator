@@ -189,7 +189,65 @@
   }
 
   $(document).ready(function() {
-    torList = $('#tor-list').DataTable();
+    torList = $('#tor-list').DataTable({
+        order: [[0, "desc"]],
+        searching: true,
+        processing: true,
+        language: {
+        },
+        serverSide: true,
+        rowId: "measurement__id",
+        ajax: {
+          url: '{% url "dashboard:submeasurement:list_tor_data" %}',
+          data: function (data) {
+
+            data.since = $("#since").val() ;
+            data.asn = $("#asn").val();
+            data.dir_port_accessible = $("#dir-port-accesible").val();
+            data.obfs4_accessible = $("#obfs4-accesible").val(); 
+
+          },
+          contentType: "application/json; charset=utf-8",  
+          type: "GET",
+        },
+        columns: [
+          {
+            data: "measurement__raw_measurement__measurement_start_time",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "measurement__raw_measurement__probe_asn",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "dir_port_total",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "dir_port_accessible",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "obfs4_total",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "obfs4_accessible",
+            orderable: true,
+            searchable: true,
+          },
+        ],
+        initComplete: function () {},
+        select: {
+          style: 'single'
+        },
+        buttons: [],
+      });
   });
   
 </script>

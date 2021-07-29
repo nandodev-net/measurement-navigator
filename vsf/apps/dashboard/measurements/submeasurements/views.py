@@ -588,6 +588,67 @@ class ListTorTemplate(ListSubMeasurementTemplate):
         context =  super().get_context_data()
         prefill = context['prefill']
         get = self.request.GET or {}
-        
+
         context['prefill'] = prefill
         return context
+
+class ListTORBackEnd(ListSubMeasurementBackend):
+    """
+        This is the back end for the tor submeasurement table. The dynamic
+        table in "ListTORTemplate" talks to this view
+    """
+
+    columns = ListSubMeasurementBackend.columns +  [
+        'dir_port_total',
+        'dir_port_accessible',
+        'obfs4_total',
+        'obfs4_accessible'
+    ]
+
+    order_columns = ListSubMeasurementBackend.order_columns +  [
+        'dir_port_total',
+        'dir_port_accessible',
+        'obfs4_total',
+        'obfs4_accessible'
+    ]
+
+    SubMeasurement = SubMeasModels.TOR
+
+    def filter_queryset(self, qs):
+        qs = super().filter_queryset(qs)
+        get = self.request.GET or {}
+
+        dir_port_total, dir_port_accessible = get.get('dir_port_total'), get.get('dir_port_accessible')
+        obfs4_total, obfs4_accessible = get.get('obfs4_total'), get.get('obfs4_accessible')
+
+        return qs
+
+    def prepare_results(self, qs):
+        # prepare list with output column data
+        # queryset is already paginated here
+        json_data = []
+
+        qs = qs.only(
+            'measurement__raw_measurement__measurement_start_time',
+            'measurement__raw_measurement__probe_asn',
+            'measurement__id',
+            'measurement__domain__site__name',
+            'dir_port_total',
+            'dir_port_accessible',
+            'obfs4_total',
+            'obfs4_accessible'
+        )
+
+        print(qs)
+        for item in qs:
+            print(item)
+            json_data.append({
+                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
+                'measurement__id' : item.measurement.id,
+                'dir_port_total' : item.dir_port_total or 0,
+                'dir_port_accessible' : item.dir_port_accessible or 0,
+                'obfs4_total' : item.obfs4_total or 0,
+                'obfs4_accessible' : item.obfs4_accessible or 0, 
+            })
+        return json_data
