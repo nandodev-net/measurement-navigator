@@ -41,5 +41,10 @@ urlpatterns = [
         ListTorTemplate.as_view(),
         name='list_tor'
     ),
+    path(
+        'tor_data/',
+        ListTORBackEnd.as_view(),
+        name='list_tor_data'
+    ),
 
 ]
