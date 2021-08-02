@@ -77,10 +77,18 @@ class Case(TimeStampedModel):
         blank=True,
     )
 
+    start_date_manual = models.BooleanField (
+        default=False 
+    )
+
     end_date = models.DateTimeField(
         null=True, 
         blank=True,
         )
+
+    end_date_manual = models.BooleanField (
+        default=False 
+    )
 
     category = models.ForeignKey(   
         to=Category,                          

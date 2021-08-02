@@ -144,8 +144,13 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">Start Date:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9 d-inline-flex">
                     <p><span id="start_date_slug">{{ object.get_start_date }}</span></p>
+                    {% if start_manual %}
+                        <i class="fas fa-pencil-alt ml-2"></i>
+                    {% else %}
+                        <i class="fas fa-magic ml-2"></i>
+                    {% endif %}
                 </div>
             </div>
             <hr>
@@ -153,8 +158,13 @@
                 <div class="col-3">
                     <h5 class="font-weight-bold">End Date:</h5>
                 </div>
-                <div class="col-9">
+                <div class="col-9 d-inline-flex">
                     <p><span id="end_date_slug">{{ object.get_end_date }}</span></p>
+                    {% if end_manual %}
+                        <i class="fas fa-pencil-alt ml-2"></i>
+                    {% else %}
+                        <i class="fas fa-magic ml-2"></i>
+                    {% endif %}
                 </div>
             </div>
             <hr>

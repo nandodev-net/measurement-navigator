@@ -281,9 +281,10 @@ class EventDetailData(VSFLoginRequiredMixin, View):
                 "issue_type": eventObj.issue_type,
                 "domain": eventObj.domain.domain_name,
                 "asn": eventObj.asn.asn,
-
+                "start_manual": eventObj.isStartDateManual(),
+                "end_manual": eventObj.isEndDateManual(),
             }
-            
+            print(data)
             return JsonResponse(data, safe=False)
         else:
             return JsonResponse({})
@@ -303,6 +304,10 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
         if context['object'].closed:
             status = "closed"
         context['status'] = status 
+        
+        context['start_manual'] = context['object'].isStartDateManual()
+        context['end_manual'] = context['object'].isEndDateManual()
+        print(context['start_manual'])
         
         queryStr = issue_type.upper() + '.objects.all()'
         submeasures = eval(queryStr)

@@ -102,6 +102,17 @@ class Event(TimeStampedModel):
         blank= True
     )
 
+    def isStartDateManual(self) -> bool:
+        if self.manual_start_date:
+            return True 
+        return False
+
+    def isEndDateManual(self) -> bool:
+        if self.manual_end_date:
+            return True 
+        return False
+
+
     def generate_title(self) -> str:
         """
             This function will return a string that should be used as auto-title

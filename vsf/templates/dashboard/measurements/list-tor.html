@@ -143,6 +143,22 @@
       </div>
     </nav>
 
+    <div class="card py-0 px-5 mt-5" id="histogram-card">
+      <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#histogram" aria-expanded="true" aria-controls="failures"> 
+          <div class="card-header">
+              <h5 class="mb-0">Histogram</h5>
+          </div>
+      </a>
+      <div class="collapse" id="histogram">
+          <div class="card-body">
+              <div id="container">
+                <canvas id="stacked-bar"></canvas>
+              </div>
+          </div>
+      </div>
+    </div>
+
+
     <div class="card rounded p-5" id="">
       <div class="table-responsive">
         <table class="table table-striped mt-5 datatable" id="tor-list">
@@ -175,6 +191,9 @@
 <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
 <script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+
+
 {% include "includes/js/measurements-includes-js/copy-clipboard-search-url-js.html" %}
 <script>
   'use strict';
@@ -187,6 +206,53 @@
   function updatedir(val) {
     $('#valuedir').text(val + '%'); 
   }
+
+  const labels = [
+    '20/07', '21/07', '22/07', '23/07', '24/07', '25/07', '26/07', '27/07', '28/07', '29/07',
+    '30/07', '31/07', '01/07'
+  ];
+  const data = {
+    labels: labels,
+    datasets: [
+      {
+        label: 'Red Flags',
+        data: [15, 0, 13, 0, 1, 0, 2, 3, 0, 4, 0, 0, 0],
+        backgroundColor: '#f2797f',
+      },
+      {
+        label: 'Normal Measurements',
+        data: [1, 15, 22, 13, 12, 4, 10, 9, 8, 4, 3, 2],
+        backgroundColor: '#79a9f2',
+      },
+    ]
+  };
+
+  const config = {
+    type: 'bar',
+    data: data,
+    options: {
+      plugins: {
+        title: {
+          display: true,
+          text: 'Chart.js Bar Chart - Stacked'
+        },
+      },
+      responsive: true,
+      scales: {
+        x: {
+          stacked: true,
+        },
+        y: {
+          stacked: true
+        }
+      }
+    }
+  };
+
+  window.onload = function() {
+    var ctx = document.getElementById('stacked-bar').getContext('2d');
+    window.myPie = new Chart(ctx, config);
+  };
 
   $(document).ready(function() {
     torList = $('#tor-list').DataTable({

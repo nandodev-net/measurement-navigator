@@ -18,11 +18,11 @@
     // Whenever you change some field in search form, update search url
     $(".additional-filter").change(updateSearchUrl);
 
+
     // When click in copy url btn, copy to clip board
     $("#copy-search-url-btn").click(function (e) {
       e.preventDefault();
       
-
       // Get the text element whose value is going to get copied into clipboard
       let $textArea = $("#copy-search-url");
 
@@ -31,7 +31,7 @@
       // Focus and select such field
       $textArea.focus();
       $textArea.select();
-
+      
       
       // Status messages
       let $successMessage = $("#copy-clipboard-success");
@@ -81,6 +81,13 @@
       let args = $.param(params);
       // Update field value
       $("#copy-search-url").val(url + args);
+
+      let check = $( '#dynamic' ).is(':checked');
+      console.log(check);
+      if (check) {
+        window.history.replaceState(null,null, $("#copy-search-url").val());
+      }
+
     }
   });
 </script>
