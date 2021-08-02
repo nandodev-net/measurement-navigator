@@ -169,8 +169,6 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         context['categoryNames'] = categoryNames
 
         x = datetime.fromisoformat('2021-03-02 00:00:00+00:00')
-        print(x)
-        print('trololo')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -192,20 +190,24 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         if oldest_start_date:
             oldest_start_date = datetime.strptime(oldest_start_date, '%Y-%m-%d %H:%M')
 
-        
-        print(oldest_start_date)
+      
 
         start_dates, end_dates = [], []
         for i in eventsObject:
             start_dates.append(i.get_start_date())
             end_dates.append(i.get_end_date())
 
+        start_date_manual = False
         if post['start_date'][0] == None or post['start_date'][0] == "": 
             early_start_date = min(start_dates)
+        else:
+            start_date_manual = True
 
+        end_date_manual = False
         if post['end_date'][0] == None or post['end_date'][0] == "": 
             oldest_start_date = max(end_dates)
-
+        else:
+            end_date_manual = True
 
         
         
@@ -213,13 +215,18 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         category = Category.objects.filter(name = post['category'][0]).first()
         
         try:
+            print('----------')
+            print(post)
+            print(post['title_eng'][0])
             new_case = Case(
                 title = post['title'][0],
                 title_eng = post['title_eng'][0],
                 description = post['description'][0],
                 description_eng = post['description_eng'][0],
                 start_date = early_start_date,
+                start_date_manual = start_date_manual,
                 end_date = oldest_start_date,
+                end_date_manual = end_date_manual,
                 case_type = post['case_type'][0].lower(),
                 category = category,
                 twitter_search = post['twitter_search'][0],
@@ -340,13 +347,15 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 "case_type": caseObj.case_type,
                 'start_date': datetime.strftime(utc_aware_date(caseObj.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'end_date': datetime.strftime(utc_aware_date(caseObj.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'start_date_manual': caseObj.start_date_manual,
+                'end_date_manual': caseObj.end_date_manual,
                 "category": caseObj.category.name,
                 "published": caseObj.published,
                 "twitter_search": caseObj.twitter_search,
                 "events": events
 
             }
-            
+            print(data)
             return JsonResponse(data, safe=False)
         else:
             return JsonResponse({})
@@ -359,6 +368,7 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
         category = context['object'].category.name
         context['category'] = category
 

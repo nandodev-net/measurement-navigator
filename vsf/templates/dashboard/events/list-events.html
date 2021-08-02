@@ -300,7 +300,18 @@
           if (json['confirmed']) {
             $( '#confirm_toggle' ).attr("checked", "checked");
           }
-          console.log($( '#confirm_toggle' ));
+          $(' #icon_start ').empty();
+          $(' #icon_end ').empty();
+          if (json['start_manual']) {
+            $(' #icon_start ').append('<i class="fas fa-pencil-alt"></i>');
+          } else {
+            $(' #icon_start ').append('<i class="fas fa-magic"></i>');
+          }
+          if (json['end_manual']) {
+            $(' #icon_end ').append('<i class="fas fa-pencil-alt"></i>');
+          } else {
+            $(' #icon_end ').append('<i class="fas fa-magic"></i>');
+          }
         }
       });
       jQuery.noConflict();

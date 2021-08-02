@@ -20,7 +20,7 @@
       <link href="{% static 'css/vendor.css' %}" rel="stylesheet" />
       <link href="{% static 'css/jquery.json-viewer.css' %}" rel="stylesheet" />
     {% endblock style %}
-
+  
     {% block custom_stylesheet %}
     {% endblock custom_stylesheet %}
   </head>
@@ -225,6 +225,7 @@
           </li>
 
           
+          
         </ul>
       </div>
     </header>
@@ -297,6 +298,16 @@
         <script src="{% static 'js/plugins/sweetalert.js' %}"></script>
         <script src="{% static 'js/jquery.json-viewer.js' %}"></script>
         <script>
+          
+            $('.drp-tmz').on('mousedown',function(ev) {
+              
+              $('.drp-tmz').toggleClass('open');
+            });
+
+            $('.drp-tmz').on('mouseup',function(ev) {
+              
+              $('.drp-tmz').toggleClass('open');
+            });
 
             $('#tz_selector').change(function(){
                 console.log('SETEO', $('#tz_selector').val())

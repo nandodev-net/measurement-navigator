@@ -24224,8 +24224,35 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
     background-color: #343a40;
     border-color: #343a40;
     color: white;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
+.drp-tmz:after {
+    display:block;
+    position:absolute;
+    right: -15%;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    height: max-content;
+    font-family: "Font Awesome 5 free";
+    content: "\f358"
+  }
+.drp-tmz.open:after {
+    display:block;
+    position:absolute;
+    right: -15%;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    height: max-content;
+    font-family: "Font Awesome 5 free";
+    content: "\f359"
+  }
+
+  
 .btn-blue {
     color: #fff;
     background-color: #00BDF8;
@@ -24257,4 +24284,25 @@ input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
   
 .with-overflow {
     max-width: 1250px;
+}
+
+.btn-header-link {
+    display: block;
+    text-align: left;
+    border-bottom: none;
+}
+.btn-header-link:after {
+    content: "\f107";
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    float: right;
+    margin-top: -5%;
+    font-size: 2rem;
+}
+.btn-header-link.collapsed:after {
+    content: "\f106";
+    float: right;
+}
+.card-header {
+    border-bottom: none !important;
 }

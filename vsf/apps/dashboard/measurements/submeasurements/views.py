@@ -589,8 +589,20 @@ class ListTorTemplate(ListSubMeasurementTemplate):
         prefill = context['prefill']
         get = self.request.GET or {}
 
+        dir_port_accessible = get.get('dir_port_accessible')
+        if dir_port_accessible:
+            prefill['dir_port_accessible'] = dir_port_accessible
+        
+        obfs4_accessible = get.get('obfs4_accessible')
+        if obfs4_accessible:
+            prefill['obfs4_accessible'] = obfs4_accessible
+
+
         context['prefill'] = prefill
         return context
+
+    
+
 
 class ListTORBackEnd(ListSubMeasurementBackend):
     """

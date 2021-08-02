@@ -200,6 +200,19 @@
         $( '#category_detail' ).text(json["category"]);
         $( '#published_detail' ).text(json["published"]);
         $( '#twitter_search_detail' ).text(json["twitter_search"]);
+        $(' #icon_start ').empty();
+        $(' #icon_end ').empty();
+        if (json['start_date_manual']) {
+          $(' #icon_start ').append('<i class="fas fa-pencil-alt"></i>');
+        } else {
+          $(' #icon_start ').append('<i class="fas fa-magic"></i>');
+        }
+        if (json['end_date_manual']) {
+          $(' #icon_end ').append('<i class="fas fa-pencil-alt"></i>');
+        } else {
+          $(' #icon_end ').append('<i class="fas fa-magic"></i>');
+        }
+
         var eventsJson = json["events"];
         var body = '';
         eventsJson.forEach(el => {
