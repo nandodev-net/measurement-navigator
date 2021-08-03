@@ -229,7 +229,7 @@
 
     <div class="card rounded p-5 with-overflow" id="domains-list-card">
       <div class="table-responsive">
-        <table class="table table-striped mt-5 datatable" id="dns-list">
+        <table class="table table-striped mt-5 datatable wrap" id="dns-list">
           <thead>
             <tr>
               <th class="text-center text-capitalize" scope="col">Input</th>
@@ -536,6 +536,9 @@
             data: "measurement__raw_measurement__input",
             orderable: true,
             searchable: true,
+            render: function (data, type, row, meta) {
+              return `<div class='wrapper-dt'> ${data} </div>`
+            }
           },
           {
             data: "measurement__raw_measurement__measurement_start_time",
@@ -601,17 +604,16 @@
             searchable: false,
             render: function (data, type, row, meta) {
               if (data.isOk) {
-                let html = "<div class='answer text-left'>"
+                let html = "<div class='answer text-left wrapper-dt'>"
                 let json = data.json
                 for (const type in json) {
                   if (json[type].length === 0) continue
 
                   html += `<strong>${type}:</strong>`;
-                  html += "<ul class='mb-0'>";
                   
-                  json[type].forEach(x => html+=`<li><pre class='mb-0'> ${x} </pre></li>`)
+                  json[type].forEach(x => html+=`<pre class='mb-0 text-left'> - ${x} </pre>`)
 
-                  html += "</ul>";
+                
 
                 }
                 html += "</div>"
@@ -629,16 +631,16 @@
             render: function (data, type, row, meta) {
               console.log(data)
               if (data.isOk) {
-                let html = "<strong>Address:</strong>";
-                html += "<ul>";
+                let html = `<div class='text-left wrapper-dt'><strong>Address:</strong>`;
+                
                 for (const i in data.json)
-                  html += `<li> <pre class='mb-0'> ${data.json[i]} </pre> </li>`
+                  html += `<pre class='mb-0 text-left'> - ${data.json[i]} </pre>`
 
-                html += "</ul>";
+                  html += `</div>`
                 return html;
               }
               else
-                return `<pre class='controlResolverAnswers'> ${prettyPrintJson.toHtml(data)} </pre>`;
+                return `<div class='text-left'><pre class='controlResolverAnswers'> ${prettyPrintJson.toHtml(data)} </pre></div>`;
             },
           },
           {

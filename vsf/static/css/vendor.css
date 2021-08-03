@@ -24306,3 +24306,12 @@ input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
 .card-header {
     border-bottom: none !important;
 }
+
+.wrapper-dt {
+    width: 200px !important;
+    white-space: pre-wrap;      /* CSS3 */   
+    white-space: -moz-pre-wrap; /* Firefox */    
+    white-space: -pre-wrap;     /* Opera <7 */   
+    white-space: -o-pre-wrap;   /* Opera 7 */    
+    word-wrap: break-word;      /* IE */
+}
