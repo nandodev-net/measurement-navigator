@@ -47,18 +47,18 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         sites = Site.objects.all()
 
         # Get the most recent measurement:
-        last_measurement_date = self.SubMeasurement\
-                                .objects.all()\
-                                .order_by("-measurement__raw_measurement__measurement_start_time")\
-                                .values("measurement__raw_measurement__measurement_start_time")\
-                                .first()
+        # last_measurement_date = self.SubMeasurement\
+        #                         .objects.all()\
+        #                         .order_by("-measurement__raw_measurement__measurement_start_time")\
+        #                         .values("measurement__raw_measurement__measurement_start_time")\
+        #                         .first()
 
         #   If there is no measurements, result is going to be none, cover that case.
-        if last_measurement_date is None:
-            last_measurement_date = "No measurements yet"
-        else:
-            ##last_measurement_date = utc_aware_date(last_measurement_date["measurement__raw_measurement__measurement_start_time"], self.request.session['system_tz'])
-            last_measurement_date = datetime.strftime(last_measurement_date["measurement__raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
+        # if last_measurement_date is None:
+        #     last_measurement_date = "No measurements yet"
+        # else:
+        #     ##last_measurement_date = utc_aware_date(last_measurement_date["measurement__raw_measurement__measurement_start_time"], self.request.session['system_tz'])
+        #     last_measurement_date = datetime.strftime(last_measurement_date["measurement__raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
 
         # Compute flag types
         flag_types = []
@@ -100,7 +100,7 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         context['flags'] = flag_types
         context['sites'] = sites
         context['asns'] = AsnModels.ASN.objects.all()
-        context['last_measurement_date'] = last_measurement_date
+        # context['last_measurement_date'] = last_measurement_date
         context['prefill'] = prefill
 
         return context
