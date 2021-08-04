@@ -48,17 +48,17 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
 
         # Get the most recent measurement:
         last_measurement_date = self.SubMeasurement\
-                                .objects.all()\
-                                .order_by("-measurement__raw_measurement__measurement_start_time")\
-                                .values("measurement__raw_measurement__measurement_start_time")\
-                                .first()
+                                .objects.last()#\
+                                # .order_by("-measurement__raw_measurement__measurement_start_time")\
+                                # .values("measurement__raw_measurement__measurement_start_time")\
+                                # .first()
 
         #   If there is no measurements, result is going to be none, cover that case.
         if last_measurement_date is None:
             last_measurement_date = "No measurements yet"
         else:
             ##last_measurement_date = utc_aware_date(last_measurement_date["measurement__raw_measurement__measurement_start_time"], self.request.session['system_tz'])
-            last_measurement_date = datetime.strftime(last_measurement_date["measurement__raw_measurement__measurement_start_time"], "%Y-%m-%d %H:%M:%S")
+            last_measurement_date = datetime.strftime(last_measurement_date.measurement.raw_measurement.measurement_start_time, "%Y-%m-%d %H:%M:%S")
 
         # Compute flag types
         flag_types = []
