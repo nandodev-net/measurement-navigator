@@ -340,13 +340,6 @@
       },
     });
 
-    /*eventsTable = $('#events').DataTable({
-      order: [[2, "desc"]],
-      searching: true,
-      select: {
-        style: 'multi'
-      },
-    });*/
   });
 
   $( '#deletecaseBtn' ).click(function (event) {
@@ -355,7 +348,6 @@
         selected.id
       ));
 
-      console.log('AAA',casesSelected)
       $.ajax({
         type: "GET",
         url: '{% url "dashboard:event_cases:case_delete" %}',

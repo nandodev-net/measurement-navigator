@@ -177,11 +177,33 @@
                             <p><strong>Query: </strong> IN {{query.query_type}} {{query.hostname}}</p>
                             <p><strong>Engine: </strong> {{query.engine}} </p>
 
-                            {% if query.failure %}
-                                <i class="fas fa-times mr-2"></i> {{query.failure}}
-                            {% else %}
-                                <i class="fas fa-check mr-2"></i> null
-                            {% endif %}
+                            <div class="row">
+                                <div class="col-1"><p><strong>Name</strong></p></div>
+                                <div class="col-1"><p><strong>Class</strong></p></div>
+                                <div class="col-1"><p><strong>TTL</strong></p></div>
+                                <div class="col-1"><p><strong>Type</strong></p></div>
+                                <div class="col-2"><p><strong>DATA</strong></p></div>
+                                <div class="col-6"></div>
+                            </div>
+
+                            {% for item in query.answers %}
+                            <div class="row">
+                                {% if item.as_org_name == '<unknown>' %}
+                                    <div class="col-1"><p>@</p></div>
+                                {% else %}
+                                    <div class="col-1"><p>@ {{ item.as_org_name }}</p></div>
+                                {% endif %}
+                                <div class="col-1"><p>IN</p></div>
+                                {% if item.ttl %}
+                                    <div class="col-1"><p> {{ item.ttl }}</p></div>
+                                {% else %}
+                                    <div class="col-1"><p></p></div>
+                                {% endif %}
+                                <div class="col-1"><p> {{ item.answer_type }} </p></div>
+                                <div class="col-2"><p>{{ item.ipv4 }}</p></div>
+                                <div class="col-6"></div>
+                            </div>
+                            {% endfor %}
                     </div>
                     {% endfor %}
                     

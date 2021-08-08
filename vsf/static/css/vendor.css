@@ -24221,6 +24221,7 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
 }
 
 #tz_selector {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='gray' d='M2 0L0 2h4zm0 5L0 3h4z'/%3E%3C/svg%3E");
     background-color: #343a40;
     border-color: #343a40;
     color: white;
@@ -24228,30 +24229,6 @@ div.dtk-focus-alt table.dataTable tbody th.focus {
     -moz-appearance: none;
     appearance: none;
 }
-
-.drp-tmz:after {
-    display:block;
-    position:absolute;
-    right: -15%;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-    height: max-content;
-    font-family: "Font Awesome 5 free";
-    content: "\f358"
-  }
-.drp-tmz.open:after {
-    display:block;
-    position:absolute;
-    right: -15%;
-    top: 0;
-    bottom: 0;
-    margin: auto;
-    height: max-content;
-    font-family: "Font Awesome 5 free";
-    content: "\f359"
-  }
-
   
 .btn-blue {
     color: #fff;
@@ -24283,7 +24260,7 @@ input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
 }
   
 .with-overflow {
-    max-width: 1250px;
+    max-width:fit-content;
 }
 
 .btn-header-link {
@@ -24296,7 +24273,7 @@ input::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     font-family: 'Font Awesome 5 Free';
     font-weight: 900;
     float: right;
-    margin-top: -5%;
+    margin-top: -4rem;
     font-size: 2rem;
 }
 .btn-header-link.collapsed:after {

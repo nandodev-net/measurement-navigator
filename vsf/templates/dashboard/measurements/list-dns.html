@@ -452,7 +452,7 @@
       },
       {
         label: 'Normal Measurements',
-        data: [1, 15, 22, 13, 12, 4, 10, 9, 8, 4, 3, 2],
+        data: [1, 15, 20, 13, 12, 4, 10, 9, 8, 4, 3, 2],
         backgroundColor: '#79a9f2',
       },
     ]
@@ -470,12 +470,8 @@
       },
       responsive: true,
       scales: {
-        x: {
-          stacked: true,
-        },
-        y: {
-          stacked: true
-        }
+        xAxes: [{ stacked: true }],
+        yAxes: [{ stacked: true }]
       }
     }
   };

@@ -211,8 +211,8 @@
           </li>
 
           <li class=''>
-              <div class="dropdown drp-tmz mr-5">
-                  <select id="tz_selector" class="w-100" name="tz_selector">
+              <div class="dropdown mr-5">
+                  <select id="tz_selector" class="w-100 custom-select" name="tz_selector">
                       {% if request.session.system_tz == "1" %}
                           <option value="1" selected>UTC (0)</option>
                           <option value="2">Caracas (utc -4)</option>
@@ -298,16 +298,7 @@
         <script src="{% static 'js/plugins/sweetalert.js' %}"></script>
         <script src="{% static 'js/jquery.json-viewer.js' %}"></script>
         <script>
-          
-            $('.drp-tmz').on('mousedown',function(ev) {
-              
-              $('.drp-tmz').toggleClass('open');
-            });
 
-            $('.drp-tmz').on('mouseup',function(ev) {
-              
-              $('.drp-tmz').toggleClass('open');
-            });
 
             $('#tz_selector').change(function(){
                 console.log('SETEO', $('#tz_selector').val())
