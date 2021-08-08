@@ -543,12 +543,8 @@
       },
       responsive: true,
       scales: {
-        x: {
-          stacked: true,
-        },
-        y: {
-          stacked: true
-        }
+        xAxes: [{ stacked: true }],
+        yAxes: [{ stacked: true }]
       }
     }
   };
@@ -612,6 +608,9 @@
             data: "measurement__raw_measurement__input",
             orderable: true,
             searchable: true,
+            render: function (data, type, row, meta) {
+              return `<div class='wrapper-dt'> ${data} </div>`
+            }
           },
           {
             data: "measurement__raw_measurement__measurement_start_time",
