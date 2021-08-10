@@ -56,6 +56,14 @@ class SubMeasurement(TimeStampedModel):
         verbose_name = 'confirmed?'
     )
 
+    ############################################### data duplicada
+    measurement_start_time = models.DateTimeField(null=True, blank=True, db_index=True)
+    input = models.TextField(null=True, blank=True, db_index=True)
+    probe_cc = models.CharField(null=True, blank=True, max_length=50)
+    probe_asn = models.CharField(null=True, blank=True, max_length=50)
+    anomaly = models.BooleanField(null=True, blank=True, default=False)
+    ###############################################
+
     # If ooni tells that this type of measurement is the blocking reason
     # If true, it is, if false, it is not, if null, we know nothing
     ooni_reason_for_blocking = models.NullBooleanField(default=None)
