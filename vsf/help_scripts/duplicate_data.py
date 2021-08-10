@@ -1,106 +1,117 @@
 from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMModels
-
-dns = SubMModels.DNS.objects.all()
-count_dns =  dns.count()
-i = 1
-
-for instance in dns:
-    print ('duplicating DNS: ', i, 'from', count_dns)
-
-    if instance.measurement.raw_measurement.input:
-        instance.input = instance.measurement.raw_measurement.input
-
-    if instance.measurement.raw_measurement.measurement_start_time:
-        instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
-
-    if instance.measurement.raw_measurement.probe_asn:
-        instance.probe_asn = instance.measurement.raw_measurement.probe_asn
-
-    if instance.measurement.raw_measurement.probe_cc:
-        instance.probe_cc = instance.measurement.raw_measurement.probe_cc
-
-    if instance.measurement.anomaly:
-        instance.anomaly = instance.measurement.anomaly
-    instance.save()
-
-    i = i+1
+from django.core.paginator import Paginator
 
 
-http = SubMModels.HTTP.objects.all()
-count_http =  http.count()
-i = 1
+dns_ = SubMModels.DNS.objects.all()
+count_dns =  dns_.count()
+dns = Paginator(dns_, 1000)
 
-for instance in http:
-    print ('duplicating HTTP: ', i, 'from', count_http)
+for page_idx in range(1, dns.num_pages):
+    i = 1
+    for instance in dns.page(page_idx).object_list:
+        print ('duplicating DNS: ', i, 'from', count_dns)
 
-    if instance.measurement.raw_measurement.input:
-        instance.input = instance.measurement.raw_measurement.input
+        if instance.measurement.raw_measurement.input:
+            instance.input = instance.measurement.raw_measurement.input
 
-    if instance.measurement.raw_measurement.measurement_start_time:
-        instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
+        if instance.measurement.raw_measurement.measurement_start_time:
+            instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
 
-    if instance.measurement.raw_measurement.probe_asn:
-        instance.probe_asn = instance.measurement.raw_measurement.probe_asn
+        if instance.measurement.raw_measurement.probe_asn:
+            instance.probe_asn = instance.measurement.raw_measurement.probe_asn
 
-    if instance.measurement.raw_measurement.probe_cc:
-        instance.probe_cc = instance.measurement.raw_measurement.probe_cc
+        if instance.measurement.raw_measurement.probe_cc:
+            instance.probe_cc = instance.measurement.raw_measurement.probe_cc
 
-    if instance.measurement.anomaly:
-        instance.anomaly = instance.measurement.anomaly
-    instance.save()
+        if instance.measurement.anomaly:
+            instance.anomaly = instance.measurement.anomaly
+        instance.save()
 
-    i = i+1
-
-
-
-tcp = SubMModels.TCP.objects.all()
-count_tcp =  tcp.count()
-i = 1
-
-for instance in tcp:
-    print ('duplicating TCP: ', i, 'from', count_tcp)
-
-    if instance.measurement.raw_measurement.input:
-        instance.input = instance.measurement.raw_measurement.input
-
-    if instance.measurement.raw_measurement.measurement_start_time:
-        instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
-
-    if instance.measurement.raw_measurement.probe_asn:
-        instance.probe_asn = instance.measurement.raw_measurement.probe_asn
-
-    if instance.measurement.raw_measurement.probe_cc:
-        instance.probe_cc = instance.measurement.raw_measurement.probe_cc
-
-    if instance.measurement.anomaly:
-        instance.anomaly = instance.measurement.anomaly
-    instance.save()
-
-    i = i+1
+        i = i+1
 
 
-tor = SubMModels.TOR.objects.all()
-count_tor =  tor.count()
-i = 1
+http_ = SubMModels.HTTP.objects.all()
+count_http =  http_.count()
+http = Paginator(http_, 1000)
 
-for instance in tor:
-    print ('duplicating TOR: ', i, 'from', count_tor)
+for page_idx in range(1, http.num_pages):
+    i = 1
+    for instance in http.page(page_idx).object_list:
+        print ('duplicating HTTP: ', i, 'from', count_http)
 
-    if instance.measurement.raw_measurement.input:
-        instance.input = instance.measurement.raw_measurement.input
+        if instance.measurement.raw_measurement.input:
+            instance.input = instance.measurement.raw_measurement.input
 
-    if instance.measurement.raw_measurement.measurement_start_time:
-        instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
+        if instance.measurement.raw_measurement.measurement_start_time:
+            instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
 
-    if instance.measurement.raw_measurement.probe_asn:
-        instance.probe_asn = instance.measurement.raw_measurement.probe_asn
+        if instance.measurement.raw_measurement.probe_asn:
+            instance.probe_asn = instance.measurement.raw_measurement.probe_asn
 
-    if instance.measurement.raw_measurement.probe_cc:
-        instance.probe_cc = instance.measurement.raw_measurement.probe_cc
+        if instance.measurement.raw_measurement.probe_cc:
+            instance.probe_cc = instance.measurement.raw_measurement.probe_cc
 
-    if instance.measurement.anomaly:
-        instance.anomaly = instance.measurement.anomaly
-    instance.save()
+        if instance.measurement.anomaly:
+            instance.anomaly = instance.measurement.anomaly
+        instance.save()
 
-    i = i+1
+        i = i+1
+
+
+
+tcp_ = SubMModels.TCP.objects.all()
+count_tcp =  tcp_.count()
+tcp = Paginator(tcp_, 1000)
+
+for page_idx in range(1, tcp.num_pages):
+    i = 1
+    for instance in tcp.page(page_idx).object_list:
+        print ('duplicating TCP: ', i, 'from', count_tcp)
+
+        if instance.measurement.raw_measurement.input:
+            instance.input = instance.measurement.raw_measurement.input
+
+        if instance.measurement.raw_measurement.measurement_start_time:
+            instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
+
+        if instance.measurement.raw_measurement.probe_asn:
+            instance.probe_asn = instance.measurement.raw_measurement.probe_asn
+
+        if instance.measurement.raw_measurement.probe_cc:
+            instance.probe_cc = instance.measurement.raw_measurement.probe_cc
+
+        if instance.measurement.anomaly:
+            instance.anomaly = instance.measurement.anomaly
+        instance.save()
+
+        i = i+1
+
+
+
+tor_ = SubMModels.TOR.objects.all()
+count_tor =  tor_.count()
+tor = Paginator(tor_, 1000)
+
+for page_idx in range(1, tor.num_pages):
+    i = 1
+    for instance in tor.page(page_idx).object_list:
+        print ('duplicating TOR: ', i, 'from', count_tor)
+
+        if instance.measurement.raw_measurement.input:
+            instance.input = instance.measurement.raw_measurement.input
+
+        if instance.measurement.raw_measurement.measurement_start_time:
+            instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
+
+        if instance.measurement.raw_measurement.probe_asn:
+            instance.probe_asn = instance.measurement.raw_measurement.probe_asn
+
+        if instance.measurement.raw_measurement.probe_cc:
+            instance.probe_cc = instance.measurement.raw_measurement.probe_cc
+
+        if instance.measurement.anomaly:
+            instance.anomaly = instance.measurement.anomaly
+        instance.save()
+
+        i = i+1
