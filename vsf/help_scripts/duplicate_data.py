@@ -6,9 +6,8 @@ from django.core.paginator import Paginator
 dns_ = SubMModels.DNS.objects.all()
 count_dns =  dns_.count()
 dns = Paginator(dns_, 1000)
-
+i = 1
 for page_idx in range(1, dns.num_pages):
-    i = 1
     for instance in dns.page(page_idx).object_list:
         print ('duplicating DNS: ', i, 'from', count_dns)
 
@@ -34,9 +33,8 @@ for page_idx in range(1, dns.num_pages):
 http_ = SubMModels.HTTP.objects.all()
 count_http =  http_.count()
 http = Paginator(http_, 1000)
-
+i = 1
 for page_idx in range(1, http.num_pages):
-    i = 1
     for instance in http.page(page_idx).object_list:
         print ('duplicating HTTP: ', i, 'from', count_http)
 
@@ -63,9 +61,8 @@ for page_idx in range(1, http.num_pages):
 tcp_ = SubMModels.TCP.objects.all()
 count_tcp =  tcp_.count()
 tcp = Paginator(tcp_, 1000)
-
+i = 1
 for page_idx in range(1, tcp.num_pages):
-    i = 1
     for instance in tcp.page(page_idx).object_list:
         print ('duplicating TCP: ', i, 'from', count_tcp)
 
