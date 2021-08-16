@@ -89,10 +89,9 @@ for page_idx in range(1, tcp.num_pages):
             if instance.measurement.anomaly:
                 instance.anomaly = instance.measurement.anomaly
             instance.save()
-
-            i = i+1
         else:
             pass
+        i = i+1
 
 
 
@@ -121,7 +120,6 @@ for page_idx in range(1, tor.num_pages):
             if instance.measurement.anomaly:
                 instance.anomaly = instance.measurement.anomaly
             instance.save()
-
-            i = i+1
         else:
             pass
+        i = i+1
