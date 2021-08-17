@@ -85,7 +85,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             prefill['input'] = inpt
             measurements = measurements.filter(raw_measurement__input__contains=inpt)
 
-        since = get.get("since") or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        since = get.get("since") or (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d')
         prefill['since'] = since 
         
         #measurements = measurements.filter(raw_measurement__measurement_start_time__gte=since)
