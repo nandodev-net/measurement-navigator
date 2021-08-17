@@ -189,25 +189,27 @@
         <tr>
           <!-- INPUT -->
           <td>
-            {{ measurement.input }}
+            <div class='wrapper-dt'>
+              {{ measurement.input }}
+            </div>
           </td>
 
           <!-- STATE -->
           {% if measurement.data_ready == 'ready' %}
           <td class="text-center">
-            <i class="far fa-check-circle text-success" title="Report Stored"></i>
+            <div class='wrapper-dt'><i class="far fa-check-circle text-success" title="Report Stored"></i></div>
           </td>
           {% elif measurement.data_ready == 'not_ready' %}
           <td class="text-center" title="Report Not Available Yet">
-            <i class="fas fa-ban text-danger"></i>
+            <div class='wrapper-dt'><i class="fas fa-ban text-danger"></i></div>
           </td>
           {% elif measurement.data_ready == 'undetermined' %}
           <td class="text-center" title="Missing report">
-            <i class="fas fa-exclamation-triangle text-warning"></i>
+            <div class='wrapper-dt'><i class="fas fa-exclamation-triangle text-warning"></i></div>
           </td>
           {% else %}
           <td class="text-center" title="Ignored Measurement" >
-            <i class="fas fa-skull-crossbones text-disabled"></i>
+            <div class='wrapper-dt'><i class="fas fa-skull-crossbones text-disabled"></i></div>
           </td>
           {% endif %}
 
