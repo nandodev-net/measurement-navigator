@@ -73,7 +73,7 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
             prefill['input'] = inpt
 
         since = get.get("since")
-        prefill['since'] = since or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        prefill['since'] = since or (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d')
 
         until = get.get("until")
         if until:
