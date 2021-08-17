@@ -4,14 +4,14 @@ from django.db import connection
 from dateutil import rrule
 
 with connection.cursor() as c:
-    c.execute("SELECT pg_size_pretty( pg_database_size('vsf_test') );")
-    print('Tam DB total: ',c.fetchall())
+    c.execute("SELECT pg_size_pretty( pg_database_size('vsf_db') );")
+    print('Tam DB total: ',c.fetchall(), '\n\n')
 
 ##############################################################################################
 
 with connection.cursor() as c:
     c.execute("SELECT pg_size_pretty(pg_total_relation_size('measurements_measurement'))")
-    print('Tam total Measurements: ',c.fetchall(),'\n\n')
+    print('Tam total Measurements: ',c.fetchall())
 
 meas_ = MeasModels.Measurement.objects.all()
 count_meas =  meas_.count()
@@ -23,6 +23,22 @@ print('First MEAS: ', first_meas_date)
 print('Last MEAS: ', last_meas_date)
 months = rrule.rrule(rrule.MONTHLY, dtstart=first_meas_date, until=last_meas_date).count()
 print("MEAS months: ", months,'\n\n')
+
+#######################################################################
+with connection.cursor() as c:
+    c.execute("SELECT pg_size_pretty(pg_total_relation_size('measurements_rawmeasurement'))")
+    print('Tam total RAWMeasurements: ',c.fetchall())
+
+meas_ = MeasModels.RawMeasurement.objects.all()
+count_meas =  meas_.count()
+first_meas_date = MeasModels.RawMeasurement.objects.earliest('created').created
+last_meas_date = MeasModels.RawMeasurement.objects.latest('created').created
+
+print('Num total RAWMEAS: ', count_meas)
+print('First RAWMEAS: ', first_meas_date)
+print('Last RAWMEAS: ', last_meas_date)
+months = rrule.rrule(rrule.MONTHLY, dtstart=first_meas_date, until=last_meas_date).count()
+print("RAWMEAS months: ", months,'\n\n')
 
 ###################################################################################################
 
