@@ -116,23 +116,23 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
     """
     # Columns to be shown
     columns = [
-            'measurement__raw_measurement__input',
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__probe_cc',
+            'input',
+            'measurement_start_time',
+            'probe_asn',
+            'probe_cc',
             'site_name',
-            'measurement__anomaly',
+            'anomaly',
             'flag_type'
         ]
 
     # Columns to be ordered
     order_columns = [
-            'measurement__raw_measurement__input',
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__probe_cc',
+            'input',
+            'measurement_start_time',
+            'probe_asn',
+            'probe_cc',
             'site_name',
-            'measurement__anomaly',
+            'anomaly',
             'flag_type'
         ]
     
@@ -140,12 +140,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
     SubMeasurement = None
 
     def get_initial_queryset(self):
-        qs = self.SubMeasurement.objects.all()\
-                .select_related('measurement')\
-                .select_related('measurement__raw_measurement')\
-                .select_related('measurement__domain')\
-                .select_related('measurement__domain__site')
-        
+        qs = self.SubMeasurement.objects.all()
         return qs
 
     def filter_queryset(self, qs):
@@ -164,19 +159,19 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
 
 
         if input:
-            qs = qs.filter(measurement__raw_measurement__input__contains=input)
+            qs = qs.filter(input__contains=input)
         if since:
-            qs = qs.filter(measurement__raw_measurement__measurement_start_time__gte=since)
+            qs = qs.filter(measurement_start_time__gte=since)
         if asn:
-            qs = qs.filter(measurement__raw_measurement__probe_asn=asn)
+            qs = qs.filter(probe_asn=asn)
         if country:
-            qs = qs.filter(measurement__raw_measurement__probe_cc=country)
+            qs = qs.filter(_probe_cc=country)
         if until:
-            qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
+            qs = qs.filter(measurement_start_time__lte=until)
         if site:
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:
-            qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
+            qs = qs.filter(anomaly= anomaly.lower() == 'true')
         if flags:
             flags = [flag.lower() for flag in flags]
             qs = qs.filter(flag_type__in = flags)
@@ -248,13 +243,13 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         # queryset is already paginated here
 
         qs = qs.only(
-            "measurement__raw_measurement__measurement_start_time",
-            "measurement__raw_measurement__probe_cc",
-            "measurement__raw_measurement__probe_asn",
-            "measurement__raw_measurement__input",
+            "measurement_start_time",
+            "probe_cc",
+            "probe_asn",
+            "input",
             "measurement__id",
             "measurement__domain__site__name",
-            "measurement__anomaly",
+            "anomaly",
             "jsons__answers",
             "jsons__control_resolver_answers",
             "client_resolver",
@@ -426,13 +421,13 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
         json_data = []
 
         qs = qs.only(
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_cc',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__input',
+            'measurement_start_time',
+            'probe_cc',
+            'probe_asn',
+            'input',
             'measurement__id',
             'measurement__domain__site__name',
-            'measurement__anomaly',
+            'anomaly',
             'flag_type',
             'status_code_match',
             'headers_match',
@@ -543,13 +538,13 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
         json_data = []
 
         qs = qs.only(
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_cc',
-            'measurement__raw_measurement__probe_asn',
-            'measurement__raw_measurement__input',
+            'measurement_start_time',
+            'probe_cc',
+            'probe_asn',
+            'input',
             'measurement__id',
             'measurement__domain__site__name',
-            'measurement__anomaly',
+            'anomaly',
             'flag_type',
             'status_blocked',
             'status_failure',
@@ -641,8 +636,8 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         json_data = []
 
         qs = qs.only(
-            'measurement__raw_measurement__measurement_start_time',
-            'measurement__raw_measurement__probe_asn',
+            'measurement_start_time',
+            'probe_asn',
             'measurement__id',
             'measurement__domain__site__name',
             'dir_port_total',
