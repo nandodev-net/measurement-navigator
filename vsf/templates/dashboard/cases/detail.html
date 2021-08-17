@@ -239,17 +239,20 @@
 
     let monthsNumbers = {
         "January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06", 
-        "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12"
+        "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12",
+        "Aug": "08", "Aug.": "08", "Sep": "09", "Sep.": "09", "Sept": "09", "Oct": "10", "Oct.": "10",
+        "Octo": "10", "Nov": "11", "Nov.": "11", "Nove": "11", "Dec": "12", "Dec.": "12", "Dece": "12"
     }
 
     function parseDate (date) {
-        console.log(date);
         var splitted = date.split(", ");
         var dayAndMonth = splitted[0].split(" ");
         var month = dayAndMonth[0];
         var day = dayAndMonth[1];
         var year = splitted[1];
 
+        console.log(month);
+        console.log('///');
         if (parseInt(day) < 10) {day = '0' + day;}
 
         var time = splitted[2].split(" ")[0].split(":");
@@ -300,8 +303,10 @@
     $('#start_date_picker').dateTimePicker({
       selectData: parseStart_Date
     });
-    
+    console.log("{{ object.end_date }}");
+    console.log('-------');
     parseEnd_Date = parseDate("{{ object.end_date }}");
+    console.log(parseEnd_Date);
     var end_date = `
       <div id="end_date_picker"> </div>
       <input 
