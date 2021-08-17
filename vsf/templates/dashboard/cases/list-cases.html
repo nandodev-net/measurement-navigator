@@ -287,6 +287,9 @@
           data: "title",
           orderable: true,
           searchable: true,
+          render: function (data, type, row, meta) {
+            return `<div class='wrapper-dt'> ${data} </div>`
+          }
         },
         {
           data: "start_date",
