@@ -161,7 +161,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         if input:
             qs = qs.filter(input__contains=input)
         if since:
-            qs = qs.filter(measurement_start_time__gte=since)
+            qs = qs.filter(measurement_start_time__gte = since)
         if asn:
             qs = qs.filter(probe_asn=asn)
         if country:
@@ -255,6 +255,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             "client_resolver",
             "dns_consistency" 
         )
+        
         json_data = []
         for item in qs:
             json_data.append({
@@ -645,10 +646,9 @@ class ListTORBackEnd(ListSubMeasurementBackend):
             'obfs4_total',
             'obfs4_accessible'
         )
-
-        print(qs)
+        
         for item in qs:
-            print(item)
+            
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
