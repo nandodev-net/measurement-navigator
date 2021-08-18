@@ -417,5 +417,13 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
         for index in range(1, delta.days + 1):
             aux = datetime.strptime(since, "%Y-%m-%d") + timedelta(days=index)
             dates_array.append(aux.strftime("%Y-%m-%d"))
-            measurements.filter(measurement_start_time = aux.strftime("%Y-%m-%d"))
-            
+            print(aux.strftime("%Y-%m-%d"))
+            x = measurements.filter(measurement_start_time__date = aux.strftime("%Y-%m-%d"))
+            ok = x.filter(flag_type="ok").count()
+            print(ok)
+            ok_qtty.append(ok)
+            no_ok = x.exclude(flag_type="ok").count()
+            no_ok_qtty.append(no_ok)
+
+        print(ok_qtty)
+        print(no_ok_qtty)
