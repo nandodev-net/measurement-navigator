@@ -1,6 +1,6 @@
 from django.conf.urls import include
 from django.urls import path
-from .views import ListMeasurementsTemplate, MeasurementDetailView, ListMeasurementsBackEnd
+from .views import ListMeasurementsTemplate, MeasurementDetailView, ListMeasurementsBackEnd, MeasurementCounter
 
 app_name = 'measurements'
 
@@ -22,6 +22,12 @@ urlpatterns = [
         'detail/<uuid:pk>', 
         MeasurementDetailView.as_view(),
         name="detail"
+    ),
+
+    path(
+        'counter/',
+        MeasurementCounter.as_view(),
+        name="counter"
     )
 
 ]

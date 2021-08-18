@@ -201,7 +201,7 @@
     </nav>
 
     <div class="card py-0 px-5 mt-5" id="histogram-card">
-      <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#histogram" aria-expanded="true" aria-controls="failures"> 
+      <a href="#!" id='x' class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#histogram" aria-expanded="true" aria-controls="failures"> 
           <div class="card-header">
               <h5 class="mb-0">Histogram</h5>
           </div>
@@ -289,6 +289,31 @@
     if (check) {
       table.ajax.reload();
     }
+  });
+  function sss() {
+    console.log('lol');
+  }
+  
+  $( '#x' ).click( function() {
+    console.log('yuju');
+      $.ajax({
+        type: "GET",
+        url: '{% url "dashboard:measurement:counter" %}',
+        data: { 
+          since: $("#since").val(),
+          until: $("#until").val(),
+          asn: $("#asn").val(),
+          dns_consistency: $("#dns_consistency").val(),
+          anomaly: $("#anomaly-state").val(),
+          site: $("#site").val(),
+          flags: $("#flag").val(),
+          input: $("#input").val(),
+          measurement_type: 'dns'
+        },
+        success: function (measurementData) {
+
+        }
+    });
   });
 
   $( '#dns-list' ).on('dblclick', 'tbody tr', function() {

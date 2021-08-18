@@ -3,7 +3,7 @@ from django.db.models.query         import QuerySet
 from django.db.models               import Subquery, OuterRef
 from django.http.response           import Http404
 from django.core                    import serializers
-from django.views.generic           import TemplateView, DetailView
+from django.views.generic           import TemplateView, DetailView, View
 from apps.main                      import measurements
 from apps.main.measurements         import submeasurements
 #Inheritance imports
@@ -11,7 +11,7 @@ from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from typing                                     import List
-from datetime                                   import datetime, timedelta
+from datetime                                   import date, datetime, timedelta
 import json
 #Utils import
 from apps.main.measurements.utils               import search_measurement_by_queryset, _filter_by_flag_no_ok
@@ -362,3 +362,60 @@ class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             })
 
         return json_data
+
+
+class MeasurementCounter(VSFLoginRequiredMixin, View): 
+
+    def get(self, request, **kwargs):
+        get = self.request.GET or {}
+        
+        measurements = MeasModels.Measurement.objects.all()
+
+        #--------------- Starting Filter -----------------#
+
+        # -- Input Filter
+        input = get.get("input")
+        if input:
+            measurements = measurements.filter(raw_measurement__input__contains=input)
+        # -- Start Date Filter
+        since = get.get("since") or (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d')        
+        # measurements = measurements.filter(raw_measurement__measurement_start_time__gte=since)
+        # -- End Date Filter
+        until = get.get("until")
+        if until:
+            measurements = measurements.filter(raw_measurement__measurement_start_time__lte=until)
+        # -- Site Filter
+        site = get.get("site")
+        if site: measurements = measurements.filter(domain__site=site)
+        # -- Anomaly Filter
+        anomaly = get.get("anomaly")
+        if anomaly: measurements = measurements.filter(anomaly=True)
+        # -- ASN Filter
+        asn = get.get("asn")
+        if asn: measurements = measurements.filter(raw_measurement__probe_asn=asn)
+        # -- Test Name Filter
+        test_name = get.get('test_name')
+        if test_name: measurements = measurements.filter(raw_measurement__test_name=test_name)
+        # -- Measurement Type Filter
+        measurement_type = get.get("measurement_type")
+        if measurement_type == 'dns':
+            measurements = SubMModels.DNS.objects.filter(measurement__in = measurements)
+        elif measurement_type == 'http':
+           measurements = SubMModels.HTTP.objects.filter(measurement__in = measurements)
+        elif measurement_type == 'tcp':        
+            measurements = SubMModels.TCP.objects.filter(measurement__in = measurements)
+
+        today = datetime.now()
+        delta = today - datetime.strptime(since, "%Y-%m-%d")
+
+        # Dates Array
+        dates_array = []
+        # Measurement Quantity OK
+        ok_qtty = []
+        # Measurement Quantity NO Ok
+        no_ok_qtty = []
+        for index in range(1, delta.days + 1):
+            aux = datetime.strptime(since, "%Y-%m-%d") + timedelta(days=index)
+            dates_array.append(aux.strftime("%Y-%m-%d"))
+            measurements.filter(measurement_start_time = aux.strftime("%Y-%m-%d"))
+            
