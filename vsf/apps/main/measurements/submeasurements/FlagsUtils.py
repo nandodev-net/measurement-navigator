@@ -148,8 +148,10 @@ def _event_creator(min_date : datetime, max_date : datetime, asn : ASN, domain :
     identification = f"{type} ISSUE FROM {min_date.strftime('%Y-%m-%d %H:%M:%S')} FOR ISP {asn.asn if asn else 'UNKNOWN_ASN'} ({asn.name if asn else 'UNKNOWN_ASN'})"
     return Event(
             identification=identification, 
-            start_date=min_date, 
+            start_date=min_date,
+            current_start_date=min_date, 
             end_date=max_date,
+            current_end_date=max_date,
             domain=domain,
             asn=asn,
             issue_type=type)
@@ -327,6 +329,12 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     if resulting_event.end_date < max_date or resulting_event.start_date > min_date:
         resulting_event.end_date   = max(max_date, resulting_event.end_date)
         resulting_event.start_date = min(min_date, resulting_event.start_date)
+
+        if not resulting_event.end_date_manual:
+            resulting_event.current_end_date = resulting_event.end_date
+        if not resulting_event.start_date_manual:
+            resulting_event.current_start_date = resulting_event.start_date
+
         resulting_event.save()
 
     # Update changed measurements
@@ -451,7 +459,9 @@ def update_event_dates():
                             update events_event ev\
                             SET \
                                 start_date=events_min_max_date.min_date,\
-                                end_date=events_min_max_date.max_date\
+                                end_date=events_min_max_date.max_date,\
+                                current_start_date = CASE WHEN manual_start_time=FALSE THEN events_min_max_date.min_date,\
+                                current_end_date = CASE WHEN manual_end_time=FALSE THEN events_min_max_date.max_date\
                             FROM events_min_max_date\
                             WHERE ev.id = events_min_max_date.event_id;"
                         )

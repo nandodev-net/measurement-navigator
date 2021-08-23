@@ -43,10 +43,28 @@ class Event(TimeStampedModel):
         blank=True
     )
 
+    current_start_date = models.DateTimeField(
+        null=True, 
+        blank=True
+    )
+
+    start_date_manual = models.BooleanField (
+        default=False 
+    )
+
     # Last measurement date
     end_date = models.DateTimeField(
         null=True, 
         blank=True
+    )
+
+    current_end_date = models.DateTimeField(
+        null=True, 
+        blank=True
+    )
+
+    end_date_manual = models.BooleanField (
+        default=False 
     )
 
     public_evidence = models.TextField(
