@@ -545,7 +545,6 @@
         ajax: {
           url: '{% url "dashboard:submeasurement:list_dns_data" %}',
           data: function (data) {
-
             data.since = $("#since").val() ;
             data.until = $("#until").val();
             data.asn = $("#asn").val();
@@ -554,7 +553,8 @@
             data.site = $("#site").val();
             data.flags = $("#flag").val();
             data.input = $("#input").val();
-
+            console.log(data);
+            console.log('asdkajd');
           },
           contentType: "application/json; charset=utf-8",  
           type: "GET",
