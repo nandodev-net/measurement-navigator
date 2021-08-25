@@ -394,9 +394,7 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
         # -- ASN Filter
         asn = get.get("asn")
         if asn: measurements = measurements.filter(raw_measurement__probe_asn=asn)
-        # -- Test Name Filter
-        test_name = get.get('test_name')
-        if test_name: measurements = measurements.filter(raw_measurement__test_name=test_name)
+        
         # -- Measurement Type Filter
         measurement_type = get.get("measurement_type")
         if measurement_type == 'dns':
