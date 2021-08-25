@@ -420,19 +420,19 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
             dates_array.append(aux.strftime("%Y-%m-%d"))
             x = measurements.filter(measurement_start_time__date = aux.strftime("%Y-%m-%d"))
 
-            ok = x.filter(flag_type="ok").count()
+            ok = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.OK).count()
             ok_qtty.append(ok)
 
-            soft = x.filter(flag_type="soft").count()
+            soft = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.SOFT).count()
             soft_qtty.append(soft)
 
-            hard = x.filter(flag_type="hard").count()
+            hard = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.HARD).count()
             hard_qtty.append(hard)
 
-            muted = x.filter(flag_type="muted").count()
+            muted = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.MUTED).count()
             muted_qtty.append(muted)
 
-            manual = x.filter(flag_type="manual").count()
+            manual = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.MANUAL).count()
             manual_qtty.append(manual)
 
         return JsonResponse({
