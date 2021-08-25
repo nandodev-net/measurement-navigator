@@ -1,5 +1,6 @@
 #Django imports
 from django.db.models.query         import QuerySet
+from django.http import  JsonResponse
 from django.db.models               import Subquery, OuterRef
 from django.http.response           import Http404
 from django.core                    import serializers
@@ -410,20 +411,37 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
 
         # Dates Array
         dates_array = []
-        # Measurement Quantity OK
+        # Measurement Quantity by Flag
         ok_qtty = []
-        # Measurement Quantity NO Ok
-        no_ok_qtty = []
+        soft_qtty = []
+        hard_qtty = []
+        muted_qtty = []
+        manual_qtty = []
         for index in range(1, delta.days + 1):
             aux = datetime.strptime(since, "%Y-%m-%d") + timedelta(days=index)
             dates_array.append(aux.strftime("%Y-%m-%d"))
-            print(aux.strftime("%Y-%m-%d"))
             x = measurements.filter(measurement_start_time__date = aux.strftime("%Y-%m-%d"))
-            ok = x.filter(flag_type="ok").count()
-            print(ok)
-            ok_qtty.append(ok)
-            no_ok = x.exclude(flag_type="ok").count()
-            no_ok_qtty.append(no_ok)
 
-        print(ok_qtty)
-        print(no_ok_qtty)
+            ok = x.filter(flag_type="ok").count()
+            ok_qtty.append(ok)
+
+            soft = x.filter(flag_type="soft").count()
+            soft_qtty.append(soft)
+
+            hard = x.filter(flag_type="hard").count()
+            hard_qtty.append(hard)
+
+            muted = x.filter(flag_type="muted").count()
+            muted_qtty.append(muted)
+
+            manual = x.filter(flag_type="manual").count()
+            manual_qtty.append(manual)
+
+        return JsonResponse({
+            'dates': dates_array,
+            'ok': ok_qtty,
+            'soft': soft_qtty,
+            'hard': hard_qtty,
+            'muted': muted_qtty,
+            'manual': manual_qtty,
+        }, safe=False)
