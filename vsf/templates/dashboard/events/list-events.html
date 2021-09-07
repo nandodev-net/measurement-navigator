@@ -143,19 +143,38 @@
             </div> 
           </div>
 
+          <div class="col-4 mt-4">
+            <div class="row align-items-center ml-1">
+              <div class="col-5 mx-auto">
+                <label class='font-weight-bold' for="muted">
+                  Muted
+                </label>
+              </div>
+              <div class="col-7 mx-auto">
+                <select id="muted" class="custom-select additional-filter" name="muted">
+                  <option value="all" >Any Muted</option>
+                  <option {% if prefill.muted == 'true' %} selected {% endif %} value="true">True</option>
+                  <option {% if prefill.muted == 'false' %} selected {% endif %} value="false">False</option>
+                </select>
+                <input id='previous_muted' value='all' hidden /> 
+              </div>
+            </div> 
+          </div>
+
+
           <div class="col-2">
             {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
           </div>
 
 
-          <div class="col-4 mt-4">
+          <div class="col-2 mt-4">
             <small>
               <strong>Autoload filters</strong>
             </small>
             <input class='ml-2' id='dynamic' type="checkbox" value="">
           </div>
 
-
+          <div class="col-10"></div>
           <div class="col-2 my-auto">
             <button id="url-form-button" class="btn btn-blue float-right" type="submit">
               <i class="fa fa-search"></i> <strong>Search</strong>
@@ -174,7 +193,10 @@
       </button>
       <button type="button" class="btn btn-dark rounded mb-4" id="confirmTrigger">
         <i class="fa fa-check"></i> Confirm Toggle
-    </button>
+      </button>
+      <button type="button" class="btn btn-dark rounded mb-4" id="confirmTriggerMuted">
+        <i class="fa fa-check"></i> Muted Toggle
+      </button>
 
       <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="detailNewTab">
         <i class="fas fa-info mr-1"></i> Details in New Tab
@@ -194,6 +216,7 @@
               <th class="text-center" scope="col">End Date</th>
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
+              <th class="text-center" scope="col">Muted</th>
             </tr>
           </thead>
           <tbody>
@@ -220,6 +243,15 @@
     var events; 
     var casesTable;
     var idLastSaved;
+    var previousMuted;
+
+    $( '#muted' ).on('focus', function () {
+      $('#previous_muted').val = this.value;
+    }).change(function() {
+      previousMuted = $('#previous_muted').val;
+      console.log(previousMuted);
+      $('#previous_muted').val = this.value;
+    });
 
     function open_edit_modal(url){
       $('#edit_event').load(url, function(){
@@ -257,7 +289,6 @@
           </tr>`
         );
       });
-      console.log(anyRelated);
 
       if (rSelected.length === 0){
         Swal.fire({
@@ -289,6 +320,7 @@
         type   : "GET",
         data   : { 'id': id },
         success: function (json) {
+
           var url = "{% url 'dashboard:events:detail' pk=1 %}".replace(1, id);
           $( '#identification_detail' ).text(json["identification"]);
           $( '#start_date_detail' ).text(json["start_date"]);
@@ -299,6 +331,9 @@
           $( '#link' ).attr("href", url);
           if (json['confirmed']) {
             $( '#confirm_toggle' ).attr("checked", "checked");
+          }
+          if (json['muted']) {
+            $( '#confirm_toggle_muted' ).attr("checked", "checked");
           }
           $(' #icon_start ').empty();
           $(' #icon_end ').empty();
@@ -325,6 +360,16 @@
       $.ajax({
         type: "POST",
         url: "{% url 'dashboard:events:confirm' %}",
+        data: { events: [idLastSaved] , csrfmiddlewaretoken: "{{ csrf_token }}"},
+      });  
+      events.ajax.reload() 
+
+    });
+
+    $('#confirm_toggle_muted').change(function() {
+      $.ajax({
+        type: "POST",
+        url: "{% url 'dashboard:events:mute' %}",
         data: { events: [idLastSaved] , csrfmiddlewaretoken: "{{ csrf_token }}"},
       });  
       events.ajax.reload() 
@@ -359,7 +404,6 @@
                 }
             });
           } else {
-            console.log(data)
             Swal.fire({
                 icon: "error",
                 title: "Some or all of the selected events are already related to some of the selected cases.",
@@ -436,7 +480,6 @@
             var eventsSelected = events.rows({ selected: true }).data().toArray().map((selected) => (
                 selected.id
             ));
-            console.log('HI', eventsSelected)
 
             $.ajax({
                 type: "POST",
@@ -455,7 +498,72 @@
                             }
                         });
                     } else {
-                        console.log(data)
+                        Swal.fire({
+                            icon: "error",
+                            title: "Bad request.",
+                            text: `${data.error}`,
+                            confirmButtonColor: "#dc3545",
+                            confirmButtonText: "Continue"
+                        });
+                    }
+                
+                }
+            });
+        }
+    });
+
+
+    $( '#confirmTriggerMuted' ).click(function(e) {
+      jQuery.noConflict();
+
+      $( '#selectedEvents-tbody' ).empty();
+      var rSelected = events.rows( { selected: true }).data().toArray();
+
+
+        rSelected.forEach(event => {
+            $('#selectedEvents-tbody').append(
+                `<tr>
+            <td>${event[0]}</td>
+            <td>${event[1]}</td>
+            <td>${event[2]}</td>
+            <td>${event[3]}</td>
+            <td>${event[4]}</td>
+            <td>${event[5]}</td>
+          </tr>`
+            );
+        });
+
+        if (rSelected.length === 0) {
+            Swal.fire({
+                icon: "error",
+                title: "You must select at least one event",
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+            });
+        } else {
+            var eventsSelected = events.rows({ selected: true }).data().toArray();
+
+            var eventsSelected = events.rows({ selected: true }).data().toArray().map((selected) => (
+                selected.id
+            ));
+
+            $.ajax({
+                type: "POST",
+                url: "{% url 'dashboard:events:mute' %}",
+                data: { events: eventsSelected , csrfmiddlewaretoken: "{{ csrf_token }}"},
+                success: function (data) {
+                    if (data.error === null) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Successful Confirm status change!",
+                            confirmButtonColor: "#28a745",
+                            confirmButtonText: "Continue"
+                        }).then(result => {
+                            if (result.isConfirmed) {
+                                location.reload();
+                            }
+                        });
+                    } else {
                         Swal.fire({
                             icon: "error",
                             title: "Bad request.",
@@ -557,7 +665,11 @@
             data.issue_type = $("#issue_type").val();
             data.domain = $("#domain").val();
             data.asn = $("#asn").val();
-            
+            data.muted = $("#muted").val();
+
+
+
+            /* TO DO, FIRST LOAD MUTED FALSE BY DEFAULT*/
           },
           contentType: "application/json; charset=utf-8",  
           type: "GET",
@@ -621,6 +733,22 @@
             data: "asn",
             orderable: false,
             searchable: true,
+          },
+          {
+            data: "muted",
+            orderable: true,
+            searchable: false,
+            render: function (data, type, row, meta) {
+              if (data) {
+                return `<div class="text-success w-100 text-center">
+                          <i class="far fa-check-circle text-success" title="Muted Event"></i>
+                        </div>`
+              } else {
+                return `<div class="text-danger w-100 text-center">
+                          <i class="far fa-check-circle text-default" title="Event not Muted"></i>
+                        </div>`
+              }
+            },
           },
         ],
         initComplete: function () {},
