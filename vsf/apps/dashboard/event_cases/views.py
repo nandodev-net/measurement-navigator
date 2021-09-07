@@ -1,18 +1,16 @@
 #Django imports
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
-from django.views.generic           import ListView, View, DetailView
-from django.views.generic.edit import UpdateView, CreateView
-from django.shortcuts               import get_object_or_404, redirect, render
+from django.http                import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
+from django.views.generic       import ListView, View, DetailView
+from django.views.generic.edit  import UpdateView, CreateView
+from django.shortcuts           import get_object_or_404, redirect, render
 
 #Inheritance imports
-from vsf.views                      import VSFLoginRequiredMixin, VSFLogin
-from django.contrib.messages.views  import SuccessMessageMixin
-from django.views.generic.edit      import FormView
+from vsf.views                  import VSFLoginRequiredMixin, VSFLogin
 
 #Local imports
-from apps.main.cases.models import Case, Category
-from apps.main.events.models import Event
-from .forms import CaseForm, CaseCreateForm
+from apps.main.cases.models     import Case, Category
+from apps.main.events.models    import Event
+from .forms import CaseCreateForm
 from ..utils import *
 
 #Third party imports
@@ -360,7 +358,6 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
         else:
             return JsonResponse({})
 
-
 class CaseDetailView(VSFLoginRequiredMixin, DetailView):
     template_name = 'cases/detail.html'
     slug_field = 'pk'
@@ -427,7 +424,6 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
             print(e)
             return HttpResponseBadRequest()
 
-
 class EventsUnlinking(VSFLoginRequiredMixin, View):
     def get(self, request, **kwargs):
 
@@ -441,7 +437,6 @@ class EventsUnlinking(VSFLoginRequiredMixin, View):
 
         return HttpResponse("OK")
         
-
 class CaseDeleteView(VSFLoginRequiredMixin, View):
     def get(self, request, **kwargs):
 
@@ -457,7 +452,6 @@ class CaseDeleteView(VSFLoginRequiredMixin, View):
             case.delete()
 
         return HttpResponse("OK")
-
 
 class EditEvents(VSFLoginRequiredMixin, DetailView):
 
@@ -540,7 +534,6 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()
-
 
 class CasePublish(VSFLoginRequiredMixin, View):
 
