@@ -1,9 +1,8 @@
 # Django imports
-from django.views.generic           import TemplateView, ListView, UpdateView, View, DetailView
-from django.shortcuts               import get_object_or_404, redirect, render
+from django.views.generic           import ListView, UpdateView, View, DetailView
+from django.shortcuts               import get_object_or_404, redirect
 from django.http.response           import HttpResponseBadRequest
 from django.http                    import JsonResponse
-from django.core.serializers.json   import DjangoJSONEncoder
 from django.db.models               import Q
 
 # Inheritance imports
@@ -15,14 +14,14 @@ from datetime                                   import datetime, timedelta
 import json
 
 # Local imports
-from apps.main.measurements.models import Measurement
-from apps.main.events.models    import Event
-from apps.main.cases.models     import Case
-from apps.main.asns.models      import ASN
+from apps.main.measurements.models  import Measurement
+from apps.main.events.models        import Event
+from apps.main.cases.models         import Case
+from apps.main.asns.models          import ASN
 from apps.main.measurements.submeasurements.models import DNS, HTTP, TCP, SubMeasurement
-from apps.main.sites.models import Domain
-from apps.main.asns.models import ASN
-from .forms                     import EventForm
+from apps.main.sites.models         import Domain
+from apps.main.asns.models          import ASN
+from .forms                         import EventForm
 from ..utils import *
 
 
@@ -52,6 +51,13 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         if end_time:
             prefill['end_time'] = end_time
 
+        counter = 0
+        print(get)
+        print('aloooooo')
+
+        print(counter)
+        print('.......................')
+
         context = super().get_context_data()
         context['prefill'] = prefill
         context['issueTypes'] = issueTypes
@@ -78,40 +84,33 @@ class EventsList(VSFLoginRequiredMixin, ListView):
             return JsonResponse({'error' : None})
 
         except Exception as e:
-            print(e)
             return HttpResponseBadRequest()
 
 class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
     columns = [ 
         'id', 'identification', 'issue_type', 'confirmed', 'start_date', 'end_date', 
-        'domain__domain_name', 'asn__asn'
+        'domain__domain_name', 'asn__asn', 'muted'
     ]
 
     order_columns = [ 
         'id', '', 'issue_type', 'confirmed', 'start_date', 'end_date', 
-        'domain__domain_name', 'asn__asn'
+        'domain__domain_name', 'asn__asn', 'muted'
     ]
 
     def get_initial_queryset(self):
-        return Event.objects.all()
+        qs = Event.objects.all()
 
-    def filter_queryset(self, qs):
 
         #--------- Filtering datetime fields ---------#
-
-        start_time = self.request.GET.get('start_time')
+        start_time, end_time = self.request.GET.get('start_time'), self.request.GET.get('end_time')
         if start_time != None and start_time != "":
-
             start_time = datetime.strptime(start_time, '%Y-%m-%d')
             utc_start_time = utc_aware_date(start_time, self.request.session['system_tz'])
             qs = qs.filter(
                 Q(start_date__gte = utc_start_time) | 
                 Q(manual_start_date__gte = utc_start_time)
             )
-
-
-        end_time = self.request.GET.get('end_time')
         if end_time != None and end_time != "":
             end_time = datetime.strptime(end_time, '%Y-%m-%d')
             utc_end_time = utc_aware_date(end_time, self.request.session['system_tz'])
@@ -120,31 +119,50 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 Q(manual_end_date__gte = utc_end_time)
             )
 
+
+        #--------- Filtering identification field ---------#
         identification = self.request.GET.get('identification')
         if identification != None and identification != "":
             qs = qs.filter(identification = identification)
 
-        confirmed = self.request.GET.get('confirmed')
         
+        #--------- Filtering confirmation field ---------#
+        confirmed = self.request.GET.get('confirmed')
         if confirmed != None and confirmed != "":
             if confirmed == 'true': 
                 qs = qs.filter(confirmed = 't') 
             else: 
                 qs = qs.filter(confirmed = 'f')
 
+
+        #--------- Filtering muted field ---------#
+        muted = self.request.GET.get('muted')
+        if muted != None and muted != "":
+            if muted == 'true': 
+                qs = qs.filter(muted = 't') 
+            elif muted == 'false': 
+                qs = qs.filter(muted = 'f')
+
+
+        #--------- Filtering Issue field ---------#
         issue_type = self.request.GET.get('issue_type')
         if issue_type != None and issue_type != "":
             qs = qs.filter(issue_type = issue_type)
 
 
+        #--------- Filtering muted field ---------#
         asn = self.request.GET.get('asn')
         if asn != None and asn != "":
             qs = qs.filter(asn__asn = asn)
 
+            
+        #--------- Filtering domain field ---------#
         domain = self.request.GET.get('domain')
         if domain != None and domain != "":
             qs = qs.filter(domain__domain_name__contains = domain)
 
+
+        #--------- Filtering case field ---------#
         case = self.request.GET.get('case')
         if case != None:
             case_events = Case.objects.filter(id = case).first().events.all()
@@ -152,15 +170,11 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             
         return qs
 
+
     def prepare_results(self, qs):
 
         response = []
         for event in qs:
-
-            try:
-                case = event.cases.latest('id').title
-            except:
-                case = None
                 
             # Compute start date
             start_date = event.get_start_date()
@@ -171,14 +185,8 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             end_date = event.get_end_date()
             if end_date:
                 end_date = end_date.strftime("%b. %d, %Y, %H:%M %p")
-
-            status = "active"
-            if event.muted:
-                status = "muted"
-            if event.closed:
-                status = "closed"
                 
-                
+            print(event.muted)
             response.append({
                 'id': event.id,
                 'identificator': event.id,
@@ -188,6 +196,7 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 'end_date': datetime.strftime(utc_aware_date(event.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
+                'muted': event.muted
             })
 
         return response
@@ -274,6 +283,7 @@ class EventDetailData(VSFLoginRequiredMixin, View):
             data = {
                 "identification": eventObj.identification,
                 'confirmed': eventObj.confirmed,
+                'muted': eventObj.muted,
                 "start_date": datetime.strftime(utc_aware_date(eventObj.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 "end_date": datetime.strftime(utc_aware_date(eventObj.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 "public_evidence": eventObj.public_evidence,
@@ -284,7 +294,6 @@ class EventDetailData(VSFLoginRequiredMixin, View):
                 "start_manual": eventObj.isStartDateManual(),
                 "end_manual": eventObj.isEndDateManual(),
             }
-            print(data)
             return JsonResponse(data, safe=False)
         else:
             return JsonResponse({})
@@ -401,7 +410,6 @@ class EventConfirm(VSFLoginRequiredMixin, View):
         except Exception as e:
             print(e)
 
-
 class EventMute(VSFLoginRequiredMixin, View):
 
     def post(self, request, **kwargs):
@@ -410,6 +418,18 @@ class EventMute(VSFLoginRequiredMixin, View):
         
         eventsIds = post['events[]']
         eventsObjetcs = Event.objects.filter(id__in=eventsIds).all()
+        try:
+            for event in eventsObjetcs:
+                if event.muted:
+                    event.muted = False
+                else:
+                    event.muted = True
+                event.save()
+            return JsonResponse({'error' : None})
+        except Exception as e:
+            print(e)
+
+        """
         try:
             for event in eventsObjetcs:
                 dns = DNS.objects.filter(event=event)
@@ -456,6 +476,7 @@ class EventMute(VSFLoginRequiredMixin, View):
             return JsonResponse({'error' : None})
         except Exception as e:
             print(e)
+        """
 
 
 class EventsByMeasurement(VSFLoginRequiredMixin, View):
