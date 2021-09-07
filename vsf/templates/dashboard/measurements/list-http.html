@@ -527,35 +527,38 @@
         },
         success: function (d) {
           const fill = {
-            labels: d.dates,
-            datasets: [
-              {
+            labels: [
+              '20/07', '21/07', '22/07', '23/07', '24/07', '25/07', '26/07', '27/07', '28/07', '29/07',
+              '30/07', '31/07', '01/07'
+            ],
+            datasets: [{              
                 label: 'Flags OK',
-                data: d.ok,
+                data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
                 backgroundColor: '#34eb74',
               },
               {
                 label: 'Flags SOFT',
-                data: d.soft,
+                data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
                 backgroundColor: '#34a4eb',
               },
               {
                 label: 'Flags HARD',
-                data: d.hard,
+                data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
                 backgroundColor: '#eb6b34',
               },
               {
                 label: 'Flags MUTED',
-                data: d.muted,
+                data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
                 backgroundColor: '#ada5a1',
               },
               {
                 label: 'Flags MANUAL',
-                data: d.manual,
+                data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
                 backgroundColor: '#000000',
               },
             ]
           };
+
 
           const config = {
             type: 'bar',
