@@ -19,7 +19,7 @@ print("Requesting ooni data")
 today = datetime.now()
 
 now = today 
-n_months_ago = today - timedelta(days=3) 
+n_months_ago = today - timedelta(days=50) 
 now = now.strftime("%Y-%m-%d") 
 n_months_ago = n_months_ago.strftime("%Y-%m-%d")
 request_fp_data(since=n_months_ago, until=now, from_fastpath=False, )
