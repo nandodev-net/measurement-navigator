@@ -50,12 +50,9 @@ def create_sub_measurements(measurement : RawMeasurement) -> Tuple[List[SubMeasu
         return (create_dns_from_dns_cons(measurement), count)
 
     elif measurement.test_name == RawMeasurement.TestTypes.TOR :
-        tor = create_tor_from_tor(measurement)
+        tor = [create_tor_from_tor(measurement)]
         count['tor'] = len(tor)
         return (tor, count)
-
-        return True
-
     return ([], count)
 
 def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
@@ -335,13 +332,16 @@ def create_tor_from_tor(measurement : RawMeasurement) -> TOR:
             dir_port_accessible  is not None) and (
             obfs4_total      is not None) and (
             obfs4_accessible    is not None):
-        
-        tor = Tor(
+
+        tor = TOR(
             measurement=None,
             dir_port_total=dir_port_total,
             dir_port_accessible=dir_port_accessible,
             obfs4_total=obfs4_total,
             obfs4_accessible=obfs4_accessible,
+            measurement_start_time=measurement.measurement_start_time,
+            probe_asn=measurement.probe_asn,
+            probe_cc=measurement.probe_cc,
         )
         return tor
     
@@ -433,11 +433,10 @@ def check_submeasurement(submeasurement : SubMeasurement) -> bool:
     return False
 
 def check_tor_from_tor(tor : TOR) -> bool:
-    test_keys           = measurement.test_keys
-    dir_port_total = test_keys['dir_port_total']
-    dir_port_accessible = test_keys['dir_port_accessible']
-    obfs4_total = test_keys['obfs4_total']
-    obfs4_accessible = test_keys['obfs4_accessible']
+    dir_port_total = tor.dir_port_total
+    dir_port_accessible = tor.dir_port_accessible
+    obfs4_total = tor.obfs4_total
+    obfs4_accessible = tor.obfs4_accessible
 
     if (int(dir_port_accessible) <= int(dir_port_total)//2) or (int(obfs4_total) <= int(obfs4_accessible)//2):
         return True

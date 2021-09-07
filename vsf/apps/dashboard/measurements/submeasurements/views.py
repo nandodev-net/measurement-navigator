@@ -640,7 +640,6 @@ class ListTORBackEnd(ListSubMeasurementBackend):
             'measurement_start_time',
             'probe_asn',
             'measurement__id',
-            'measurement__domain__site__name',
             'dir_port_total',
             'dir_port_accessible',
             'obfs4_total',

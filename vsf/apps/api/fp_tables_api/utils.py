@@ -109,6 +109,7 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
         'until': until,
         'limit': 1000,
         'order':'asc',
+        'test_name':'tor',
         'order_by' : 'measurement_start_time'
     }
 
@@ -120,6 +121,8 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
 
     # Perform a get request from Ooni
     next_url = 'https://api.ooni.io/api/v1/measurements?' + urlencode(data)
+
+    print('\n\n', next_url)
 
     # We store the earliest measurement so we can update just what needs to be updated 
     # when computing hard flags and updating measurement count

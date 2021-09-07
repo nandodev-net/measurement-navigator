@@ -107,7 +107,6 @@ class RawMeasurement(TimeStampedModel):
 
         (sub_measurements,_) = create_sub_measurements(self)
 
-
         for sb in sub_measurements:
             sb.measurement = measurement
             try:

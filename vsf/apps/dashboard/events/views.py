@@ -184,8 +184,10 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 'identificator': event.id,
                 'issue_type': event.issue_type, 
                 'confirmed': event.confirmed, 
-                'start_date': datetime.strftime(utc_aware_date(event.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'end_date': datetime.strftime(utc_aware_date(event.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'start_date': datetime.strftime(utc_aware_date(event.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'is_manual_start_date':event.start_date_manual,
+                'end_date': datetime.strftime(utc_aware_date(event.current_end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'is_manual_end_date':event.end_date_manual,
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
             })
