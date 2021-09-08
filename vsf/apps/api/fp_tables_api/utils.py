@@ -109,7 +109,6 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
         'until': until,
         'limit': 1000,
         'order':'asc',
-        'test_name':'tor',
         'order_by' : 'measurement_start_time'
     }
 
