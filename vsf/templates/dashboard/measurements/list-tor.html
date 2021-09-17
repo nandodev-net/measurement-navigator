@@ -120,12 +120,36 @@
             </div> 
           </div>
 
+          <div class="col-4 mt-3">
+            <div class="row align-items-center">
+              <div class="col-5 mx-auto">
+                <label class="font-weight-bold" for="or-port-dirauth-accessible">Dir Auth Accesible</label>
+              </div>
+              <div class="col-6 mx-auto">
+                <input
+                  id="or-port-dirauth-accessible"
+                  class="additional-filter"
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value="{{prefill.or_port_dirauth_accessible}}"
+                  name="or_port_dirauth_accessible"
+                  onchange="updatedirauth(this.value);"
+                />
+              </div>
+              <div vlass="col-1 mx-auto">
+                <p id='valuedirauth' class="text-secondary mb-1">50%</p>
+              </div>
+            </div> 
+          </div>
+
           <div class="col-2">
             {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
           </div>
 
 
-          <div class="col-4 mt-4">
+          <div class="col-2 mt-4">
             <small>
               <strong>Autoload filters</strong>
             </small>
@@ -133,7 +157,7 @@
           </div>
 
 
-          <div class="col-2 my-auto">
+          <div class="col-12 my-auto">
             <button id="url-form-button" class="btn btn-blue float-right" type="submit">
               <i class="fa fa-search"></i> <strong>Search</strong>
             </button>
@@ -205,6 +229,10 @@
 
   function updatedir(val) {
     $('#valuedir').text(val + '%'); 
+  }
+
+  function updatedirauth(val) {
+    $('#valuedirauth').text(val + '%'); 
   }
 
   $( '#histogramService' ).click( function() {
@@ -297,6 +325,7 @@
             data.asn = $("#asn").val();
             data.dir_port_accessible = $("#dir-port-accesible").val();
             data.obfs4_accessible = $("#obfs4-accesible").val(); 
+            data.or_port_dirauth_accessible = $('or-port-dirauth-accessible').val();
 
           },
           contentType: "application/json; charset=utf-8",  
@@ -333,6 +362,16 @@
             orderable: true,
             searchable: true,
           },
+          {
+            data: 'or_port_dirauth_total',
+            orderable: true,
+            searchable: true,
+          }
+          {
+            data: 'or_port_dirauth_accessible',
+            orderable: true,
+            searchable: true,
+          }
         ],
         initComplete: function () {},
         select: {

@@ -166,6 +166,7 @@ class TOR(SubMeasurement):
     dir_port_accessible = models.IntegerField(default=0)
     obfs4_total = models.IntegerField(default=0)
     obfs4_accessible = models.IntegerField(default=0)
-
+    or_port_dirauth_total = models.IntegerField(default=0)
+    or_port_dirauth_accessible = models.IntegerField(default=0)
     class Meta:
         default_related_name = 'tor_list'
