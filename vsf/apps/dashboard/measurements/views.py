@@ -258,6 +258,23 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
             context['rawmeasurement'].annotations = json.dumps(measurement.raw_measurement.annotations)
             context['rawmeasurement'].urlFlag = '/static/img/flags/' + measurement.raw_measurement.probe_cc.lower() + '.svg'
             context['rawmeasurement'].rawjson = serializers.serialize('json', [measurement.raw_measurement])
+
+            tcp_connections = []
+            for connection in measurement.raw_measurement.test_keys['tcp_connect']:
+                aux = {
+                    'ip': connection['ip'],
+                    'status': connection['status'],
+
+                }
+                
+                for key, value in measurement.raw_measurement.test_keys['control']['tcp_connect'].items():
+                    if connection['ip'] in key.lower():
+                        aux['control_status'] = value['status']
+                        aux['control_failure'] = value['failure']
+
+                tcp_connections.append(aux)
+            context['rawmeasurement'].tcp_connections = tcp_connections
+            
         return context
 
 
