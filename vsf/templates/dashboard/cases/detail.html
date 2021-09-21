@@ -92,7 +92,7 @@
         <div class="col-3 font-weight-bold">Start Date</div>
         <div class="col-9">
           <span id="start_date_slug">{{object.start_date}}</span>
-          {% if object.start_date_manual %}
+          {% if object.is_it_manual %}
               <i class="fas fa-pencil-alt ml-2"></i>
           {% else %}
               <i class="fas fa-magic ml-2"></i>
@@ -104,7 +104,7 @@
         <div class="col-3 font-weight-bold">End Date</div>
         <div class="col-9">
           <span id="end_date_slug">{{object.end_date}}</span>
-          {% if object.end_date_manual %}
+          {% if object.is_it_manual %}
             <i class="fas fa-pencil-alt ml-2"></i>
           {% else %}
               <i class="fas fa-magic ml-2"></i>
@@ -238,10 +238,20 @@
     $( "#edit" ).hide();
 
     let monthsNumbers = {
-        "January": "01", "February": "02", "March": "03", "April": "04", "May": "05", "June": "06", 
-        "July": "07", "August": "08", "September": "09", "October": "10", "November": "11", "December": "12",
-        "Aug": "08", "Aug.": "08", "Sep": "09", "Sep.": "09", "Sept": "09", "Oct": "10", "Oct.": "10",
-        "Octo": "10", "Nov": "11", "Nov.": "11", "Nove": "11", "Dec": "12", "Dec.": "12", "Dece": "12"
+        "January": "01", "Jan": "01", "Jan.": "01", "Janu": "01", 
+        "February": "02", "Feb.": "02", "Feb": "02", "Febr": "02", 
+        "March": "03", "Mar": "03", "Mar.": "03", "Marc": "03",
+        "April": "04", "Apr": "04", "Apr.": "04", "Apri": "04", 
+        "May": "05", "May.": "05",
+        "June": "06", "Jun.": "06", "Jun": "06", 
+        "July": "07", "Jul": "07", "Jul.": "07", 
+        "August": "08", "Aug": "08", "Aug.": "08", "Augu": "08",
+        "September": "09", "Sep": "09", "Sep.": "09", "Sept": "09", "Sept.": "09",
+        "October": "10", "Oct": "10", "Oct.": "10", "Octo": "10",
+        "November": "11", "Nov": "11", "Nov.": "11", "Nove": "11",
+        "December": "12", "Dec": "12", "Dec.": "12", "Dece": "12"
+          
+          
     }
 
     function parseDate (date) {

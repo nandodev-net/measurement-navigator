@@ -4,6 +4,7 @@
 """
 # Django imports
 from django.db      import models
+from django.db.models.fields import BooleanField
 from model_utils.models import TimeStampedModel
 from django.urls    import reverse
 from django.conf    import settings
@@ -77,8 +78,14 @@ class Case(TimeStampedModel):
         blank=True,
     )
 
-    start_date_manual = models.BooleanField (
-        default=False 
+    start_date_manual = models.DateTimeField(
+        null=True, 
+        blank=True,
+    )
+
+    start_date_automatic = models.DateTimeField(
+        null=True, 
+        blank=True
     )
 
     end_date = models.DateTimeField(
@@ -86,8 +93,14 @@ class Case(TimeStampedModel):
         blank=True,
         )
 
-    end_date_manual = models.BooleanField (
-        default=False 
+    end_date_manual = models.DateTimeField(
+        null=True, 
+        blank=True,
+    )
+
+    end_date_automatic = models.DateTimeField(
+        null=True, 
+        blank=True,
     )
 
     category = models.ForeignKey(   
@@ -111,6 +124,14 @@ class Case(TimeStampedModel):
         null=True, 
         blank=True,
         )
+    
+    is_it_continues = models.BooleanField(
+        default = False
+    )
+
+    is_it_manual = models.BooleanField(
+        default = False
+    )
 
     def get_sites(self) -> dict:
 
