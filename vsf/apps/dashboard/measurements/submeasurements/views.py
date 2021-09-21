@@ -1,15 +1,14 @@
 #Django imports
 from django.http import request
 from django.views.generic           import TemplateView
-from django.db.models.expressions   import RawSQL
-from django.db.models               import OuterRef, Subquery
+from django.db.models               import F
 
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from datetime                                   import datetime, timedelta
-from typing                                     import Tuple, List
+from typing                                     import List
 # Local imports
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
@@ -593,7 +592,11 @@ class ListTorTemplate(ListSubMeasurementTemplate):
         if obfs4_accessible:
             prefill['obfs4_accessible'] = obfs4_accessible
 
+        or_port_dirauth_accessible = get.get('or_port_dirauth_accessible')
+        if or_port_dirauth_accessible:
+            prefill['or_port_dirauth_accessible'] = or_port_dirauth_accessible
 
+            
         context['prefill'] = prefill
         return context
 
@@ -610,14 +613,18 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         'dir_port_total',
         'dir_port_accessible',
         'obfs4_total',
-        'obfs4_accessible'
+        'obfs4_accessible',
+        'or_port_dirauth_total',
+        'or_port_dirauth_accessible'
     ]
 
     order_columns = ListSubMeasurementBackend.order_columns +  [
         'dir_port_total',
         'dir_port_accessible',
         'obfs4_total',
-        'obfs4_accessible'
+        'obfs4_accessible',
+        'or_port_dirauth_total',
+        'or_port_dirauth_accessible'
     ]
 
     SubMeasurement = SubMeasModels.TOR
@@ -626,8 +633,16 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         qs = super().filter_queryset(qs)
         get = self.request.GET or {}
 
-        dir_port_total, dir_port_accessible = get.get('dir_port_total'), get.get('dir_port_accessible')
-        obfs4_total, obfs4_accessible = get.get('obfs4_total'), get.get('obfs4_accessible')
+        dir_port_accessible = int(get.get('dir_port_accessible')) / 100
+        obfs4_accessible = int(get.get('obfs4_accessible')) / 100
+        or_port_dirauth_accessible = int(get.get('or_port_dirauth_accessible')) / 100
+
+        if dir_port_accessible:
+            qs = qs.filter(dir_port_accessible__lte = F('dir_port_total') * dir_port_accessible)
+        if obfs4_accessible:
+            qs = qs.filter(obfs4_accessible__lte = F('obfs4_total') * obfs4_accessible)
+        if or_port_dirauth_accessible:
+            qs = qs.filter(or_port_dirauth_accessible__lte = F('or_port_dirauth_total') * or_port_dirauth_accessible)
 
         return qs
 
@@ -643,7 +658,9 @@ class ListTORBackEnd(ListSubMeasurementBackend):
             'dir_port_total',
             'dir_port_accessible',
             'obfs4_total',
-            'obfs4_accessible'
+            'obfs4_accessible',
+            'or_port_dirauth_total',
+            'or_port_dirauth_accessible'
         )
         
         for item in qs:
@@ -656,5 +673,8 @@ class ListTORBackEnd(ListSubMeasurementBackend):
                 'dir_port_accessible' : item.dir_port_accessible or 0,
                 'obfs4_total' : item.obfs4_total or 0,
                 'obfs4_accessible' : item.obfs4_accessible or 0, 
+                'or_port_dirauth_total': item.or_port_dirauth_total,
+                'or_port_dirauth_accessible': item.or_port_dirauth_accessible
             })
+
         return json_data
