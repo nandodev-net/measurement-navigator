@@ -181,54 +181,82 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         events = post['events[]'] if 'events[]' in post.keys() else []
         eventsObject = Event.objects.filter(id__in=events)
 
-        early_start_date = post['start_date'][0]
-        if early_start_date:
-            early_start_date = datetime.strptime(early_start_date, '%Y-%m-%d %H:%M')
-        oldest_start_date = post['end_date'][0]
-        if oldest_start_date:
-            oldest_start_date = datetime.strptime(oldest_start_date, '%Y-%m-%d %H:%M')
 
-      
+        # Checking and getting the start and end dates of the case
+        # when was selected manually
+        start_date_manual = post['start_date'][0]
+        end_date_manual = post['end_date'][0]
+        is_it_manual = False 
+        if start_date_manual:
+            is_it_manual = True 
+            start_date_manual = datetime.strptime(start_date_manual, '%Y-%m-%d %H:%M')
 
-        start_dates, end_dates = [], []
-        for i in eventsObject:
-            start_dates.append(i.get_start_date())
-            end_dates.append(i.get_end_date())
+        if end_date_manual:
+            end_date_manual = datetime.strptime(end_date_manual, '%Y-%m-%d %H:%M')
 
-        start_date_manual = False
-        if post['start_date'][0] == None or post['start_date'][0] == "": 
-            early_start_date = min(start_dates)
-        else:
-            start_date_manual = True
+  
+        # Filtering the early and oldest date in the selected events.
+        start_date_automatic = [ event.get_start_date() for event in eventsObject ]
+        end_date_automatic = [ event.get_end_date() for event in eventsObject ]
+        if len(start_date_automatic) > 0: start_date_automatic = min(start_date_automatic)
+        else: start_date_automatic = None
+        if len(end_date_automatic) > 0: end_date_automatic = max(end_date_automatic)
+        else: end_date_automatic = None
 
-        end_date_manual = False
-        if post['end_date'][0] == None or post['end_date'][0] == "": 
-            oldest_start_date = max(end_dates)
-        else:
-            end_date_manual = True
 
-        
-        
         #Getting Category object
         category = Category.objects.filter(name = post['category'][0]).first()
         
+        # Checking if the case continues
+        is_it_continues = False
+        if is_it_manual and end_date_manual:
+            if end_date_manual > datetime.now(): is_it_continues = True
+        if not is_it_manual and end_date_automatic:
+            if end_date_automatic > datetime.now(): is_it_continues = True
+
+        # Deciding which date put in the main dates fields.
+        start_date, end_date = start_date_manual, end_date_manual 
+        if not is_it_manual:
+            start_date, end_date = start_date_automatic, end_date_automatic 
+
         try:
-            print('----------')
-            print(post)
+            print('--------------')
+            print(post['title'][0])
             print(post['title_eng'][0])
+            print(post['description'][0])
+            print(post['description_eng'][0])
+            print(start_date)
+            print(start_date_manual)
+            print(start_date_automatic)
+            print(end_date)
+            print(end_date_manual)
+            print(end_date_automatic)
+            print(post['case_type'][0].lower())
+            print(category)
+            print(post['twitter_search'][0])
+            print(published)
+            print(is_it_manual)
+            print(is_it_continues)
+            print('------------------------')
+
+
             new_case = Case(
                 title = post['title'][0],
                 title_eng = post['title_eng'][0],
                 description = post['description'][0],
                 description_eng = post['description_eng'][0],
-                start_date = early_start_date,
+                start_date = start_date,
                 start_date_manual = start_date_manual,
-                end_date = oldest_start_date,
+                start_date_automatic = start_date_automatic,
+                end_date = end_date,
                 end_date_manual = end_date_manual,
+                end_date_automatic = end_date_automatic,
                 case_type = post['case_type'][0].lower(),
                 category = category,
                 twitter_search = post['twitter_search'][0],
-                published = published
+                published = published,
+                is_it_manual = is_it_manual,
+                is_it_continues = is_it_continues
             )
             new_case.save()
             new_case.events.set(eventsObject)
