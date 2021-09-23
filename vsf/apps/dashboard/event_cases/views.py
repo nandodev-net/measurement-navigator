@@ -81,7 +81,6 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
             return JsonResponse({'error' : None})
 
         except Exception as e:
-            print(e)
             return HttpResponseBadRequest()
 
 class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
@@ -196,12 +195,10 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
 
   
         # Filtering the early and oldest date in the selected events.
-        start_date_automatic = [ event.get_start_date() for event in eventsObject ]
-        end_date_automatic = [ event.get_end_date() for event in eventsObject ]
-        if len(start_date_automatic) > 0: start_date_automatic = min(start_date_automatic)
-        else: start_date_automatic = None
-        if len(end_date_automatic) > 0: end_date_automatic = max(end_date_automatic)
-        else: end_date_automatic = None
+        ordered_by_start_date = eventsObject.order_by('start_date')
+        ordered_by_end_date = eventsObject.order_by('end_date')
+        start_date_automatic = ordered_by_start_date.first() or None
+        end_date_automatic = ordered_by_end_date.last() or None
 
 
         #Getting Category object
@@ -220,26 +217,6 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             start_date, end_date = start_date_automatic, end_date_automatic 
 
         try:
-            print('--------------')
-            print(post['title'][0])
-            print(post['title_eng'][0])
-            print(post['description'][0])
-            print(post['description_eng'][0])
-            print(start_date)
-            print(start_date_manual)
-            print(start_date_automatic)
-            print(end_date)
-            print(end_date_manual)
-            print(end_date_automatic)
-            print(post['case_type'][0].lower())
-            print(category)
-            print(post['twitter_search'][0])
-            print(published)
-            print(is_it_manual)
-            print(is_it_continues)
-            print('------------------------')
-
-
             new_case = Case(
                 title = post['title'][0],
                 title_eng = post['title_eng'][0],
@@ -264,7 +241,6 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             return JsonResponse({'error' : None})
 
         except Exception as e:
-            print(e)
             return HttpResponseBadRequest()
 
     def form_valid(self, form):
@@ -378,10 +354,10 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 "category": caseObj.category.name,
                 "published": caseObj.published,
                 "twitter_search": caseObj.twitter_search,
-                "events": events
+                "events": events,
+                "is_it_continues": caseObj.is_it_continues
 
             }
-            print(data)
             return JsonResponse(data, safe=False)
         else:
             return JsonResponse({})
@@ -426,10 +402,18 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
         return context
 
     def post(self, request, *args, **kwargs):
+
         post = dict(request.POST)
-        print(post)
         category = Category.objects.filter(name = post['category'][0]).first()
 
+        is_it_manual = False
+        if post['start_date'][0]:
+            is_it_manual = True
+
+        is_it_continues = Case.objects.get(id = post['id'][0]).is_it_continues
+        if post['end_date'][0]:
+            if post['end_date'][0] > datetime.now(): is_it_continues = True 
+            elif post['end_date'][0] < datetime.now(): is_it_continues = False
 
         try:
 
@@ -443,13 +427,14 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
                 case_type = post['case_type'][0].lower(),
                 category = category,
                 twitter_search = post['twitter_search'][0],
+                is_it_manual = is_it_manual,
+                is_it_continues = is_it_continues
             )     
             
 
             return redirect('/dashboard/cases/detail/' + post['id'][0])
 
         except Exception as e:
-            print(e)
             return HttpResponseBadRequest()
 
 class EventsUnlinking(VSFLoginRequiredMixin, View):
@@ -508,8 +493,6 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
             prefill[field] = prefillAux
 
         start_time = get.get("start_time")
-        print(start_time)
-        print('auxilioo')
         if start_time:
             prefill['start_time'] = start_time 
         
@@ -544,8 +527,6 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
         caseID = post['case'][0]
         case = get_object_or_404(Case, pk=caseID)
 
-        print(post)
-
         try:
             if 'eventsToDelete[]' in post:
                 for eventID in post['eventsToDelete[]']:
@@ -554,13 +535,11 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
             
             if 'eventsSelected[]' in post:
                 newEvents = Event.objects.filter(id__in=post['eventsSelected[]']).all()
-                print(newEvents)
                 case.events.add(*newEvents)
                     
 
             return JsonResponse({'error' : None})
         except Exception as e:
-            print(e)
             return HttpResponseBadRequest()
 
 class CasePublish(VSFLoginRequiredMixin, View):
@@ -580,4 +559,34 @@ class CasePublish(VSFLoginRequiredMixin, View):
                 case.save()
             return JsonResponse({'error' : None})
         except Exception as e:
-            print(e)
+            return HttpResponseBadRequest()
+
+
+class CaseChangeToAutomatic(VSFLoginRequiredMixin, View):
+
+    def post(self, request, **kwargs):
+        post = dict(request.POST)
+        case_id = int(post['cases[]'][0])
+        case = Case.objects.get(id = case_id)
+        try:
+
+            case.is_it_manual = False 
+            if case.start_date_automatic and case.end_date_automatic:
+                case.start_date = case.start_date_automatic
+                case.end_date = case.end_date_automatic
+            else:
+                return JsonResponse({'error' : 'There are no events associated to this case'})
+
+            is_it_continues = False
+            if case.end_date_automatic:
+                if case.end_date_automatic > datetime.now(): is_it_continues = True 
+
+            case.update(
+                is_it_manual = False,
+                start_date = case.start_date_automatic,
+                end_date = case.end_date_automatic,
+                is_it_continues = is_it_continues
+            )
+            return JsonResponse({'error' : None})
+        except Exception as e:
+            return HttpResponseBadRequest()

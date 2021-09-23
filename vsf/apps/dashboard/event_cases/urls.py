@@ -63,5 +63,11 @@ urlpatterns = [
         views.CasePublish.as_view(),
         name="publish"
     ),
+
+    path(
+        'goAutomatic/',
+        views.CaseChangeToAutomatic.as_view(),
+        name="goAutomatic"
+    ),
     
 ]
