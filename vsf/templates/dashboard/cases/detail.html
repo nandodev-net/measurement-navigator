@@ -39,11 +39,30 @@
     </div>
 </div>
 
-{% if object.published  %}
-    <div class="col-2"><button class='btn btn-danger' id="publishTrigger" type='button'> Unpublish </button></div>
-{% else %}
-    <div class="col-2"><button class='btn btn-success' id="publishTrigger" type='button'> Publish </button></div>
-{% endif %}
+<div class="col-2">
+  {% if object.published  %}
+    <button class='btn btn-danger' id="publishTrigger" type='button'> Unpublish </button>
+  {% else %}
+    <button class='btn btn-success' id="publishTrigger" type='button'> Publish </button>
+  {% endif %}
+</div>
+
+<div class="col-2">
+  {% if object.is_it_manual  %}
+    <button class='btn btn-outline-dark btn-block' id="goAutomatic" type='button'> 
+      <i class="fas fa-magic"></i> Go to automatic 
+    </button>
+  {% endif %}
+</div>
+<div class="col-6"></div>
+<div class="col-2">
+  {% if object.is_it_continues %}
+    <small><i class="fas fa-circle-notch text-danger"></i> Continues </small>
+  {% else %}
+    <small><i class="fas fa-window-close text-success"></i> It doesn't continue </small>
+  {% endif %}
+</div>
+
 <br>
 <br>
 <br>
@@ -233,6 +252,38 @@
 
     });
 
+    $( '#goAutomatic' ).click(function(e) {
+        jQuery.noConflict();
+        $.ajax({
+            type: "POST",
+            url: "{% url 'dashboard:event_cases:goAutomatic' %}",
+            data: { cases: ["{{object.id}}"] , csrfmiddlewaretoken: "{{ csrf_token }}"},
+            success: function (data) {
+                if (data.error === null) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "The dates of the case was changed to automatic!",
+                        confirmButtonColor: "#28a745",
+                        confirmButtonText: "Continue"
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Bad request.",
+                        text: `${data.error}`,
+                        confirmButtonColor: "#dc3545",
+                        confirmButtonText: "Continue"
+                    });
+                }
+            
+            }
+        });
+
+    });
 
   $( "#edit" ).click(function() {
     $( "#edit" ).hide();
@@ -260,9 +311,7 @@
         var month = dayAndMonth[0];
         var day = dayAndMonth[1];
         var year = splitted[1];
-
-        console.log(month);
-        console.log('///');
+        
         if (parseInt(day) < 10) {day = '0' + day;}
 
         var time = splitted[2].split(" ")[0].split(":");
@@ -313,10 +362,9 @@
     $('#start_date_picker').dateTimePicker({
       selectData: parseStart_Date
     });
-    console.log("{{ object.end_date }}");
-    console.log('-------');
+    
     parseEnd_Date = parseDate("{{ object.end_date }}");
-    console.log(parseEnd_Date);
+    
     var end_date = `
       <div id="end_date_picker"> </div>
       <input 
@@ -412,8 +460,7 @@
         selected[0][0]
       ));
       var case_id = $("#id").val()
-      console.log(case_id)
-      console.log(eventsSelected)
+      
       $.ajax({
         type: "GET",
         url: '{% url "dashboard:event_cases:event_remove" %}',
@@ -432,7 +479,6 @@
                 }
             });
           } else {
-            console.log(data)
             Swal.fire({
                 icon: "error",
                 title: "Bad request.",
