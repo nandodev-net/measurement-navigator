@@ -36,7 +36,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
         
         fields = [ 
-            'identification', 'confirmed', 'issue_type', 'domain', 'asn'
+            'identification', 'confirmed', 'issue_type', 'domain', 'asn', 'muted'
         ]
 
         for field in fields:
@@ -51,12 +51,6 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         if end_time:
             prefill['end_time'] = end_time
 
-        counter = 0
-        print(get)
-        print('aloooooo')
-
-        print(counter)
-        print('.......................')
 
         context = super().get_context_data()
         context['prefill'] = prefill
@@ -137,10 +131,10 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
         #--------- Filtering muted field ---------#
         muted = self.request.GET.get('muted')
-        if muted != None and muted != "":
+        if muted != None:
             if muted == 'true': 
                 qs = qs.filter(muted = 't') 
-            elif muted == 'false': 
+            elif muted == 'false' or muted == '': 
                 qs = qs.filter(muted = 'f')
 
 

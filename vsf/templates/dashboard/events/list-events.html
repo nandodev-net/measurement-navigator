@@ -154,7 +154,7 @@
                 <select id="muted" class="custom-select additional-filter" name="muted">
                   <option value="all" >Any Muted</option>
                   <option {% if prefill.muted == 'true' %} selected {% endif %} value="true">True</option>
-                  <option {% if prefill.muted == 'false' %} selected {% endif %} value="false">False</option>
+                  <option {% if prefill.muted == 'false' or prefill.muted == "" %} selected {% endif %} value="false">False</option>
                 </select>
                 <input id='previous_muted' value='all' hidden /> 
               </div>
