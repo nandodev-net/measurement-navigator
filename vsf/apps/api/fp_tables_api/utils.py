@@ -107,7 +107,7 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
         'probe_cc': 'VE', # In case we want to add other countries
         'since': since,
         'until': until,
-        'limit': 1000,
+        'limit': 100,
         'order':'asc',
         'order_by' : 'measurement_start_time'
     }
