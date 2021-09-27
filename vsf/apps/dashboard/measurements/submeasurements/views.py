@@ -157,23 +157,23 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         flags        = get.getlist('flags[]') if get != {} else []
 
 
-        if input:
-            qs = qs.filter(input__contains=input)
-        if since:
-            qs = qs.filter(measurement_start_time__gte = since)
-        if asn:
-            qs = qs.filter(probe_asn=asn)
-        if country:
-            qs = qs.filter(_probe_cc=country)
-        if until:
-            qs = qs.filter(measurement_start_time__lte=until)
-        if site:
-            qs = qs.filter(measurement__domain__site=site)
-        if anomaly:
-            qs = qs.filter(anomaly= anomaly.lower() == 'true')
-        if flags:
-            flags = [flag.lower() for flag in flags]
-            qs = qs.filter(flag_type__in = flags)
+        # if input:
+        #     qs = qs.filter(input__contains=input)
+        # if since:
+        #     qs = qs.filter(measurement_start_time__gte = since)
+        # if asn:
+        #     qs = qs.filter(probe_asn=asn)
+        # if country:
+        #     qs = qs.filter(_probe_cc=country)
+        # if until:
+        #     qs = qs.filter(measurement_start_time__lte=until)
+        # if site:
+        #     qs = qs.filter(measurement__domain__site=site)
+        # if anomaly:
+        #     qs = qs.filter(anomaly= anomaly.lower() == 'true')
+        # if flags:
+        #     flags = [flag.lower() for flag in flags]
+        #     qs = qs.filter(flag_type__in = flags)
 
         return qs
 
@@ -633,16 +633,16 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         qs = super().filter_queryset(qs)
         get = self.request.GET or {}
 
-        dir_port_accessible = int(get.get('dir_port_accessible')) / 100
-        obfs4_accessible = int(get.get('obfs4_accessible')) / 100
-        or_port_dirauth_accessible = int(get.get('or_port_dirauth_accessible')) / 100
+        # dir_port_accessible = int(get.get('dir_port_accessible')) / 100
+        # obfs4_accessible = int(get.get('obfs4_accessible')) / 100
+        # or_port_dirauth_accessible = int(get.get('or_port_dirauth_accessible')) / 100
 
-        if dir_port_accessible:
-            qs = qs.filter(dir_port_accessible__lte = F('dir_port_total') * dir_port_accessible)
-        if obfs4_accessible:
-            qs = qs.filter(obfs4_accessible__lte = F('obfs4_total') * obfs4_accessible)
-        if or_port_dirauth_accessible:
-            qs = qs.filter(or_port_dirauth_accessible__lte = F('or_port_dirauth_total') * or_port_dirauth_accessible)
+        # if dir_port_accessible:
+        #     qs = qs.filter(dir_port_accessible__lte = F('dir_port_total') * dir_port_accessible)
+        # if obfs4_accessible:
+        #     qs = qs.filter(obfs4_accessible__lte = F('obfs4_total') * obfs4_accessible)
+        # if or_port_dirauth_accessible:
+        #     qs = qs.filter(or_port_dirauth_accessible__lte = F('or_port_dirauth_total') * or_port_dirauth_accessible)
 
         return qs
 
@@ -655,6 +655,7 @@ class ListTORBackEnd(ListSubMeasurementBackend):
             'measurement_start_time',
             'probe_asn',
             'measurement__id',
+            'flag_type',
             'dir_port_total',
             'dir_port_accessible',
             'obfs4_total',
@@ -664,7 +665,6 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         )
         
         for item in qs:
-            
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
@@ -672,6 +672,7 @@ class ListTORBackEnd(ListSubMeasurementBackend):
                 'dir_port_total' : item.dir_port_total or 0,
                 'dir_port_accessible' : item.dir_port_accessible or 0,
                 'obfs4_total' : item.obfs4_total or 0,
+                'flag_type'   : item.flag_type,
                 'obfs4_accessible' : item.obfs4_accessible or 0, 
                 'or_port_dirauth_total': item.or_port_dirauth_total,
                 'or_port_dirauth_accessible': item.or_port_dirauth_accessible

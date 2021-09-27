@@ -63,7 +63,7 @@ def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
         Note that the Measurement field is not provided since it may not be created yet.
         Set this field manually to a valid Measurement.
     """
-
+    print('Creating DNS from Web Connectivity...')
     # Sanity & consistency check: See if the measurement is a web_connectivity measurement
     if web_con_measurement.test_name != RawMeasurement.TestTypes.WEB_CONNECTIVITY:
         raise AttributeError("The given measurement is not a web_connectivity measurement")
@@ -129,6 +129,7 @@ def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
         No pude conseguir una medición de prueba para probar esta función, está 
         pendiente testearla. Por ahora solo es copy paste de la versión del sistema viejo
     """
+    print('Creating DNS from DNS Consistency...')
     # Get the relevant data
     test_keys = measurement.test_keys
     queries             = test_keys['queries']
@@ -245,7 +246,7 @@ def create_http_from_web_conn(measurement : RawMeasurement) -> HTTP:
         when the measurement is meaningless due to an HTTP test 
         failure.
     """
-
+    print('Creating HTTP from Web Connectivity...')
     test_keys           = measurement.test_keys
     # Get relevant data from test_keys
     status_code_match   = test_keys['status_code_match']
@@ -283,6 +284,7 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
     """
         Create a TCP test sub measurement from a web_connectivity measurement
     """
+    print('Creating TCP from Web Connectivity...')
     test_keys = measurement.test_keys
 
     tcp_connect = test_keys["tcp_connect"]
@@ -321,17 +323,22 @@ def create_tor_from_tor(measurement : RawMeasurement) -> TOR:
         when the measurement is meaningless due to an TOR test 
         failure.
     """
+    print('Creating TOR from TOR...')
     test_keys           = measurement.test_keys
     # Get relevant data from test_keys
     dir_port_total = test_keys['dir_port_total']
     dir_port_accessible = test_keys['dir_port_accessible']
     obfs4_total = test_keys['obfs4_total']
     obfs4_accessible = test_keys['obfs4_accessible']
+    or_port_dirauth_total = test_keys['or_port_dirauth_total']
+    or_port_dirauth_accessible = test_keys['or_port_dirauth_accessible']
 
     if     (dir_port_total  is not None) and (
             dir_port_accessible  is not None) and (
             obfs4_total      is not None) and (
-            obfs4_accessible    is not None):
+            obfs4_accessible    is not None) and (
+            or_port_dirauth_total      is not None) and (
+            or_port_dirauth_accessible    is not None):
 
         tor = TOR(
             measurement=None,
@@ -339,6 +346,8 @@ def create_tor_from_tor(measurement : RawMeasurement) -> TOR:
             dir_port_accessible=dir_port_accessible,
             obfs4_total=obfs4_total,
             obfs4_accessible=obfs4_accessible,
+            or_port_dirauth_total=or_port_dirauth_total,
+            or_port_dirauth_accessible=or_port_dirauth_accessible,
             measurement_start_time=measurement.measurement_start_time,
             probe_asn=measurement.probe_asn,
             probe_cc=measurement.probe_cc,

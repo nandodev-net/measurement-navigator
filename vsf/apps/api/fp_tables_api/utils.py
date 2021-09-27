@@ -85,7 +85,7 @@ def checkPostData(data) -> bool:
 
         return True
 
-def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:int =None) -> (int, [str]):
+def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool = True, limit:int =None) -> (int, [str]):
     """
         Given the start and end date for a set of measurements,
         perform a get request to ooni in order to get the
@@ -111,6 +111,9 @@ def request_fp_data(since: str, until: str, from_fastpath: bool = True, limit:in
         'order':'asc',
         'order_by' : 'measurement_start_time'
     }
+
+    if test_name:
+        data['test_name'] = test_name
 
     # Check if the post data is valid:
     if not checkPostData(data):
