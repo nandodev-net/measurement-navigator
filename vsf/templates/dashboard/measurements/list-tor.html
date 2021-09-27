@@ -190,6 +190,7 @@
             <tr>
               <th class="text-center text-capitalize" scope="col">Start Time</th>
               <th class="text-center text-capitalize" scope="col">ASN</th>
+              <th class="text-center text-capitalize" scope="col">Flag</th>
               <th class="text-center text-capitalize" scope="col">Dir Port Total</th>
               <th class="text-center text-capitalize" scope="col">Dir Port Accesible</th>
               <th class="text-center text-capitalize" scope="col">OBSF4 Total</th>
@@ -325,9 +326,9 @@
 
             data.since = $("#since").val() ;
             data.asn = $("#asn").val();
-            data.dir_port_accessible = $("#dir-port-accesible").val();
-            data.obfs4_accessible = $("#obfs4-accesible").val(); 
-            data.or_port_dirauth_accessible = $('or-port-dirauth-accessible').val();
+            // data.dir_port_accessible = $("#dir-port-accesible").val();
+            // data.obfs4_accessible = $("#obfs4-accesible").val(); 
+            // data.or_port_dirauth_accessible = $('or-port-dirauth-accessible').val();
 
           },
           contentType: "application/json; charset=utf-8",  
@@ -343,6 +344,34 @@
             data: "measurement__raw_measurement__probe_asn",
             orderable: true,
             searchable: true,
+          },
+          {
+            data: "flag_type",
+            orderable: true,
+            searchable: true,
+            render: function (data, type, row, meta) {
+              if (data === "ok") {
+                return `<div class="text-center text-success">
+                          <i title="OK" class="far fa-thumbs-up"></i>
+                        </div>`;
+              } else if (data === "hard") {
+                return `<div class="text-center text-danger">
+                          <i title="HARD" class="far fa-flag"></i>
+                        </div>`;
+              } else if (data === "soft") {
+                return `<div class="text-center text-warning">
+                          <i title="SOFT" class="far fa-flag"></i>
+                        </div>`;
+              } else if (data === "muted") {
+                return `<div class="text-center text-secondary">
+                          <i title="MUTED" class="far fa-flag"></i>
+                        </div>`;
+              } else {
+                return `<div class="text-center text-dark">
+                            <i title="MANUAL" class="far fa-flag"></i>
+                          </div>`;
+              } 
+            }
           },
           {
             data: "dir_port_total",
@@ -368,7 +397,7 @@
             data: 'or_port_dirauth_total',
             orderable: true,
             searchable: true,
-          }
+          },
           {
             data: 'or_port_dirauth_accessible',
             orderable: true,
