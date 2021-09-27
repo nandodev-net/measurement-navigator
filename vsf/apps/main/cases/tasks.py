@@ -20,7 +20,7 @@ class CASES_TASKS:
 
 
 @shared_task(time_limit=3600, vsf_name = CASES_TASKS.UPDATE_DATES, base=VSFTask)
-def update_dates_cases():
+def update_case_dates():
     """
         Task that runs for all over the cases and detect if 
         there was a change in their associated events dates, in

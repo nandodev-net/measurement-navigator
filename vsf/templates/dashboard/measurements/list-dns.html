@@ -201,7 +201,7 @@
     </nav>
 
     <div class="card py-0 px-5 mt-5" id="histogram-card">
-      <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#histogram" aria-expanded="true" aria-controls="failures"> 
+      <a href="#!" id='histogramService' class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#histogram" aria-expanded="true" aria-controls="failures"> 
           <div class="card-header">
               <h5 class="mb-0">Histogram</h5>
           </div>
@@ -438,62 +438,77 @@
       });
     }
   });
-
-  const labels = [
-    '20/07', '21/07', '22/07', '23/07', '24/07', '25/07', '26/07', '27/07', '28/07', '29/07',
-    '30/07', '31/07', '01/07'
-  ];
-  const data = {
-    labels: labels,
-    
-    datasets: [{              
-      label: 'Flags OK',
-      data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
-      backgroundColor: '#34eb74',
-      },
-      {
-        label: 'Flags SOFT',
-        data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
-        backgroundColor: '#34a4eb',
-      },
-      {
-        label: 'Flags HARD',
-        data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
-        backgroundColor: '#eb6b34',
-      },
-      {
-        label: 'Flags MUTED',
-        data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
-        backgroundColor: '#ada5a1',
-      },
-      {
-        label: 'Flags MANUAL',
-        data: [1, 5, 0, 9, 4, 10, 0, 2, 15, 20, 1, 12, 13],
-        backgroundColor: '#000000',
-      },
-    ]
-  };
-
-  const config = {
-    type: 'bar',
-    data: data,
-    options: {
-      plugins: {
-        title: {
-          display: true,
-          text: 'Chart.js Bar Chart - Stacked'
+  $( '#histogramService' ).click( function() {
+      $.ajax({
+        type: "GET",
+        url: '{% url "dashboard:measurement:counter" %}',
+        data: { 
+          since: $("#since").val(),
+          until: $("#until").val(),
+          asn: $("#asn").val(),
+          dns_consistency: $("#dns_consistency").val(),
+          anomaly: $("#anomaly-state").val(),
+          site: $("#site").val(),
+          flags: $("#flag").val(),
+          input: $("#input").val(),
+          measurement_type: 'tor'
         },
-      },
-      responsive: true,
-      scales: {
-        xAxes: [{ stacked: true }],
-        yAxes: [{ stacked: true }]
-      }
-    }
-  };
+        success: function (d) {
+          const fill = {
+            labels: d.dates,
+            datasets: [
+              {
+                label: 'Flags OK',
+                data: d.ok,
+                backgroundColor: '#34eb74',
+              },
+              {
+                label: 'Flags SOFT',
+                data: d.soft,
+                backgroundColor: '#34a4eb',
+              },
+              {
+                label: 'Flags HARD',
+                data: d.hard,
+                backgroundColor: '#eb6b34',
+              },
+              {
+                label: 'Flags MUTED',
+                data: d.muted,
+                backgroundColor: '#ada5a1',
+              },
+              {
+                label: 'Flags MANUAL',
+                data: d.manual,
+                backgroundColor: '#000000',
+              },
+            ]
+          };
 
-  let ctx = document.getElementById('stacked-bar').getContext('2d');
-  new Chart(ctx, config);
+          const config = {
+            type: 'bar',
+            data: fill,
+            options: {
+              plugins: {
+                title: {
+                  display: true,
+                  text: 'Chart.js Bar Chart - Stacked'
+                },
+              },
+              responsive: true,
+              scales: {
+                xAxes: [{ stacked: true }],
+                yAxes: [{ stacked: true }]
+              }
+            }
+          };
+
+          var ctx = document.getElementById('stacked-bar').getContext('2d');
+          new Chart(ctx, config);
+
+        }
+      });
+  });
   
   $(document).ready(function() {
 
@@ -639,7 +654,6 @@
             orderable: false,
             searchable: false,
             render: function (data, type, row, meta) {
-              console.log(data)
               if (data.isOk) {
                 let html = `<div class='text-left wrapper-dt'><strong>Address:</strong>`;
                 
