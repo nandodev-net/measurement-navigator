@@ -439,7 +439,6 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
             dates_array.append(aux.strftime("%Y-%m-%d"))
             x = measurements.filter(measurement_start_time__date = aux.strftime("%Y-%m-%d"))
 
-            print(x)
             ok = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.OK).count()
             ok_qtty.append(ok)
 

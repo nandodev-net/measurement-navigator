@@ -188,9 +188,10 @@
       data   : { 'id': id },
       success: function (json) {
         var url = "{% url 'dashboard:event_cases:detail_page' pk=1 %}".replace(1, id);
-        console.log(url);
+
         $( '#linkdetail' ).attr("href", url);
         $('#events > tbody').empty();
+        $( '#continues' ).empty();
         $( '#title_detail' ).text(json["title"]);
         $( '#description_detail' ).text(json["description"]);
         $( '#description_eng_detail' ).text(json["description_eng"]);
@@ -200,6 +201,7 @@
         $( '#category_detail' ).text(json["category"]);
         $( '#published_detail' ).text(json["published"]);
         $( '#twitter_search_detail' ).text(json["twitter_search"]);
+        
         $(' #icon_start ').empty();
         $(' #icon_end ').empty();
         if (json['start_date_manual']) {
@@ -211,6 +213,16 @@
           $(' #icon_end ').append('<i class="fas fa-pencil-alt"></i>');
         } else {
           $(' #icon_end ').append('<i class="fas fa-magic"></i>');
+        }
+
+        if (json['is_it_continues']) {
+          $( '#continues' ).append(
+            `<i class="fas fa-circle-notch text-danger"></i> Continues`
+          );
+        } else {
+          $( '#continues' ).append(
+            `<i class="fas fa-window-close text-success"></i> It doesn't continue`
+          );
         }
 
         var eventsJson = json["events"];

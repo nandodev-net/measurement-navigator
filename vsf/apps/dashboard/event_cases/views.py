@@ -176,6 +176,8 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         published = post['published'][0]
         published = eval(published.capitalize())
 
+
+
         #Getting Events objects
         events = post['events[]'] if 'events[]' in post.keys() else []
         eventsObject = Event.objects.filter(id__in=events)
@@ -205,11 +207,16 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         category = Category.objects.filter(name = post['category'][0]).first()
         
         # Checking if the case continues
-        is_it_continues = False
+        is_it_continues = post['continue'][0]
+        is_it_continues = eval(is_it_continues.capitalize())
+
         if is_it_manual and end_date_manual:
             if end_date_manual > datetime.now(): is_it_continues = True
         if not is_it_manual and end_date_automatic:
             if end_date_automatic > datetime.now(): is_it_continues = True
+
+        if not is_it_continues and eval(post['continue'][0].capitalize()):
+            is_it_continues = True 
 
         # Deciding which date put in the main dates fields.
         start_date, end_date = start_date_manual, end_date_manual 
@@ -412,8 +419,9 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
 
         is_it_continues = Case.objects.get(id = post['id'][0]).is_it_continues
         if post['end_date'][0]:
-            if post['end_date'][0] > datetime.now(): is_it_continues = True 
-            elif post['end_date'][0] < datetime.now(): is_it_continues = False
+            end_date = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
+            if end_date > datetime.now(): is_it_continues = True 
+            elif end_date < datetime.now(): is_it_continues = False
 
         try:
 
@@ -422,8 +430,8 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
                 title_eng = post['title_eng'][0],
                 description = post['description'][0],
                 description_eng = post['description_eng'][0],
-                start_date = post['start_date'][0] or None,
-                end_date = post['end_date'][0] or None,
+                start_date = datetime.strptime(post['start_date'][0], '%Y-%m-%d %H:%M'),
+                end_date = end_date or None,
                 case_type = post['case_type'][0].lower(),
                 category = category,
                 twitter_search = post['twitter_search'][0],

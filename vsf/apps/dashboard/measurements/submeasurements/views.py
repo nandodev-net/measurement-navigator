@@ -596,13 +596,10 @@ class ListTorTemplate(ListSubMeasurementTemplate):
         if or_port_dirauth_accessible:
             prefill['or_port_dirauth_accessible'] = or_port_dirauth_accessible
 
-            
         context['prefill'] = prefill
         return context
 
     
-
-
 class ListTORBackEnd(ListSubMeasurementBackend):
     """
         This is the back end for the tor submeasurement table. The dynamic
@@ -633,16 +630,21 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         qs = super().filter_queryset(qs)
         get = self.request.GET or {}
 
-        # dir_port_accessible = int(get.get('dir_port_accessible')) / 100
-        # obfs4_accessible = int(get.get('obfs4_accessible')) / 100
-        # or_port_dirauth_accessible = int(get.get('or_port_dirauth_accessible')) / 100
+        dir_port_accessible = get.get('dir_port_accessible')
+        if dir_port_accessible: dir_port_accessible = int(dir_port_accessible) / 100
+        
+        obfs4_accessible = get.get('obfs4_accessible')
+        if obfs4_accessible: int(obfs4_accessible) / 100
+        
+        or_port_dirauth_accessible = get.get('or_port_dirauth_accessible')
+        if or_port_dirauth_accessible: int(or_port_dirauth_accessible) / 100
 
-        # if dir_port_accessible:
-        #     qs = qs.filter(dir_port_accessible__lte = F('dir_port_total') * dir_port_accessible)
-        # if obfs4_accessible:
-        #     qs = qs.filter(obfs4_accessible__lte = F('obfs4_total') * obfs4_accessible)
-        # if or_port_dirauth_accessible:
-        #     qs = qs.filter(or_port_dirauth_accessible__lte = F('or_port_dirauth_total') * or_port_dirauth_accessible)
+        if dir_port_accessible:
+            qs = qs.filter(dir_port_accessible__lte = F('dir_port_total') * dir_port_accessible)
+        if obfs4_accessible:
+            qs = qs.filter(obfs4_accessible__lte = F('obfs4_total') * obfs4_accessible)
+        if or_port_dirauth_accessible:
+            qs = qs.filter(or_port_dirauth_accessible__lte = F('or_port_dirauth_total') * or_port_dirauth_accessible)
 
         return qs
 
@@ -678,4 +680,5 @@ class ListTORBackEnd(ListSubMeasurementBackend):
                 'or_port_dirauth_accessible': item.or_port_dirauth_accessible
             })
 
+        print(json_data)
         return json_data
