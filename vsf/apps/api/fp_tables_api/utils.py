@@ -123,8 +123,8 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
 
     # Perform a get request from Ooni
     next_url = 'https://api.ooni.io/api/v1/measurements?' + urlencode(data)
-
-    print('\n\n', next_url)
+    from vsf.utils import Colors as c
+    print(c.magenta("\n\nRequesting URL: \n"), next_url)
 
     # We store the earliest measurement so we can update just what needs to be updated 
     # when computing hard flags and updating measurement count
@@ -132,6 +132,7 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
 
     objects = [] # List of measurement objects obtained
     status_code = 200
+
     while next_url != None:
         try:
             # If it wasn't able to get the next page data, just store the currently added data
@@ -160,96 +161,106 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
         else:
             results = data['results']
 
+        # for result in results:
+        #     print(c.green('Creating FastPath Meas'), result['report_id'])
+        #     fp = FastPath(
+        #         anomaly = result['anomaly'],
+        #         confirmed = result['confirmed'],
+        #         failure = result['failure'],
+        #         input= str(result['input']),
+        #         tid= result.get('measurement_id'),
+        #         measurement_start_time=result['measurement_start_time'],
+        #         measurement_url=result['measurement_url'],
+        #         probe_asn= result['probe_asn'],
+        #         probe_cc= result['probe_cc'],
+        #         report_id= result['report_id'],
+        #         scores=result['scores'],
+        #         test_name= result['test_name'],
+        #     )
+        #     URL.objects.get_or_create(url=fp.input)
+        #     objects.append(fp)
+        
         for result in results:
-
-            fp = FastPath(
-                anomaly = result['anomaly'],
-                confirmed = result['confirmed'],
-                failure = result['failure'],
-                input= str(result['input']),
-                tid= result.get('measurement_id'),
-                measurement_start_time=result['measurement_start_time'],
-                measurement_url=result['measurement_url'],
-                probe_asn= result['probe_asn'],
-                probe_cc= result['probe_cc'],
-                report_id= result['report_id'],
-                scores=result['scores'],
-                test_name= result['test_name'],
-            )
-            URL.objects.get_or_create(url=fp.input)
-            objects.append(fp)
+            URL.objects.get_or_create(url=str(result['input']))
+            try:
+                req = requests.get(result['measurement_url'])
+                status_code = req.status_code
+                assert req.status_code == 200
+            except:
+                continue
 
 
     # Save only if this measurement does not exists
-    saved_measurements = []
-    for fp in objects:
-        try:
-            fp_old = FastPath.objects.get(
-                        measurement_start_time=fp.measurement_start_time,
-                        input=fp.input,
-                        report_id=fp.report_id,
-                        test_name=fp.test_name)
-            continue
-        except FastPath.DoesNotExist:
-            pass
+    # saved_measurements = []
+    # for fp in objects:
+    #     try:
+    #         fp_old = FastPath.objects.get(
+    #                     measurement_start_time=fp.measurement_start_time,
+    #                     input=fp.input,
+    #                     report_id=fp.report_id,
+    #                     test_name=fp.test_name)
+    #         continue
+    #     except FastPath.DoesNotExist:
+    #         pass
 
         #Since this measurement is not yet stored, try to recover its complete data if possible
-        try:
-            req = requests.get(fp.measurement_url)
-            status_code = req.status_code
-            assert req.status_code == 200
-        except:
-            fp.save()
-            saved_measurements.append(fp.id)
-            continue
+        # try:
+        #     req = requests.get(fp.measurement_url)
+        #     status_code = req.status_code
+        #     assert req.status_code == 200
+        # except:
+        #     fp.save()
+        #     saved_measurements.append(fp.id)
+        #     continue
 
 
-        from vsf.utils import Colors as c
-        try:
-            print(c.magenta("Creating a new measurement"))
-            data = req.json()
-            ms = RawMeasurement.objects.create(
-                input=data['input'],
-                report_id= data['report_id'],
-                report_filename= data.get('report_filename','NO_AVAILABLE'), #
-                options= data.get('options', "NO_AVAILABLE"), #
-                probe_cc= data.get('probe_cc','VE'),
-                probe_asn= data['probe_asn'],
-                probe_ip=data.get('probe_ip'),
-                data_format_version= data['data_format_version'],
-                test_name= data['test_name'],
-                test_start_time= data.get('test_start_time'),
-                measurement_start_time= data['measurement_start_time'],
-                test_runtime= data.get('test_runtime'),
-                test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
-                software_name= data['software_name'],
-                software_version= data['software_version'],
-                test_version= data['test_version'],
-                bucket_date= data.get('bucket_date'), #
-                test_keys= data['test_keys'],
-                annotations= data['annotations']
-            )
-            fp.report_ready = True
-            data_state = FastPath.DataReady.READY
-            start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
-            print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-            if start_time_datetime < cache_min_date:
-                cache_min_date = start_time_datetime
-                print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+            from vsf.utils import Colors as c
+            try:
+                print(c.magenta("Creating a new measurement"))
+                data = req.json()
+                ms = RawMeasurement.objects.create(
+                    input=data['input'],
+                    report_id= data['report_id'],
+                    report_filename= data.get('report_filename','NO_AVAILABLE'), #
+                    options= data.get('options', "NO_AVAILABLE"), #
+                    probe_cc= data.get('probe_cc','VE'),
+                    probe_asn= data['probe_asn'],
+                    probe_ip=data.get('probe_ip'),
+                    data_format_version= data['data_format_version'],
+                    test_name= data['test_name'],
+                    test_start_time= data.get('test_start_time'),
+                    measurement_start_time= data['measurement_start_time'],
+                    test_runtime= data.get('test_runtime'),
+                    test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
+                    software_name= data['software_name'],
+                    software_version= data['software_version'],
+                    test_version= data['test_version'],
+                    bucket_date= data.get('bucket_date'), #
+                    test_keys= data['test_keys'],
+                    annotations= data['annotations']
+                )
+                # fp.report_ready = True
+                # data_state = FastPath.DataReady.READY
+                start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
+                print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+                if start_time_datetime < cache_min_date:
+                    cache_min_date = start_time_datetime
+                    print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
 
-        except Exception as e:
-            fp.report_ready = False
-            data_state = FastPath.DataReady.UNDETERMINED
+            except:
+                pass
+                # fp.report_ready = False
+                # data_state = FastPath.DataReady.UNDETERMINED
 
-        fp.data_ready = data_state
-        fp.save()
-        saved_measurements.append(fp.id)
+            # fp.data_ready = data_state
+            # fp.save()
+            # saved_measurements.append(fp.id)
 
-        if limit and (len(saved_measurements) >= limit):
-            break
+            # if limit and (len(saved_measurements) >= limit):
+            #     break
 
 
-    return (status_code, saved_measurements)
+    return (status_code)
 
 
 def update_measurement_table(
