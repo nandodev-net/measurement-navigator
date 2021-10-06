@@ -218,7 +218,7 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
             try:
                 print(c.magenta("Creating a new measurement"))
                 data = req.json()
-                ms = RawMeasurement.objects.get_or_create(
+                ms = RawMeasurement.objects.create(
                     input=data['input'],
                     report_id= data['report_id'],
                     report_filename= data.get('report_filename','NO_AVAILABLE'), #
