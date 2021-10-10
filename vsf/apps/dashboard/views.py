@@ -145,13 +145,17 @@ class GetMeasurement(VSFLoginRequiredMixin, View):
 
         tid = self.request.GET or {}
         tid = tid.get('id')
+        print('alooooooooooooo')
 
         if tid != None:
             obj = fp_models.FastPath.objects.get(id=tid)
 
+            print(obj)
+            print('-------------------------------')
+
             data = {
                 'anomaly' : obj.anomaly,
-                'confirmed' : obj.confirmed,
+                'confirmed' : obj.cofirmed,
                 'failure' : obj.failure,
                 'input' : obj.input,
                 'tid' : obj.tid,

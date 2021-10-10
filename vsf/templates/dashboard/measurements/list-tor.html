@@ -75,23 +75,23 @@
           <div class="col-6 ">
             <div class="row align-items-center ml-1">
               <div class="col-6 mx-auto">
-                <label class="font-weight-bold" for="dir-port-accesible">Dir. Port Accesible</label>
+                <label class="font-weight-bold" for="dir-port-accessible">Dir. Port Accessible</label>
               </div>
               <div class="col-5 mx-auto">
                 <input
-                  id="dir-port-accesible"
+                  id="dir-port-accessible"
                   class="additional-filter"
                   type="range"
                   min="0"
                   max="100"
                   step="1"
-                  value="{{prefill.dir_port_accesible}}"
-                  name="dir_port_accesible"
+                  value="{{prefill.dir_port_accessible}}"
+                  name="dir_port_accessible"
                   onchange="updatedir(this.value);"
                 />
               </div>
               <div vlass="col-1 mx-auto">
-                <p id='valuedir' class="text-secondary mb-1">50%</p>
+                <p id='valuedir' class="text-secondary mb-1">{{ prefill.dir_port_accessible }}%</p>
               </div>
             </div> 
           </div>
@@ -99,23 +99,23 @@
           <div class="col-4 mt-3">
             <div class="row align-items-center">
               <div class="col-5 mx-auto">
-                <label class="font-weight-bold" for="obfs4-accesible">OBFS4 Accesible</label>
+                <label class="font-weight-bold" for="obfs4-accessible">OBFS4 Accessible</label>
               </div>
               <div class="col-6 mx-auto">
                 <input
-                  id="obfs4-accesible"
+                  id="obfs4-accessible"
                   class="additional-filter"
                   type="range"
                   min="0"
                   max="100"
                   step="1"
-                  value="{{prefill.obfs4_accesible}}"
-                  name="obfs4_accesible"
+                  value="{{prefill.obfs4_accessible}}"
+                  name="obfs4_accessible"
                   onchange="updateobfs4(this.value);"
                 />
               </div>
               <div vlass="col-1 mx-auto">
-                <p id='valueobfs4' class="text-secondary mb-1">50%</p>
+                <p id='valueobfs4' class="text-secondary mb-1">{{prefill.obfs4_accessible}}%</p>
               </div>
             </div> 
           </div>
@@ -123,7 +123,7 @@
           <div class="col-4 mt-3">
             <div class="row align-items-center">
               <div class="col-5 mx-auto">
-                <label class="font-weight-bold" for="or-port-dirauth-accessible">Dir Auth Accesible</label>
+                <label class="font-weight-bold" for="or-port-dirauth-accessible">Dir Auth Accessible</label>
               </div>
               <div class="col-6 mx-auto">
                 <input
@@ -139,7 +139,7 @@
                 />
               </div>
               <div vlass="col-1 mx-auto">
-                <p id='valuedirauth' class="text-secondary mb-1">50%</p>
+                <p id='valuedirauth' class="text-secondary mb-1">{{ prefill.or_port_dirauth_accessible }}%</p>
               </div>
             </div> 
           </div>
@@ -167,6 +167,8 @@
       </div>
     </nav>
 
+    <!--
+      HISTOGRAM CARD
     <div class="card py-0 px-5 mt-5" id="histogram-card">
       <a href="#!" id='histogramService' class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#histogram" aria-expanded="true" aria-controls="failures"> 
           <div class="card-header">
@@ -181,6 +183,18 @@
           </div>
       </div>
     </div>
+    -->
+
+    <div class="row mb-5 mt-5">
+      <div class="col-10">
+        <h4><strong>TOR measurements from: {{ prefill.since }}</strong></h4>
+      </div>
+      <div class="col-2">
+        <button type="button" class="btn btn-dark rounded" id='info'>
+          <i class="fa fa-info-circle"></i> Details in new tab 
+        </button>
+      </div>
+    </div>
 
 
     <div class="card rounded p-5" id="">
@@ -192,11 +206,12 @@
               <th class="text-center text-capitalize" scope="col">ASN</th>
               <th class="text-center text-capitalize" scope="col">Flag</th>
               <th class="text-center text-capitalize" scope="col">Dir Port Total</th>
-              <th class="text-center text-capitalize" scope="col">Dir Port Accesible</th>
+              <th class="text-center text-capitalize" scope="col">Dir Port Accessible</th>
               <th class="text-center text-capitalize" scope="col">OBSF4 Total</th>
-              <th class="text-center text-capitalize" scope="col">OBSF4 Accesible</th>
+              <th class="text-center text-capitalize" scope="col">OBSF4 Accessible</th>
               <th class="text-center text-capitalize" scope="col">Dir Auth Total</th>
-              <th class="text-center text-capitalize" scope="col">Dir Auth Accesible</th>
+              <th class="text-center text-capitalize" scope="col">Dir Auth Accessible</th>
+              <th class="text-center" scope="col">Selected</th>
             </tr>
           </thead>
 
@@ -226,92 +241,126 @@
   'use strict';
   var torList;
 
+  $("#detailed-measurement-page").click(function() {
+    var url = $(this).attr('alt');
+    window.open(url, '_blank');
+  });
+
+  $("#info").click(function() { 
+    var result = $("tr:has(:checked)");
+
+    if (result.length < 1) { 
+      Swal.fire({
+        icon: "warning",
+        title: "You must select at least one row to get the details.",
+        confirmButtonColor: "#ffc107",
+        confirmButtonText: "Continue",
+      });
+    } else {
+      var urls = []
+      for (const val of Object.values(result)) {
+        if (val.id) { 
+          var url = "{% url 'dashboard:measurement:tor_detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', val.id);
+          urls.push(url);
+        }
+      }
+      console.log(urls);
+
+      urls.forEach(function(url){
+        window.open(url, '_blank');
+      });
+    }
+  });
+
   function updateobfs4(val) {
+    $('#valueobfs4').empty();
     $('#valueobfs4').text(val + '%'); 
   }
 
   function updatedir(val) {
+    $('#valuedir').empty();
     $('#valuedir').text(val + '%'); 
   }
 
   function updatedirauth(val) {
+    $('#valuedirauth').empty();
     $('#valuedirauth').text(val + '%'); 
   }
 
-  $( '#histogramService' ).click( function() {
-      $.ajax({
-        type: "GET",
-        url: '{% url "dashboard:measurement:counter" %}',
-        data: { 
-          since: $("#since").val(),
-          until: $("#until").val(),
-          asn: $("#asn").val(),
-          dns_consistency: $("#dns_consistency").val(),
-          anomaly: $("#anomaly-state").val(),
-          site: $("#site").val(),
-          flags: $("#flag").val(),
-          input: $("#input").val(),
-          measurement_type: 'tor'
-        },
-        success: function (d) {
-          const fill = {
-            labels: d.dates,
-            datasets: [
-              {
-                label: 'Flags OK',
-                data: d.ok,
-                backgroundColor: '#34eb74',
-              },
-              {
-                label: 'Flags SOFT',
-                data: d.soft,
-                backgroundColor: '#34a4eb',
-              },
-              {
-                label: 'Flags HARD',
-                data: d.hard,
-                backgroundColor: '#eb6b34',
-              },
-              {
-                label: 'Flags MUTED',
-                data: d.muted,
-                backgroundColor: '#ada5a1',
-              },
-              {
-                label: 'Flags MANUAL',
-                data: d.manual,
-                backgroundColor: '#000000',
-              },
-            ]
-          };
+  $( '#tor-list' ).on('dblclick', 'tbody tr', function() {
+    var id = $( this ).attr( 'id' );
+    var urlBlank = "{% url 'dashboard:measurement:tor_detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', id);
+    jQuery.noConflict();
 
-          const config = {
-            type: 'bar',
-            data: fill,
-            options: {
-              plugins: {
-                title: {
-                  display: true,
-                  text: 'Chart.js Bar Chart - Stacked'
-                },
-              },
-              responsive: true,
-              scales: {
-                xAxes: [{ stacked: true }],
-                yAxes: [{ stacked: true }]
-              }
-            }
-          };
+    $.ajax({
+      type: "GET",
+      url: '{% url "measurements:get_measurement" %}',
+      data: { id: id },
+      success: function (measurementData) {
 
-          var ctx = document.getElementById('stacked-bar').getContext('2d');
-          new Chart(ctx, config);
+        $("#detailed-measurement-page").attr("alt", urlBlank);
+        $("#annotations-detailed").jsonViewer(measurementData["annotations"], {
+          collapsed: true,
+          rootCollapsable: false
+        });
+        $("#bucket-date-detailed").text(measurementData["bucket_date"]);
+        $("#data-format-version-detailed").text(
+          measurementData["data_format_version"]
+        );
+        $("#measurement-start-time-detailed").text(
+          measurementData["measurement_start_time"]
+        );
+        $("#options-detailed").text(measurementData["options"]);
+        $("#probe-asn-detailed").text(measurementData["probe_asn"]);
+        $("#probe-cc-detailed").text(measurementData["probe_cc"]);
+        $("#probe-ip-detailed").text(measurementData["probe_ip"]);
+        $("#report-filename-detailed").text(
+          measurementData["report_filename"]
+        );
+        $("#report-id-detailed").text(measurementData["report_id"]);
+        $("#software-name-detailed").text(
+          measurementData["software_name"]
+        );
+        $("#software-version-detailed").text(
+          measurementData["software_version"]
+        );
+        $("#test-helpers-detailed").jsonViewer(measurementData["test_helpers"], {
+          collapsed: true,
+          rootCollapsable: false
+        });
+        $("#test-keys-detailed").jsonViewer(measurementData["test_keys"], {
+          collapsed: true,
+          rootCollapsable: false
+        });
+        $("#test-name-detailed").text(measurementData["test_name"]);
+        $("#test-runtime-detailed").text(
+          measurementData["test_runtime"]
+        );
+        $("#test-start-time-detailed").text(
+          measurementData["test_start_time"]
+        );
+        $("#test-version-detailed").text(
+          measurementData["test_version"]
+        );
 
-        }
-      });
+
+        $("#modalMeasurementInfo").modal("show");
+
+        
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        Swal.fire({
+          icon: "warning",
+          title: "There are an error in the inputs!",
+          confirmButtonColor: "#28a745",
+          confirmButtonText: "Continue",
+        });
+      },
+    });
   });
 
-
   $(document).ready(function() {
+
     torList = $('#tor-list').DataTable({
         order: [[0, "desc"]],
         searching: true,
@@ -326,8 +375,8 @@
 
             data.since = $("#since").val() ;
             data.asn = $("#asn").val();
-            data.dir_port_accessible = $("#dir-port-accesible").val();
-            data.obfs4_accessible = $("#obfs4-accesible").val(); 
+            data.dir_port_accessible = $("#dir-port-accessible").val();
+            data.obfs4_accessible = $("#obfs4-accessible").val(); 
             data.or_port_dirauth_accessible = $('or-port-dirauth-accessible').val();
 
           },
@@ -402,6 +451,14 @@
             data: 'or_port_dirauth_accessible',
             orderable: true,
             searchable: true,
+          },
+          {
+            data: "selection",
+            orderable: true,
+            searchable: true,
+            render: function (data, type, row, meta) {
+              return `<input class="form-check-input" type="checkbox" value="">`
+            }
           }
         ],
         initComplete: function () {},

@@ -1,0 +1,109 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+
+{% block custom_stylesheet %}
+<link rel=stylesheet
+  href="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.css"
+/>
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+
+<style>
+    .pcoded-main-container {
+        width: auto;
+    }
+    #header {
+        width: 270%;
+    }
+    #header-runtime, #failures-card, #dns-card, #tcp-card, #http-card, #generalInfo, #raw-card, #events-card {
+        width: -webkit-fill-available;;
+    }
+    .btn-header-link {
+        display: block;
+        text-align: left;
+        border-bottom: none;
+    }
+    .btn-header-link:after {
+        content: "\f107";
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        float: right;
+        margin-top: -5%;
+        font-size: 2rem;
+    }
+    .btn-header-link.collapsed:after {
+        content: "\f106";
+        float: right;
+    }
+    .card-header {
+        border-bottom: none !important;
+    }
+
+</style>
+{% endblock custom_stylesheet %}
+
+
+{% block tab_title %} VSF - Measurement Detail {% endblock tab_title %}
+{% block title %} Measurement Detail {% endblock title %}
+{% block sub_title %} Specific details of the measurement with id: {{ rawmeasurement.id }}{% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+    <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:measurement:list_measurements' %}">Measurements List</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'dashboard:measurement:detail' pk=rawmeasurement.id %}">Measurement Detail</a>
+</li>
+
+{% endblock route %}
+
+{% block content %}
+
+    <div class="card p-5 bg-success" id="header">  
+        <div class="row mb-5">
+            <div class="col-3"></div>
+            <div class="col-6">
+                {% block header %} {% endblock header%}
+            </div>
+            <div class="col-3"></div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-4">
+                <img class="ml-4" height="100px" src="{{rawmeasurement.urlFlag}}" />
+            </div>
+            <div class="col-4">
+            </div>
+            <div class="col-4">
+            </div>
+        </div>
+
+        <div class="row ">
+            <div class="col-4">
+                <h3 class="text-white ml-4">Venezuela</h3>
+                <h5 class="font-weight-bold text-white ml-4">Country</h5>
+            </div>
+            <div class="col-4">
+                <h3 class="text-white">{{rawmeasurement.probe_asn}}</h3>
+                <h5 class="font-weight-bold text-white">Network</h5>
+            </div>
+            <div class="col-4">
+                <h3 class="text-white ml-4">{{rawmeasurement.test_start_time}}</h3>
+                <h5 class="font-weight-bold text-white ml-4">Date & Time</h5>
+            </div>
+        </div>
+    </div>
+
+    {% block content_measurement %}
+    {% endblock content_measurement %}
+
+
+{% endblock content %}
+
+{% block custom_scripts %}
+
+
+{% endblock custom_scripts %}
