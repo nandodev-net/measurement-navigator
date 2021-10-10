@@ -163,7 +163,6 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         # context['last_measurement_date'] = last_measurement_date
         return context
 
-
 class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
     """
         Given the uuid "id" for some measurement through a GET request, 
@@ -223,7 +222,7 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
         return context
 
 class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
-    template_name = 'measurements/measurement-detail.html'
+    template_name = 'measurements/wconn-detail.html'
     slug_field = 'pk'
     model = MeasModels.Measurement
 
@@ -274,7 +273,41 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
 
                 tcp_connections.append(aux)
             context['rawmeasurement'].tcp_connections = tcp_connections
+        else:
+            print(context['rawmeasurement'].__dict__)
             
+        return context
+
+
+class TorDetailView(VSFLoginRequiredMixin, DetailView):
+    template_name = 'measurements/tor-detail.html'
+    slug_field = 'pk'
+    model = MeasModels.Measurement
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        measurement = context['measurement']
+        context['rawmeasurement'] = measurement.raw_measurement
+
+        test_keys = measurement.raw_measurement.test_keys
+        keys = [] 
+        for key, value in test_keys['targets'].items():
+            keys.append({
+                'name': value['target_name'] if 'target_name' in value else key,
+                'address': value['target_address'],
+                'type': value['target_protocol'],
+                'connect': value['summary']['connect']['failure'],
+                'handshake': value['tls_handshakes']
+
+            })
+
+        context['keys'] = keys
+        context['obfs4'] = str(test_keys['obfs4_accessible']) + '/' + str(test_keys['obfs4_total'])
+        context['dir'] = str(test_keys['dir_port_accessible']) + '/' + str(test_keys['dir_port_total'])
+        context['rawmeasurement'].test_helpers = json.dumps(measurement.raw_measurement.test_helpers)
+        context['rawmeasurement'].annotations = json.dumps(measurement.raw_measurement.annotations)
+        context['rawmeasurement'].rawjson = serializers.serialize('json', [measurement.raw_measurement])
+
         return context
 
 
@@ -382,7 +415,6 @@ class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
             })
 
         return json_data
-
 
 class MeasurementCounter(VSFLoginRequiredMixin, View): 
 

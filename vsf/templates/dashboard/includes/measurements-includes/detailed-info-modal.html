@@ -25,6 +25,8 @@
 
       <div class="modal-body">
         <div class="container-fluid">
+
+          {% if measurement_type == 'web_connectivity' %}
           <div class="row border-bottom my-4">
             <div class="col-4">
               <strong class="text-capitalize">Input</strong>
@@ -33,6 +35,7 @@
               <p id="input-detailed"></p>
             </div>
           </div>
+          {% endif %}
 
           <div class="row border-bottom mb-4">
             <div class="col-4">
@@ -224,7 +227,8 @@
               <p id="test-version-detailed"></p>
             </div>
           </div>
-
+          
+          {% if measurement_type == 'web_connectivity' %}
           <div class="row mb-4">
             <div class="col-4">
               <strong class="text-capitalize">Flags</strong>
@@ -233,6 +237,7 @@
               <div id="flags"></div>
             </div>
           </div>
+          {% endif %}
 
         </div>
       </div>

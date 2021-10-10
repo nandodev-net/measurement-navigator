@@ -125,11 +125,11 @@ class Case(TimeStampedModel):
         blank=True,
         )
     
-    is_it_continues = models.BooleanField(
+    active = models.BooleanField(
         default = False
     )
 
-    is_it_manual = models.BooleanField(
+    manual = models.BooleanField(
         default = False
     )
 

@@ -101,6 +101,7 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         context['asns'] = AsnModels.ASN.objects.all()
         # context['last_measurement_date'] = last_measurement_date
         context['prefill'] = prefill
+        context['measurement_type'] = 'web_connectivity'
 
         return context
     
@@ -157,23 +158,23 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         flags        = get.getlist('flags[]') if get != {} else []
 
 
-        # if input:
-        #     qs = qs.filter(input__contains=input)
-        # if since:
-        #     qs = qs.filter(measurement_start_time__gte = since)
-        # if asn:
-        #     qs = qs.filter(probe_asn=asn)
-        # if country:
-        #     qs = qs.filter(_probe_cc=country)
-        # if until:
-        #     qs = qs.filter(measurement_start_time__lte=until)
-        # if site:
-        #     qs = qs.filter(measurement__domain__site=site)
-        # if anomaly:
-        #     qs = qs.filter(anomaly= anomaly.lower() == 'true')
-        # if flags:
-        #     flags = [flag.lower() for flag in flags]
-        #     qs = qs.filter(flag_type__in = flags)
+        if input:
+            qs = qs.filter(input__contains=input)
+        if since:
+            qs = qs.filter(measurement_start_time__gte = since)
+        if asn:
+            qs = qs.filter(probe_asn=asn)
+        if country:
+            qs = qs.filter(_probe_cc=country)
+        if until:
+            qs = qs.filter(measurement_start_time__lte=until)
+        if site:
+            qs = qs.filter(measurement__domain__site=site)
+        if anomaly:
+            qs = qs.filter(anomaly= anomaly.lower() == 'true')
+        if flags:
+            flags = [flag.lower() for flag in flags]
+            qs = qs.filter(flag_type__in = flags)
 
         return qs
 
@@ -587,18 +588,24 @@ class ListTorTemplate(ListSubMeasurementTemplate):
         dir_port_accessible = get.get('dir_port_accessible')
         if dir_port_accessible:
             prefill['dir_port_accessible'] = dir_port_accessible
+        else:
+            prefill['dir_port_accessible'] = 50
         
         obfs4_accessible = get.get('obfs4_accessible')
         if obfs4_accessible:
             prefill['obfs4_accessible'] = obfs4_accessible
+        else:
+            prefill['obfs4_accessible'] = 50
 
         or_port_dirauth_accessible = get.get('or_port_dirauth_accessible')
         if or_port_dirauth_accessible:
             prefill['or_port_dirauth_accessible'] = or_port_dirauth_accessible
+        else:
+            prefill['or_port_dirauth_accessible'] = 50
 
         context['prefill'] = prefill
+        context['measurement_type'] = 'tor'
         return context
-
     
 class ListTORBackEnd(ListSubMeasurementBackend):
     """
@@ -634,15 +641,19 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         if dir_port_accessible: dir_port_accessible = int(dir_port_accessible) / 100
         
         obfs4_accessible = get.get('obfs4_accessible')
-        if obfs4_accessible: int(obfs4_accessible) / 100
+        if obfs4_accessible: obfs4_accessible = int(obfs4_accessible) / 100
         
         or_port_dirauth_accessible = get.get('or_port_dirauth_accessible')
-        if or_port_dirauth_accessible: int(or_port_dirauth_accessible) / 100
+        if or_port_dirauth_accessible: or_port_dirauth_accessible = int(or_port_dirauth_accessible) / 100
 
         if dir_port_accessible:
             qs = qs.filter(dir_port_accessible__lte = F('dir_port_total') * dir_port_accessible)
         if obfs4_accessible:
+            print(qs)
+            print(obfs4_accessible)
+            print('tracata')
             qs = qs.filter(obfs4_accessible__lte = F('obfs4_total') * obfs4_accessible)
+            print(qs)
         if or_port_dirauth_accessible:
             qs = qs.filter(or_port_dirauth_accessible__lte = F('or_port_dirauth_total') * or_port_dirauth_accessible)
 
@@ -680,5 +691,4 @@ class ListTORBackEnd(ListSubMeasurementBackend):
                 'or_port_dirauth_accessible': item.or_port_dirauth_accessible
             })
 
-        print(json_data)
         return json_data

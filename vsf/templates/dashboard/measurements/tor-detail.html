@@ -1,0 +1,147 @@
+{% extends 'extends/measurement-detail.html' %}
+{% load static %}
+
+{% block header %}
+    {% if rawmeasurement.test_keys.accessible %}
+        <h1 class="text-center text-white font-weight-bold "> OK </h1>
+    {% else %}
+        <h1 class="text-center text-white font-weight-bold "> ? Error </h1>
+    {% endif %}
+    <h3 class="text-center text-white">{{rawmeasurement.input}}</h3>
+{% endblock header %} 
+
+{% block content_measurement %}
+    <div class="row mb-5" id="header-runtime">
+        <div class="col-9">
+            <h4 class="ml-4">TOR Test</h4>
+        </div>
+        <div class="col-3">
+            <h4 class="">Runtime: {{rawmeasurement.test_runtime}}</h4>
+        </div>
+    </div>
+
+    <div class="col-5">
+        <h5><strong>Tor Browser Bridges</strong></h5>
+    </div>
+    <div class="col-7">
+        <h5><strong>Tor Directory Authorities</strong></h5>
+    </div>
+
+    <div class="col-5">
+        <h2>{{ obfs4 }} OK</h2>
+    </div>
+    <div class="col-7">
+        <h2>{{ dir }} OK</h2>
+    </div>
+
+
+
+    <div class="card rounded p-5" id="">
+        <div class="table-responsive">
+            <table class="table table-striped mt-5 datatable" id="detail-tor-list">
+            <thead>
+                <tr>
+                <th class="text-center text-capitalize" scope="col">Name</th>
+                <th class="text-center text-capitalize" scope="col">Address</th>
+                <th class="text-center text-capitalize" scope="col">Type</th>
+                <th class="text-center text-capitalize" scope="col">Connect</th>
+                <th class="text-center text-capitalize" scope="col">Handshake</th>
+                </tr>
+            </thead>
+
+            <tbody id='detail-tor-tbody'>
+            </tbody>
+                {% for key in keys %}
+                    <tr>
+                        <td>{{ key.name }}</td>
+                        <td>{{ key.address }}</td>
+                        <td>{{ key.type }}</td>
+                        <td>{{ key.connect }}</td>
+                        <td>N/A</td>
+                    </tr>
+                {% endfor %}
+            <tfoot></tfoot>
+            </table>
+        </div>
+    </div>
+
+
+    <div class="shadow-none p-3 mb-2 bg-secondary rounded" id="generalInfo">
+        <p class="text-white"><bold>Report ID: </bold> {{rawmeasurement.report_id}}</p>
+
+        <p class="text-white"><bold>Platform: </bold> {{rawmeasurement.platform}}</p>
+
+        <p class="text-white"><bold>Software Name:</bold> {{rawmeasurement.software_name}} ({{rawmeasurement.software_version}})</p>
+
+        <p class="text-white"><bold>Measurement Engine: </bold> {{rawmeasurement.engine}} </p>
+    </div>
+
+    <div class="card py-0 px-5 mt-3" id="raw-card">
+        <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#raw" aria-expanded="true" aria-controls="raw">
+            <div class="card-header">
+                <h5 class="mb-0">Raw Measurement Data</h5>
+            </div>
+        </a>
+        <div class="collapse" id="raw">
+            <div class="card-body">
+                <pre id="raw-data"> {{rawmeasurement.rawjson}} </pre>
+            </div>
+        </div>
+    </div>
+    
+{% endblock content_measurement %}
+
+
+
+
+{% block custom_scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+<script>
+
+
+    $(document).ready(function() {
+
+        vartorList = $('#detail-tor-list').DataTable();
+
+        if ('{{rawmeasurement.test_keys.accessible}}' === 'False') {
+            $( '#header' ).attr("class", "card p-5 bg-danger")
+        }
+        
+        if ('{{rawmeasurement.test_keys.http_experiment_failure}}' !== 'None') {
+            $( '#http-experiment' ).empty();
+            $( '#http-experiment' ).append(
+                '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.http_experiment_failure}}'
+            );
+        }
+        if ('{{rawmeasurement.test_keys.dns_experiment_failure}}' !== 'None') {
+            $( '#dns-experiment' ).empty();
+            $( '#dns-experiment' ).append(
+                '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.dns_experiment_failure}}'
+            );
+        }
+        if ('{{rawmeasurement.test_keys.control_failure}}' !== 'None') {
+            $( '#control-experiment' ).empty();
+            $( '#control-experiment' ).append(
+                '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.control_failure}}'
+            );
+        }
+
+
+        var raw = $('#raw-data').text();
+        rawParsed = JSON.parse(raw);
+        rawParsed[0]['fields']['annotations'] = JSON.parse(rawParsed[0]['fields']['annotations']);
+        rawParsed[0]['fields']['test_helpers'] = JSON.parse(rawParsed[0]['fields']['test_helpers']);
+        jQuery.noConflict();
+        $("#raw-data").jsonViewer(rawParsed[0]['fields'], {
+            collapsed: true,
+            rootCollapsable: false
+        });
+
+
+    });
+</script>
+{% endblock custom_scripts %}
