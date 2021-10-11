@@ -176,7 +176,6 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         events = post['events[]'] if 'events[]' in post.keys() else []
         eventsObject = Event.objects.filter(id__in=events)
 
-        print(post)
         published = eval(post['published'][0].capitalize())
         manual = eval(post['manual'][0].capitalize())
         active = eval(post['activate'][0].capitalize())

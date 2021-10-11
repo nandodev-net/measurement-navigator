@@ -29,10 +29,10 @@
 
 {% block route %}
 
-<li class="breadcrumb-item">
+<li class="breadcrumb-item text-white">
     <a href="{% url home %}">Home</a>
   </li>
-  <li class="breadcrumb-item">
+  <li class="breadcrumb-item text-white">
     <a href="{% url 'dashboard:event_cases:create_case' %}">Create Case</a>
   </li>
 
@@ -314,6 +314,7 @@
           url: "{% url 'dashboard:event_cases:create_case' %}",
           data: data,
           success: function(data) {
+            console.log(data)
             if (data.error === null) {
               Swal.fire({
                 icon: "success",
@@ -336,6 +337,8 @@
             }
           },
           error: function(XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest);
+            
             Swal.fire({
               icon: "error",
               title: "There was an error!",
