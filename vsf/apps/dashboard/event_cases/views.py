@@ -176,7 +176,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         events = post['events[]'] if 'events[]' in post.keys() else []
         eventsObject = Event.objects.filter(id__in=events)
 
-
+        print(post)
         published = eval(post['published'][0].capitalize())
         manual = eval(post['manual'][0].capitalize())
         active = eval(post['activate'][0].capitalize())
@@ -184,24 +184,27 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
 
         start_date_manual, end_date_manual = None, None 
         if manual:
+            if post['start_date'][0] == '' or post['end_date'][0] == '':
+                return JsonResponse({'error' : 'You must choose the start and the end date of the case'})
+
             # Getting start and end dates introduced manually
             start_date_manual = datetime.strptime(post['start_date'][0], '%Y-%m-%d %H:%M')
             end_date_manual = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
-            if not (start_date_manual and end_date_manual):
-                return JsonResponse({'error' : 'You must choose the start and the end date of the case'})
+            
 
             # Even if manually the case was setted to inactive, if the end date introduced manually
             # is greater than today, the case is setted to active
             if end_date_manual > datetime.now(): active = True
 
-  
-        # Filtering the early and oldest date in the selected events.
-        ordered_by_start_date = eventsObject.order_by('start_date')
-        ordered_by_end_date = eventsObject.order_by('end_date')
-        start_date_automatic = ordered_by_start_date.first() or None
-        end_date_automatic = ordered_by_end_date.last() or None
-        if end_date_automatic:
-            if end_date_automatic > datetime.now(): active = True
+        start_date_automatic, end_date_automatic = None, None
+        if 'events[]' in post.keys():
+            # Filtering the early and oldest date in the selected events.
+            ordered_by_start_date = eventsObject.order_by('start_date')
+            ordered_by_end_date = eventsObject.order_by('end_date')
+            start_date_automatic = ordered_by_start_date.first() or None
+            end_date_automatic = ordered_by_end_date.last() or None
+            if end_date_automatic:
+                if end_date_automatic > datetime.now(): active = True
 
         #Getting Category object
         category = Category.objects.filter(name = post['category'][0]).first()
@@ -209,7 +212,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
 
         # Deciding which date put in the main dates fields.
         start_date, end_date = start_date_manual, end_date_manual 
-        if not manual:
+        if not manual and 'events[]' in post.keys():
             start_date, end_date = start_date_automatic, end_date_automatic 
 
         try:
@@ -237,6 +240,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             return JsonResponse({'error' : None})
 
         except Exception as e:
+            print(e)
             return HttpResponseBadRequest()
 
     def form_valid(self, form):
