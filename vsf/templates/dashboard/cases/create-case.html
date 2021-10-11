@@ -40,12 +40,10 @@
 
 {% block content %}
   <div class="col-12">
-    <form>
+    <form method="post">{% csrf_token %}
+
       <div class="card p-5">
       
-        {% csrf_token %}
-
-
 
         <div class="row mb-4">
           <div class="col-6">
@@ -183,7 +181,7 @@
 
       
       </div>
-
+      
       <div class="card mt-5" id="events-card">
         <div class="card-header">
           <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events-to-pick" aria-expanded="true" aria-controls="events-to-pick">Click here to choose the events to be related</a></h5>
@@ -256,8 +254,6 @@
         $(' #activate_label' ).text('NO');
       }
     });
-
-
     $(".form-control").each(function() {
         formmat($(this));
     });
@@ -281,74 +277,72 @@
             e.parent('.form-group').removeClass("fill");
         }
     }
+    
 
     $( '#submit_case' ).click(function (e) {
 
-      var allowed = true;
       var eventsSelected = events.rows({ selected: true }).data().toArray();
 
-      if (allowed) {
-        var eventsID = events.rows( { selected: true }).data().toArray().map((selected) => (
-          selected.id
-        ));
+      var eventsID = events.rows( { selected: true }).data().toArray().map((selected) => (
+        selected.id
+      ));
 
-        var data = {
-          title: $( '#title' ).val(), 
-          title_eng: $( '#title_eng' ).val(), 
-          description: $( '#description' ).val(), 
-          description_eng: $( '#description_eng' ).val(),
-          manual: $( '#manual' ).is(":checked"),
-          activate: $( '#activate' ).is(":checked"),
-          start_date: $( '#start_date' ).val(), 
-          end_date: $( '#end_date' ).val(),
-          case_type: $( '#case_type option:selected' ).val(), 
-          category: $( '#category option:selected' ).val(),
-          twitter_search: $( '#twitter_search' ).val(), 
-          published: $( '#published' ).is(":checked"),
-          events: eventsID, 
-          csrfmiddlewaretoken: "{{ csrf_token }}"
-        }
+      var data = {
+        title: $( '#title' ).val(), 
+        title_eng: $( '#title_eng' ).val(), 
+        description: $( '#description' ).val(), 
+        description_eng: $( '#description_eng' ).val(),
+        manual: $( '#manual' ).is(":checked"),
+        activate: $( '#activate' ).is(":checked"),
+        start_date: $( '#start_date' ).val(), 
+        end_date: $( '#end_date' ).val(),
+        case_type: $( '#case_type option:selected' ).val(), 
+        category: $( '#category option:selected' ).val(),
+        twitter_search: $( '#twitter_search' ).val(), 
+        published: $( '#published_new' ).is(":checked"),
+        events: eventsID,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      };
+      console.log(data);
 
-        $.ajax({
-          type: "POST",
-          url: "{% url 'dashboard:event_cases:create_case' %}",
-          data: data,
-          success: function(data) {
-            console.log(data)
-            if (data.error === null) {
-              Swal.fire({
-                icon: "success",
-                title: "Successful Creation!",
-                confirmButtonColor: "#28a745",
-                confirmButtonText: "Continue"
-              }).then(result => {
-                if (result.isConfirmed) {
-                    window.location = "{% url 'dashboard:event_cases:list_cases' %}";
-                }
-              });
-            } else {
-              Swal.fire({
-                icon: "error",
-                title: "Error!",
-                text: `${ data.error }`,
-                confirmButtonColor: "#dc3545",
-                confirmButtonText: "Continue"
-              });
-            }
-          },
-          error: function(XMLHttpRequest, textStatus, errorThrown) {
-            console.log(XMLHttpRequest);
-            
+      $.ajax({
+        type: "POST",
+        url: "{% url 'dashboard:event_cases:create_case' %}",
+        contentType: 'application/x-www-form-urlencoded',
+        data: data,
+        success: function(data) {
+          if (data.error === null) {
+            Swal.fire({
+              icon: "success",
+              title: "Successful Creation!",
+              confirmButtonColor: "#28a745",
+              confirmButtonText: "Continue"
+            }).then(result => {
+              if (result.isConfirmed) {
+                  window.location = "{% url 'dashboard:event_cases:list_cases' %}";
+              }
+            });
+          } else {
             Swal.fire({
               icon: "error",
-              title: "There was an error!",
-              text: `${ textStatus }, ${ errorThrown }`,
+              title: "Error!",
+              text: `${ data.error }`,
               confirmButtonColor: "#dc3545",
               confirmButtonText: "Continue"
             });
           }
-        });
-      }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          Swal.fire({
+            icon: "error",
+            title: "There was an error!",
+            text: `${ textStatus }, ${ errorThrown }`,
+            confirmButtonColor: "#dc3545",
+            confirmButtonText: "Continue"
+          });
+        }
+      });
+      
     });
 
 
@@ -373,9 +367,6 @@
             data.confirmed = $("#confirmed").val();
             data.start_time = $("#start_time").val();
             data.end_time = $("#end_time").val();
-            data.public_evidence = $("#public_evidence").val(); 
-            data.private_evidence = $("#private_evidence").val();
-            data.issue_type = $("#issue_type").val();
             data.domain = $("#domain").val();
             data.asn = $("#asn").val();
           },

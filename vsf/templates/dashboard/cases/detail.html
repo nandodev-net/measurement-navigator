@@ -48,7 +48,7 @@
 </div>
 
 <div class="col-2">
-  {% if object.is_it_manual  %}
+  {% if object.manual  %}
     <button class='btn btn-outline-dark btn-block' id="goAutomatic" type='button'> 
       <i class="fas fa-magic"></i> Go to automatic 
     </button>
@@ -56,7 +56,7 @@
 </div>
 <div class="col-6"></div>
 <div class="col-2">
-  {% if object.is_it_continues %}
+  {% if object.active %}
     <small><i class="fas fa-circle-notch text-danger"></i> Continues </small>
   {% else %}
     <small><i class="fas fa-window-close text-success"></i> It doesn't continue </small>
@@ -111,7 +111,7 @@
         <div class="col-3 font-weight-bold">Start Date</div>
         <div class="col-9">
           <span id="start_date_slug">{{object.start_date}}</span>
-          {% if object.is_it_manual %}
+          {% if object.manual %}
               <i class="fas fa-pencil-alt ml-2"></i>
           {% else %}
               <i class="fas fa-magic ml-2"></i>
@@ -123,7 +123,7 @@
         <div class="col-3 font-weight-bold">End Date</div>
         <div class="col-9">
           <span id="end_date_slug">{{object.end_date}}</span>
-          {% if object.is_it_manual %}
+          {% if object.manual %}
             <i class="fas fa-pencil-alt ml-2"></i>
           {% else %}
               <i class="fas fa-magic ml-2"></i>
@@ -135,7 +135,6 @@
         <div class="col-3 font-weight-bold">Category</div>
         <div class="col-9"><span id="category_slug">{{category}}</span></div>
       </div>
-      <hr>
       <hr>
       <div class="row">
         <div class="col-3 font-weight-bold">Twitter Search</div>
@@ -169,7 +168,6 @@
     </a>
   </button>
 </div>
-
 
 <div class="col-12">
   <div class="card" id="events-card">
@@ -280,6 +278,15 @@
                     });
                 }
             
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown) {
+              Swal.fire({
+                icon: "error",
+                title: "There was an error!",
+                text: `${ textStatus }, ${ errorThrown }`,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+              });
             }
         });
 
@@ -301,8 +308,6 @@
         "October": "10", "Oct": "10", "Oct.": "10", "Octo": "10",
         "November": "11", "Nov": "11", "Nov.": "11", "Nove": "11",
         "December": "12", "Dec": "12", "Dec.": "12", "Dece": "12"
-          
-          
     }
 
     function parseDate (date) {
@@ -311,24 +316,29 @@
         var month = dayAndMonth[0];
         var day = dayAndMonth[1];
         var year = splitted[1];
-        
+
         if (parseInt(day) < 10) {day = '0' + day;}
 
         var time = splitted[2].split(" ")[0].split(":");
         dayornight = splitted[2].split(" ")[1]
         hour = time[0]
+        if (dayornight == 'p.m.' && (parseInt(hour) + 12 == 24)) { hour = '00'; }
         if (dayornight == "p.m.") {hour = parseInt(hour) + 12;}
         minutes = "00"
         if (time.length === 2) {minutes = time[1]}
         if (hour === 'midnight' ) {hour = "00"}
-        
+        console.log(year);
+        console.log(monthsNumbers[month]);
+        console.log(day);
+        console.log(hour);
+        console.log(minutes);
         return year + "-" + monthsNumbers[month] + "-" + day + " " + hour + ":" + minutes;
     }
 
     var title = `<input value="{{ object.title }}" id="title" class="form-control w-75" type="text" aria-label="Title" name="title" required/>`;
     $( '#title_slug').empty().append(title)
 
-    var title_eng = `<input value="{{ object.title_eng }}" id="title_eng" class="form-control w-75" type="text" aria-label="Title" name="title_eng" required/>`;
+    var title_eng = `<input value="{{ object.title_eng }}" id="title_eng" class="form-control w-75" type="text" aria-label="Title" name="title_eng"/>`;
     $( '#title_eng_slug').empty().append(title_eng)
 
     var description = `<textarea id="description" class="form-control w-75" type="text" aria-label="Description" name="description">{{ object.description }}</textarea>`;
@@ -348,6 +358,8 @@
     $("#case_type").val('{{object.case_type}}');
 
     var parseStart_Date = parseDate("{{ object.start_date }}");
+    console.log(parseStart_Date);
+    console.log(typeof parseStart_Date);
     var start_date = `
       <div id="start_date_picker"></div>
       <input 
