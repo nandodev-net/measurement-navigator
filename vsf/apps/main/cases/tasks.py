@@ -42,14 +42,14 @@ def update_case_dates():
 
                 ordered_by_start_date = case.events.order_by('start_date')
                 ordered_by_end_date = case.events.order_by('end_date')
-                start_date_automatic = ordered_by_start_date.first() or None
-                end_date_automatic = ordered_by_end_date.last() or None
+                start_date_automatic = ordered_by_start_date.first().start_date.replace(tzinfo=None) or None
+                end_date_automatic = ordered_by_end_date.last().end_date.replace(tzinfo=None) or None
 
-                is_it_continues = case.is_it_continues
+                active = case.active
                 if end_date_automatic > datetime.now(): is_it_continues = True
                 else: is_it_continues = False
 
-                if case.it_is_manual:
+                if case.manual:
                     case.update(
                         start_date_automatic = start_date_automatic,
                         end_date_automatic = end_date_automatic
@@ -60,7 +60,7 @@ def update_case_dates():
                         end_date_automatic = end_date_automatic,
                         start_date = start_date_automatic,
                         end_date = end_date_automatic,
-                        is_it_continues = is_it_continues,
+                        active = active,
                     )
 
     except Exception as e:

@@ -159,8 +159,8 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         #--------- Filtering case field ---------#
         case = self.request.GET.get('case')
         if case != None:
-            case_events = Case.objects.filter(id = case).first().events.all()
-            qs = qs.difference(case_events)
+            case_events = [event.id for event in Case.objects.filter(id = case).first().events.all()]
+            qs = qs.exclude(id__in = case_events)
             
         return qs
 

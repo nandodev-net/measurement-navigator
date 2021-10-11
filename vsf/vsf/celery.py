@@ -95,7 +95,7 @@ app.conf.beat_schedule = {
         'args' : (),
         'options' : {'queue' : transient_queue_name}
     },
-        'update-case-dates':{
+    'update-case-dates':{
         'task':'apps.main.cases.tasks.update_case_dates',
         'schedule':3600,
         'args' : (),
