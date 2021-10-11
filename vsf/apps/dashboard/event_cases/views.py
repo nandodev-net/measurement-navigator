@@ -559,8 +559,18 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
             if 'eventsSelected[]' in post:
                 newEvents = Event.objects.filter(id__in=post['eventsSelected[]']).all()
                 case.events.add(*newEvents)
-                    
 
+            ordered_by_start_date = case.events.order_by('start_date')
+            ordered_by_end_date = case.events.order_by('end_date')
+            start_date_automatic = ordered_by_start_date.first().start_date.replace(tzinfo=None) or None
+            end_date_automatic = ordered_by_end_date.last().end_date.replace(tzinfo=None) or None
+
+            case.start_date_automatic = start_date_automatic
+            case.end_date_automatic = end_date_automatic
+            if not case.manual:
+                case.start_date = start_date_automatic
+                case.end_date = end_date_automatic
+            
             return JsonResponse({'error' : None})
         except Exception as e:
             return HttpResponseBadRequest()
