@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 import pytz
 
 # Local imports
-from .models                                import DNS, TCP, HTTP, SubMeasurement
+from .models                                import DNS, TCP, HTTP, TOR, SubMeasurement
 from apps.main.measurements.flags.models    import Flag
 from apps.main.events.models                import Event
 from apps.main.measurements.models          import Measurement
@@ -365,7 +365,7 @@ def hard_flag(
             interval_size = how many measurements to consider in each step of the algorithm
     """
 
-    submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns')]
+    submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns'), (TOR,'tor')]
     
     # For every submeasurement type...
     for (SM, label) in submeasurements:
