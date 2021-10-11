@@ -355,7 +355,7 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 "published": caseObj.published,
                 "twitter_search": caseObj.twitter_search,
                 "events": events,
-                "is_it_continues": caseObj.is_it_continues
+                "is_it_continues": caseObj.active
 
             }
             return JsonResponse(data, safe=False)
