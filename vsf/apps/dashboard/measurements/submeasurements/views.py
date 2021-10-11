@@ -161,17 +161,17 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         if input:
             qs = qs.filter(input__contains=input)
         if since:
-            qs = qs.filter(measurement_start_time__gte = since)
+            qs = qs.filter(measurement__raw_measurement__measurement_start_time__gte = since)
         if asn:
-            qs = qs.filter(probe_asn=asn)
+            qs = qs.filter(measurement__raw_measurement__probe_asn=asn)
         if country:
-            qs = qs.filter(_probe_cc=country)
+            qs = qs.filter(measurement__raw_measurement__probe_cc=country)
         if until:
-            qs = qs.filter(measurement_start_time__lte=until)
+            qs = qs.filter(easurement__raw_measurement__measurement_start_time__lte=until)
         if site:
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:
-            qs = qs.filter(anomaly= anomaly.lower() == 'true')
+            qs = qs.filter(measurement__anomaly= anomaly.lower() == 'true')
         if flags:
             flags = [flag.lower() for flag in flags]
             qs = qs.filter(flag_type__in = flags)
