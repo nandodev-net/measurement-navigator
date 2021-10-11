@@ -240,8 +240,8 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             return JsonResponse({'error' : None})
 
         except Exception as e:
-            print(e)
-            return HttpResponseBadRequest()
+            return JsonResponse({'error' : e})
+            # return HttpResponseBadRequest()
 
     def form_valid(self, form):
         
