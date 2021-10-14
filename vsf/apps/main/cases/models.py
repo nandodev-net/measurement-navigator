@@ -125,11 +125,11 @@ class Case(TimeStampedModel):
         blank=True,
         )
     
-    active = models.BooleanField(
+    is_active = models.BooleanField(
         default = False
     )
 
-    manual = models.BooleanField(
+    manual_is_active = models.BooleanField(
         default = False
     )
 
