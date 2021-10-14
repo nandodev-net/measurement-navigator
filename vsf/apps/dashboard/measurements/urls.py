@@ -1,6 +1,6 @@
 from django.conf.urls import include
 from django.urls import path
-from .views import ListMeasurementsTemplate, MeasurementDetailView, ListMeasurementsBackEnd, MeasurementCounter, TorDetailView
+from .views import ListMeasurementsTemplate, MeasurementDetailView, ListMeasurementsBackEnd, MeasurementCounter
 
 app_name = 'measurements'
 
@@ -29,11 +29,5 @@ urlpatterns = [
         MeasurementCounter.as_view(),
         name="counter"
     ),
-
-    path(
-        'tor_detail/<uuid:pk>',
-        TorDetailView.as_view(),
-        name='tor_detail'
-    )
 
 ]
