@@ -260,7 +260,7 @@
       var urls = []
       for (const val of Object.values(result)) {
         if (val.id) { 
-          var url = "{% url 'dashboard:measurement:tor_detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', val.id);
+          var url = "{% url 'dashboard:measurement:detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', val.id);
           urls.push(url);
         }
       }
@@ -289,7 +289,7 @@
 
   $( '#tor-list' ).on('dblclick', 'tbody tr', function() {
     var id = $( this ).attr( 'id' );
-    var urlBlank = "{% url 'dashboard:measurement:tor_detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', id);
+    var urlBlank = "{% url 'dashboard:measurement:detail' pk='12341234-1123-1234-1234-121212121212' %}".replace('12341234-1123-1234-1234-121212121212', id);
     jQuery.noConflict();
 
     $.ajax({
@@ -377,7 +377,7 @@
             data.asn = $("#asn").val();
             data.dir_port_accessible = $("#dir-port-accessible").val();
             data.obfs4_accessible = $("#obfs4-accessible").val(); 
-            data.or_port_dirauth_accessible = $('or-port-dirauth-accessible').val();
+            data.or_port_dirauth_accessible = $(' #or-port-dirauth-accessible ').val();
 
           },
           contentType: "application/json; charset=utf-8",  
