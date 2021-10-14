@@ -649,14 +649,13 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         if dir_port_accessible:
             qs = qs.filter(dir_port_accessible__lte = F('dir_port_total') * dir_port_accessible)
         if obfs4_accessible:
-            print(qs)
-            print(obfs4_accessible)
-            print('tracata')
             qs = qs.filter(obfs4_accessible__lte = F('obfs4_total') * obfs4_accessible)
-            print(qs)
         if or_port_dirauth_accessible:
+            print('entro aca')
+            print(qs)
             qs = qs.filter(or_port_dirauth_accessible__lte = F('or_port_dirauth_total') * or_port_dirauth_accessible)
-
+            print(qs)
+            
         return qs
 
     def prepare_results(self, qs):
