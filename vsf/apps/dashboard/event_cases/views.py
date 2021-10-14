@@ -33,7 +33,7 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
         categories = Category.objects.all()
         categoryNames = [cat.name for cat in categories]
         fields = [ 
-            'title', 'start_date', 'end_date', 'category', 'published'
+            'title', 'start_date', 'end_date', 'category', 'published', 'is_active'
         ]
 
         for field in fields:
@@ -94,7 +94,8 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         'start_date',
         'end_date',
         'category',
-        'published'
+        'published',
+        'is_active'
     ]
 
     order_columns = [
@@ -102,7 +103,8 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         'start_date',
         'end_date',
         'category',
-        'published'
+        'published',
+        'is_active'
     ]
 
     def get_initial_queryset(self):
@@ -114,7 +116,7 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         get = self.request.GET or {}
 
         title, start_date, end_date = get.get('title'), get.get('start_date'), get.get('end_date')
-        category, published =  get.get('category'), get.get('published')
+        category, published, is_active =  get.get('category'), get.get('published'), get.get('is_active')
 
         if title != None and title != "":
             qs = qs.filter(title__contains = title)
@@ -131,9 +133,12 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
 
         if category != None and category != "":
             qs = qs.filter(category__name = category)
+
         if published in ['true', 'false']:
             qs = qs.filter(published = eval(published.capitalize()))
-            pass
+        
+        if is_active in ['true', 'false']:
+            qs = qs.filter(is_Active = eval(is_active.caoutakuze()))
         
         return qs
 
@@ -149,7 +154,8 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
                 'start_date': case.get_start_date(), 
                 'end_date': case.get_end_date(), 
                 'category': category.name, 
-                'published': case.published
+                'published': case.published,
+                'is_active': case.is_active
             })
 
         return response
@@ -184,24 +190,20 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         eventsObject = Event.objects.filter(id__in=events)
 
         published = eval(post['published'][0].capitalize())
-        manual = eval(post['manual'][0].capitalize())
-        active = eval(post['activate'][0].capitalize())
-
+        is_active = False
+        manual_is_active = eval(post['activate'][0].capitalize())
+        if manual_is_active: is_active = True
 
         start_date_manual, end_date_manual = None, None 
-        if manual:
-            if post['start_date'][0] == '' or post['end_date'][0] == '':
-                return JsonResponse({'error' : 'You must choose the start and the end date of the case'})
-
-            # Getting start and end dates introduced manually
+        if post['start_date'][0] != '':
             start_date_manual = datetime.strptime(post['start_date'][0], '%Y-%m-%d %H:%M')
+        if post['end_date'][0] != '':
             end_date_manual = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
-            
+            # If the manual end date selected is greater than today, then the case
+            # will be active. 
+            if end_date_manual > datetime.now(): is_active = True
 
-            # Even if manually the case was setted to inactive, if the end date introduced manually
-            # is greater than today, the case is setted to active
-            if end_date_manual > datetime.now(): active = True
-
+        
         start_date_automatic, end_date_automatic = None, None
         if 'events[]' in post.keys():
             # Filtering the early and oldest date in the selected events.
@@ -210,7 +212,7 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             start_date_automatic = ordered_by_start_date.first().start_date.replace(tzinfo=None) or None
             end_date_automatic = ordered_by_end_date.last().end_date.replace(tzinfo=None) or None
             if end_date_automatic:
-                if end_date_automatic > datetime.now(): active = True
+                if end_date_automatic > datetime.now(): is_active = True
 
         #Getting Category object
         category = Category.objects.filter(name = post['category'][0]).first()

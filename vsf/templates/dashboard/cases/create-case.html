@@ -77,53 +77,61 @@
         </div>
 
         <div class="row mb-4">
-          <div class="col-1"></div>
-          <div class="col-4">
-            <h6><i class="fas fa-info-circle"></i><strong> Do you want to add the dates of this case manually?</strong></h6>
+          <div class="col-5">
+            <h6><i class="fas fa-info-circle"></i><strong> Do you want to add the start date of this case manually?</strong></h6>
           </div>
-          <div class="col-7">
+          <div class="col-2">
             <div class="custom-control custom-switch">
-              <input type="checkbox" class="custom-control-input" id="manual">
-              <label class="custom-control-label font-weight-bold" id='manual_label' for="manual">NO</label>
+              <input type="checkbox" class="custom-control-input" id="start_date_manual">
+              <label class="custom-control-label font-weight-bold" id='start_date_manual_label' for="start_date_manual">NO</label>
+            </div>
+          </div>
+          <div class="col-5">
+            <div id='start_date_manual_input' class="">
+              <div class="row">
+                <div class="col-4">
+                  <label class='font-weight-bold mt-2'>
+                    Start Date
+                  </label>
+                </div>
+                <div class="col-8">
+                  <div id="start_date_picker"> </div>
+                  <input type="hidden" id="start_date" value="" name="start_date">
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      
         
-        <div id='dates' class=''>
-          <div class="row mb-5">
-            <div class="col-2">
-              <label class='font-weight-bold mt-2'>
-                Start Date
-              </label>
+        <div class="row mb-4">
+          <div class="col-5">
+            <h6><i class="fas fa-info-circle"></i><strong> Do you want to add the end date of this case manually?</strong></h6>
+          </div>
+          <div class="col-2">
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="end_date_manual">
+              <label class="custom-control-label font-weight-bold" id='end_date_manual_label' for="end_date_manual">NO</label>
             </div>
-            <div class="col-4">
-              <div id="start_date_picker"> </div>
-              <input type="hidden" id="start_date" value="" name="start_date">
-            </div>
-            <div class="col-2">
-              <label class='font-weight-bold mt-2'>
-                End Date
-              </label>
-            </div>
-            <div class="col-4">
-              <div id="end_date_picker"> </div>
-              <input type="hidden" id="end_date" value="" name="end_date">
+          </div>
+          <div class="col-5">
+            <div id='end_date_manual_input' class="">
+              <div class="row">
+                <div class="col-4">
+                  <label class='font-weight-bold mt-2'>
+                    End Date
+                  </label>
+                </div>
+                <div class="col-8">
+                  <div id="end_date_picker"> </div>
+                  <input type="hidden" id="end_date" value="" name="end_date">
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="row mb-4">
-          <div class="col-1"></div>
-          <div class="col-4">
-            <h6><i class="fas fa-info-circle"></i><strong> Do you want to activate this case manually even when there could be no active events related?</strong></h6>
-          </div>
-          <div class="col-7">
-            <div class="custom-control custom-switch">
-              <input type="checkbox" class="custom-control-input" id="activate">
-              <label class="custom-control-label font-weight-bold" id='activate_label' for="activate">NO</label>
-            </div>
-          </div>
-        </div>
+        
 
         <div class="row mb-5">
           <div class="col-2">
@@ -163,6 +171,23 @@
             </select>
           </div>
         </div>
+
+        <div class="row mb-4">
+          <div class="col-3"></div>
+          <div class="col-4">
+            <h6><i class="fas fa-info-circle"></i><strong> 
+              Do you want to keep this case as active even where there could be no active events related?
+            </strong></h6>
+          </div>
+          <div class="col-3">
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="activate">
+              <label class="custom-control-label font-weight-bold" id='activate_label' for="activate">NO</label>
+            </div>
+          </div>
+          <div class="col-2"></div>
+        </div>
+
 
         <div class="row">
           <div class="col-10">
@@ -235,14 +260,25 @@
   <script>
     var events; 
 
-    $(' #manual' ).on('click', function() {
+    $(' #end_date_manual' ).on('click', function() {
       var checked = $(this).is(":checked");
       if (checked) {
-        $(' #manual_label' ).text('YES');
-        $( '#dates' ).show();
+        $(' #end_date_manual_label' ).text('YES');
+        $( '#end_date_manual_input' ).show();
       } else {
-        $(' #manual_label' ).text('NO');
-        $( '#dates' ).hide();
+        $(' #end_date_manual_label' ).text('NO');
+        $( '#end_date_manual_input' ).hide();
+      }
+    });
+
+    $(' #start_date_manual' ).on('click', function() {
+      var checked = $(this).is(":checked");
+      if (checked) {
+        $(' #start_date_manual_label' ).text('YES');
+        $( '#start_date_manual_input' ).show();
+      } else {
+        $(' #start_date_manual_label' ).text('NO');
+        $( '#start_date_manual_input' ).hide();
       }
     });
 
@@ -303,7 +339,6 @@
         events: eventsID,
         csrfmiddlewaretoken: '{{ csrf_token }}'
       };
-      console.log(data);
 
       $.ajax({
         type: "POST",
@@ -350,7 +385,8 @@
       
       $('#start_date_picker').dateTimePicker();
       $('#end_date_picker').dateTimePicker();
-      $( '#dates' ).hide();
+      $( '#start_date_manual_input' ).hide();
+      $( '#end_date_manual_input' ).hide();
       events = $('#events').DataTable({
         searching: true,
         processing: true,

@@ -97,13 +97,113 @@
         </div>
     </div>
 
-    {% block content_measurement %}
-    {% endblock content_measurement %}
+    <div class="row mb-4" id="header-runtime">
+        <div class="col-9">
+            <h4 class="ml-4">
+                {{beautify_test_name}} Test
+            </h4>
+        </div>
+        <div class="col-3">
+            <h4 class="">Runtime: {{rawmeasurement.test_runtime}}</h4>
+        </div>
+    </div>
 
+
+    {% if rawmeasurement.test_name == 'web_connectivity' %}
+        {% include 'measurements/wconn-detail.html' %}
+    {% elif rawmeasurement.test_name == 'tor' %}
+        {% include 'measurements/tor-detail.html' %}
+    {% endif %}
+
+    <div class="shadow-none p-3 mb-2 bg-secondary rounded" id="generalInfo">
+        <p class="text-white"><bold>Report ID: </bold> {{rawmeasurement.report_id}}</p>
+
+        <p class="text-white"><bold>Platform: </bold> {{rawmeasurement.platform}}</p>
+
+        <p class="text-white"><bold>Software Name:</bold> {{rawmeasurement.software_name}} ({{rawmeasurement.software_version}})</p>
+
+        <p class="text-white"><bold>Measurement Engine: </bold> {{rawmeasurement.engine}} </p>
+    </div>
+
+    <div class="card py-0 px-5 mt-3" id="raw-card">
+        <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#raw" aria-expanded="true" aria-controls="raw">
+            <div class="card-header">
+                <h5 class="mb-0">Raw Measurement Data</h5>
+            </div>
+        </a>
+        <div class="collapse" id="raw">
+            <div class="card-body">
+                <pre id="raw-data"> {{rawmeasurement.rawjson}} </pre>
+            </div>
+        </div>
+    </div>
 
 {% endblock content %}
 
 {% block custom_scripts %}
 
+
+<script src="https://cdn.jsdelivr.net/npm/pretty-print-json@0.3/dist/pretty-print-json.min.js"></script>
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+<script>
+
+
+    $(document).ready(function() {
+
+        /* Case Web Connectivity */
+        if ( '{{rawmeasurement.test_name}}' === 'web_connectivity' ) {
+            $('#events-table').DataTable({
+                order: [[ 2, "desc" ]],
+                searching: true,
+                language: {
+                },
+                buttons: [],
+                select: {
+                style: 'multi',
+                },
+            });
+
+            if ('{{rawmeasurement.test_keys.http_experiment_failure}}' !== 'None') {
+                $( '#http-experiment' ).empty();
+                $( '#http-experiment' ).append(
+                    '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.http_experiment_failure}}'
+                );
+            }
+            if ('{{rawmeasurement.test_keys.dns_experiment_failure}}' !== 'None') {
+                $( '#dns-experiment' ).empty();
+                $( '#dns-experiment' ).append(
+                    '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.dns_experiment_failure}}'
+                );
+            }
+            if ('{{rawmeasurement.test_keys.control_failure}}' !== 'None') {
+                $( '#control-experiment' ).empty();
+                $( '#control-experiment' ).append(
+                    '<i class="fas fa-times mr-2"></i>' + '{{rawmeasurement.test_keys.control_failure}}'
+                );
+            }
+        } else if ( '{{rawmeasurement.test_name}}' === 'web_connectivity' ) {
+            var torList = $('#detail-tor-list').DataTable();
+        }
+
+
+        if ('{{rawmeasurement.test_keys.accessible}}' === 'False') {
+            $( '#header' ).attr("class", "card p-5 bg-danger")
+        }
+        
+        var raw = $('#raw-data').text();
+        rawParsed = JSON.parse(raw);
+        rawParsed[0]['fields']['annotations'] = JSON.parse(rawParsed[0]['fields']['annotations']);
+        rawParsed[0]['fields']['test_helpers'] = JSON.parse(rawParsed[0]['fields']['test_helpers']);
+        jQuery.noConflict();
+        $("#raw-data").jsonViewer(rawParsed[0]['fields'], {
+            collapsed: true,
+            rootCollapsable: false
+        });
+
+
+    });
+</script>
 
 {% endblock custom_scripts %}

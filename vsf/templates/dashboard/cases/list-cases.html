@@ -102,7 +102,22 @@
             </div>   
           </div>
 
-          <div class="col-6"></div>
+          <div class="col-3 mt-3">
+            <div class="row align-items-center ml-1">
+              <div class="col-4 mx-auto">
+                <label class="font-weight-bold" for="is_active">Active</label>
+              </div>
+              <div class="col-8 mx-auto">
+                <select id="is_active" class="custom-select additional-filter" name="is_active">
+                  <option selected value="">Any</option>
+                  <option {% if prefill.is_active == 'false' %} selected {% endif %} value="false">False</option>
+                  <option {% if prefill.is_active == 'true' %} selected {% endif %} value="true">True</option>
+                </select>
+              </div>
+            </div>   
+          </div>
+
+          <div class="col-3"></div>
 
           <div class="col-3 my-auto mx-auto">
             <button id="url-form-button" class="btn btn-blue btn-block" type="submit">
@@ -134,6 +149,7 @@
             <th class="text-center" scope="col">End Date</th>
             <th class="text-center" scope="col">Category</th>
             <th class="text-center" scope="col">Published</th>
+            <th class="text-center" scope="col">Active</th>
             {% if user.is_editor %}
               <th class="text-center" scope="col">Actions</th>
             {% endif %}
@@ -215,13 +231,13 @@
           $(' #icon_end ').append('<i class="fas fa-magic"></i>');
         }
 
-        if (json['is_it_continues']) {
+        if (json['is_active']) {
           $( '#continues' ).append(
-            `<i class="fas fa-circle-notch text-danger"></i> Continues`
+            `<i class="fas fa-circle-notch text-danger"></i> Active`
           );
         } else {
           $( '#continues' ).append(
-            `<i class="fas fa-window-close text-success"></i> It doesn't continue`
+            `<i class="fas fa-window-close text-success"></i> Not Active`
           );
         }
 
@@ -278,6 +294,7 @@
           data.end_date = $("#end_date").val();
           data.category = $("#category").val();
           data.published = $('#published').val();
+          data.is_active = $( '#is_active ').val();
         },
         contentType: "application/json; charset=utf-8",  
         type: "GET",
@@ -330,6 +347,22 @@
             } else {
               return `<div class="text-danger w-100 text-center">
                         <i class="far fa-check-circle text-default" title="User is Inactive"></i>
+                    </div>`
+            }            
+          },
+        },
+        {
+          data: "is_active",
+          orderable: false,
+          searchable: true,
+          render: function (data, type, row, meta) {
+            if (data) {
+              return `<div class="text-success w-100 text-center">
+                        <i class="far fa-check-circle text-success" title="True"></i>
+                    </div>`
+            } else {
+              return `<div class="text-danger w-100 text-center">
+                        <i class="far fa-check-circle text-default" title="False"></i>
                     </div>`
             }            
           },

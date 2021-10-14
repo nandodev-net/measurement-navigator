@@ -222,7 +222,7 @@ class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
         return context
 
 class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
-    template_name = 'measurements/wconn-detail.html'
+    template_name = 'extends/measurement-detail.html'
     slug_field = 'pk'
     model = MeasModels.Measurement
 
@@ -254,9 +254,6 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
             context['rawmeasurement'].platform = measurement.raw_measurement.annotations['platform']
             context['rawmeasurement'].engine = measurement.raw_measurement.annotations['engine_name'] + ' (' + measurement.raw_measurement.annotations['engine_version'] + ')'
             context['rawmeasurement'].hasHttpRequests = len(measurement.raw_measurement.test_keys['requests']) > 0            
-            context['rawmeasurement'].annotations = json.dumps(measurement.raw_measurement.annotations)
-            context['rawmeasurement'].urlFlag = '/static/img/flags/' + measurement.raw_measurement.probe_cc.lower() + '.svg'
-            context['rawmeasurement'].rawjson = serializers.serialize('json', [measurement.raw_measurement])
 
             tcp_connections = []
             for connection in measurement.raw_measurement.test_keys['tcp_connect']:
@@ -273,42 +270,34 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
 
                 tcp_connections.append(aux)
             context['rawmeasurement'].tcp_connections = tcp_connections
+            context['beautify_test_name'] = 'Web Connectivity'
+        elif measurement.raw_measurement.test_name == 'tor':
+            keys = [] 
+            for key, value in measurement.raw_measurement.test_keys['targets'].items():
+                keys.append({
+                    'name': value['target_name'] if 'target_name' in value else key,
+                    'address': value['target_address'],
+                    'type': value['target_protocol'],
+                    'connect': value['summary']['connect']['failure'],
+                    'handshake': value['tls_handshakes']
+
+                })
+                context['beautify_test_name'] = 'TOR'
+
+            context['keys'] = keys
+            context['obfs4'] = str(measurement.raw_measurement.test_keys['obfs4_accessible']) + '/' + str(measurement.raw_measurement.test_keys['obfs4_total'])
+            context['dir'] = str(measurement.raw_measurement.test_keys['dir_port_accessible']) + '/' + str(measurement.raw_measurement.test_keys['dir_port_total'])
         else:
-            print(context['rawmeasurement'].__dict__)
-            
-        return context
+            context['beautify_test_name'] = measurement.raw_measurement.test_name.capitalize()
 
 
-class TorDetailView(VSFLoginRequiredMixin, DetailView):
-    template_name = 'measurements/tor-detail.html'
-    slug_field = 'pk'
-    model = MeasModels.Measurement
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        measurement = context['measurement']
-        context['rawmeasurement'] = measurement.raw_measurement
-
-        test_keys = measurement.raw_measurement.test_keys
-        keys = [] 
-        for key, value in test_keys['targets'].items():
-            keys.append({
-                'name': value['target_name'] if 'target_name' in value else key,
-                'address': value['target_address'],
-                'type': value['target_protocol'],
-                'connect': value['summary']['connect']['failure'],
-                'handshake': value['tls_handshakes']
-
-            })
-
-        context['keys'] = keys
-        context['obfs4'] = str(test_keys['obfs4_accessible']) + '/' + str(test_keys['obfs4_total'])
-        context['dir'] = str(test_keys['dir_port_accessible']) + '/' + str(test_keys['dir_port_total'])
-        context['rawmeasurement'].test_helpers = json.dumps(measurement.raw_measurement.test_helpers)
+        
         context['rawmeasurement'].annotations = json.dumps(measurement.raw_measurement.annotations)
+        context['rawmeasurement'].urlFlag = '/static/img/flags/' + measurement.raw_measurement.probe_cc.lower() + '.svg'
         context['rawmeasurement'].rawjson = serializers.serialize('json', [measurement.raw_measurement])
 
         return context
+
 
 
 class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
