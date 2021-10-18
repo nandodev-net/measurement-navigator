@@ -161,20 +161,37 @@
             </div> 
           </div>
 
+          <div class="col-4 mt-4">
+            <div class="row align-items-center ml-1">
+              <div class="col-5 mx-auto">
+                <label class='font-weight-bold' for="it_continues">
+                  It Countinues?
+                </label>
+              </div>
+              <div class="col-7 mx-auto">
+                <select id="it_continues" class="custom-select additional-filter" name="it_continues">
+                  <option value="all">Any</option>
+                  <option {% if prefill.it_continues == 'true' %} selected {% endif %} value="true">True</option>
+                  <option {% if prefill.it_continues == 'false' or prefill.it_continues == "" %} selected {% endif %} value="false">False</option>
+                </select>
+              </div>
+            </div> 
+          </div>
 
+
+          <div class="col-7"></div>
           <div class="col-2">
             {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
           </div>
 
 
-          <div class="col-2 mt-4">
+          <div class="col-1 mt-4">
             <small>
               <strong>Autoload filters</strong>
             </small>
             <input class='ml-2' id='dynamic' type="checkbox" value="">
           </div>
 
-          <div class="col-10"></div>
           <div class="col-2 my-auto">
             <button id="url-form-button" class="btn btn-blue float-right" type="submit">
               <i class="fa fa-search"></i> <strong>Search</strong>
@@ -217,6 +234,7 @@
               <th class="text-center" scope="col">Domain</th>
               <th class="text-center" scope="col">ASN</th>
               <th class="text-center" scope="col">Muted</th>
+              <th class="text-center" scope="col">It Continues</th>
             </tr>
           </thead>
           <tbody>
@@ -666,6 +684,7 @@
             data.domain = $("#domain").val();
             data.asn = $("#asn").val();
             data.muted = $("#muted").val();
+            data.it_continues = $( '#it_continues' ).val();
 
 
 
@@ -746,6 +765,22 @@
               } else {
                 return `<div class="text-danger w-100 text-center">
                           <i class="far fa-check-circle text-default" title="Event not Muted"></i>
+                        </div>`
+              }
+            },
+          },
+          {
+            data: "it_continues",
+            orderable: true,
+            searchable: false,
+            render: function (data, type, row, meta) {
+              if (data) {
+                return `<div class="text-success w-100 text-center">
+                          <i class="far fa-check-circle text-success" title="Event Continuing"></i>
+                        </div>`
+              } else {
+                return `<div class="text-danger w-100 text-center">
+                          <i class="far fa-check-circle text-default" title="Stopped Event"></i>
                         </div>`
               }
             },

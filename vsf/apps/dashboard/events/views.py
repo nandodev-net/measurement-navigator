@@ -36,7 +36,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
         
         fields = [ 
-            'identification', 'confirmed', 'issue_type', 'domain', 'asn', 'muted'
+            'identification', 'confirmed', 'issue_type', 'domain', 'asn', 'muted', 'it_continues'
         ]
 
         for field in fields:
@@ -161,6 +161,14 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         if case != None:
             case_events = [event.id for event in Case.objects.filter(id = case).first().events.all()]
             qs = qs.exclude(id__in = case_events)
+
+        #--------- Filtering Continuity ---------#
+        it_continues = self.request.GET.get('it_continues')
+        if it_continues:
+            if it_continues == 'true': 
+                qs = qs.filter(it_continues = 't') 
+            elif it_continues == 'false' or it_continues == '': 
+                qs = qs.filter(it_continues = 'f')
             
         return qs
 
@@ -180,7 +188,6 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             if end_date:
                 end_date = end_date.strftime("%b. %d, %Y, %H:%M %p")
                 
-            print(event.muted)
             response.append({
                 'id': event.id,
                 'identificator': event.id,
@@ -192,7 +199,8 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 'is_manual_end_date':event.end_date_manual,
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
-                'muted': event.muted
+                'muted': event.muted,
+                'it_continues': event.it_continues
             })
 
         return response
