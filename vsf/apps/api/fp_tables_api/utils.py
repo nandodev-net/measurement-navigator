@@ -22,6 +22,7 @@ from   rest_framework.views     import APIView
 from   django.core.cache        import cache
 
 # Third party imports
+import sys
 import time
 import json
 import requests
@@ -102,6 +103,55 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
         both the since and until date should be in the following format:
         YYYY-mm-dd.
     """
+
+    web_con = False
+    tor = False
+    http_requests = False
+    dns_consistency = False
+    http_invalid_request_line = False
+    bridge_reachability = False
+    tcp_connect = False
+    http_header_field_manipulation = False
+    http_host = False
+    multi_protocol_traceroute = False
+    meek_fronted_requests_test = False
+    whatsapp = False
+    vanilla_tor = False
+    facebook_messenger = False
+    ndt = False
+    dash = False
+    telegram = False
+    psiphon = False
+    sni_blocking = False   
+
+    page_req = False
+
+    meas_req_wc = False
+    meas_req_tr = False
+    meas_req_http_requests = False
+    meas_req_dns_consistency = False
+    meas_req_http_invalid_request_line = False
+    meas_req_bridge_reachability = False
+    meas_req_tcp_connect = False
+    meas_req_http_header_field_manipulation = False
+    meas_req_http_host = False
+    meas_req_multi_protocol_traceroute = False
+    meas_req_meek_fronted_requests_test = False
+    meas_req_whatsapp = False
+    meas_req_vanilla_tor = False
+    meas_req_facebook_messenger = False
+    meas_req_ndt = False
+    meas_req_dash = False
+    meas_req_telegram = False
+    meas_req_psiphon = False
+    meas_req_sni_blocking = False  
+
+    f = open( 'informe0.txt', 'a')
+    f.write('INICIANDO DIAGNOSTICO ')
+    f.write(datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
+    f.write('\n')
+    
+   
     # Data validation
     data = {
         'probe_cc': 'VE', # In case we want to add other countries
@@ -137,7 +187,16 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
         try:
             # If it wasn't able to get the next page data, just store the currently added data
             # @TODO we have to think what to do in this cases
+            pag_ini = time.time()
             req = requests.get(next_url)
+            pag_fin = time.time()
+        
+            if not page_req:
+                f.write('Tiempo en request a ooni de una pagina de 100 mediciones parciales: ')
+                f.write(str(pag_fin-pag_ini))
+                f.write('\n')
+                page_req = True
+ 
             status_code = req.status_code
             assert(req.status_code == 200)
         except:
@@ -183,12 +242,110 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
         for result in results:
             URL.objects.get_or_create(url=str(result['input']))
             try:
+                meas_ini = time.time()
                 req = requests.get(result['measurement_url'])
+                meas_fin = time.time()
+                if result['test_name'] == 'tor' and not meas_req_tr:
+                    f.write('Tiempo en request a ooni de una medicion TOR: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_tr = True
+                elif result['test_name'] == 'web_connectivity' and not meas_req_wc:
+                    f.write('Tiempo en request a ooni de una medicion WebConn: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_wc = True
+                elif result['test_name'] == 'http_requests' and not meas_req_http_requests:
+                    f.write('Tiempo en request a ooni de una medicion http_requests: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_http_requests = True  
+                elif result['test_name'] == 'dns_consistency' and not meas_req_dns_consistency:
+                    f.write('Tiempo en request a ooni de una medicion dns_consistency: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_dns_consistency = True  
+                elif result['test_name'] == 'http_invalid_request_line' and not meas_req_http_invalid_request_line:
+                    f.write('Tiempo en request a ooni de una medicion http_invalid_request_line: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_http_invalid_request_line = True 
+                elif result['test_name'] == 'bridge_reachability' and not meas_req_bridge_reachability:
+                    f.write('Tiempo en request a ooni de una medicion bridge_reachability: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_bridge_reachability = True 
+                elif result['test_name'] == 'tcp_connect' and not meas_req_tcp_connect:
+                    f.write('Tiempo en request a ooni de una medicion tcp_connect: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_tcp_connect = True 
+                elif result['test_name'] == 'http_header_field_manipulation' and not meas_req_http_header_field_manipulation:
+                    f.write('Tiempo en request a ooni de una medicion http_header_field_manipulation: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_http_header_field_manipulation = True 
+                elif result['test_name'] == 'http_host' and not meas_req_http_host:
+                    f.write('Tiempo en request a ooni de una medicion http_host: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_http_host = True 
+                elif result['test_name'] == 'multi_protocol_traceroute' and not meas_req_multi_protocol_traceroute:
+                    f.write('Tiempo en request a ooni de una medicion multi_protocol_traceroute: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_multi_protocol_traceroute = True 
+                elif result['test_name'] == 'meek_fronted_requests_test' and not meas_req_meek_fronted_requests_test:
+                    f.write('Tiempo en request a ooni de una medicion meek_fronted_requests_test: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_meek_fronted_requests_test = True 
+                elif result['test_name'] == 'whatsapp' and not meas_req_whatsapp:
+                    f.write('Tiempo en request a ooni de una medicion whatsapp: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_whatsapp = True
+                elif result['test_name'] == 'vanilla_tor' and not meas_req_vanilla_tor:
+                    f.write('Tiempo en request a ooni de una medicion vanilla_tor: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_vanilla_tor = True
+                elif result['test_name'] == 'facebook_messenger' and not meas_req_facebook_messenger:
+                    f.write('Tiempo en request a ooni de una medicion facebook_messenger: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_facebook_messenger = True
+                elif result['test_name'] == 'ndt' and not meas_req_ndt:
+                    f.write('Tiempo en request a ooni de una medicion ndt: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_ndt = True
+                elif result['test_name'] == 'dash' and not meas_req_dash:
+                    f.write('Tiempo en request a ooni de una medicion dash: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_dash = True
+                elif result['test_name'] == 'telegram' and not meas_req_telegram:
+                    f.write('Tiempo en request a ooni de una medicion telegram: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_telegram = True
+                elif result['test_name'] == 'psiphon' and not meas_req_psiphon:
+                    f.write('Tiempo en request a ooni de una medicion psiphon: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_psiphon = True
+                elif result['test_name'] == 'sni_blocking' and not meas_req_sni_blocking:
+                    f.write('Tiempo en request a ooni de una medicion sni_blocking: ')
+                    f.write(str(meas_fin-meas_ini))
+                    f.write('\n')
+                    meas_req_sni_blocking = True
+
                 status_code = req.status_code
                 assert req.status_code == 200
             except:
                 continue
-
+    
 
     # Save only if this measurement does not exists
     # saved_measurements = []
@@ -218,6 +375,7 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
             try:
                 print(c.magenta("Creating a new measurement"))
                 data = req.json()
+                meas_cr_ini = time.time()
                 ms = RawMeasurement.objects.create(
                     input=data['input'],
                     report_id= data['report_id'],
@@ -239,6 +397,110 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
                     test_keys= data['test_keys'],
                     annotations= data['annotations']
                 )
+                meas_cr_fin = time.time()
+                if data['test_name'] == 'tor' and not tor:
+
+                    f.write('Tiempo en creacion medicion TOR: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    tor = True
+                elif data['test_name'] == 'web_connectivity' and not web_con:
+                    f.write('Tiempo en creacion medicion WebConn: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    web_con = True  
+                    
+                elif result['test_name'] == 'http_requests' and not http_requests:
+                    f.write('Tiempo en creacion medicion http_requests: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    http_requests = True  
+                elif result['test_name'] == 'dns_consistency' and not dns_consistency:
+                    f.write('Tiempo en creacion medicion dns_consistency: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    dns_consistency = True  
+                elif result['test_name'] == 'http_invalid_request_line' and not http_invalid_request_line:
+                    f.write('Tiempo en creacion medicion http_invalid_request_line: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    http_invalid_request_line = True 
+                elif result['test_name'] == 'bridge_reachability' and not bridge_reachability:
+                    f.write('Tiempo en creacion medicion bridge_reachability: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    bridge_reachability = True 
+                elif result['test_name'] == 'tcp_connect' and not tcp_connect:
+                    f.write('Tiempo en creacion medicion tcp_connect: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    tcp_connect = True 
+                elif result['test_name'] == 'tcp_connect' and not tcp_connect:
+                    f.write('Tiempo en creacion medicion tcp_connect: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    tcp_connect = True 
+                elif result['test_name'] == 'http_header_field_manipulation' and not http_header_field_manipulation:
+                    f.write('Tiempo en creacion medicion http_header_field_manipulation: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    http_header_field_manipulation = True 
+                elif result['test_name'] == 'http_host' and not http_host:
+                    f.write('Tiempo en creacion medicion http_host: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    http_host = True 
+                elif result['test_name'] == 'multi_protocol_traceroute' and not multi_protocol_traceroute:
+                    f.write('Tiempo en creacion medicion multi_protocol_traceroute: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    multi_protocol_traceroute = True 
+                elif result['test_name'] == 'meek_fronted_requests_test' and not meek_fronted_requests_test:
+                    f.write('Tiempo en creacion medicion meek_fronted_requests_test: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    meek_fronted_requests_test = True 
+                elif result['test_name'] == 'whatsapp' and not whatsapp:
+                    f.write('Tiempo en creacion medicion whatsapp: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    whatsapp = True
+                elif result['test_name'] == 'vanilla_tor' and not vanilla_tor:
+                    f.write('Tiempo en creacion medicion vanilla_tor: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    vanilla_tor = True
+                elif result['test_name'] == 'facebook_messenger' and not facebook_messenger:
+                    f.write('Tiempo en creacion medicion facebook_messenger: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    facebook_messenger = True
+                elif result['test_name'] == 'ndt' and not ndt:
+                    f.write('Tiempo en creacion medicion ndt: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    ndt = True
+                elif result['test_name'] == 'dash' and not dash:
+                    f.write('Tiempo en creacion medicion dash: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    dash = True
+                elif result['test_name'] == 'telegram' and not telegram:
+                    f.write('Tiempo en creacion medicion telegram: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    telegram = True
+                elif result['test_name'] == 'psiphon' and not psiphon:
+                    f.write('Tiempo en creacion medicion psiphon: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    psiphon = True
+                elif result['test_name'] == 'sni_blocking' and not sni_blocking:
+                    f.write('Tiempo en creacion medicion sni_blocking: ')
+                    f.write(str(meas_cr_fin-meas_cr_ini))
+                    f.write('\n')
+                    sni_blocking = True
+                f.close()
                 # fp.report_ready = True
                 # data_state = FastPath.DataReady.READY
                 start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
@@ -259,7 +521,7 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
             # if limit and (len(saved_measurements) >= limit):
             #     break
 
-
+    
     return (status_code)
 
 
