@@ -339,7 +339,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
 
     # Update changed measurements
     reference_measurement = measurements_with_flags[0]
-    SM_types = [HTTP, TCP, DNS]
+    SM_types = [HTTP, TCP, DNS, TOR]
     SM_type = None
     for t in SM_types:
         if isinstance(reference_measurement, t):
@@ -438,7 +438,7 @@ def update_event_dates():
         event table following dates in its 
         related submeasurements 
     """
-    submeasurements = ['dns','http','tcp']
+    submeasurements = ['dns','http','tcp','tor']
     with connection.cursor() as cursor:
         for subm in submeasurements:
             cursor.execute(f"WITH\
