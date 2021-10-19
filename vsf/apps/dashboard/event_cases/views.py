@@ -29,15 +29,17 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
 
         get, prefill = self.request.GET or {}, {}
-
+        print(get)
         categories = Category.objects.all()
         categoryNames = [cat.name for cat in categories]
         fields = [ 
-            'title', 'start_date', 'end_date', 'category', 'published', 'is_active'
+            'title', 'start_date', 'end_date', 'category', 'is_active', 'published'
         ]
 
         for field in fields:
             getter = get.get(field)
+            print('checking this')
+            print(getter)
             prefillAux = getter if getter else ""
             if field == 'start_date' and not prefill:
                 prefillAux = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
@@ -118,6 +120,7 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         title, start_date, end_date = get.get('title'), get.get('start_date'), get.get('end_date')
         category, published, is_active =  get.get('category'), get.get('published'), get.get('is_active')
 
+
         if title != None and title != "":
             qs = qs.filter(title__contains = title)
 
@@ -138,7 +141,7 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(published = eval(published.capitalize()))
         
         if is_active in ['true', 'false']:
-            qs = qs.filter(is_Active = eval(is_active.caoutakuze()))
+            qs = qs.filter(is_active = eval(is_active.capitalize()))
         
         return qs
 
@@ -623,7 +626,7 @@ class CaseChangeToActive(VSFLoginRequiredMixin, View):
         case_id = int(post['cases[]'][0])
         case = Case.objects.get(id = case_id)
         try:
-            
+
             Case.objects.filter(id = case_id).update(
                 is_active = True,
                 manual_is_active = True
