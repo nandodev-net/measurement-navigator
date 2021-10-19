@@ -38,7 +38,6 @@
             />
           </div>
 
-
           <div class="col-3">
             <div class="row align-items-center">
               <div class="col-4 mx-auto">
@@ -66,6 +65,7 @@
             </div> 
           </div>
       
+
           <div class="col-3">
             <div class="row align-items-center ml-1">
               <div class="col-4 mx-auto">
@@ -89,6 +89,25 @@
 
           <div class="col-3 mt-3">
             <div class="row align-items-center ml-1">
+              <div class="col-5 mx-auto">
+                <label class='font-weight-bold' for="is_active">
+                  Active
+                </label>
+              </div>
+              <div class="col-7 mx-auto">
+                <select id="is_active" class="custom-select additional-filter" name="is_active">
+                  <option value="">Any</option>
+                  
+                  <option {% if prefill.is_active == "true" %} selected {% endif %} value="true">True</option>
+                  <option {% if prefill.is_active == "false" %} selected {% endif %} value="false">False</option>
+                  
+                </select>
+              </div>
+            </div> 
+          </div>
+
+          <div class="col-3 mt-3">
+            <div class="row align-items-center ml-1">
               <div class="col-4 mx-auto">
                 <label class="font-weight-bold" for="published">Published</label>
               </div>
@@ -102,20 +121,8 @@
             </div>   
           </div>
 
-          <div class="col-3 mt-3">
-            <div class="row align-items-center ml-1">
-              <div class="col-4 mx-auto">
-                <label class="font-weight-bold" for="is_active">Active</label>
-              </div>
-              <div class="col-8 mx-auto">
-                <select id="is_active" class="custom-select additional-filter" name="is_active">
-                  <option selected value="">Any</option>
-                  <option {% if prefill.is_active == 'false' %} selected {% endif %} value="false">False</option>
-                  <option {% if prefill.is_active == 'true' %} selected {% endif %} value="true">True</option>
-                </select>
-              </div>
-            </div>   
-          </div>
+
+
 
           <div class="col-3"></div>
 
@@ -183,7 +190,7 @@
     let data = {
       title: $("#title").val(), start_date: $("#start_date").val(),
       end_date: $("#end_date").val(), category: $("#category").val(), 
-      published: $('#published').val()
+      published: $('#published').val(), is_active: $( '#is_active' ).val()
     };
 
     let urlSearch = "{% url 'dashboard:event_cases:list_cases' %}";
@@ -294,7 +301,7 @@
           data.end_date = $("#end_date").val();
           data.category = $("#category").val();
           data.published = $('#published').val();
-          data.is_active = $( '#is_active ').val();
+          data.is_active = $('#is_active').val();
         },
         contentType: "application/json; charset=utf-8",  
         type: "GET",
