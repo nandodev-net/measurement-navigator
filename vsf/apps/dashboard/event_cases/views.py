@@ -161,7 +161,6 @@ class CasesData(VSFLoginRequiredMixin, BaseDatatableView):
         return response
 
 
-
 @method_decorator(csrf_exempt, name='dispatch')
 class CaseCreateView(VSFLoginRequiredMixin, CreateView):
     model = Case
@@ -194,14 +193,6 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         manual_is_active = eval(post['activate'][0].capitalize())
         if manual_is_active: is_active = True
 
-        start_date_manual, end_date_manual = None, None 
-        if post['start_date'][0] != '':
-            start_date_manual = datetime.strptime(post['start_date'][0], '%Y-%m-%d %H:%M')
-        if post['end_date'][0] != '':
-            end_date_manual = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
-            # If the manual end date selected is greater than today, then the case
-            # will be active. 
-            if end_date_manual > datetime.now(): is_active = True
 
         
         start_date_automatic, end_date_automatic = None, None
@@ -218,9 +209,19 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         category = Category.objects.filter(name = post['category'][0]).first()
         
 
+        start_date_manual, end_date_manual = None, None 
+        if post['start_date'][0] != '':
+            start_date_manual = datetime.strptime(post['start_date'][0], '%Y-%m-%d %H:%M')
+        if post['end_date'][0] != '':
+            end_date_manual = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
+            # If the manual end date selected is greater than today, then the case
+            # will be active. 
+            if end_date_manual > datetime.now(): is_active = True
+
+
         # Deciding which date put in the main dates fields.
         start_date, end_date = start_date_manual, end_date_manual 
-        if not manual and 'events[]' in post.keys():
+        if 'events[]' in post.keys() and not start_date and not end_date:
             start_date, end_date = start_date_automatic, end_date_automatic 
 
         try:
@@ -239,8 +240,8 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
                 category = category,
                 twitter_search = post['twitter_search'][0],
                 published = published,
-                manual = manual,
-                active = active
+                is_active = is_active,
+                manual_is_active = manual_is_active
             )
             new_case.save()
             new_case.events.set(eventsObject)
@@ -348,22 +349,22 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 'closed': event.closed
 
             } for event in relatedEvents]
-
+            
             data = {
                 "title": caseObj.title,
                 "title_eng": caseObj.title_eng,
                 "description": caseObj.description,
                 "description_eng": caseObj.description_eng,
                 "case_type": caseObj.case_type,
-                'start_date': datetime.strftime(utc_aware_date(caseObj.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'end_date': datetime.strftime(utc_aware_date(caseObj.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'start_date': datetime.strftime(utc_aware_date(caseObj.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S") if caseObj.start_date else None,
+                'end_date': datetime.strftime(utc_aware_date(caseObj.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S") if caseObj.end_date else None,
                 'start_date_manual': caseObj.start_date_manual,
                 'end_date_manual': caseObj.end_date_manual,
                 "category": caseObj.category.name,
                 "published": caseObj.published,
                 "twitter_search": caseObj.twitter_search,
                 "events": events,
-                "is_it_continues": caseObj.active
+                "is_it_continues": caseObj.is_active
 
             }
             return JsonResponse(data, safe=False)
@@ -415,28 +416,19 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
         category = Category.objects.filter(name = post['category'][0]).first()
 
         case = Case.objects.get(id = post['id'][0])
-        manual = case.manual
-        active = case.active
+        is_active = case.is_active
+        manual_is_active = case.manual_is_active
         start_date_manual, end_date_manual = None, None 
         start_date, end_date = None, None
 
+        if post['start_date'][0]:
+            start_date_manual = datetime.strptime(post['start_date'][0], '%Y-%m-%d %H:%M')
 
         if post['end_date'][0]:
             end_date = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
-            if end_date > datetime.now(): active = True 
-            elif end_date < datetime.now(): active = False
+            if end_date > datetime.now(): is_active = True 
+            elif end_date < datetime.now(): is_active = False
 
-        if post['start_date'][0] or post['end_date'][0]:
-            different_start_dates = post['start_date'][0] != case.start_date.strftime('%Y-%m-%d %H:%M')
-            different_end_dates = (post['end_date'][0] != case.end_date.strftime('%Y-%m-%d %H:%M'))
-            if different_start_dates or different_end_dates:
-                manual = True
-                start_date_manual, end_date_manual = datetime.strptime(post['start_date'][0], '%Y-%m-%d %H:%M'), datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M') 
-                start_date, end_date = start_date_manual, end_date_manual
-
-        if manual and (not active or case.events.first()):
-            end_date = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
-            if end_date > datetime.now(): active = True 
 
         try:
 
@@ -452,8 +444,8 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
                 case_type = post['case_type'][0].lower(),
                 category = category,
                 twitter_search = post['twitter_search'][0],
-                manual = manual,
-                active = active
+                is_active = is_active,
+                manual_is_active = manual_is_active
 
             )     
 
@@ -608,15 +600,33 @@ class CaseChangeToAutomatic(VSFLoginRequiredMixin, View):
             if not (case.start_date_automatic and case.end_date_automatic):
                 return JsonResponse({'error' : 'There are no events associated to this case'})
 
-            active = False
+            is_active = False
             if case.end_date_automatic:
-                if case.end_date_automatic.replace(tzinfo=None) > datetime.now(): active = True 
+                if case.end_date_automatic.replace(tzinfo=None) > datetime.now(): is_active = True 
 
             Case.objects.filter(id = case_id).update(
-                manual = False,
                 start_date = case.start_date_automatic,
                 end_date = case.end_date_automatic,
-                active = active
+                start_date_manual = None,
+                end_date_manual = None,
+                is_active = is_active
+            )
+            return JsonResponse({'error' : None})
+        except Exception as e:
+            print(e)
+            return HttpResponseBadRequest()
+
+class CaseChangeToActive(VSFLoginRequiredMixin, View):
+
+    def post(self, request, **kwargs):
+        post = dict(request.POST)
+        case_id = int(post['cases[]'][0])
+        case = Case.objects.get(id = case_id)
+        try:
+            
+            Case.objects.filter(id = case_id).update(
+                is_active = True,
+                manual_is_active = True
             )
             return JsonResponse({'error' : None})
         except Exception as e:
