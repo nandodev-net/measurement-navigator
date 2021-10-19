@@ -91,6 +91,7 @@ class Event(TimeStampedModel):
 
     domain  = models.ForeignKey(
                             to=Domain,
+                            blank=True,
                             null=True,
                             on_delete=SET_NULL
                             ) 
