@@ -69,5 +69,11 @@ urlpatterns = [
         views.CaseChangeToAutomatic.as_view(),
         name="goAutomatic"
     ),
+
+    path(
+        'goActive/',
+        views.CaseChangeToActive.as_view(),
+        name="goActive"
+    ),
     
 ]
