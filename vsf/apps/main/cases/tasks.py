@@ -19,7 +19,7 @@ class CASES_TASKS:
     UPDATE_DATES = 'update_dates'
 
 
-@shared_task(time_limit=3600, vsf_name = CASES_TASKS.UPDATE_DATES, base=VSFTask)
+@shared_task(time_limit=86400, vsf_name = CASES_TASKS.UPDATE_DATES, base=VSFTask)
 def update_case_dates():
     """
         Task that runs for all over the cases and detect if 
@@ -45,22 +45,22 @@ def update_case_dates():
                 start_date_automatic = ordered_by_start_date.first().start_date.replace(tzinfo=None) or None
                 end_date_automatic = ordered_by_end_date.last().end_date.replace(tzinfo=None) or None
 
-                active = case.active
-                if end_date_automatic > datetime.now(): is_it_continues = True
-                else: is_it_continues = False
+                is_active = case.is_active
+                if end_date_automatic > datetime.now(): is_active = True
+                else: is_active = False
 
-                if case.manual:
+                if case.start_date_manual and case.end_date_manual:
                     case.update(
                         start_date_automatic = start_date_automatic,
                         end_date_automatic = end_date_automatic
                     )
-                else:
+                elif not (case.start_date_manual and case.end_date_manual):
                     case.update(
                         start_date_automatic = start_date_automatic,
                         end_date_automatic = end_date_automatic,
                         start_date = start_date_automatic,
                         end_date = end_date_automatic,
-                        active = active,
+                        active = is_active,
                     )
 
     except Exception as e:
