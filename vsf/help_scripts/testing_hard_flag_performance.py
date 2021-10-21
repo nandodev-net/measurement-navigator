@@ -19,6 +19,6 @@ else:
 
 count_flags_sql()
 start = datetime.now()
-hard_flag(interval, min_meas, interval_size, continue_tresh)
+hard_flag(timedelta(days=10), 2, 10, 1)
 end = datetime.now()
 print((end - start).total_seconds())

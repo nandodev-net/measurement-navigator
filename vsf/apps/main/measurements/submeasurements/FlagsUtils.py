@@ -186,13 +186,14 @@ def select( measurements : List[SubMeasurement],
 
     # Measurement ammount, if not enough to fill a window or an interval, return an empty list
     n_meas : int = len(measurements)
-
+    print ('\n\nSELECT')
     if n_meas < event_openning_treshold:
+        print ('MURIO')
         return []
-
+    print(n_meas)
     # Resulting list
     result : List[List[SubMeasurement]] = []
-
+    print(result)
     # shortcuts
     start_time = lambda m : m.start_time
     anomaly_count = lambda lo, hi : measurements[hi].previous_counter -\
@@ -203,8 +204,10 @@ def select( measurements : List[SubMeasurement],
     lo : int = 0
     hi : int = min(interval_size - 1, n_meas-1)
     while n_meas - lo > event_openning_treshold:
+        print('ITE')
         # Search for anomaly measurements
         if measurements[lo].flag_type == Flag.FlagType.OK:
+            print('CONT')
             lo += 1
             hi = min(hi+1, n_meas-1)
             continue
@@ -213,24 +216,28 @@ def select( measurements : List[SubMeasurement],
         # anomalies
         max_in_date = _bin_search_max(measurements, start_time(measurements[lo]) + timedelta, lo, hi, start_time)
         n_anomalies = anomaly_count(lo, max_in_date)
+        print('ANOMALIAS: ',n_anomalies)
 
         # If too many anomalies in this interval:
         if n_anomalies < event_openning_treshold:
             lo += 1
             hi = min(hi+1, n_meas-1)
+            print('MUCHAS ANOMALIAS')
             continue
 
         # If too many anomalies, start a selecting process.
         current_block : List[Measurement] = []
-
-        # print(c.yellow(f"Openning new group"))
+        print('AAAAAAAA')
+        print("Openning new group")
         while n_anomalies > event_continue_treshold:
-            # print(c.green(f"\t Taking from {measurements[lo].start_time} to {measurements[max_in_date].start_time}"))
+            print('BBBBBBBBBBBBB')
+            print(c.green(f"\t Taking from {measurements[lo].start_time} to {measurements[max_in_date].start_time}"))
             last_index = lo
             for i in range(lo, min(max_in_date + 1, n_meas)):
                 if measurements[i].flag_type != SubMeasurement.FlagType.OK:
-                    # print(c.blue(f"\t added {measurements[i].id}, flag: {measurements[i].flag_type}, "))
+                    print(c.blue(f"\t added {measurements[i].id}, flag: {measurements[i].flag_type}, "))
                     current_block.append(measurements[i])
+                    print(current_block)
                     last_index = i
 
             lo = last_index
@@ -244,7 +251,7 @@ def select( measurements : List[SubMeasurement],
                                 start_time)
 
             n_anomalies = anomaly_count(last_index, max_in_date)
-            # print(c.blue(f"next anomalie count: {n_anomalies}"))
+            print(c.blue(f"next anomalie count: {n_anomalies}"))
 
             lo = min(lo+1, n_meas-1)
             hi = min(hi+1, n_meas-1)
@@ -365,11 +372,11 @@ def hard_flag(
             interval_size = how many measurements to consider in each step of the algorithm
     """
 
-    submeasurements = [(HTTP,'http'), (TCP,'tcp'), (DNS, 'dns'), (TOR,'tor')]
+    submeasurements = [(TOR,'tor')]
     
     # For every submeasurement type...
     for (SM, label) in submeasurements:
-
+        print('COMIENZO')
         # select every submeasurement such that partitioned by (domain, asn),
         # there's at the least one measurement in its partition that's 
         # not flagged.
@@ -410,14 +417,22 @@ def hard_flag(
                                     submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id\
                                                             JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
                                 ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
+        for p in meas:
+            print(p)
+
         groups = filter(
                         lambda l:len(l) >= event_openning_treshold,
                         Grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
                     )
+
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
         for group in groups:
+            print('hola')
+            print(group)
             weird_measurements = select(group, time_window, event_openning_treshold, interval_size, event_continue_treshold)
+            print('EEEEE\n')
+            print(weird_measurements)
             for sub_group in weird_measurements:
                 merge(sub_group)
         
