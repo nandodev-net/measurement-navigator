@@ -104,6 +104,8 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
         YYYY-mm-dd.
     """
 
+    day_time_ini = time.time()
+
     web_con = False
     tor = False
     http_requests = False
@@ -146,7 +148,7 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
     meas_req_psiphon = False
     meas_req_sni_blocking = False  
 
-    f = open( 'informe0.txt', 'a')
+    f = open( 'informe0.txt', 'w')
     f.write('INICIANDO DIAGNOSTICO ')
     f.write(datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
     f.write('\n')
@@ -241,6 +243,8 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
         
         for result in results:
             URL.objects.get_or_create(url=str(result['input']))
+            if result['test_name'] == 'tor':
+                URL.objects.get_or_create(url='tor')
             try:
                 meas_ini = time.time()
                 req = requests.get(result['measurement_url'])
@@ -375,9 +379,13 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
             try:
                 print(c.magenta("Creating a new measurement"))
                 data = req.json()
+                if data['test_name'] == 'tor':
+                    input_ = 'tor'
+                else:
+                    input_ = data['input'] 
                 meas_cr_ini = time.time()
                 ms = RawMeasurement.objects.create(
-                    input=data['input'],
+                    input=input_,
                     report_id= data['report_id'],
                     report_filename= data.get('report_filename','NO_AVAILABLE'), #
                     options= data.get('options', "NO_AVAILABLE"), #
@@ -399,7 +407,6 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
                 )
                 meas_cr_fin = time.time()
                 if data['test_name'] == 'tor' and not tor:
-
                     f.write('Tiempo en creacion medicion TOR: ')
                     f.write(str(meas_cr_fin-meas_cr_ini))
                     f.write('\n')
@@ -409,7 +416,6 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
                     f.write(str(meas_cr_fin-meas_cr_ini))
                     f.write('\n')
                     web_con = True  
-                    
                 elif result['test_name'] == 'http_requests' and not http_requests:
                     f.write('Tiempo en creacion medicion http_requests: ')
                     f.write(str(meas_cr_fin-meas_cr_ini))
@@ -500,7 +506,7 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
                     f.write(str(meas_cr_fin-meas_cr_ini))
                     f.write('\n')
                     sni_blocking = True
-                f.close()
+                
                 # fp.report_ready = True
                 # data_state = FastPath.DataReady.READY
                 start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
@@ -521,7 +527,12 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
             # if limit and (len(saved_measurements) >= limit):
             #     break
 
-    
+    day_time_end=time.time()
+    f.write('Tiempo en un dia de ingesta: ')
+    f.write(str(day_time_end-day_time_ini))
+    f.write('\n')   
+    f.close()
+
     return (status_code)
 
 
