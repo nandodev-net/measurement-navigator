@@ -422,16 +422,20 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
         is_active = case.is_active
         manual_is_active = case.manual_is_active
         start_date_manual, end_date_manual = None, None 
-        start_date, end_date = None, None
+        start_date, end_date = case.start_date, case.end_date
+
+
+        print(post)
 
         if post['start_date'][0]:
             start_date_manual = datetime.strptime(post['start_date'][0], '%Y-%m-%d %H:%M')
+            start_date = start_date_manual
 
         if post['end_date'][0]:
-            end_date = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
-            if end_date > datetime.now(): is_active = True 
-            elif end_date < datetime.now(): is_active = False
-
+            end_date_manual = datetime.strptime(post['end_date'][0], '%Y-%m-%d %H:%M')
+            end_date = end_date_manual
+            if end_date_manual > datetime.now(): is_active = True 
+            elif end_date_manual < datetime.now(): is_active = False
 
         try:
 

@@ -118,11 +118,25 @@
       <hr>
       <div class="row">
         <div class="col-3 font-weight-bold">Start Date</div>
-        <div class="col-9">
+        <div class="col-3">
           <span id="start_date_slug">{{object.start_date}}</span>
+        </div>
+        <div class="col-3">
+          <span id='edit_start_date_slug'>
+            <div id="start_date_picker"></div>
+            <input 
+              type="hidden" 
+              class="form-control w-75" 
+              id="start_date" 
+              value="" 
+              name="start_date"
+            />
+          </span>
+        </div>
+        <div class="col-3">
           {% if object.start_date_manual %}
               <i class="fas fa-pencil-alt ml-2"></i>
-          {% elif object.start_date_automatic %}
+          {% else %}
               <i class="fas fa-magic ml-2"></i>
           {% endif %}
         </div>
@@ -130,11 +144,25 @@
       <hr>
       <div class="row">
         <div class="col-3 font-weight-bold">End Date</div>
-        <div class="col-9">
+        <div class="col-3">
           <span id="end_date_slug">{{object.end_date}}</span>
+        </div>
+        <div class="col-3">
+          <span id='edit_end_date_slug'>
+            <div id="end_date_picker"> </div>
+            <input 
+              type="hidden"
+              class="form-control w-75"  
+              id="end_date" 
+              value="" 
+              name="end_date" 
+            />
+          </span>
+        </div>
+        <div class="col-3">
           {% if object.end_date_manual %}
             <i class="fas fa-pencil-alt ml-2"></i>
-          {% elif object.end_date_automatic %}
+          {% else %}
               <i class="fas fa-magic ml-2"></i>
           {% endif %}
         </div>
@@ -343,9 +371,6 @@
 
     });
 
-  $( "#edit" ).click(function() {
-    $( "#edit" ).hide();
-
     let monthsNumbers = {
         "January": "01", "Jan": "01", "Jan.": "01", "Janu": "01", 
         "February": "02", "Feb.": "02", "Feb": "02", "Febr": "02", 
@@ -378,13 +403,13 @@
         minutes = "00"
         if (time.length === 2) {minutes = time[1]}
         if (hour === 'midnight' ) {hour = "00"}
-        console.log(year);
-        console.log(monthsNumbers[month]);
-        console.log(day);
-        console.log(hour);
-        console.log(minutes);
         return year + "-" + monthsNumbers[month] + "-" + day + " " + hour + ":" + minutes;
     }
+
+
+  $( "#edit" ).click(function() {
+    $( "#edit" ).hide();
+
 
     var title = `<input value="{{ object.title }}" id="title" class="form-control w-75" type="text" aria-label="Title" name="title" required/>`;
     $( '#title_slug').empty().append(title)
@@ -411,6 +436,15 @@
     var parseStart_Date = parseDate("{{ object.start_date }}");
 
     var start_date = `
+      <h6><i class="fas fa-info-circle"></i><strong> Do you want to edit the start date of this case manually?</strong></h6>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="start_date_manual">
+        <label class="custom-control-label font-weight-bold" id='start_date_manual_label' for="start_date_manual">NO</label>
+      </div>
+    `;
+
+    /*
+    var start_date = `
       <div id="start_date_picker"></div>
       <input 
       type="hidden" 
@@ -419,7 +453,7 @@
       value="${parseStart_Date}" 
       name="start_date"
       />`
-
+    */
     $( '#start_date_slug' ).empty().append(start_date);
     $('#start_date_picker').dateTimePicker({
       selectData: parseStart_Date
@@ -427,6 +461,15 @@
     
     parseEnd_Date = parseDate("{{ object.end_date }}");
     
+    var end_date = `
+      <h6><i class="fas fa-info-circle"></i><strong> Do you want to edit the end date of this case manually?</strong></h6>
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="end_date_manual">
+        <label class="custom-control-label font-weight-bold" id='end_date_manual_label' for="end_date_manual">NO</label>
+      </div>
+    `;
+
+    /*
     var end_date = `
       <div id="end_date_picker"> </div>
       <input 
@@ -436,6 +479,7 @@
       value="${parseEnd_Date}" 
       name="end_date" 
     />`;
+    */
     $( '#end_date_slug').empty().append(end_date);
     $('#end_date_picker').dateTimePicker({
       selectData: parseEnd_Date
@@ -472,6 +516,8 @@
   $( "#cancel" ).click(function() {
       $( "#edit" ).show();
 
+      $( '#edit_start_date_slug' ).hide();
+      $( '#edit_end_date_slug' ).hide();
       $( '#title' ).replaceWith(`<p>{{ object.title }}</p>`);
       var description = `<textarea style="width:50%;" disabled>{{ object.description }}</textarea>`;
       $( '#description').replaceWith(description);
@@ -481,9 +527,9 @@
       $( '#case_type').replaceWith(case_type);
       $("#case_type").val('{{object.case_type}}');
       var start_date = `<p>{{ object.start_date }}</p>`;
-      $( '#start_date').replaceWith(start_date);
+      $( '#start_date_slug' ).empty().append(start_date);
       var end_date = `<p>{{ object.end_date }}</p>`;
-      $( '#end_date' ).replaceWith(end_date);
+      $( '#end_date_slug' ).empty().append(end_date);
       var category = `<p>{{ object.category }}</p>`;
       $( '#category').replaceWith(category);
       $("#category").val('{{object.category}}');
@@ -496,10 +542,38 @@
       $( "#submit" ).hide();
   });
 
+  $('body').on('click', '#start_date_manual', function() {
+    var checked = $(this).is(":checked");
+    if (checked) {
+      $(' #start_date_manual_label' ).text('YES');
+      $( '#edit_start_date_slug' ).show();
+      $( '#start_date' ).value("{{object.start_date}}");
+    } else {
+      $(' #start_date_manual_label' ).text('NO');
+      $( '#edit_start_date_slug' ).hide();
+    }
+  });
+
+  $('body').on('click', '#end_date_manual', function() {
+    var checked = $(this).is(":checked");
+    if (checked) {
+      $(' #end_date_manual_label' ).text('YES');
+      $( '#edit_end_date_slug' ).show();
+      $( '#end_date' ).value("{{object.end_date}}");
+    } else {
+      $(' #end_date_manual_label' ).text('NO');
+      $( '#edit_end_date_slug' ).hide();
+    }
+  });
+
+
+
 
   $(document).ready(function() {
     $( "#cancel" ).hide();
     $( "#submit" ).hide();
+    $( '#edit_start_date_slug' ).hide();
+    $( '#edit_end_date_slug' ).hide();
 
     eventsTable = $('#events').DataTable({
       order: [[2, "desc"]],
