@@ -18,8 +18,6 @@
         var timeout = 800;;
         
         var selectDate = settings.selectData == "now" ? moment() : moment(settings.selectData, settings.dateFormat);
-        console.log('entrandis');
-        console.log(selectDate);
 
         var startDate = copyDate(moment());
         var lastSelected = copyDate(selectDate);
