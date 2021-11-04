@@ -19,6 +19,7 @@ from django.contrib     import admin
 from django.conf        import settings
 from django.conf.urls   import url, include
 from django.urls        import include, path
+from django.conf.urls.static import static
 
 # Third party imports
 from rest_framework                 import routers
@@ -53,4 +54,5 @@ urlpatterns = [
     path('', redirect_to_dashboard),
     url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
