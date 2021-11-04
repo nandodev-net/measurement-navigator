@@ -146,6 +146,7 @@ test.py
 **/migrations/**
 !**/migrations
 !**/migrations/__init__.py
+media/ooni_data/*
 manage.py
 vsf/settings/development.py
 vsf/settings/production.py
