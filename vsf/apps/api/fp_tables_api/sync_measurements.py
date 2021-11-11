@@ -53,9 +53,9 @@ def _make_local_path(output_dir: pathlib.Path, entry: ooni_client.FileEntry) -> 
     return output_dir / basename
 
 
-def s3_measurements_download(country:str='VE', 
+def s3_measurements_download(test_type=None, country:str='VE', 
     first_date:str=(dt.date.today() - dt.timedelta(days=1)), 
-    last_date:str=dt.date.today(), test_type=None , max_string_size:int=1000, 
+    last_date:str=dt.date.today(), max_string_size:int=1000, 
     cost_limit_usd:float=1.00):
 
     logging.basicConfig(level=logging.INFO)
