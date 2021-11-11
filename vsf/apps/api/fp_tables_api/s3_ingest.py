@@ -139,7 +139,12 @@ def request_s3_meas_data():
     print('-----------------------')
     print('\nsolicitando jsons a ooni... \n')
     time_ini = time.time()
-    s3_measurements_download()
+    test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 'torsf', 'httpinvalidrequestline', 
+    'httpheaderfieldmanipulation', 'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 'riseupvpn',
+    'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 'meekfrontedrequeststest', 'httprequests', 'httphost',
+    'dnscheck', 'dnsconsistency', 'bridgereachability']
+    for test in test_types:
+        s3_measurements_download(test)
     print('\ncreacion de jsons temporales finalizada... \n')
     cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
     print('\niniciando lectura de archivos temporales... \n')
