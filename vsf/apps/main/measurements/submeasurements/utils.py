@@ -115,7 +115,11 @@ def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
             inconsistent= inconsistent,
             jsons=jsonf,
             client_resolver=client_resolver,
-            ooni_reason_for_blocking=ooni_blocking
+            ooni_reason_for_blocking=ooni_blocking,
+            measurement_start_time=web_con_measurement.measurement_start_time,
+            probe_asn=web_con_measurement.probe_asn,
+            probe_cc=web_con_measurement.probe_cc,
+            input=web_con_measurement.input
         )
         new_dns.append(dns)
 
@@ -215,7 +219,11 @@ def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
                         hostname=query['hostname'],
                         jsons=jsonf,
                         client_resolver=client_resolver,
-                        ooni_reason_for_blocking=ooni_blocking
+                        ooni_reason_for_blocking=ooni_blocking,
+                        measurement_start_time=measurement.measurement_start_time,
+                        probe_asn=measurement.probe_asn,
+                        probe_cc=measurement.probe_cc,
+                        input=measurement.input,
                     )
 
                 else:
@@ -229,7 +237,11 @@ def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
                         hostname=query['hostname'],
                         jsons=jsonf,
                         client_resolver=client_resolver,
-                        ooni_reason_for_blocking=ooni_blocking
+                        ooni_reason_for_blocking=ooni_blocking,
+                        measurement_start_time=measurement.measurement_start_time,
+                        probe_asn=measurement.probe_asn,
+                        probe_cc=measurement.probe_cc,
+                        input=measurement.input,
                     )
 
                 new_dns.append(dns)
@@ -273,7 +285,11 @@ def create_http_from_web_conn(measurement : RawMeasurement) -> HTTP:
             headers_match=headers_match,
             body_length_match=body_length_match,
             body_proportion=body_proportion,
-            ooni_reason_for_blocking=ooni_blocking
+            ooni_reason_for_blocking=ooni_blocking,
+            measurement_start_time=measurement.measurement_start_time,
+            probe_asn=measurement.probe_asn,
+            probe_cc=measurement.probe_cc,
+            input=measurement.input
         )
         return http
     
@@ -306,7 +322,11 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
                     status_failure=tcp_connect_item['status']['failure'],
                     status_success=tcp_connect_item['status']['success'],
                     ip=tcp_connect_item['ip'],
-                    ooni_reason_for_blocking = ooni_blocking
+                    ooni_reason_for_blocking = ooni_blocking,
+                    measurement_start_time=measurement.measurement_start_time,
+                    probe_asn=measurement.probe_asn,
+                    probe_cc=measurement.probe_cc,
+                    input=measurement.input
                 ))
         except:
             pass
@@ -351,6 +371,7 @@ def create_tor_from_tor(measurement : RawMeasurement) -> TOR:
             measurement_start_time=measurement.measurement_start_time,
             probe_asn=measurement.probe_asn,
             probe_cc=measurement.probe_cc,
+            input=measurement.input
         )
         return tor
     

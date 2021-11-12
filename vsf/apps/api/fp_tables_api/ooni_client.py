@@ -42,7 +42,7 @@ class FileEntry:
 class OoniClient:
     def __init__(self):
         s3_client = boto3.client(
-            's3', config=Config(signature_version=UNSIGNED))
+            's3', config=Config(signature_version=UNSIGNED, max_pool_connections=50))
         self._new_client = _2020OoniClient(s3_client)
         self._legacy_client = _LegacyOoniClient(s3_client)
 
