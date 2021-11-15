@@ -193,15 +193,25 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             end_date = event.get_end_date()
             if end_date:
                 end_date = end_date.strftime("%b. %d, %Y, %H:%M %p")
-                
+            
+            if event.current_start_date:
+                start_date = datetime.strftime(utc_aware_date(event.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S")
+            else:
+                start_date = datetime.strftime(utc_aware_date(event.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S")
+
+            if event.current_end_date:
+                end_date = datetime.strftime(utc_aware_date(event.current_end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S")
+            else:
+                end_date = datetime.strftime(utc_aware_date(event.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S")
+
             response.append({
                 'id': event.id,
                 'identificator': event.id,
                 'issue_type': event.issue_type, 
                 'confirmed': event.confirmed, 
-                'start_date': datetime.strftime(utc_aware_date(event.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'start_date': start_date,
                 'is_manual_start_date':event.start_date_manual,
-                'end_date': datetime.strftime(utc_aware_date(event.current_end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'end_date': end_date,
                 'is_manual_end_date':event.end_date_manual,
                 'domain': event.domain.domain_name, 
                 'asn': event.asn.asn,
