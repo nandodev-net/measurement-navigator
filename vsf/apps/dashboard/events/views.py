@@ -14,7 +14,8 @@ from datetime                                   import datetime, timedelta
 import json
 
 # Local imports
-from apps.main.measurements.models  import Measurement
+from apps.main.measurements.models  import RawMeasurement
+from apps.main.sites.models         import Site
 from apps.main.events.models        import Event
 from apps.main.cases.models         import Case
 from apps.main.asns.models          import ASN
@@ -93,11 +94,14 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
     ]
 
     def get_initial_queryset(self):
-        qs = Event.objects.all()
+        return Event.objects.all()
 
+
+    def filter_queryset(self, qs):
 
         #--------- Filtering datetime fields ---------#
         start_time, end_time = self.request.GET.get('start_time'), self.request.GET.get('end_time')
+        print(start_time)
         if start_time != None and start_time != "":
             start_time = datetime.strptime(start_time, '%Y-%m-%d')
             utc_start_time = utc_aware_date(start_time, self.request.session['system_tz'])
@@ -105,6 +109,8 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 Q(start_date__gte = utc_start_time) | 
                 Q(manual_start_date__gte = utc_start_time)
             )
+
+        print(qs)
         if end_time != None and end_time != "":
             end_time = datetime.strptime(end_time, '%Y-%m-%d')
             utc_end_time = utc_aware_date(end_time, self.request.session['system_tz'])
@@ -141,7 +147,7 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         #--------- Filtering Issue field ---------#
         issue_type = self.request.GET.get('issue_type')
         if issue_type != None and issue_type != "":
-            qs = qs.filter(issue_type = issue_type)
+            qs = qs.filter(issue_type = issue_type.lower())
 
 
         #--------- Filtering muted field ---------#
@@ -322,26 +328,18 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
         context['end_manual'] = context['object'].isEndDateManual()
         print(context['start_manual'])
         
-        queryStr = issue_type.upper() + '.objects.all()'
-        submeasures = eval(queryStr)
-        submeasuresRelated = submeasures.filter(event = context['object'].id)
+
+
+        test_types = RawMeasurement.TestTypes.choices
+        test_types = list(map(lambda m: {'name':m[1], 'value':m[0]}, test_types))
+        sites = Site.objects.all().values('name', 'description_spa', 'description_eng', 'id')
+        context['submeasurements_filter'] = {
+            'test_types': test_types,
+            'sites': sites,
+            'flags': [ 'DNS', 'HTTP', 'TCP' ]
+        }
+
         
-        context['submeasures'] = [
-            {
-                
-                'start_time': datetime.strftime(utc_aware_date(sub.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'probe_cc': sub.measurement.raw_measurement.probe_cc,
-                'probe_asn': sub.measurement.raw_measurement.probe_asn,
-                'input': sub.measurement.raw_measurement.input,
-                'id': sub.measurement_id,
-                'site': sub.measurement.domain.site.id if sub.measurement.domain and sub.measurement.domain.site else -1,
-                'site_name': sub.measurement.domain.site.name if sub.measurement.domain and sub.measurement.domain.site else "(no site)",
-                'measurement_anomaly': sub.measurement.anomaly,
-                'flag_type': sub.flag_type,
-
-            } for sub in submeasuresRelated
-        ]
-
         issueTypes = Event.IssueType.choices
         issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
         context['issueTypes'] = issueTypes
@@ -354,7 +352,6 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
 
     def post(self, request, *args, **kwargs):
         post = dict(request.POST)
-        print(post)
         identification = post['identification'][0]
         start_date = post['start_date'][0]
         end_date = post['end_date'][0]

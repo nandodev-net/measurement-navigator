@@ -4,17 +4,10 @@
 
 {% block custom_stylesheet %}
 <style>
-  .pcoded-main-container {
-      width: -webkit-fill-available;;
-  }
-  #dates {
-    opacity: 1;
-    transition: opacity 1s; 
-  }
-
-  #dates.fade {
-    opacity: 0;
-  }
+  .pcoded-main-container { width: -webkit-fill-available; } 
+  #events { min-width: -webkit-fill-available; }
+  #dates { opacity: 1; transition: opacity 1s; }
+  #dates.fade { opacity: 0; }
   .dtp_modal-content { margin-top:  2%;}
 </style>
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
@@ -213,7 +206,113 @@
         </div>
         <div class="collapse" id="events-to-pick">
             <div class="card-body p-5">
-    
+
+              <!-- Events selector -->
+              <div class="bg-light p-2 mb-5">
+                <div class="row">
+
+                  <div class="col-4">
+                    <div class="row align-items-center ml-1">
+                      <div class="col-5 mx-auto">
+                        <label class='font-weight-bold' for="confirmed">
+                          Confirmed
+                        </label>
+                      </div>
+                      <div class="col-7 mx-auto">
+                        <select id="confirmed" class="custom-select additional-filter" name="confirmed">
+                          <option value="">Any Confirmation</option>
+                          <option value="true">True</option>
+                          <option value="false">False</option>
+                        </select>
+                      </div>
+                    </div> 
+                  </div>
+
+                  <div class="col-4">
+                    <div class="row align-items-center ml-1">
+                      <div class="col-5 mx-auto">
+                        <label class='font-weight-bold'>
+                          Start Time
+                        </label>
+                      </div>
+                      <div class="col-7 mx-auto">
+                        <input id="start_time" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ event_filter.start_time }}" name="start_time"/>
+                      </div>
+                    </div> 
+                  </div>
+
+                  <div class="col-4">
+                    <div class="row align-items-center">
+                      <div class="col-5 mx-auto">
+                        <label class='font-weight-bold'>
+                          End Time
+                        </label>
+                      </div>
+                      <div class="col-7 mx-auto">
+                        <input id="end_time" class="text-secondary form-control mr-2 additional-filter" type="date" value="" name="end_time"/>
+                      </div>
+                    </div> 
+                  </div>
+
+                </div>
+
+                <div class="row mt-4">
+
+                  <div class="col-4">
+                    <div class="row align-items-center ml-1">
+                      <div class="col-5 mx-auto">
+                        <label class="font-weight-bold" for="site">Issue Type</label>
+                      </div>
+                      <div class="col-7 mx-auto">
+                        <select class="custom-select additional-filter" id="issue_type" name="issue_type">
+                          <option selected value="">
+                            Any Issue
+                          </option>
+                          {% for issue in event_filter.issues %}
+                            <option value="{{ issue.name }}"> {{ issue.name }} </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>   
+                  </div>
+        
+                  <div class="col-4">
+                    <input
+                    id="domain"
+                    class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+                    type="search"
+                    placeholder="Domain"
+                    aria-label="Search domain"
+                    value=""
+                    name="domain"
+                    />
+                  </div>
+        
+                  <div class="col-4">
+                    <div class="row align-items-center">
+                      <div class="col-3 mx-auto">
+                        <label class='font-weight-bold' for="asn">
+                          ASN
+                        </label>
+                      </div>
+                      <div class="col-9 mx-auto">
+                        <select id="asn" class="custom-select additional-filter" name="asn">
+                          <option value="">Any ASN</option>
+                          {% for asn in event_filter.asns %}
+                            <option value="{{ asn.asn }}">
+                              {{ asn.asn }} - {{ asn.name }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div> 
+                  </div>
+
+                </div>
+
+              </div>
+
+              
               <table class="table table-striped mt-5 datatable" id="events">
                 <thead>
                   <tr>
@@ -229,6 +328,9 @@
                 <tbody>
                 </tbody>
               </table>
+
+
+
             </div>
         </div>
       </div>
@@ -258,6 +360,11 @@
   <script type="text/javascript" src="{% static 'plugins/datepicker/datetimepicker.js' %}"></script>  
 
   <script>
+
+    $(' .additional-filter ').change( function() {
+      events.ajax.reload();
+    });
+
     var events; 
 
     $(' #end_date_manual' ).on('click', function() {
