@@ -250,27 +250,42 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
         context['events'] = events 
         
         if measurement.raw_measurement.test_name == 'web_connectivity':
-            context['rawmeasurement'].hasTcpConnections = len(measurement.raw_measurement.test_keys['tcp_connect']) > 0
+            if measurement.raw_measurement.test_keys['tcp_connect']:
+                context['rawmeasurement'].hasTcpConnections = len(measurement.raw_measurement.test_keys['tcp_connect']) > 0
+                tcp_connections = []
+                for connection in measurement.raw_measurement.test_keys['tcp_connect']:
+                    aux = {
+                        'ip': connection['ip'],
+                        'status': connection['status'],
+
+                    }
+                    
+                    for key, value in measurement.raw_measurement.test_keys['control']['tcp_connect'].items():
+                        if connection['ip'] in key.lower():
+                            aux['control_status'] = value['status']
+                            aux['control_failure'] = value['failure']
+
+                    tcp_connections.append(aux)
+                context['rawmeasurement'].tcp_connections = tcp_connections
+
+            
             context['rawmeasurement'].platform = measurement.raw_measurement.annotations['platform']
             context['rawmeasurement'].engine = measurement.raw_measurement.annotations['engine_name'] + ' (' + measurement.raw_measurement.annotations['engine_version'] + ')'
-            context['rawmeasurement'].hasHttpRequests = len(measurement.raw_measurement.test_keys['requests']) > 0            
+            
+            if measurement.raw_measurement.test_keys['requests']:
+                context['rawmeasurement'].hasHttpRequests = len(measurement.raw_measurement.test_keys['requests']) > 0            
 
-            tcp_connections = []
-            for connection in measurement.raw_measurement.test_keys['tcp_connect']:
-                aux = {
-                    'ip': connection['ip'],
-                    'status': connection['status'],
-
-                }
-                
-                for key, value in measurement.raw_measurement.test_keys['control']['tcp_connect'].items():
-                    if connection['ip'] in key.lower():
-                        aux['control_status'] = value['status']
-                        aux['control_failure'] = value['failure']
-
-                tcp_connections.append(aux)
-            context['rawmeasurement'].tcp_connections = tcp_connections
+            
             context['beautify_test_name'] = 'Web Connectivity'
+
+ 
+
+
+            flagsDNS  = [subm.flag_type for subm in measurement.dns_list.all()]
+            flagsHTTP = [subm.flag_type for subm in measurement.http_list.all()]
+            flagsTCP  = [subm.flag_type for subm in measurement.tcp_list.all()]
+            context['flags'] = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
+            
         elif measurement.raw_measurement.test_name == 'tor':
             keys = [] 
             for key, value in measurement.raw_measurement.test_keys['targets'].items():
@@ -297,8 +312,6 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
         context['rawmeasurement'].rawjson = serializers.serialize('json', [measurement.raw_measurement])
 
         return context
-
-
 
 class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
     """
@@ -341,6 +354,8 @@ class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         ## Ok this is the kind of solution that i don't like
 
         # Parse the input data
+        event_id    = get.get('event_id')
+        issue_type  = get.get('issue_type')
         input       = get.get('input')
         test_name   = get.get('test_name')
         since       = get.get('since')
@@ -351,6 +366,12 @@ class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         site        = get.get('site')
         flags        = get.getlist('flags[]') if get != {} else []
         
+
+        if event_id and issue_type:
+            qs = qs.filter()
+            queryStr = 'SubMModels.' + issue_type.upper() + '.objects.filter(event = ' + event_id + ')'
+            submeasures = eval(queryStr)
+
 
         # Get desired measurements
         measurements = search_measurement_by_queryset(

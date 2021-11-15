@@ -172,7 +172,7 @@
                 <select id="it_continues" class="custom-select additional-filter" name="it_continues">
                   <option value="all">Any</option>
                   <option {% if prefill.it_continues == 'true' %} selected {% endif %} value="true">True</option>
-                  <option {% if prefill.it_continues == 'false' or prefill.it_continues == "" %} selected {% endif %} value="false">False</option>
+                  <option {% if prefill.it_continues == 'false' %} selected {% endif %} value="false">False</option>
                 </select>
               </div>
             </div> 

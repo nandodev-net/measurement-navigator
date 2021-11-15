@@ -22350,7 +22350,7 @@ pre[class*=language-]:before {
 }
 
 .form-group.fill .floating-label {
-    top: -10px;
+    top: -20px;
     font-size: 0.75rem;
     color: #343a40;
 }

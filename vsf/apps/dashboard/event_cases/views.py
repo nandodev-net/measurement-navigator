@@ -21,6 +21,8 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from apps.main.asns.models          import ASN
+
 
 class CasesListView(VSFLoginRequiredMixin, ListView):
     template_name = "cases/list-cases.html"
@@ -38,8 +40,6 @@ class CasesListView(VSFLoginRequiredMixin, ListView):
 
         for field in fields:
             getter = get.get(field)
-            print('checking this')
-            print(getter)
             prefillAux = getter if getter else ""
             if field == 'start_date' and not prefill:
                 prefillAux = (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
@@ -178,8 +178,13 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
         categories = Category.objects.all()
         categoryNames = [cat.name for cat in categories]
         context['categoryNames'] = categoryNames
-
-        x = datetime.fromisoformat('2021-03-02 00:00:00+00:00')
+        issueTypes = Event.IssueType.choices
+        issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
+        context['event_filter'] = {
+            'asns': ASN.objects.all(),
+            'issues': issueTypes,
+            'start_time': (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d'),
+        }
         return context
 
     def post(self, request, *args, **kwargs):
@@ -220,6 +225,9 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             # If the manual end date selected is greater than today, then the case
             # will be active. 
             if end_date_manual > datetime.now(): is_active = True
+        if start_date_manual and end_date_manual and start_date_manual > end_date_manual:
+            return JsonResponse({'error' : 'The end date selected must be greater than the start date selected'})
+
 
 
         # Deciding which date put in the main dates fields.
@@ -384,6 +392,9 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
         
         category = context['object'].category.name
         context['category'] = category
+        context['object'].start_date = context['object'].start_date if context['object'].start_date else datetime.now()
+        context['object'].end_date = context['object'].end_date if context['object'].end_date else datetime.now()
+
 
         types = [ type_[1].lower() for type_ in context['object'].TYPE_CATEGORIES ]
         context['types'] = types
@@ -393,6 +404,7 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
         context['categoryNames'] = categoryNames
 
         relatedEvents = context['object'].events.all()
+
 
         events = [{
             'id': event.id,
@@ -602,22 +614,32 @@ class CaseChangeToAutomatic(VSFLoginRequiredMixin, View):
         post = dict(request.POST)
         case_id = int(post['cases[]'][0])
         case = Case.objects.get(id = case_id)
+        date_type = post['date'][0]
+        print(date_type)
+        print(post)
         try:
-
             if not (case.start_date_automatic and case.end_date_automatic):
                 return JsonResponse({'error' : 'There are no events associated to this case'})
 
-            is_active = False
-            if case.end_date_automatic:
-                if case.end_date_automatic.replace(tzinfo=None) > datetime.now(): is_active = True 
+            if date_type == 'start_date':
 
-            Case.objects.filter(id = case_id).update(
-                start_date = case.start_date_automatic,
-                end_date = case.end_date_automatic,
-                start_date_manual = None,
-                end_date_manual = None,
-                is_active = is_active
-            )
+                Case.objects.filter(id = case_id).update(
+                    start_date = case.start_date_automatic,
+                    start_date_manual = None,
+                )
+            else:
+
+                is_active = False
+                if case.end_date_automatic:
+                    if case.end_date_automatic.replace(tzinfo=None) > datetime.now(): is_active = True 
+
+
+                Case.objects.filter(id = case_id).update(
+                    end_date = case.end_date_automatic,
+                    end_date_manual = None,
+                    is_active = is_active
+                )
+
             return JsonResponse({'error' : None})
         except Exception as e:
             print(e)

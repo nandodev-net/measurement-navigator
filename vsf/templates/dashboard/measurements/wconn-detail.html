@@ -52,7 +52,44 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-6">
+                    <p class="text-success"><strong>Experiment</strong></p><br>
                     <p><strong>Resolver: </strong> {{rawmeasurement.test_keys.client_resolver}}</p>
+
+                    {% for query in rawmeasurement.test_keys.queries %}
+                        <div class="border-bottom border-top py-4">
+                            <p><strong>Query: </strong> IN {{query.query_type}} {{query.hostname}}</p>
+                            <p><strong>Engine: </strong> {{query.engine}} </p>
+
+                            <div class="row">
+                                <div class="col-1"><p><strong>Name</strong></p></div>
+                                <div class="col-1"><p><strong>Class</strong></p></div>
+                                <div class="col-1"><p><strong>TTL</strong></p></div>
+                                <div class="col-1"><p><strong>Type</strong></p></div>
+                                <div class="col-2"><p><strong>DATA</strong></p></div>
+                                <div class="col-6"></div>
+                            </div>
+
+                            {% for item in query.answers %}
+                            <div class="row">
+                                {% if item.as_org_name == '<unknown>' %}
+                                    <div class="col-1"><p>@</p></div>
+                                {% else %}
+                                    <div class="col-1"><p>@ {{ item.as_org_name }}</p></div>
+                                {% endif %}
+                                <div class="col-1"><p>IN</p></div>
+                                {% if item.ttl %}
+                                    <div class="col-1"><p> {{ item.ttl }}</p></div>
+                                {% else %}
+                                    <div class="col-1"><p></p></div>
+                                {% endif %}
+                                <div class="col-1"><p> {{ item.answer_type }} </p></div>
+                                <div class="col-2"><p>{{ item.ipv4 }}</p></div>
+                                <div class="col-6"></div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
                 </div>
                 <div class="col-6">
                     <p class="text-success"><strong>Control</strong></p><br>
@@ -81,40 +118,7 @@
                 </div>
             </div>
             
-            {% for query in rawmeasurement.test_keys.queries %}
-                <div class="border-bottom border-top py-4">
-                    <p><strong>Query: </strong> IN {{query.query_type}} {{query.hostname}}</p>
-                    <p><strong>Engine: </strong> {{query.engine}} </p>
-
-                    <div class="row">
-                        <div class="col-1"><p><strong>Name</strong></p></div>
-                        <div class="col-1"><p><strong>Class</strong></p></div>
-                        <div class="col-1"><p><strong>TTL</strong></p></div>
-                        <div class="col-1"><p><strong>Type</strong></p></div>
-                        <div class="col-2"><p><strong>DATA</strong></p></div>
-                        <div class="col-6"></div>
-                    </div>
-
-                    {% for item in query.answers %}
-                    <div class="row">
-                        {% if item.as_org_name == '<unknown>' %}
-                            <div class="col-1"><p>@</p></div>
-                        {% else %}
-                            <div class="col-1"><p>@ {{ item.as_org_name }}</p></div>
-                        {% endif %}
-                        <div class="col-1"><p>IN</p></div>
-                        {% if item.ttl %}
-                            <div class="col-1"><p> {{ item.ttl }}</p></div>
-                        {% else %}
-                            <div class="col-1"><p></p></div>
-                        {% endif %}
-                        <div class="col-1"><p> {{ item.answer_type }} </p></div>
-                        <div class="col-2"><p>{{ item.ipv4 }}</p></div>
-                        <div class="col-6"></div>
-                    </div>
-                    {% endfor %}
-            </div>
-            {% endfor %}
+            
             
         </div>
     </div>
@@ -131,6 +135,7 @@
             {% if rawmeasurement.hasTcpConnections %}
                 <div class="row">
                     <div class="col-6">
+                        <p class="text-success">Experiment</p>
                     </div>
                     <div class="col-6">
                         <p class="text-success">Control</p>
@@ -213,6 +218,56 @@
     </div>
 </div>
 
+<div class="shadow-none p-3 mb-2 bg-secondary rounded" id="flags">
+    <p class="text-white">
+        <bold>DNS Flags: </bold>
+        {% for dns_flag in flags.dns %}
+            {% if dns_flag == 'ok' %}
+                <span class="badge badge-pill badge-success">OK</span>
+            {% elif dns_flag == 'soft' %}
+                <span class="badge badge-pill badge-warning">SOFT</span>
+            {% elif dns_flag == 'hard' %}
+                <span class="badge badge-pill badge-danger">HARD</span>
+            {% elif dns_flag == 'manual' %}
+                <span class="badge badge-pill badge-info">MANUAL</span>
+            {% elif dns_flag == 'muted' %}
+                <span class="badge badge-pill badge-muted">MUTED</span>
+            {% endif %}
+        {% endfor %}
+    </p>
+    <p class="text-white">
+        <bold>HTTP Flags: </bold>
+        {% for http_flags in flags.http %}
+            {% if http_flags == 'ok' %}
+                <span class="badge badge-pill badge-success">OK</span>
+            {% elif http_flags == 'soft' %}
+                <span class="badge badge-pill badge-warning">SOFT</span>
+            {% elif http_flags == 'hard' %}
+                <span class="badge badge-pill badge-danger">HARD</span>
+            {% elif http_flags == 'manual' %}
+                <span class="badge badge-pill badge-info">MANUAL</span>
+            {% elif http_flags == 'muted' %}
+                <span class="badge badge-pill badge-muted">MUTED</span>
+            {% endif %}
+        {% endfor %}
+    </p>
+    <p class="text-white">
+        <bold>TCP Flags: </bold>
+        {% for tcp_flag in flags.tcp %}
+            {% if tcp_flag == 'ok' %}
+                <span class="badge badge-pill badge-success">OK</span>
+            {% elif tcp_flag == 'soft' %}
+                <span class="badge badge-pill badge-warning">SOFT</span>
+            {% elif tcp_flag == 'hard' %}
+                <span class="badge badge-pill badge-danger">HARD</span>
+            {% elif tcp_flag == 'manual' %}
+                <span class="badge badge-pill badge-info">MANUAL</span>
+            {% elif tcp_flag == 'muted' %}
+                <span class="badge badge-pill badge-muted">MUTED</span>
+            {% endif %}
+        {% endfor %}
+    </p>
+</div>
 
 <div class="card py-0 px-5 mt-2" id="events-card">
     <a href="#!" class="btn btn-header-link collapsed" data-toggle="collapse" data-target="#events" aria-expanded="true" aria-controls="events">
