@@ -7,9 +7,7 @@ from django.core.cache import cache
 from celery import shared_task
 
 # Local imports
-from .utils              import count_flags_sql, hard_flag
 from vsf.utils           import ProcessState, VSFTask
-from .FlagsUtils         import *
 from apps.configs.models import Config
 from .models             import Case
 from datetime            import datetime, timedelta
