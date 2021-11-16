@@ -37,7 +37,7 @@ class EventsList(VSFLoginRequiredMixin, ListView):
         issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
         
         fields = [ 
-            'identification', 'confirmed', 'issue_type', 'domain', 'asn', 'muted', 'it_continues'
+            'identification', 'confirmed', 'issue_type', 'domain', 'site', 'asn', 'muted', 'it_continues'
         ]
 
         for field in fields:
@@ -47,7 +47,6 @@ class EventsList(VSFLoginRequiredMixin, ListView):
 
         start_time = get.get("start_time") or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
         prefill['start_time'] = start_time 
-        
         end_time = get.get("end_time")
         if end_time:
             prefill['end_time'] = end_time
@@ -101,23 +100,19 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
         #--------- Filtering datetime fields ---------#
         start_time, end_time = self.request.GET.get('start_time'), self.request.GET.get('end_time')
-        print(start_time)
+
+
         if start_time != None and start_time != "":
             start_time = datetime.strptime(start_time, '%Y-%m-%d')
             utc_start_time = utc_aware_date(start_time, self.request.session['system_tz'])
-            qs = qs.filter(
-                Q(start_date__gte = utc_start_time) | 
-                Q(manual_start_date__gte = utc_start_time)
-            )
+            qs = qs.filter(start_date__gte = utc_start_time) | qs.filter(manual_start_date__gte = utc_start_time)
 
-        print(qs)
+
+
         if end_time != None and end_time != "":
             end_time = datetime.strptime(end_time, '%Y-%m-%d')
             utc_end_time = utc_aware_date(end_time, self.request.session['system_tz'])
-            qs = qs.filter(
-                Q(end_date__gte = utc_end_time) | 
-                Q(manual_end_date__gte = utc_end_time)
-            )
+            qs = qs.filter(end_date__lte = utc_end_time) | qs.filter(manual_end_date__lte = utc_end_time)
 
 
         #--------- Filtering identification field ---------#
@@ -161,6 +156,11 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         if domain != None and domain != "":
             qs = qs.filter(domain__domain_name__contains = domain)
 
+        #--------- Filtering site field ---------#
+        site = self.request.GET.get('site')
+        if site != None and site != "":
+            qs = qs.filter(domain__site__name__contains = site)
+
 
         #--------- Filtering case field ---------#
         case = self.request.GET.get('case')
@@ -185,12 +185,12 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         for event in qs:
                 
             # Compute start date
-            start_date = event.get_start_date()
+            start_date = event.start_date
             if start_date:
                 start_date = start_date.strftime("%b. %d, %Y, %H:%M %p")
 
             # Compute end date
-            end_date = event.get_end_date()
+            end_date = event.end_date
             if end_date:
                 end_date = end_date.strftime("%b. %d, %Y, %H:%M %p")
             
@@ -214,6 +214,7 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 'end_date': end_date,
                 'is_manual_end_date':event.end_date_manual,
                 'domain': event.domain.domain_name, 
+                'site': event.domain.site.name if event.domain.site else "No site associated", 
                 'asn': event.asn.asn,
                 'muted': event.muted,
                 'it_continues': event.it_continues

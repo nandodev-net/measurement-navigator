@@ -615,8 +615,7 @@ class CaseChangeToAutomatic(VSFLoginRequiredMixin, View):
         case_id = int(post['cases[]'][0])
         case = Case.objects.get(id = case_id)
         date_type = post['date'][0]
-        print(date_type)
-        print(post)
+        
         try:
             if not (case.start_date_automatic and case.end_date_automatic):
                 return JsonResponse({'error' : 'There are no events associated to this case'})
@@ -627,7 +626,7 @@ class CaseChangeToAutomatic(VSFLoginRequiredMixin, View):
                     start_date = case.start_date_automatic,
                     start_date_manual = None,
                 )
-            else:
+            elif date_type == 'end_date':
 
                 is_active = False
                 if case.end_date_automatic:
@@ -635,6 +634,19 @@ class CaseChangeToAutomatic(VSFLoginRequiredMixin, View):
 
 
                 Case.objects.filter(id = case_id).update(
+                    end_date = case.end_date_automatic,
+                    end_date_manual = None,
+                    is_active = is_active
+                )
+
+            else:
+                is_active = False
+                if case.end_date_automatic:
+                    if case.end_date_automatic.replace(tzinfo=None) > datetime.now(): is_active = True 
+
+                Case.objects.filter(id = case_id).update(
+                    start_date = case.start_date_automatic,
+                    start_date_manual = None,
                     end_date = case.end_date_automatic,
                     end_date_manual = None,
                     is_active = is_active

@@ -121,6 +121,19 @@
           </div>
 
           <div class="col-4 mt-3">
+            <input
+            id="domain"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Site"
+            aria-label="Search site"
+            value="{{ prefill.site }}"
+            name="site"
+            />
+          </div>
+
+
+          <div class="col-4 mt-3">
             <div class="row align-items-center">
               <div class="col-3 mx-auto">
                 <label class='font-weight-bold' for="asn">
@@ -162,7 +175,7 @@
           </div>
 
           <div class="col-4 mt-4">
-            <div class="row align-items-center ml-1">
+            <div class="row align-items-center">
               <div class="col-5 mx-auto">
                 <label class='font-weight-bold' for="it_continues">
                   It Countinues?
@@ -179,7 +192,7 @@
           </div>
 
 
-          <div class="col-7"></div>
+          <div class="col-3"></div>
           <div class="col-2">
             {% include "includes/measurements-includes/copy-clipboard-search-url.html" %}
           </div>
@@ -232,6 +245,7 @@
               <th class="text-center" scope="col">Start Date</th>
               <th class="text-center" scope="col">End Date</th>
               <th class="text-center" scope="col">Domain</th>
+              <th class="text-center" scope="col">Site</th>
               <th class="text-center" scope="col">ASN</th>
               <th class="text-center" scope="col">Muted</th>
               <th class="text-center" scope="col">It Continues</th>
@@ -682,6 +696,7 @@
             data.end_time = $("#end_time").val();
             data.issue_type = $("#issue_type").val();
             data.domain = $("#domain").val();
+            data.site = $("#site").val();
             data.asn = $("#asn").val();
             data.muted = $("#muted").val();
             data.it_continues = $( '#it_continues' ).val();
@@ -745,6 +760,11 @@
           },
           {
             data: "domain",
+            orderable: false,
+            searchable: true,
+          },
+          {
+            data: "site",
             orderable: false,
             searchable: true,
           },
