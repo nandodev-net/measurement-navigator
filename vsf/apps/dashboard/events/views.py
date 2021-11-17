@@ -193,7 +193,7 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
             end_date = event.end_date
             if end_date:
                 end_date = end_date.strftime("%b. %d, %Y, %H:%M %p")
-            
+            """
             if event.current_start_date:
                 start_date = datetime.strftime(utc_aware_date(event.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S")
             else:
@@ -203,7 +203,9 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 end_date = datetime.strftime(utc_aware_date(event.current_end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S")
             else:
                 end_date = datetime.strftime(utc_aware_date(event.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S")
+            """
 
+            
             response.append({
                 'id': event.id,
                 'identificator': event.id,
