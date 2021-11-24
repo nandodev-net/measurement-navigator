@@ -11,6 +11,11 @@ urlpatterns = [
         ),
 
     path(
+        'public_stats/',
+        include('apps.api.public_stats_api.urls', namespace='public_stats'),
+        ),
+
+    path(
         'asns/',
         include('apps.api.asns_api.urls', namespace='asns'),
         ),

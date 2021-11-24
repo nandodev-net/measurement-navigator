@@ -183,6 +183,7 @@ def request_s3_meas_data():
                                                             measurement_start_time=result['measurement_start_time']
                                                             )
                 if len(raw_object) > 0:
+                    print('REPETIDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
                     pass
                 else:
                     from vsf.utils import Colors as c
