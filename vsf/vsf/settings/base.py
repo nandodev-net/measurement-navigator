@@ -62,11 +62,13 @@ INSTALLED_APPS = [
     'apps.main.asns.apps.AsnsConfig',
     'apps.main.early_alerts.apps.EarlyAlertsConfig',
     'apps.dashboard.apps.DashboardConfig',
+    'apps.main.public_stats.apps.PublicStatsConfig',
 ]
 
 API_APPS = [
     'apps.api.asns_api.apps.AsnsAPIConfig',
     'apps.api.fp_tables_api.apps.FpTablesAPIConfig',
+    'apps.api.public_stats_api.apps.PublicStatsApiConfig',
     'apps.api.cases_api.apps.CasesAPIConfig',
     'apps.api.events_api.apps.EventsAPIConfig',
     'apps.api.measurements_api.apps.MeasurementsAPIConfig',

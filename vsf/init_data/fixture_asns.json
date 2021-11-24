@@ -4,9 +4,7 @@
   "pk": 1,
   "fields": {
     "asn": "AS8048",
-    "name": "CANTV Servicios, Venezuela",
-    "reports": null,
-    "fp_references": null
+    "name": "CANTV Servicios, Venezuela"
   }
 },
 {
@@ -14,9 +12,7 @@
   "pk": 2,
   "fields": {
     "asn": "AS6306",
-    "name": "TELEFONICA VENEZOLANA, C.A.",
-    "reports": null,
-    "fp_references": null
+    "name": "TELEFONICA VENEZOLANA, C.A."
   }
 },
 {
@@ -24,9 +20,7 @@
   "pk": 3,
   "fields": {
     "asn": "AS27889",
-    "name": "Telecomunicaciones MOVILNET",
-    "reports": null,
-    "fp_references": null
+    "name": "Telecomunicaciones MOVILNET"
   }
 },
 {
@@ -34,9 +28,7 @@
   "pk": 4,
   "fields": {
     "asn": "AS21826",
-    "name": "Corporaci\u00f3n Telemic C.A.",
-    "reports": null,
-    "fp_references": null
+    "name": "Corporaci\u00f3n Telemic C.A."
   }
 },
 {
@@ -44,9 +36,7 @@
   "pk": 5,
   "fields": {
     "asn": "AS27807",
-    "name": "Fundaci\u00f3n Centro Nacional de Innovaci\u00f3n Tecnol\u00f3gica",
-    "reports": null,
-    "fp_references": null
+    "name": "Fundaci\u00f3n Centro Nacional de Innovaci\u00f3n Tecnol\u00f3gica"
   }
 },
 {
@@ -54,9 +44,7 @@
   "pk": 6,
   "fields": {
     "asn": "AS20312",
-    "name": "Fundaci\u00f3n Centro Nacional de Innovaci\u00f3n Tecnol\u00f3gica - 2",
-    "reports": null,
-    "fp_references": null
+    "name": "Fundaci\u00f3n Centro Nacional de Innovaci\u00f3n Tecnol\u00f3gica - 2"
   }
 },
 {
@@ -64,9 +52,7 @@
   "pk": 7,
   "fields": {
     "asn": "AS11694",
-    "name": "Universidad Simon Bolivar",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad Simon Bolivar"
   }
 },
 {
@@ -74,9 +60,7 @@
   "pk": 8,
   "fields": {
     "asn": "AS19192",
-    "name": "Universidad Central de Venezuela",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad Central de Venezuela"
   }
 },
 {
@@ -84,9 +68,7 @@
   "pk": 9,
   "fields": {
     "asn": "AS7908",
-    "name": "BT LATAM Venezuela, S.A.",
-    "reports": null,
-    "fp_references": null
+    "name": "BT LATAM Venezuela, S.A."
   }
 },
 {
@@ -94,9 +76,7 @@
   "pk": 10,
   "fields": {
     "asn": "AS11562",
-    "name": "Net Uno, C.A.",
-    "reports": null,
-    "fp_references": null
+    "name": "Net Uno, C.A."
   }
 },
 {
@@ -104,9 +84,7 @@
   "pk": 11,
   "fields": {
     "asn": "AS23007",
-    "name": "Universidad de Los Andes",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad de Los Andes"
   }
 },
 {
@@ -114,9 +92,7 @@
   "pk": 12,
   "fields": {
     "asn": "AS27717",
-    "name": "Corporacion Digitel C.A.",
-    "reports": null,
-    "fp_references": null
+    "name": "Corporacion Digitel C.A."
   }
 },
 {
@@ -124,9 +100,7 @@
   "pk": 13,
   "fields": {
     "asn": "AS27890",
-    "name": "Universidad de Oriente",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad de Oriente"
   }
 },
 {
@@ -134,9 +108,7 @@
   "pk": 14,
   "fields": {
     "asn": "AS27892",
-    "name": "Universidad del Zulia",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad del Zulia"
   }
 },
 {
@@ -144,9 +116,7 @@
   "pk": 15,
   "fields": {
     "asn": "AS27891",
-    "name": "Universidad Pedag\u00f3gica Experimental Libertador",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad Pedag\u00f3gica Experimental Libertador"
   }
 },
 {
@@ -154,9 +124,7 @@
   "pk": 16,
   "fields": {
     "asn": "AS7965",
-    "name": "Universidad Catolica Andres Bello",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad Catolica Andres Bello"
   }
 },
 {
@@ -164,9 +132,7 @@
   "pk": 17,
   "fields": {
     "asn": "AS17287",
-    "name": "Universidad de Carabobo",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad de Carabobo"
   }
 },
 {
@@ -174,9 +140,7 @@
   "pk": 18,
   "fields": {
     "asn": "AS27686",
-    "name": "Universidad Centro Occidental Lisandro Alvarado",
-    "reports": null,
-    "fp_references": null
+    "name": "Universidad Centro Occidental Lisandro Alvarado"
   }
 }
 ]
