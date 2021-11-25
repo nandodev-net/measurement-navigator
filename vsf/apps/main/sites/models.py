@@ -183,7 +183,8 @@ class Domain(TimeStampedModel):
     site = models.ForeignKey(
         to=Site,
         null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
+        related_name='rel_dom'
     )
 
     def __str__(self):
