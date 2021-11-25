@@ -35,6 +35,10 @@ class CategoryPublicStats(TimeStampedModel):
     blocked_sites_by_category = models.IntegerField(
         default=0,
         )
+    
+    blocked_domains_by_category = models.IntegerField(
+        default=0,
+        )
 
     category = models.OneToOneField(
         SiteCategory,
