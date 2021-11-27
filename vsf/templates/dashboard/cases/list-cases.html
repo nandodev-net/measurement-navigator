@@ -453,7 +453,6 @@
         selected.id
       ));
 
-      console.log('AAA',casesSelected)
       $.ajax({
         type: "POST",
         url: '{% url "dashboard:event_cases:publish" %}',

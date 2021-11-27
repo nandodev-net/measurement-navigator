@@ -53,6 +53,19 @@
   </div>
 {% endif %}
 
+{% if is_case_separable %}
+  <div class="col-3">
+    <h6>
+      <i class="fas fa-info-circle"></i>
+      <strong>
+        This case could be separable into two or more cases, click the button to make the separation
+      </strong>
+    </h6>
+  </div>
+  <div class="col-2">
+    <button class='btn btn-primary' id="separate_cases_button" type='button'> Separate Cases </button>
+  </div>
+{% endif %}
 
 
 <br>
@@ -290,7 +303,7 @@
         </div>
     </div>
 </div>
-
+{% include "includes/cases/case_separation.html" %}
 
 {% endblock content %}
 {% block custom_scripts %}
@@ -300,6 +313,104 @@
 <script type="text/javascript" src="{% static 'plugins/datepicker/datetimepicker.js' %}"></script>  
 
 <script>
+
+  $( '#submit_case_separation' ).on('click', function() {
+    var case_id = $("#id").val();
+    var quantity = $( '#cases_quantity' ).val();
+    let titles = [];
+    let english_titles = [];
+    for (let i = 1; i <= quantity ; i++) {
+      titles.push($(`#title_${i}`).val());
+      english_titles.push($(`#title_eng_${i}`).val());
+    }
+    let events_id = []
+    let case_associated = []
+    $('#events_to_separate .selector_quantity').each(function() {
+      events_id.push(this.id);
+      case_associated.push(this.value);
+    });
+
+
+    $.ajax({
+        type: "POST",
+        url: '{% url "dashboard:event_cases:separate_case" %}',
+        data: {
+          case_id: case_id,
+          titles: titles,
+          english_titles: english_titles,
+          events_id: events_id,
+          case_associated: case_associated,
+          csrfmiddlewaretoken: "{{ csrf_token }}"
+        },
+        success: function(data) {
+
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $("separate_case").modal("hide");
+          Swal.fire({
+              icon: "error",
+              title: "There was an error!",
+              text: `${ textStatus }, ${ errorThrown }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+    });
+  
+
+
+
+  });
+
+  $( '#separate_cases_button' ).on('click', function() {
+
+    jQuery.noConflict();
+    $("#separate_case").modal("show");
+
+  });
+
+  $( '#cases_quantity' ).on('change', function() {
+    var quantity = this.value;
+    
+    $( '#variable_content_case_separation' ).empty();
+
+    for (let i = 1; i <= quantity ; i++) {
+      var cases_names_fields = `
+        <br>
+        <div class='row'>
+          <div class='col-3'>
+            <label> Title of the Case No. ${i}</label> 
+          </div>
+          <div class='col-3'>
+            <input id="title_${i}" class="form-control" type="text" aria-label="Title" name="title_${i}" required/>
+          </div>
+          <div class='col-3'>
+            <label> Title in English of the Case No. ${i}</label> 
+          </div>
+          <div class='col-3'>
+            <input id="title_eng_${i}" class="form-control" type="text" aria-label="Title English" name="title_eng_${i}" required/>
+          </div>
+        </div>
+        <br>
+      `;
+      $( '#variable_content_case_separation' ).append(cases_names_fields);
+
+    }
+
+    $( '#variable_content_case_separation' ).append(`
+      <h6>
+        <i class="fas fa-info-circle"></i>
+        <strong>
+          Please select the case number that will belong to each event. 
+        </strong>
+      </h6>
+    `);
+
+    $( '#events_to_separate' ).show();
+
+  });
+
+
     $( '#publishTrigger' ).click(function(e) {
         jQuery.noConflict();
         $.ajax({
@@ -569,7 +680,7 @@
     var parseStart_Date = parseDate("{{ object.start_date }}");
 
     var start_date = `
-      <h6><i class="fas fa-info-circle"></i><strong> Do you want to edit the start date of this case manually?</strong></h6>
+      <h6 id=><i class="fas fa-info-circle"></i><strong> Do you want to edit the start date of this case manually?</strong></h6>
       <div class="custom-control custom-switch">
         <input type="checkbox" class="custom-control-input" id="start_date_manual">
         <label class="custom-control-label font-weight-bold" id='start_date_manual_label' for="start_date_manual">NO</label>
@@ -582,7 +693,8 @@
     });
 
     if ("{{object.start_date_manual}}" !== 'None'){
-      $('#start_date_manual').click()
+      $('#start_date_manual').click();
+      $( '#start_date_slug' ).empty().append(`<h6><i class="fas fa-info-circle"></i><strong> Now you can edit this manual date or click the button to back to the automatic date </strong></h6>`);
     }
     
     var parseEnd_Date = parseDate("{{ object.end_date }}");
@@ -697,6 +809,7 @@
   $(document).ready(function() {
     $( "#cancel" ).hide();
     $( "#submit" ).hide();
+    $( '#events_to_separate' ).hide();
     $( '#edit_start_date_slug' ).hide();
     $( '#edit_end_date_slug' ).hide();
 

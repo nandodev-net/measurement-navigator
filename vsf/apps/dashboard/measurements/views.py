@@ -351,8 +351,6 @@ class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         # Get request params
         get = self.request.GET or {}
 
-        ## Ok this is the kind of solution that i don't like
-
         # Parse the input data
         event_id    = get.get('event_id')
         issue_type  = get.get('issue_type')
@@ -366,12 +364,24 @@ class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
         site        = get.get('site')
         flags        = get.getlist('flags[]') if get != {} else []
         
+        
+        if event_id:
+            subms = ['dns', 'tcp', 'http']
+            measurements = []
 
-        if event_id and issue_type:
-            qs = qs.filter()
-            queryStr = 'SubMModels.' + issue_type.upper() + '.objects.filter(event = ' + event_id + ')'
-            submeasures = eval(queryStr)
+            for subm in subms:
+                ms = qs.raw(   
+                    f"SELECT DISTINCT measurements_measurement.* \
+                    FROM measurements_measurement   JOIN submeasurements_{subm} subm ON subm.measurement_id=measurements_measurement.id \
+                                                    JOIN measurements_rawmeasurement rms ON rms.id = measurements_measurement.raw_measurement_id\
+                    WHERE subm.event_id=%s", 
+                    [event_id])
 
+                measurements += list(ms)
+            # This solution is awful
+            meas_id = [meas.id for meas in measurements]
+            qs = qs.filter(id__in = meas_id)
+        
 
         # Get desired measurements
         measurements = search_measurement_by_queryset(

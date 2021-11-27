@@ -146,7 +146,7 @@
                     <h5 class="font-weight-bold">Start Date:</h5>
                 </div>
                 <div class="col-9 d-inline-flex">
-                    <p><span id="start_date_slug">{{ object.get_start_date }}</span></p>
+                    <p><span id="start_date_slug">{{ object.current_start_date }}</span></p>
                     {% if start_manual %}
                         <i class="fas fa-pencil-alt ml-2"></i>
                     {% else %}
@@ -160,7 +160,7 @@
                     <h5 class="font-weight-bold">End Date:</h5>
                 </div>
                 <div class="col-9 d-inline-flex">
-                    <p><span id="end_date_slug">{{ object.get_end_date }}</span></p>
+                    <p><span id="end_date_slug">{{ object.current_end_date }}</span></p>
                     {% if end_manual %}
                         <i class="fas fa-pencil-alt ml-2"></i>
                     {% else %}
@@ -560,7 +560,7 @@
             name="identification"
             />`;
         $( '#identification_slug' ).empty().append(identification);
-        var parseStart_Date = parseDate("{{ object.start_date }}");
+        var parseStart_Date = parseDate("{{ object.current_start_date }}");
         var start_date = `
         <div id="start_date_picker"></div>
         <input 
@@ -568,7 +568,7 @@
         class="form-control w-75" 
         id="start_date" 
         value="${parseStart_Date}" 
-        name="start_date"
+        name="current_start_date"
         />`
 
         $( '#start_date_slug' ).empty().append(start_date);
@@ -576,7 +576,7 @@
             selectData: parseStart_Date
         });
         
-        parseEnd_Date = parseDate("{{ object.end_date }}");
+        parseEnd_Date = parseDate("{{ object.current_end_date }}");
         var end_date = `
         <div id="end_date_picker"> </div>
         <input 
@@ -584,7 +584,7 @@
         class="form-control w-75"  
         id="end_date" 
         value="${parseEnd_Date}" 
-        name="end_date" 
+        name="current_end_date" 
         />`;
         $( '#end_date_slug').empty().append(end_date);
         $('#end_date_picker').dateTimePicker({
@@ -653,9 +653,9 @@
         $( "#confirmTrigger" ).show();
         var identification = `<p>{{ object.identification }}</p>`;
         $( '#identification_slug').empty().append(identification);
-        var start_date = `<p>{{ object.start_date }}</p>`;
+        var start_date = `<p>{{ object.current_start_date }}</p>`;
         $( '#start_date_slug').empty().append(start_date);
-        var end_date = `<p>{{ object.end_date }}</p>`;
+        var end_date = `<p>{{ object.current_end_date }}</p>`;
         $( '#end_date_slug').empty().append(end_date);
         var public_evidence = `<p>{{ object.public_evidence }}</p>`;
         $( '#public_evidence_slug').empty().append(public_evidence);

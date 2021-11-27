@@ -75,5 +75,11 @@ urlpatterns = [
         views.CaseChangeToActive.as_view(),
         name="goActive"
     ),
+
+    path(
+        'separate_case/',
+        views.CaseSeparation.as_view(),
+        name='separate_case'
+    )
     
 ]

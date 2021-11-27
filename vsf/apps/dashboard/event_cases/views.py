@@ -349,8 +349,8 @@ class CaseDetailData(VSFLoginRequiredMixin, View):
                 'id': event.id,
                 'identification': event.identification,
                 'confirmed': event.confirmed,
-                'start_date': datetime.strftime(utc_aware_date(event.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'end_date': datetime.strftime(utc_aware_date(event.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'start_date': datetime.strftime(utc_aware_date(event.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'end_date': datetime.strftime(utc_aware_date(event.current_end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'public_evidence': event.public_evidence,
                 'private_evidence': event.private_evidence,
                 'issue_type': event.issue_type,
@@ -389,29 +389,41 @@ class CaseDetailView(VSFLoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        category = context['object'].category.name
+        object = context['object']
+
+        ### Adding category name of the case to context 
+        category = object.category.name
         context['category'] = category
-        context['object'].start_date = context['object'].start_date if context['object'].start_date else datetime.now()
-        context['object'].end_date = context['object'].end_date if context['object'].end_date else datetime.now()
 
-
-        types = [ type_[1].lower() for type_ in context['object'].TYPE_CATEGORIES ]
-        context['types'] = types
-        
+        ### Adding all categories to show them in the filter
         categories = Category.objects.all()
         categoryNames = [cat.name for cat in categories]
         context['categoryNames'] = categoryNames
 
-        relatedEvents = context['object'].events.all()
+        ### Retrieving dates
+        object.start_date = object.start_date if object.start_date else datetime.now()
+        object.end_date = object.end_date if object.end_date else datetime.now()
+
+        ### Saving in context the categories types
+        types = [ type_[1].lower() for type_ in object.TYPE_CATEGORIES ]
+        context['types'] = types
+        
+        ### This piece of code will be useful for the case separation feature
+        is_case_separable = False
+        domains = object.get_domains()
+        if len(domains) > 1: is_case_separable = True
+        context['is_case_separable'] = is_case_separable
+        context['domains'] = domains 
+        context['cases_quantity'] = [x for x in range(2, len(domains) + 1)]
 
 
+        relatedEvents = object.events.all()
         events = [{
             'id': event.id,
             'identification': event.identification,
             'confirmed': event.confirmed,
-            'start_date': datetime.strftime(utc_aware_date(event.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-            'end_date': datetime.strftime(utc_aware_date(event.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+            'start_date': datetime.strftime(utc_aware_date(event.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+            'end_date': datetime.strftime(utc_aware_date(event.current_end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
             'public_evidence': event.public_evidence,
             'private_evidence': event.private_evidence,
             'issue_type': event.issue_type,
@@ -528,14 +540,18 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
             prefillAux = getter if getter else ""
             prefill[field] = prefillAux
 
-        start_time = get.get("start_time")
+        start_time = get.get("current_start_date")
         if start_time:
-            prefill['start_time'] = start_time 
+            prefill['current_start_date'] = start_time 
         
-        end_time = get.get("end_time")
+        end_time = get.get("current_end_date")
         if end_time:
-            prefill['end_time'] = end_time
+            prefill['current_end_date'] = end_time
 
+        issueTypes = Event.IssueType.choices
+        issueTypes = list(map(lambda m: {'name': m[1].upper(), 'value': m[0]}, issueTypes))
+        context['issueTypes'] = issueTypes
+        context['asns'] = ASN.objects.all()
         context['prefill'] = prefill
 
 
@@ -543,8 +559,8 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
             'id': event.id,
             'identification': event.identification,
             'confirmed': event.confirmed,
-            'start_date': event.start_date,
-            'end_date': event.end_date,
+            'start_date': event.current_start_date,
+            'end_date': event.current_end_date,
             'public_evidence': event.public_evidence,
             'private_evidence': event.private_evidence,
             'issue_type': event.issue_type,
@@ -573,8 +589,8 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
                 newEvents = Event.objects.filter(id__in=post['eventsSelected[]']).all()
                 case.events.add(*newEvents)
 
-            ordered_by_start_date = case.events.order_by('start_date')
-            ordered_by_end_date = case.events.order_by('end_date')
+            ordered_by_start_date = case.events.order_by('current_start_date')
+            ordered_by_end_date = case.events.order_by('current_end_date')
             start_date_automatic = ordered_by_start_date.first().start_date.replace(tzinfo=None) or None
             end_date_automatic = ordered_by_end_date.last().end_date.replace(tzinfo=None) or None
 
@@ -658,7 +674,7 @@ class CaseChangeToAutomatic(VSFLoginRequiredMixin, View):
             return HttpResponseBadRequest()
 
 class CaseChangeToActive(VSFLoginRequiredMixin, View):
-
+    
     def post(self, request, **kwargs):
         post = dict(request.POST)
         case_id = int(post['cases[]'][0])
@@ -673,3 +689,9 @@ class CaseChangeToActive(VSFLoginRequiredMixin, View):
         except Exception as e:
             print(e)
             return HttpResponseBadRequest()
+
+class CaseSeparation(VSFLoginRequiredMixin, View):
+
+    def post(self, request, **kwargs):
+        # TO DO
+        return JsonResponse({'error' : None})
