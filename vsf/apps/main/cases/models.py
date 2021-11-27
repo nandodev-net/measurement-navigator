@@ -142,6 +142,13 @@ class Case(TimeStampedModel):
 
         return sites
 
+    def get_domains(self) -> list:
+        domains = []
+        for event in self.events.all():
+            if event.domain:
+                domains.append(event.domain.domain_name)
+        return domains
+
     def get_asns(self) -> dict:
         asns = {}
         for e in self.events.all():

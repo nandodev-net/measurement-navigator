@@ -167,7 +167,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         if country:
             qs = qs.filter(measurement__raw_measurement__probe_cc=country)
         if until:
-            qs = qs.filter(easurement__raw_measurement__measurement_start_time__lte=until)
+            qs = qs.filter(measurement__raw_measurement__measurement_start_time__lte=until)
         if site:
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:

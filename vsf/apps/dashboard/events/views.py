@@ -45,11 +45,11 @@ class EventsList(VSFLoginRequiredMixin, ListView):
             prefillAux = getter if getter else ""
             prefill[field] = prefillAux
 
-        start_time = get.get("start_time") or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
-        prefill['start_time'] = start_time 
-        end_time = get.get("end_time")
-        if end_time:
-            prefill['end_time'] = end_time
+        current_start_date = get.get("current_start_date") or (datetime.now() - timedelta(days=30)).strftime('%Y-%m-%d')
+        prefill['current_start_date'] = current_start_date
+        current_end_date = get.get("current_end_date")
+        if current_end_date:
+            prefill['current_end_date'] = current_end_date
 
 
         context = super().get_context_data()
@@ -83,12 +83,12 @@ class EventsList(VSFLoginRequiredMixin, ListView):
 class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
 
     columns = [ 
-        'id', 'identification', 'issue_type', 'confirmed', 'start_date', 'end_date', 
+        'id', 'identification', 'issue_type', 'confirmed', 'current_start_date', 'current_end_date', 
         'domain__domain_name', 'asn__asn', 'muted'
     ]
 
     order_columns = [ 
-        'id', '', 'issue_type', 'confirmed', 'start_date', 'end_date', 
+        'id', '', 'issue_type', 'confirmed', 'current_start_date', 'current_end_date', 
         'domain__domain_name', 'asn__asn', 'muted'
     ]
 
@@ -99,20 +99,20 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
     def filter_queryset(self, qs):
 
         #--------- Filtering datetime fields ---------#
-        start_time, end_time = self.request.GET.get('start_time'), self.request.GET.get('end_time')
+        current_start_date, current_end_date = self.request.GET.get('current_start_date'), self.request.GET.get('current_end_date')
 
 
-        if start_time != None and start_time != "":
-            start_time = datetime.strptime(start_time, '%Y-%m-%d')
-            utc_start_time = utc_aware_date(start_time, self.request.session['system_tz'])
-            qs = qs.filter(start_date__gte = utc_start_time) | qs.filter(manual_start_date__gte = utc_start_time)
+        if current_start_date != None and current_start_date != "":
+            current_start_date = datetime.strptime(current_start_date, '%Y-%m-%d')
+            utc_start_time = utc_aware_date(current_start_date, self.request.session['system_tz'])
+            qs = qs.filter(current_start_date__gte = utc_start_time) | qs.filter(manual_start_date__gte = utc_start_time)
 
 
 
-        if end_time != None and end_time != "":
-            end_time = datetime.strptime(end_time, '%Y-%m-%d')
-            utc_end_time = utc_aware_date(end_time, self.request.session['system_tz'])
-            qs = qs.filter(end_date__lte = utc_end_time) | qs.filter(manual_end_date__lte = utc_end_time)
+        if current_end_date != None and current_end_date != "":
+            current_end_date = datetime.strptime(current_end_date, '%Y-%m-%d')
+            utc_end_time = utc_aware_date(current_end_date, self.request.session['system_tz'])
+            qs = qs.filter(current_end_date__lte = utc_end_time) | qs.filter(manual_end_date__lte = utc_end_time)
 
 
         #--------- Filtering identification field ---------#
@@ -185,14 +185,14 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
         for event in qs:
                 
             # Compute start date
-            start_date = event.start_date
-            if start_date:
-                start_date = start_date.strftime("%b. %d, %Y, %H:%M %p")
+            current_start_date = event.current_start_date
+            if current_start_date:
+                current_start_date = current_start_date.strftime("%b. %d, %Y, %H:%M %p")
 
             # Compute end date
-            end_date = event.end_date
-            if end_date:
-                end_date = end_date.strftime("%b. %d, %Y, %H:%M %p")
+            current_end_date = event.current_end_date
+            if current_end_date:
+                current_end_date = current_end_date.strftime("%b. %d, %Y, %H:%M %p")
             """
             if event.current_start_date:
                 start_date = datetime.strftime(utc_aware_date(event.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S")
@@ -211,9 +211,9 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 'identificator': event.id,
                 'issue_type': event.issue_type, 
                 'confirmed': event.confirmed, 
-                'start_date': start_date,
+                'current_start_date': current_start_date,
                 'is_manual_start_date':event.start_date_manual,
-                'end_date': end_date,
+                'current_end_date': current_end_date,
                 'is_manual_end_date':event.end_date_manual,
                 'domain': event.domain.domain_name, 
                 'site': event.domain.site.name if event.domain.site else "No site associated", 
@@ -307,8 +307,8 @@ class EventDetailData(VSFLoginRequiredMixin, View):
                 "identification": eventObj.identification,
                 'confirmed': eventObj.confirmed,
                 'muted': eventObj.muted,
-                "start_date": datetime.strftime(utc_aware_date(eventObj.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                "end_date": datetime.strftime(utc_aware_date(eventObj.end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                "current_start_date": datetime.strftime(utc_aware_date(eventObj.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                "current_end_date": datetime.strftime(utc_aware_date(eventObj.current_end_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 "public_evidence": eventObj.public_evidence,
                 "private_evidence": eventObj.private_evidence,
                 "issue_type": eventObj.issue_type,
@@ -339,8 +339,7 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
         
         context['start_manual'] = context['object'].isStartDateManual()
         context['end_manual'] = context['object'].isEndDateManual()
-        print(context['start_manual'])
-        
+
 
 
         test_types = RawMeasurement.TestTypes.choices
@@ -366,8 +365,8 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
     def post(self, request, *args, **kwargs):
         post = dict(request.POST)
         identification = post['identification'][0]
-        start_date = post['start_date'][0]
-        end_date = post['end_date'][0]
+        current_start_date = post['current_start_date'][0]
+        current_end_date = post['current_end_date'][0]
         public_evidence = post['public_evidence'][0]
         private_evidence = post['private_evidence'][0]
         domain = post['domain'][0]
@@ -379,16 +378,16 @@ class EventDetailView(VSFLoginRequiredMixin, DetailView):
             domainId = Domain.objects.filter(domain_name = domain).first().id 
             asnId = ASN.objects.filter(asn = asn).first().id 
 
-            if (( event.start_date != start_date and event.manual_start_date == None ) or 
-                (event.manual_start_date != start_date and event.manual_start_date )):
+            if (( event.current_start_date != current_start_date and event.manual_start_date == None ) or 
+                (event.manual_start_date != current_start_date and event.manual_start_date )):
                 Event.objects.filter(id = post['id'][0]).update(
-                    manual_start_date = start_date
+                    manual_start_date = current_start_date
                 )
 
-            if (( event.end_date != end_date and event.manual_end_date == None ) or 
-                (event.manual_end_date != end_date and event.manual_end_date )):
+            if (( event.current_end_date != current_end_date and event.manual_end_date == None ) or 
+                (event.manual_end_date != current_end_date and event.manual_end_date )):
                 Event.objects.filter(id = post['id'][0]).update(
-                    manual_end_date = end_date
+                    manual_end_date = current_end_date
                 )
 
             Event.objects.filter(id = post['id'][0]).update(
@@ -530,8 +529,8 @@ class EventsByMeasurement(VSFLoginRequiredMixin, View):
                     'identification':event.identification,
                     'event_type':event.issue_type,
                     'confirmed':event.confirmed,
-                    'start_date':datetime.strftime(utc_aware_date(event.start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                    'end_date':event.end_date,
+                    'current_start_date':datetime.strftime(utc_aware_date(event.current_start_date, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                    'current_end_date':event.current_end_date,
                     'domain':event.domain,
                     'asn':event.asn,
                 }

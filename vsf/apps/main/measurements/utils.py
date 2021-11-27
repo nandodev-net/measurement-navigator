@@ -368,12 +368,22 @@ def _filter_by_flag_no_ok(qs : QuerySet, subm_to_filter : List[str]) -> QuerySet
         return qs.annotate(**{field_name:Subquery(sq[:1].values('flag_type'))}).exclude(**{field_name:None})
 
     lowered_list = [s.lower() for s in subm_to_filter]
+    qs1, qs2, qs3 = None, None, None
     if 'dns' in lowered_list:
-        qs = filter_aux(SubMeas.DNS, qs)
+        qs1 = filter_aux(SubMeas.DNS, qs)
     
     if 'http' in lowered_list:
-        qs = filter_aux(SubMeas.HTTP, qs)
+        qs2 = filter_aux(SubMeas.HTTP, qs)
     
     if 'tcp' in lowered_list:
-        qs = filter_aux(SubMeas.TCP, qs)
-    return qs
+        qs3 = filter_aux(SubMeas.TCP, qs)
+
+    qsFinal = None
+    if qs1 and not qsFinal: qsFinal = qs1 
+    if qs2 and not qsFinal: qsFinal = qs2 
+    if qs2 and qsFinal:  qsFinal = qsFinal | qs2 
+    if qs3 and not qsFinal: qsFinal = qs3
+    if qs3 and qsFinal:  qsFinal = qsFinal | qs3 
+
+    if qsFinal: return qsFinal
+    else: return qs

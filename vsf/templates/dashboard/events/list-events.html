@@ -63,11 +63,11 @@
             <div class="row align-items-center ml-1">
               <div class="col-5 mx-auto">
                 <label class='font-weight-bold'>
-                  Start Time
+                  Start Date
                 </label>
               </div>
               <div class="col-7 mx-auto">
-                <input id="start_time" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.start_time }}" name="start_time"/>
+                <input id="current_start_date" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.current_start_date }}" name="current_start_date"/>
               </div>
             </div> 
           </div>
@@ -76,11 +76,11 @@
             <div class="row align-items-center">
               <div class="col-5 mx-auto">
                 <label class='font-weight-bold'>
-                  End Time
+                  End Date
                 </label>
               </div>
               <div class="col-7 mx-auto">
-                <input id="end_time" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.end_time }}" name="end_time"/>
+                <input id="current_end_date" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.current_end_date }}" name="current_end_date"/>
               </div>
             </div> 
           </div>
@@ -314,8 +314,8 @@
           `<tr>
             <td>${event.issue_type}</td>
             <td>${event.confirmed}</td>
-            <td>${event.start_date}</td>
-            <td>${event.end_date}</td>
+            <td>${event.current_start_date}</td>
+            <td>${event.current_end_date}</td>
             <td>${event.domain}</td>
             <td>${event.asn}</td>
           </tr>`
@@ -355,8 +355,8 @@
 
           var url = "{% url 'dashboard:events:detail' pk=1 %}".replace(1, id);
           $( '#identification_detail' ).text(json["identification"]);
-          $( '#start_date_detail' ).text(json["start_date"]);
-          $( '#end_date_detail' ).text(json["end_date"]);
+          $( '#start_date_detail' ).text(json["current_start_date"]);
+          $( '#end_date_detail' ).text(json["current_end_date"]);
           $( '#issue_type_detail' ).text(json["issue_type"]);
           $( '#domain_detail' ).text(json["domain"]);
           $( '#asn_detail' ).text(json["asn"]);
@@ -692,8 +692,8 @@
           data: function (data) {
             data.identification = $("#identification").val() ;
             data.confirmed = $("#confirmed").val();
-            data.start_time = $("#start_time").val();
-            data.end_time = $("#end_time").val();
+            data.current_start_date = $("#current_start_date").val();
+            data.current_end_date = $("#current_end_date").val();
             data.issue_type = $("#issue_type").val();
             data.domain = $("#domain").val();
             data.site = $("#site").val();
@@ -749,12 +749,12 @@
             },
           },
           {
-            data: "start_date",
+            data: "current_start_date",
             orderable: true,
             searchable: true,
           },
           {
-            data: "end_date",
+            data: "current_end_date",
             orderable: true,
             searchable: true,
           },
