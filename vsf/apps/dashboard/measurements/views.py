@@ -248,7 +248,10 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
         context['rawmeasurement'].test_helpers = json.dumps(measurement.raw_measurement.test_helpers)
         context['rawmeasurement'].flags = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
         context['events'] = events 
+        context['rawmeasurement'].platform = measurement.raw_measurement.annotations['platform'] 
+        context['rawmeasurement'].engine = measurement.raw_measurement.annotations['engine_name'] + ' (' + measurement.raw_measurement.annotations['engine_version'] + ')'
         
+
         if measurement.raw_measurement.test_name == 'web_connectivity':
             if measurement.raw_measurement.test_keys['tcp_connect']:
                 context['rawmeasurement'].hasTcpConnections = len(measurement.raw_measurement.test_keys['tcp_connect']) > 0
@@ -268,10 +271,6 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
                     tcp_connections.append(aux)
                 context['rawmeasurement'].tcp_connections = tcp_connections
 
-            
-            context['rawmeasurement'].platform = measurement.raw_measurement.annotations['platform']
-            context['rawmeasurement'].engine = measurement.raw_measurement.annotations['engine_name'] + ' (' + measurement.raw_measurement.annotations['engine_version'] + ')'
-            
             if measurement.raw_measurement.test_keys['requests']:
                 context['rawmeasurement'].hasHttpRequests = len(measurement.raw_measurement.test_keys['requests']) > 0            
 
