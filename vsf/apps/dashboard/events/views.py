@@ -19,7 +19,7 @@ from apps.main.sites.models         import Site
 from apps.main.events.models        import Event
 from apps.main.cases.models         import Case
 from apps.main.asns.models          import ASN
-from apps.main.measurements.submeasurements.models import DNS, HTTP, TCP, SubMeasurement
+from apps.main.measurements.submeasurements.models import DNS, HTTP, TCP, TOR
 from apps.main.sites.models         import Domain
 from apps.main.asns.models          import ASN
 from .forms                         import EventForm
@@ -544,5 +544,45 @@ class EventsByMeasurement(VSFLoginRequiredMixin, View):
 
 
 
+class EditMeasurements(VSFLoginRequiredMixin, DetailView):
+
+    """
+        Edit measurements related to one event.
+        Expected GET Arguments:
+            - id: Event id.
+    """
+    template_name = 'events/edit-measurements.html'
+    slug_field = 'pk'
+    model = Event
 
 
+    def get_context_data(self, **kwargs):
+        get, prefill = self.request.GET or {}, {}
+        context = super().get_context_data(**kwargs)
+
+        event = context['event']
+        measurements = []
+
+        for submeasurement_type in [DNS, TCP, HTTP, TOR]:
+            submeasurements_by_type = submeasurement_type.objects.filter(event = event).all()
+            for submeasurement in submeasurements_by_type:
+                measurements.append(submeasurement.measurement)
+
+        context['measurements'] = [{
+            'id': measurement.id,
+            'input': measurement.raw_measurement.input,
+            'test_name': measurement.raw_measurement.test_name,
+            'measurement_start_time': measurement.raw_measurement.measurement_start_time,
+            'probe_asn': measurement.raw_measurement.probe_asn,
+            'probe_cc': measurement.raw_measurement.probe_cc,
+            'site': measurement.domain.site.name if measurement.domain.site else None,
+            'anomaly': measurement.anomaly,
+            
+        } for measurement in measurements]
+        print(context['measurements'])
+        
+
+        context['prefill'] = prefill
+
+        
+        return context

@@ -589,19 +589,34 @@ class EditEvents(VSFLoginRequiredMixin, DetailView):
                 newEvents = Event.objects.filter(id__in=post['eventsSelected[]']).all()
                 case.events.add(*newEvents)
 
-            ordered_by_start_date = case.events.order_by('current_start_date')
-            ordered_by_end_date = case.events.order_by('current_end_date')
-            start_date_automatic = ordered_by_start_date.first().start_date.replace(tzinfo=None) or None
-            end_date_automatic = ordered_by_end_date.last().end_date.replace(tzinfo=None) or None
+            early_start_date, last_end_date = None, None 
+            for event in case.events.all():
+                if not early_start_date:
+                    early_start_date = event.current_start_date
+                elif event.current_start_date < early_start_date:
+                    early_start_date = event.current_start_date
 
-            case.start_date_automatic = start_date_automatic
-            case.end_date_automatic = end_date_automatic
-            if not case.manual:
-                case.start_date = start_date_automatic
-                case.end_date = end_date_automatic
+                if not last_end_date:
+                    last_end_date = event.current_end_date
+                elif event.current_start_date < last_end_date:
+                    last_end_date = event.current_end_date
+
+            if early_start_date: early_start_date = early_start_date.replace(tzinfo=None)
+            if last_end_date: last_end_date = last_end_date.replace(tzinfo=None)
+
             
+            case.start_date_automatic = early_start_date
+            case.end_date_automatic = last_end_date
+            if not case.start_date_manual:
+                case.start_date = early_start_date
+            if not case.end_date_manual:
+                case.end_date = last_end_date
+            
+            case.save()
             return JsonResponse({'error' : None})
         except Exception as e:
+            print(e)
+            print('--------------')
             return HttpResponseBadRequest()
 
 class CasePublish(VSFLoginRequiredMixin, View):

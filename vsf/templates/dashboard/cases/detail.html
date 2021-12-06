@@ -714,8 +714,8 @@
     });
 
     if ("{{object.end_date_manual}}" !== 'None'){
-      console.log('entro?')
-      $( '#end_date_manual' ).click()
+      $( '#end_date_manual' ).click();
+      $( '#end_date_slug' ).empty().append(`<h6><i class="fas fa-info-circle"></i><strong> Now you can edit this manual date or click the button to back to the automatic date </strong></h6>`);
     }
 
     var category = `<select id="category" class="custom-select additional-filter w-75" name="category" required>
