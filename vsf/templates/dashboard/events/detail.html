@@ -65,34 +65,11 @@
     <h5>Status: </h5> 
     <div class="d-inline-flex">
         {% if status == 'active' %}
-            <span class="badge badge-primary d-inline-flex mr-2">
-                <i class="fas fa-check mr-3 mt-1" title="Active"></i><h5 class="text-white">Active</h5> 
-            </span>
-            
-        {% else %}
-            <span class="badge badge-secondary d-inline-flex mr-2">
-                <i class="fas fa-check mr-3 mt-1" title="Not Active"></i><h5 class="text-white">Active</h5> 
-            </span>
-        {% endif %}
-
-        {% if status == 'muted' %}
-            <span class="badge badge-primary d-inline-flex mr-2">
-                <i class="fas fa-volume-mute mr-3 mt-1" title="Muted"></i><h5 class="text-white">Muted</h5> 
-            </span>
-        {% else %}
-            <span class="badge badge-secondary d-inline-flex mr-2">
-                <i class="fas fa-volume-mute mr-3 mt-1" title="Not Muted"></i><h5 class="text-white">Muted</h5> 
-            </span>
-        {% endif %}
-
-        {% if status == 'closed' %}
-            <span class="badge badge-primary d-inline-flex mr-2">
-                <i class="fas fa-times mr-3 mt-1" title="Closed"></i><h5 class="text-white">Closed</h5> 
-            </span>
-        {% else %}
-            <span class="badge badge-secondary d-inline-flex mr-2">
-                <i class="fas fa-times mr-3 mt-1" title="Not Closed"></i><h5 class="text-white">Closed</h5> 
-            </span>
+            <i class="fas fa-check mr-3 mt-1" title="Active"></i><h5 class="">Active</h5> 
+        {% elif status == 'muted' %}
+            <i class="fas fa-volume-mute mr-3 mt-1" title="Muted"></i><h5 class="">Muted</h5> 
+        {% elif status == 'closed' %}
+            <i class="fas fa-times mr-3 mt-1" title="Closed"></i><h5 class="">Closed</h5> 
         {% endif %}
     </div>
     
@@ -286,6 +263,13 @@
     <div class="card" id="events-card">
         <div class="card-header">
           <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#relatedSubmeasures" aria-expanded="true" aria-controls="relatedSubmeasures">Related Submeasures</a></h5>
+          <a 
+            href="{% url 'dashboard:events:edit_measurements' object.id %}" 
+            target="_blank"
+            class='p-2 float-right btn btn-outline-dark'
+          > 
+            <i class="fas fa-plus"></i> <span class="">Edit Measurements</span>
+          </a>
         </div>
         <div class="collapse show" id="relatedSubmeasures">
             <div class="card-body p-3">
