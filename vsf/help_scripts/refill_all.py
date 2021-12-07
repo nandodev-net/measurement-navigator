@@ -18,8 +18,8 @@ from datetime                     import datetime, timedelta
 print("Requesting ooni data")
 today = datetime.now()
 
-now = today 
-n_months_ago = today - timedelta(days=1) 
+now = today - timedelta(days=2) 
+n_months_ago = today - timedelta(days=3) 
 now = now.strftime("%Y-%m-%d") 
 n_months_ago = n_months_ago.strftime("%Y-%m-%d")
 request_fp_data(test_name=None,since=n_months_ago, until=now, from_fastpath=False, )

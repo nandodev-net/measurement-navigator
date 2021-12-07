@@ -26,13 +26,13 @@ def update_case_dates():
     """
 
     name = CASES_TASKS.UPDATE_DATES
-    state = cache.get(name)
+    #state = cache.get(name)
     result = {'error' : None, 'ran' : False}
 
-    if state == ProcessState.RUNNING or state == ProcessState.STARTING:
-        return result
+    # if state == ProcessState.RUNNING or state == ProcessState.STARTING:
+    #     return result
 
-    cache.set(name, ProcessState.RUNNING)
+    #cache.set(name, ProcessState.RUNNING)
 
     try:
         for case in Case.objects.all():

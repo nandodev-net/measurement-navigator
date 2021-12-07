@@ -7,6 +7,7 @@ from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
 from django.db          import connection
 from django.core.cache  import cache
+import sys
 
 # Third party imports:
 from typing import List
@@ -158,8 +159,8 @@ def _event_creator(min_date : datetime, max_date : datetime, asn : ASN, domain :
 
 def select( measurements : List[SubMeasurement],
             timedelta : timedelta = timedelta(days=1), 
-            event_openning_treshold : int = 7, 
-            interval_size : int = 10,
+            event_openning_treshold : int = 1, 
+            interval_size : int = 5,
             event_continue_treshold : int = 5
             ) -> List[List[SubMeasurement]]:
     """
@@ -217,7 +218,7 @@ def select( measurements : List[SubMeasurement],
         max_in_date = _bin_search_max(measurements, start_time(measurements[lo]) + timedelta, lo, hi, start_time)
         n_anomalies = anomaly_count(lo, max_in_date)
         print('ANOMALIAS: ',n_anomalies)
-
+        print(event_openning_treshold)
         # If too many anomalies in this interval:
         if n_anomalies < event_openning_treshold:
             lo += 1
@@ -370,6 +371,9 @@ def hard_flag(
             event_openning_treshold =  minimum ammount of too-near measurements to consider a hard
                                         flag
             interval_size = how many measurements to consider in each step of the algorithm
+
+            event_continue_treshold : int = how many anomaly measurements are required to expand an existent event with new measurements
+
     """
 
     submeasurements = [(TOR,'tor')]
@@ -381,6 +385,7 @@ def hard_flag(
         # there's at the least one measurement in its partition that's 
         # not flagged.
         # (so we can avoid run the logic over elements not recently updated)
+
         meas = SM.objects.raw(  f"WITH \
                                     measurements as (\
                                         SELECT  \
@@ -418,7 +423,7 @@ def hard_flag(
                                                             JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
                                 ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
         for p in meas:
-            print(p)
+            print(p.flag_type,' ', p.probe_asn)
 
         groups = filter(
                         lambda l:len(l) >= event_openning_treshold,
@@ -430,6 +435,9 @@ def hard_flag(
         for group in groups:
             print('hola')
             print(group)
+            for i in group:
+                print(i.__dict__)
+            
             weird_measurements = select(group, time_window, event_openning_treshold, interval_size, event_continue_treshold)
             print('EEEEE\n')
             print(weird_measurements)
