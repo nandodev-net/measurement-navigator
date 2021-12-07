@@ -161,8 +161,7 @@ def request_fp_data(test_name: str, since: str, until: str, from_fastpath: bool 
         'until': until,
         'limit': 100,
         'order':'asc',
-        'order_by' : 'measurement_start_time',
-        'input': 'http://partidounnuevotiempo.org/'
+        'order_by' : 'measurement_start_time'
     }
 
     if test_name:
