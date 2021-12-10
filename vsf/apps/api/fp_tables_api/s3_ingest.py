@@ -29,11 +29,6 @@ meas_path = './media/ooni_data/'
 gz_list = []
 file_list = []
 
-data = []
-
-
-
-
 def checkPostData(data) -> bool:
         """
         This function will check if the input data on the post request is valid.
