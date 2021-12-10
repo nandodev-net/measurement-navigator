@@ -1,24 +1,8 @@
 """
     Additional functionality to perform validations in the post request
 """
-
-from rest_framework.response    import Response
-from rest_framework.generics    import  (
-    ListCreateAPIView,
-    RetrieveUpdateAPIView,
-)
-from rest_framework.status      import  (
-    HTTP_200_OK,
-    HTTP_201_CREATED,
-    HTTP_204_NO_CONTENT,
-    HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-    HTTP_412_PRECONDITION_FAILED
-)
 import django.utils.timezone    as timezone
 import django.utils.dateparse   as dateparse
-from   django.shortcuts         import render
-from   rest_framework.views     import APIView
 from   django.core.cache        import cache
 
 # Third party imports
@@ -30,7 +14,7 @@ import datetime
 import collections
 from urllib.parse   import urlencode
 from pathlib import Path
-import ujson
+import gzip
 import json
 import os
 
@@ -42,46 +26,13 @@ from .sync_measurements import *
 
 meas_path = './media/ooni_data/'
 
+gz_list = []
 file_list = []
 
+data = []
 
-def truncate_utf8_chars(filename, count, ignore_newlines=True):
-    """
-    Truncates last `count` characters of a text file encoded in UTF-8.
-    :param filename: The path to the text file to read
-    :param count: Number of UTF-8 characters to remove from the end of the file
-    :param ignore_newlines: Set to true, if the newline character at the end of the file should be ignored
-    """
-    with open(filename, 'rb+') as f:
-        last_char = None
-        size = os.fstat(f.fileno()).st_size
-        offset = 1
-        chars = 0
-        while offset <= size:
-            f.seek(-offset, os.SEEK_END)
-            b = ord(f.read(1))
 
-            if ignore_newlines:
-                if b == 0x0D or b == 0x0A:
-                    offset += 1
-                    continue
 
-            if b & 0b10000000 == 0 or b & 0b11000000 == 0b11000000:
-                # This is the first byte of a UTF8 character
-                chars += 1
-                if chars == count:
-                    # When `count` number of characters have been found, move current position back
-                    # with one byte (to include the byte just checked) and truncate the file
-                    f.seek(-1, os.SEEK_CUR)
-                    f.truncate()
-                    return
-            offset += 1
-
-def add_bracket(filename):
-    with open(filename, 'a+') as f:
-        f.write(']')
-        f.close()
-    return
 
 def checkPostData(data) -> bool:
         """
@@ -134,10 +85,10 @@ def checkPostData(data) -> bool:
 
 def request_s3_meas_data():
     print('-----------------------')
-    print('INICIANDO INGESTA DE S3')
+    print('S3 INGEST BEGINS')
     print('-----------------------')
     print('-----------------------')
-    print('\nsolicitando jsons a ooni... \n')
+    print('\nRequesting ooni data... \n')
     time_ini = time.time()
     test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 'torsf', 'httpinvalidrequestline', 
     'httpheaderfieldmanipulation', 'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 'riseupvpn',
@@ -146,25 +97,34 @@ def request_s3_meas_data():
     
     for test in test_types:
         s3_measurements_download(test)
-    print('\ncreacion de jsons temporales finalizada... \n')
+    print('\nTemp files created... \n')
     cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
-    print('\niniciando lectura de archivos temporales... \n')
-    raw_object = []
+    print('\nInitializing temp files analysis... \n')
+
     time.sleep(2)
+    print('Colecting Gzip files...')
     for child in Path(meas_path).iterdir():
         if child.is_file():
-            file_list.append(meas_path + child.name)
+            gz_list.append(meas_path + child.name)
 
+
+    print('Decompressing Gzip files...')
+    for gz_file in gz_list:
+        with gzip.open(gz_file,'r') as current_file:
+            file_content = current_file.read()
+            file = open(gz_file[:-3], "w")
+            file.write(file_content.decode('UTF-8'))
+            file.close()
+            file_list.append(gz_file[:-3])
+            os.remove(gz_file)
+
+
+    print('Reading JSONL files...')
     for jsonl_file in file_list:
-        file_ = jsonl_file
-        truncate_utf8_chars(file_, 1)
-        add_bracket(file_)
-        with open(file_,'r') as current_file:
-
-            results = json.loads(current_file.read())
-            
-
-            for result in results:
+        with open(jsonl_file) as f:
+            for line in f:
+                #data.append(json.loads(line))
+                result = json.loads(line)
                 if result['test_name'] == 'tor':
                     if result['test_keys']==None:
                         continue
@@ -179,19 +139,7 @@ def request_s3_meas_data():
                         URL.objects.get_or_create(url=result['input'])
                         input_ = result['input'] 
 
-                # raw_object = RawMeasurement.objects.filter(input=input_, 
-                #                                             report_id=result['report_id'], 
-                #                                             probe_asn=result['probe_asn'], 
-                #                                             test_name=result['test_name'], 
-                #                                             measurement_start_time=result['measurement_start_time']
-                #                                             )
 
-
-
-                # if len(raw_object) > 0:
-                #     print('REPETIDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
-                #     pass
-                # else:
                 from vsf.utils import Colors as c
                 try:
                     print(c.magenta("Creating a new measurement"))
@@ -226,9 +174,9 @@ def request_s3_meas_data():
                 except Exception as e: print(e)
 
 
-    print('\nEliminando archivos temporales... \n')
+    print('Removing temporal files...')
     for jsonl_file in file_list:
-        os.remove(jsonl_file)    
+        os.remove(jsonl_file)
 
     time_end = time.time()
     print('\n\n1-Day Measurement ingest time: ', time_end-time_ini)
