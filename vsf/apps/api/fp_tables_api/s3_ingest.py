@@ -3,16 +3,13 @@
 """
 import django.utils.timezone    as timezone
 import django.utils.dateparse   as dateparse
-from   django.core.cache        import cache
 
 # Third party imports
-import sys
 import time
 import json
 import requests
 import datetime
 import collections
-from urllib.parse   import urlencode
 from pathlib import Path
 import gzip
 import json
@@ -89,9 +86,12 @@ def request_s3_meas_data():
     'httpheaderfieldmanipulation', 'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 'riseupvpn',
     'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 'meekfrontedrequeststest', 'httprequests', 'httphost',
     'dnscheck', 'dnsconsistency', 'bridgereachability']
+
+    #test_types = ['tor']
     
     for test in test_types:
         s3_measurements_download(test)
+
     print('\nTemp files created... \n')
     cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
     print('\nInitializing temp files analysis... \n')
@@ -118,7 +118,6 @@ def request_s3_meas_data():
     for jsonl_file in file_list:
         with open(jsonl_file) as f:
             for line in f:
-                #data.append(json.loads(line))
                 result = json.loads(line)
                 if result['test_name'] == 'tor':
                     if result['test_keys']==None:
@@ -168,10 +167,9 @@ def request_s3_meas_data():
                         print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
                 except Exception as e: print(e)
 
-
     print('Removing temporal files...')
     for jsonl_file in file_list:
-        os.remove(jsonl_file)
+       os.remove(jsonl_file)
 
     time_end = time.time()
     print('\n\n1-Day Measurement ingest time: ', time_end-time_ini)
