@@ -42,7 +42,7 @@
 
                 <span id='variable_content_case_separation' class=""></span>
 
-                <table class="table table-striped mt-5 mb-3 datatable" id="events_to_separate">
+                <table class="table table-striped mt-5 mb-3 datatable" id="events_to_separate_datatable">
                     <thead>
                         <th class="text-center" scope="col">Event Type</th>
                         <th class="text-center" scope="col">Start Date</th>
@@ -59,13 +59,9 @@
                             <td> {{event.start_date}} </td>
                             <td> {{event.end_date}} </td>
                             <td> {{event.domain}} </td>
-                            <td>
+                            <td class='selector'>
                                 <select id={{event.id}} class='selector_quantity'>
-                                    <option value=1>1</option>
-                                    {% for i in cases_quantity %}
-                                        <option value={{i}}>{{i}}</option>
-                                    {% endfor %}
-                                
+                                    <option value=1 selected>1</option>
                                 </select>
                             </td>
                           </tr>
