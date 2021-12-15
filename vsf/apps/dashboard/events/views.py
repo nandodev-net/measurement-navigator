@@ -14,7 +14,7 @@ from datetime                                   import datetime, timedelta
 import json
 
 # Local imports
-from apps.main.measurements.models  import RawMeasurement
+from apps.main.measurements.models  import RawMeasurement, Measurement
 from apps.main.sites.models         import Site
 from apps.main.events.models        import Event
 from apps.main.cases.models         import Case
@@ -586,3 +586,79 @@ class EditMeasurements(VSFLoginRequiredMixin, DetailView):
 
         
         return context
+
+
+    def post(self, request, *args, **kwargs):
+        post = dict(request.POST)
+        print('ENTRANDO EN EL POST REQUEST')
+        print(post)
+
+        event_id = post['event_id'][0]
+        event = get_object_or_404(Event, pk=event_id)
+
+        try:
+            if 'measurements_to_delete[]' in post:
+                for measurement_id in post['measurements_to_delete[]']:
+                    measurement = get_object_or_404(Measurement, pk=measurement_id)
+
+                    dns_list = DNS.objects.filter(measurement = measurement).all()
+                    if dns_list:
+                        for dns in dns_list: 
+                            dns.event = None
+                            dns.save()
+
+                    tcp_list = TCP.objects.filter(measurement = measurement).all()
+                    if tcp_list:
+                        for tcp in tcp_list: 
+                            tcp.event = None
+                            tcp.save()
+
+                    http_list = HTTP.objects.filter(measurement = measurement).all()
+                    if http_list:
+                        for http in http_list:
+                            http.event = None
+                            http.save()
+
+
+                    tor_list = TOR.objects.filter(measurement = measurement).all()
+                    if tor_list:
+                        for tor in tor_list:
+                            tor.event = None
+                            tor.save()
+
+
+            if 'measurements_selected[]' in post:
+                for measurement_id in post['measurements_selected[]']:
+                    measurement = get_object_or_404(Measurement, pk=measurement_id)
+
+                    dns_list = DNS.objects.filter(measurement = measurement).all()
+                    if dns_list:
+                        for dns in dns_list: 
+                            dns.event = event
+                            dns.save()
+
+                    tcp_list = TCP.objects.filter(measurement = measurement).all()
+                    if tcp_list:
+                        for tcp in tcp_list: 
+                            tcp.event = event
+                            tcp.save()
+
+                    http_list = HTTP.objects.filter(measurement = measurement).all()
+                    if http_list:
+                        for http in http_list:
+                            http.even  =event
+                            http.save()
+
+
+                    tor_list = TOR.objects.filter(measurement = measurement).all()
+                    if tor_list:
+                        for tor in tor_list:
+                            tor.event = event
+                            tor.save()
+
+            return JsonResponse({'error' : None})
+        except Exception as e:
+            print(e)
+            print('--------------')
+            return HttpResponseBadRequest()
+

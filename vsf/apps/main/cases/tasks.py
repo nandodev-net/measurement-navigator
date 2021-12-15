@@ -40,26 +40,23 @@ def update_case_dates():
 
                 ordered_by_start_date = case.events.order_by('start_date')
                 ordered_by_end_date = case.events.order_by('end_date')
-                start_date_automatic = ordered_by_start_date.first().start_date.replace(tzinfo=None) or None
-                end_date_automatic = ordered_by_end_date.last().end_date.replace(tzinfo=None) or None
+
+                start_date_automatic = ordered_by_start_date.first().start_date.replace(tzinfo=None) if ordered_by_start_date.first() else None
+                end_date_automatic = ordered_by_end_date.last().end_date.replace(tzinfo=None) if ordered_by_end_date.last() else None
 
                 is_active = case.is_active
-                if end_date_automatic > datetime.now(): is_active = True
-                else: is_active = False
+                if not case.manual_is_active and end_date_automatic:
+                    if end_date_automatic > datetime.now(): is_active = True
+                    else: is_active = False
 
-                if case.start_date_manual and case.end_date_manual:
-                    case.update(
-                        start_date_automatic = start_date_automatic,
-                        end_date_automatic = end_date_automatic
-                    )
-                elif not (case.start_date_manual and case.end_date_manual):
-                    case.update(
-                        start_date_automatic = start_date_automatic,
-                        end_date_automatic = end_date_automatic,
-                        start_date = start_date_automatic,
-                        end_date = end_date_automatic,
-                        active = is_active,
-                    )
+                case.start_date_automatic = start_date_automatic
+                case.end_date_automatic = end_date_automatic
+                case.is_active = is_active
+
+                if not case.start_date_manual: case.start_date = start_date_automatic
+                if not  case.end_date_manual: case.end_date = end_date_automatic
+                    
+                case.save()
 
     except Exception as e:
         result['error'] = str(e)

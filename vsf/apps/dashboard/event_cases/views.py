@@ -708,5 +708,68 @@ class CaseChangeToActive(VSFLoginRequiredMixin, View):
 class CaseSeparation(VSFLoginRequiredMixin, View):
 
     def post(self, request, **kwargs):
-        # TO DO
-        return JsonResponse({'error' : None})
+
+        try:
+            post = dict(request.POST)
+            original_title = post['original_title'][0]
+            titles = post['titles[]']
+            titles_eng = post['titles_eng[]']
+            
+            cases_quantity = int(post['cases_quantity'][0])
+            if cases_quantity == 1: return JsonResponse({'error': 'You have to separate this case into two or more cases'})
+
+            one_match = False
+            for title in titles:
+                if title == original_title and one_match:
+                    return JsonResponse({
+                        'error' : 'Just one of the titles can be the same of the original one, the rest must be different'
+                    })
+                elif title == original_title: one_match = True 
+                
+            titles_contains_duplicates = any(titles.count(title) > 1 for title in titles)
+            if titles_contains_duplicates:
+                return JsonResponse({
+                    'error' : 'The titles must be differents'
+                })
+
+            events_id = post['ids[]']
+            events_by_cluster = post['values[]']
+            
+            events_associated = {}
+
+            for i in range(0, len(events_id)):
+                cluster = events_by_cluster[i]
+                event = Event.objects.get(id = events_id[i])
+                if cluster in events_associated: 
+                    events_associated[cluster].append(event)
+                else:
+                    events_associated[cluster] = [event]
+
+            if len(events_associated) == 1: return JsonResponse({'error': 'You have to pick at least one event to separate from the original'})
+
+            case_id = int(post['case_id'][0])
+            case = Case.objects.get(id = case_id)
+            category = case.category
+
+            from django.forms import model_to_dict
+            kwargs = model_to_dict(case, exclude=['id', 'title', 'title_eng', 'category', 'events'])
+            kwargs['category'] = category
+            case.delete()
+
+            for j in range(0, cases_quantity):
+                
+                new_instance_case = Case.objects.create(**kwargs)
+                new_instance_case.title = titles[j]
+                new_instance_case.title_eng = titles_eng[j]
+                events = events_associated[str(j + 1)]
+                for event in events:
+                    new_instance_case.events.add(event)
+
+                new_instance_case.save()
+
+            return JsonResponse({'error': None})
+
+        except Exception as e:
+            print(e)
+            print('-------------')
+            return HttpResponseBadRequest()

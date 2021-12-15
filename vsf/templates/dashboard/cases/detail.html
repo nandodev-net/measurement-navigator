@@ -314,53 +314,6 @@
 
 <script>
 
-  $( '#submit_case_separation' ).on('click', function() {
-    var case_id = $("#id").val();
-    var quantity = $( '#cases_quantity' ).val();
-    let titles = [];
-    let english_titles = [];
-    for (let i = 1; i <= quantity ; i++) {
-      titles.push($(`#title_${i}`).val());
-      english_titles.push($(`#title_eng_${i}`).val());
-    }
-    let events_id = []
-    let case_associated = []
-    $('#events_to_separate .selector_quantity').each(function() {
-      events_id.push(this.id);
-      case_associated.push(this.value);
-    });
-
-
-    $.ajax({
-        type: "POST",
-        url: '{% url "dashboard:event_cases:separate_case" %}',
-        data: {
-          case_id: case_id,
-          titles: titles,
-          english_titles: english_titles,
-          events_id: events_id,
-          case_associated: case_associated,
-          csrfmiddlewaretoken: "{{ csrf_token }}"
-        },
-        success: function(data) {
-
-        },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-          $("separate_case").modal("hide");
-          Swal.fire({
-              icon: "error",
-              title: "There was an error!",
-              text: `${ textStatus }, ${ errorThrown }`,
-              confirmButtonColor: "#dc3545",
-              confirmButtonText: "Continue"
-          });
-        }
-    });
-  
-
-
-
-  });
 
   $( '#separate_cases_button' ).on('click', function() {
 
@@ -369,10 +322,74 @@
 
   });
 
+  $( '#submit_case_separation' ).on('click', function() {
+    let quantity = $( '#cases_quantity' ).val();
+    let titles = [];
+    let titles_eng = [];
+    for (let i = 1; i <= quantity ; i++) {
+      titles.push($( '#title_' + i ).val());
+      titles_eng.push($( '#title_eng_' + i ).val());
+    }
+
+    var ids = []
+    var values = []
+    $('#events_to_separate_datatable tbody tr').each(function (index, tr) { 
+      var val = $(tr).find('.selector_quantity option:selected').val();
+      var id = $(tr).find('.selector_quantity').attr("id")
+      values.push(val);
+      ids.push(id);
+    });
+
+    jQuery.noConflict();
+    $.ajax({
+        type: "POST",
+        url: "{% url 'dashboard:event_cases:separate_case' %}",
+        data: { 
+          titles: titles,
+          titles_eng: titles_eng,
+          ids: ids,
+          values: values,
+          original_title: "{{object.title}}",
+          original_english_title: "{{object.title_eng}}",
+          case_id: "{{object.id}}",
+          cases_quantity: $( '#cases_quantity' ).val(),
+          csrfmiddlewaretoken: "{{ csrf_token }}"
+        },
+        success: function (data) {
+            if (data.error === null) {
+                Swal.fire({
+                    icon: "success",
+                    title: "Successful Case Separation!",
+                    confirmButtonColor: "#28a745",
+                    confirmButtonText: "Continue"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                      window.location = "{% url 'dashboard:event_cases:list_cases' %}";
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "Bad request.",
+                    text: `${data.error}`,
+                    confirmButtonColor: "#dc3545",
+                    confirmButtonText: "Continue"
+                });
+            }
+        
+        }
+    });
+
+        
+  });
+
   $( '#cases_quantity' ).on('change', function() {
     var quantity = this.value;
     
     $( '#variable_content_case_separation' ).empty();
+    let title = "{{object.title}}";
+    let title_eng = "{{object.title_eng}}";
+
 
     for (let i = 1; i <= quantity ; i++) {
       var cases_names_fields = `
@@ -381,19 +398,37 @@
           <div class='col-3'>
             <label> Title of the Case No. ${i}</label> 
           </div>
-          <div class='col-3'>
-            <input id="title_${i}" class="form-control" type="text" aria-label="Title" name="title_${i}" required/>
+          <div class='col-9'>
+            <input 
+              id="title_${i}" 
+              class="form-control" 
+              type="text" 
+              aria-label="Title" 
+              name="title_${i}" 
+              value=${title}
+              required
+            />
           </div>
           <div class='col-3'>
             <label> Title in English of the Case No. ${i}</label> 
           </div>
-          <div class='col-3'>
-            <input id="title_eng_${i}" class="form-control" type="text" aria-label="Title English" name="title_eng_${i}" required/>
+          <div class='col-9'>
+            <input 
+              id="title_eng_${i}" 
+              class="form-control" 
+              type="text" 
+              aria-label="Title English" 
+              name="title_eng_${i}" 
+              value=${title_eng}
+              required
+            />
           </div>
         </div>
         <br>
       `;
       $( '#variable_content_case_separation' ).append(cases_names_fields);
+      $( '#title_' + i ).val(title);
+      $( '#title_eng_' + i ).val(title_eng);
 
     }
 
@@ -407,6 +442,20 @@
     `);
 
     $( '#events_to_separate' ).show();
+
+    $('#events_to_separate_datatable tbody tr').each(function (index, tr) { 
+      
+      var selector = $(tr).find('.selector_quantity')
+      if (quantity == 2) {
+        
+      } else {
+        for (let i = 2; i <= quantity; i++) {
+          selector.append(`<option value=${i}>${i}</option>`)
+        }
+      }
+      
+    });
+
 
   });
 
