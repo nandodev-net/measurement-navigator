@@ -447,7 +447,7 @@
       
       var selector = $(tr).find('.selector_quantity')
       if (quantity == 2) {
-        
+        selector.append(`<option value=${2}>${2}</option>`)
       } else {
         for (let i = 2; i <= quantity; i++) {
           selector.append(`<option value=${i}>${i}</option>`)
