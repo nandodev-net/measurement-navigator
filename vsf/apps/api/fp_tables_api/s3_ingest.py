@@ -134,52 +134,52 @@ def request_s3_meas_data():
                         URL.objects.get_or_create(url=result['input'])
                         input_ = result['input'] 
 
-                # raw_object = RawMeasurement.objects.filter(input=input_, 
-                #                                             report_id=result['report_id'], 
-                #                                             probe_asn=result['probe_asn'], 
-                #                                             test_name=result['test_name'], 
-                #                                             measurement_start_time=result['measurement_start_time']
-                #                                             )
+                raw_object = RawMeasurement.objects.filter(input=input_, 
+                                                            report_id=result['report_id'], 
+                                                            probe_asn=result['probe_asn'], 
+                                                            test_name=result['test_name'], 
+                                                            measurement_start_time=result['measurement_start_time']
+                                                            )
 
 
 
-                # if len(raw_object) > 0:
-                #     print('REPETIDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
-                #     pass
-                # else:
+                if len(raw_object) > 0:
+                    print('REPETIDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
+                    pass
+                else:
 
-                from vsf.utils import Colors as c
-                try:
-                    print(c.magenta("Creating a new measurement"))
+                    from vsf.utils import Colors as c
+                    try:
+                        print(c.magenta("Creating a new measurement"))
 
-                    ms = RawMeasurement.objects.create(
-                        input=input_,
-                        report_id= result['report_id'],
-                        report_filename= result.get('report_filename','NO_AVAILABLE'), #
-                        options= result.get('options', "NO_AVAILABLE"), #
-                        probe_cc= result.get('probe_cc','VE'),
-                        probe_asn= result['probe_asn'],
-                        probe_ip=result.get('probe_ip'),
-                        data_format_version= result['data_format_version'],
-                        test_name= result['test_name'],
-                        test_start_time= result.get('test_start_time'),
-                        measurement_start_time= result['measurement_start_time'],
-                        test_runtime= result.get('test_runtime'),
-                        test_helpers= result.get('test_helpers',"NO_AVAILABLE"),
-                        software_name= result['software_name'],
-                        software_version= result['software_version'],
-                        test_version= result['test_version'],
-                        bucket_date= result.get('bucket_date'), #
-                        test_keys= result.get('test_keys',"NO_AVAILABLE"),
-                        annotations= result['annotations']
-                    )
+                        ms = RawMeasurement.objects.create(
+                            input=input_,
+                            report_id= result['report_id'],
+                            report_filename= result.get('report_filename','NO_AVAILABLE'), #
+                            options= result.get('options', "NO_AVAILABLE"), #
+                            probe_cc= result.get('probe_cc','VE'),
+                            probe_asn= result['probe_asn'],
+                            probe_ip=result.get('probe_ip'),
+                            data_format_version= result['data_format_version'],
+                            test_name= result['test_name'],
+                            test_start_time= result.get('test_start_time'),
+                            measurement_start_time= result['measurement_start_time'],
+                            test_runtime= result.get('test_runtime'),
+                            test_helpers= result.get('test_helpers',"NO_AVAILABLE"),
+                            software_name= result['software_name'],
+                            software_version= result['software_version'],
+                            test_version= result['test_version'],
+                            bucket_date= result.get('bucket_date'), #
+                            test_keys= result.get('test_keys',"NO_AVAILABLE"),
+                            annotations= result['annotations']
+                        )
 
-                    start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
-                    print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-                    if start_time_datetime < cache_min_date:
-                        cache_min_date = start_time_datetime
-                        print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
-                except Exception as e: print(e)
+                        start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
+                        print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+                        if start_time_datetime < cache_min_date:
+                            cache_min_date = start_time_datetime
+                            print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+                    except Exception as e: print(e)
 
     print('Removing temporal files...')
     for jsonl_file in file_list:
