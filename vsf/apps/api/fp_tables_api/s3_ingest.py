@@ -75,6 +75,7 @@ def checkPostData(data) -> bool:
 
         return True
 
+# 1-Day Avg time = 24424 segs. aprox 7hrs 47mins
 def request_s3_meas_data():
     print('-----------------------')
     print('S3 INGEST BEGINS')
@@ -133,6 +134,19 @@ def request_s3_meas_data():
                         URL.objects.get_or_create(url=result['input'])
                         input_ = result['input'] 
 
+                # raw_object = RawMeasurement.objects.filter(input=input_, 
+                #                                             report_id=result['report_id'], 
+                #                                             probe_asn=result['probe_asn'], 
+                #                                             test_name=result['test_name'], 
+                #                                             measurement_start_time=result['measurement_start_time']
+                #                                             )
+
+
+
+                # if len(raw_object) > 0:
+                #     print('REPETIDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
+                #     pass
+                # else:
 
                 from vsf.utils import Colors as c
                 try:
