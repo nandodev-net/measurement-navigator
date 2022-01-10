@@ -35,7 +35,7 @@ asn_list = [
 
 inicio = time.time()
 for current_asn in asn_list:
-    request_fp_data(test_name=None,since=n_months_ago, until=now, from_fastpath=False, probe_asn=current_asn, anomaly='true')
+    request_fp_data(test_name='web_connectivity',since=n_months_ago, until=now, from_fastpath=False, probe_asn=current_asn, anomaly='true')
 fin = time.time()
 
 print('Tiempo de ejecucion API: ', str(fin-inicio))
