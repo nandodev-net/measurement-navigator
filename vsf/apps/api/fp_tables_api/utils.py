@@ -377,157 +377,172 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
         #     continue
 
 
-            from vsf.utils import Colors as c
-            try:
-                print(c.magenta("Creating a new measurement"))
-                data = req.json()
-                if data['test_name'] == 'tor':
-                    input_ = 'tor'
-                else:
-                    input_ = data['input'] 
-                meas_cr_ini = time.time()
-                ms = RawMeasurement.objects.create(
-                    input=input_,
-                    report_id= data['report_id'],
-                    report_filename= data.get('report_filename','NO_AVAILABLE'), #
-                    options= data.get('options', "NO_AVAILABLE"), #
-                    probe_cc= data.get('probe_cc','VE'),
-                    probe_asn= data['probe_asn'],
-                    probe_ip=data.get('probe_ip'),
-                    data_format_version= data['data_format_version'],
-                    test_name= data['test_name'],
-                    test_start_time= data.get('test_start_time'),
-                    measurement_start_time= data['measurement_start_time'],
-                    test_runtime= data.get('test_runtime'),
-                    test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
-                    software_name= data['software_name'],
-                    software_version= data['software_version'],
-                    test_version= data['test_version'],
-                    bucket_date= data.get('bucket_date'), #
-                    test_keys= data['test_keys'],
-                    annotations= data['annotations']
-                )
-                meas_cr_fin = time.time()
-                if data['test_name'] == 'tor' and not tor:
-                    f.write('Tiempo en creacion medicion TOR: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    tor = True
-                elif data['test_name'] == 'web_connectivity' and not web_con:
-                    f.write('Tiempo en creacion medicion WebConn: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    web_con = True  
-                elif result['test_name'] == 'http_requests' and not http_requests:
-                    f.write('Tiempo en creacion medicion http_requests: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    http_requests = True  
-                elif result['test_name'] == 'dns_consistency' and not dns_consistency:
-                    f.write('Tiempo en creacion medicion dns_consistency: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    dns_consistency = True  
-                elif result['test_name'] == 'http_invalid_request_line' and not http_invalid_request_line:
-                    f.write('Tiempo en creacion medicion http_invalid_request_line: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    http_invalid_request_line = True 
-                elif result['test_name'] == 'bridge_reachability' and not bridge_reachability:
-                    f.write('Tiempo en creacion medicion bridge_reachability: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    bridge_reachability = True 
-                elif result['test_name'] == 'tcp_connect' and not tcp_connect:
-                    f.write('Tiempo en creacion medicion tcp_connect: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    tcp_connect = True 
-                elif result['test_name'] == 'tcp_connect' and not tcp_connect:
-                    f.write('Tiempo en creacion medicion tcp_connect: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    tcp_connect = True 
-                elif result['test_name'] == 'http_header_field_manipulation' and not http_header_field_manipulation:
-                    f.write('Tiempo en creacion medicion http_header_field_manipulation: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    http_header_field_manipulation = True 
-                elif result['test_name'] == 'http_host' and not http_host:
-                    f.write('Tiempo en creacion medicion http_host: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    http_host = True 
-                elif result['test_name'] == 'multi_protocol_traceroute' and not multi_protocol_traceroute:
-                    f.write('Tiempo en creacion medicion multi_protocol_traceroute: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    multi_protocol_traceroute = True 
-                elif result['test_name'] == 'meek_fronted_requests_test' and not meek_fronted_requests_test:
-                    f.write('Tiempo en creacion medicion meek_fronted_requests_test: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    meek_fronted_requests_test = True 
-                elif result['test_name'] == 'whatsapp' and not whatsapp:
-                    f.write('Tiempo en creacion medicion whatsapp: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    whatsapp = True
-                elif result['test_name'] == 'vanilla_tor' and not vanilla_tor:
-                    f.write('Tiempo en creacion medicion vanilla_tor: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    vanilla_tor = True
-                elif result['test_name'] == 'facebook_messenger' and not facebook_messenger:
-                    f.write('Tiempo en creacion medicion facebook_messenger: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    facebook_messenger = True
-                elif result['test_name'] == 'ndt' and not ndt:
-                    f.write('Tiempo en creacion medicion ndt: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    ndt = True
-                elif result['test_name'] == 'dash' and not dash:
-                    f.write('Tiempo en creacion medicion dash: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    dash = True
-                elif result['test_name'] == 'telegram' and not telegram:
-                    f.write('Tiempo en creacion medicion telegram: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    telegram = True
-                elif result['test_name'] == 'psiphon' and not psiphon:
-                    f.write('Tiempo en creacion medicion psiphon: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    psiphon = True
-                elif result['test_name'] == 'sni_blocking' and not sni_blocking:
-                    f.write('Tiempo en creacion medicion sni_blocking: ')
-                    f.write(str(meas_cr_fin-meas_cr_ini))
-                    f.write('\n')
-                    sni_blocking = True
-                
-                # fp.report_ready = True
-                # data_state = FastPath.DataReady.READY
-                start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
-                print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-                if start_time_datetime < cache_min_date:
-                    cache_min_date = start_time_datetime
-                    print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+            raw_object = RawMeasurement.objects.filter(input=result['input'], 
+                                                        report_id=result['report_id'], 
+                                                        probe_asn=result['probe_asn'], 
+                                                        test_name=result['test_name'], 
+                                                        measurement_start_time=result['measurement_start_time']
+                                                        )
 
-            except:
+
+
+            if len(raw_object) > 0:
+                print('REPETIDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
                 pass
-                # fp.report_ready = False
-                # data_state = FastPath.DataReady.UNDETERMINED
+            else:
 
-            # fp.data_ready = data_state
-            # fp.save()
-            # saved_measurements.append(fp.id)
 
-            # if limit and (len(saved_measurements) >= limit):
-            #     break
+                from vsf.utils import Colors as c
+                try:
+                    print(c.magenta("Creating a new measurement"))
+                    data = req.json()
+                    if data['test_name'] == 'tor':
+                        input_ = 'tor'
+                    else:
+                        input_ = data['input'] 
+                    meas_cr_ini = time.time()
+                    ms = RawMeasurement.objects.create(
+                        input=input_,
+                        report_id= data['report_id'],
+                        report_filename= data.get('report_filename','NO_AVAILABLE'), #
+                        options= data.get('options', "NO_AVAILABLE"), #
+                        probe_cc= data.get('probe_cc','VE'),
+                        probe_asn= data['probe_asn'],
+                        probe_ip=data.get('probe_ip'),
+                        data_format_version= data['data_format_version'],
+                        test_name= data['test_name'],
+                        test_start_time= data.get('test_start_time'),
+                        measurement_start_time= data['measurement_start_time'],
+                        test_runtime= data.get('test_runtime'),
+                        test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
+                        software_name= data['software_name'],
+                        software_version= data['software_version'],
+                        test_version= data['test_version'],
+                        bucket_date= data.get('bucket_date'), #
+                        test_keys= data['test_keys'],
+                        annotations= data['annotations']
+                    )
+                    meas_cr_fin = time.time()
+                    if data['test_name'] == 'tor' and not tor:
+                        f.write('Tiempo en creacion medicion TOR: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        tor = True
+                    elif data['test_name'] == 'web_connectivity' and not web_con:
+                        f.write('Tiempo en creacion medicion WebConn: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        web_con = True  
+                    elif result['test_name'] == 'http_requests' and not http_requests:
+                        f.write('Tiempo en creacion medicion http_requests: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        http_requests = True  
+                    elif result['test_name'] == 'dns_consistency' and not dns_consistency:
+                        f.write('Tiempo en creacion medicion dns_consistency: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        dns_consistency = True  
+                    elif result['test_name'] == 'http_invalid_request_line' and not http_invalid_request_line:
+                        f.write('Tiempo en creacion medicion http_invalid_request_line: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        http_invalid_request_line = True 
+                    elif result['test_name'] == 'bridge_reachability' and not bridge_reachability:
+                        f.write('Tiempo en creacion medicion bridge_reachability: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        bridge_reachability = True 
+                    elif result['test_name'] == 'tcp_connect' and not tcp_connect:
+                        f.write('Tiempo en creacion medicion tcp_connect: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        tcp_connect = True 
+                    elif result['test_name'] == 'tcp_connect' and not tcp_connect:
+                        f.write('Tiempo en creacion medicion tcp_connect: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        tcp_connect = True 
+                    elif result['test_name'] == 'http_header_field_manipulation' and not http_header_field_manipulation:
+                        f.write('Tiempo en creacion medicion http_header_field_manipulation: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        http_header_field_manipulation = True 
+                    elif result['test_name'] == 'http_host' and not http_host:
+                        f.write('Tiempo en creacion medicion http_host: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        http_host = True 
+                    elif result['test_name'] == 'multi_protocol_traceroute' and not multi_protocol_traceroute:
+                        f.write('Tiempo en creacion medicion multi_protocol_traceroute: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        multi_protocol_traceroute = True 
+                    elif result['test_name'] == 'meek_fronted_requests_test' and not meek_fronted_requests_test:
+                        f.write('Tiempo en creacion medicion meek_fronted_requests_test: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        meek_fronted_requests_test = True 
+                    elif result['test_name'] == 'whatsapp' and not whatsapp:
+                        f.write('Tiempo en creacion medicion whatsapp: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        whatsapp = True
+                    elif result['test_name'] == 'vanilla_tor' and not vanilla_tor:
+                        f.write('Tiempo en creacion medicion vanilla_tor: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        vanilla_tor = True
+                    elif result['test_name'] == 'facebook_messenger' and not facebook_messenger:
+                        f.write('Tiempo en creacion medicion facebook_messenger: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        facebook_messenger = True
+                    elif result['test_name'] == 'ndt' and not ndt:
+                        f.write('Tiempo en creacion medicion ndt: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        ndt = True
+                    elif result['test_name'] == 'dash' and not dash:
+                        f.write('Tiempo en creacion medicion dash: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        dash = True
+                    elif result['test_name'] == 'telegram' and not telegram:
+                        f.write('Tiempo en creacion medicion telegram: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        telegram = True
+                    elif result['test_name'] == 'psiphon' and not psiphon:
+                        f.write('Tiempo en creacion medicion psiphon: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        psiphon = True
+                    elif result['test_name'] == 'sni_blocking' and not sni_blocking:
+                        f.write('Tiempo en creacion medicion sni_blocking: ')
+                        f.write(str(meas_cr_fin-meas_cr_ini))
+                        f.write('\n')
+                        sni_blocking = True
+                    
+                    # fp.report_ready = True
+                    # data_state = FastPath.DataReady.READY
+                    start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
+                    print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+                    if start_time_datetime < cache_min_date:
+                        cache_min_date = start_time_datetime
+                        print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+
+                except:
+                    pass
+                    # fp.report_ready = False
+                    # data_state = FastPath.DataReady.UNDETERMINED
+
+                # fp.data_ready = data_state
+                # fp.save()
+                # saved_measurements.append(fp.id)
+
+                # if limit and (len(saved_measurements) >= limit):
+                #     break
 
     day_time_end=time.time()
     f.write('Tiempo en un dia de ingesta: ')
