@@ -12,16 +12,30 @@ from apps.api.fp_tables_api.utils import request_fp_data # To request data from 
 
 # Third party imports 
 from datetime                     import datetime, timedelta
+import time
 
 # --- Request data from ooni --- #
 
 print("Requesting ooni data")
-today = datetime.now()
 
+
+today = datetime.now()
 now = today - timedelta(days=2) 
 n_months_ago = today - timedelta(days=3) 
 now = now.strftime("%Y-%m-%d") 
 n_months_ago = n_months_ago.strftime("%Y-%m-%d")
-request_fp_data(test_name=None,since=n_months_ago, until=now, from_fastpath=False, )
 
+# ASNs
+
+asn_list = [
+    'AS8048', #cantv
+    'AS27717' #digitel
+]
+
+inicio = time.time()
+for current_asn in asn_list:
+    request_fp_data(test_name=None,since=n_months_ago, until=now, from_fastpath=False, probe_asn=current_asn)
+fin = time.time()
+
+print('Tiempo de ejecucion API: ', str(fin-inicio))
 # ------------------------------ #
