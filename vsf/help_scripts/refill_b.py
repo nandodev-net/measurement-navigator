@@ -20,11 +20,12 @@ print("Requesting ooni data")
 
 
 today = datetime.now()
-now = today - timedelta(days=2) 
-n_months_ago = today - timedelta(days=3) 
+now = today - timedelta(days=3) 
+n_months_ago = today - timedelta(days=4) 
 now = now.strftime("%Y-%m-%d") 
 n_months_ago = n_months_ago.strftime("%Y-%m-%d")
 
+print('Since: ', n_months_ago, ' at 00:00 To: ', now,' at 00:00')
 
 asn_list = [
     'AS11562',  #netuno
