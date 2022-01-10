@@ -20,8 +20,8 @@ print("Requesting ooni data")
 
 
 today = datetime.now()
-now = today - timedelta(days=3) 
-n_months_ago = today - timedelta(days=4) 
+now = today - timedelta(days=4) 
+n_months_ago = today - timedelta(days=5) 
 now = now.strftime("%Y-%m-%d") 
 n_months_ago = n_months_ago.strftime("%Y-%m-%d")
 
