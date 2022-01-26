@@ -510,6 +510,7 @@ class CaseDeleteView(VSFLoginRequiredMixin, View):
             if len(to_be_orphaned_as)>0:
                 for event in to_be_orphaned_as:
                     case.events.remove(event)
+                    ###AGREGAR MOD DE STATS
             case.delete()
 
         return HttpResponse("OK")
