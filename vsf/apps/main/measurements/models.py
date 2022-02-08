@@ -73,7 +73,7 @@ class RawMeasurement(TimeStampedModel):
     test_version = models.CharField(max_length=100)
     bucket_date = models.DateTimeField(null=True)
     # boolean created for post_save the raw_measurement
-    is_processed = models.BooleanField(default=False)
+    is_processed = models.BooleanField(default=True)
 
     # ---------------------------------------------- #
     test_keys = JSONField()
