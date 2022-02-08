@@ -26,7 +26,7 @@ from .sync_measurements import *
 from vsf.bulk_create_manager import BulkCreateManager
 from apps.main.measurements.post_save_utils import post_save_rawmeasurement
 
-meas_path = './media/ooni_d/'
+meas_path = './media/ooni_data/'
 
 gz_list = []
 file_list = []
@@ -90,43 +90,43 @@ def request_s3_meas_data():
     time_ini = time.time()
     cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
 
-    # test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 'torsf', 'httpinvalidrequestline', 
-    # 'httpheaderfieldmanipulation', 'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 'riseupvpn',
-    # 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 'meekfrontedrequeststest', 'httprequests', 'httphost',
-    # 'dnscheck', 'dnsconsistency', 'bridgereachability']
+    test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 'torsf', 'httpinvalidrequestline', 
+    'httpheaderfieldmanipulation', 'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 'riseupvpn',
+    'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 'meekfrontedrequeststest', 'httprequests', 'httphost',
+    'dnscheck', 'dnsconsistency', 'bridgereachability']
 
-    # #test_types = ['tor']
+    #test_types = ['tor']
     
     
-    # for test in test_types:
-    #     s3_measurements_download(test)
+    for test in test_types:
+        s3_measurements_download(test)
 
-    # print('\nTemp files created... \n')
-    # print('\nInitializing temp files analysis... \n')
+    print('\nTemp files created... \n')
+    print('\nInitializing temp files analysis... \n')
 
-    # time.sleep(2)
-    # print('Colecting Gzip files...')
-    # for child in Path(meas_path).iterdir():
-    #     if child.is_file():
-    #         gz_list.append(meas_path + child.name)
+    time.sleep(2)
+    print('Colecting Gzip files...')
+    for child in Path(meas_path).iterdir():
+        if child.is_file():
+            gz_list.append(meas_path + child.name)
 
 
-    # print('Decompressing Gzip files...')
-    # for gz_file in gz_list:
-    #     with gzip.open(gz_file,'r') as current_file:
-    #         file_content = current_file.read()
-    #         file = open(gz_file[:-3], "w")
-    #         file.write(file_content.decode('UTF-8'))
-    #         file.close()
-    #         file_list.append(gz_file[:-3])
-    #         os.remove(gz_file)
+    print('Decompressing Gzip files...')
+    for gz_file in gz_list:
+        with gzip.open(gz_file,'r') as current_file:
+            file_content = current_file.read()
+            file = open(gz_file[:-3], "w")
+            file.write(file_content.decode('UTF-8'))
+            file.close()
+            file_list.append(gz_file[:-3])
+            os.remove(gz_file)
 
     file_list = os.listdir(meas_path)
     print('Reading JSONL files...')
     for jsonl_file in file_list:
         new_meas_list = []
-        #with open(jsonl_file) as f:
-        with open(meas_path+'/'+jsonl_file) as f:
+        with open(jsonl_file) as f:
+        #with open(meas_path+'/'+jsonl_file) as f:
             for line in f:
                 result = json.loads(line)
                 if result['test_name'] == 'tor':
@@ -175,6 +175,7 @@ def request_s3_meas_data():
                         bucket_date= result.get('bucket_date'), #
                         test_keys= result.get('test_keys',"NO_AVAILABLE"),
                         annotations= result['annotations']
+                        is_processed= False
                     )
                     print ('-----LISTANDO------')
                     new_meas_list.append(ms)
@@ -196,9 +197,9 @@ def request_s3_meas_data():
 
         except Exception as e: print(e)
 
-    # print('Removing temporal files...')
-    # for jsonl_file in file_list:
-    #    os.remove(jsonl_file)
+    print('Removing temporal files...')
+    for jsonl_file in file_list:
+       os.remove(jsonl_file)
     
     print('>>>>PROCESSING INFO<<<<')
     paginator = Paginator(RawMeasurement.objects.filter(is_processed=False), 500)
