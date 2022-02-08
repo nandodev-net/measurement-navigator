@@ -25,7 +25,8 @@ def generate_public_stats():
         blocked_domains_by_asn=[]
         blocked_sites_by_asn=[]
         for domain in domains:
-            event = Event.objects.filter(domain=domain, asn=asn, it_continues=True, closed=False, confirmed=True)
+            event = Event.objects.filter(domain=domain, asn=asn, it_continues=True, closed=False, confirmed=True) #TODO eventypes en filtrado
+
             if len(event)>0 and domain.domain_name not in blocked_domains_by_asn:
                 blocked_domains_by_asn.append(domain.domain_name)
             if domain.site and domain.site.name not in blocked_sites_by_asn:

@@ -1,35 +1,41 @@
 """
     Additional functionality to perform validations in the post request
 """
+
+from rest_framework.response    import Response
+from rest_framework.generics    import  (
+    ListCreateAPIView,
+    RetrieveUpdateAPIView,
+)
+from rest_framework.status      import  (
+    HTTP_200_OK,
+    HTTP_201_CREATED,
+    HTTP_204_NO_CONTENT,
+    HTTP_400_BAD_REQUEST,
+    HTTP_404_NOT_FOUND,
+    HTTP_412_PRECONDITION_FAILED
+)
 import django.utils.timezone    as timezone
 import django.utils.dateparse   as dateparse
-from django.core.paginator import Paginator
+from   django.shortcuts         import render
+from   rest_framework.views     import APIView
+from   django.core.cache        import cache
 
 # Third party imports
+import sys
 import time
 import json
 import requests
 import datetime
 import collections
-from pathlib import Path
-import gzip
-import json
-import os
+from urllib.parse   import urlencode
 
 # Local imports
 from apps.main.sites.models             import URL
+from apps.main.asns.models              import ASN
+from .                                  import utils
 from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
-from .sync_measurements import *
-
-# Bulk create manager import
-from vsf.bulk_create_manager import BulkCreateManager
-from apps.main.measurements.post_save_utils import post_save_rawmeasurement
-
-meas_path = './media/ooni_d/'
-
-gz_list = []
-file_list = []
 
 def checkPostData(data) -> bool:
         """
@@ -80,137 +86,234 @@ def checkPostData(data) -> bool:
 
         return True
 
-# 1-Day Avg time = 24424 segs. aprox 7hrs 47mins
-def request_s3_meas_data():
-    print('----------------------- 1263.9786775112152')
-    print('S3 INGEST BEGINS')
-    print('-----------------------')
-    print('-----------------------')
-    print('\nRequesting ooni data... \n')
-    time_ini = time.time()
+def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None, anomaly: str=None, from_fastpath: bool = True, limit:int =None) -> (int, [str]):
+    """
+        Given the start and end date for a set of measurements,
+        perform a get request to ooni in order to get the
+        recent fast path objects and store them in the database.
+
+        The function returns the status code for the ooni request
+        and a list of tid corresponding to the actually added measurements.
+
+        'from_fastpath' param remains unused for now, we need this in the first place
+        to recover not-ready measurements, but that concept seems to be gone. 
+
+        'limit' param provides a limit for the maximum ammount of stored measurements
+
+        both the since and until date should be in the following format:
+        YYYY-mm-dd.
+    """
+
+    day_time_ini = time.time()
+
+    page_req = False
+
+
+
+    f = open( 'informe0.txt', 'w')
+    f.write('INICIANDO DIAGNOSTICO ')
+    f.write(datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
+    f.write('\n')
+    
+   
+    # Data validation
+    data = {
+        'probe_cc': 'VE', # In case we want to add other countries
+        'since': since,
+        'until': until,
+        'limit': 200,
+        'order':'asc',
+        'order_by' : 'measurement_start_time',
+        'probe_asn': probe_asn,
+        'anomaly': anomaly,
+    }
+
+    if test_name:
+        data['test_name'] = test_name
+
+    # Check if the post data is valid:
+    if not checkPostData(data):
+        raise AttributeError("Unvalid input arguments. Given: \n" +
+                                "   Since: " + since + "\n" +
+                                "   Until: " + until)
+
+    # Perform a get request from Ooni
+    next_url = 'https://api.ooni.io/api/v1/measurements?' + urlencode(data)
+    from vsf.utils import Colors as c
+    print(c.magenta("\n\nRequesting URL: \n"), next_url)
+
+    # We store the earliest measurement so we can update just what needs to be updated 
+    # when computing hard flags and updating measurement count
     cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
 
-    # test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 'torsf', 'httpinvalidrequestline', 
-    # 'httpheaderfieldmanipulation', 'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 'riseupvpn',
-    # 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 'meekfrontedrequeststest', 'httprequests', 'httphost',
-    # 'dnscheck', 'dnsconsistency', 'bridgereachability']
+    objects = [] # List of measurement objects obtained
+    status_code = 200
 
-    # #test_types = ['tor']
-    
-    
-    # for test in test_types:
-    #     s3_measurements_download(test)
-
-    # print('\nTemp files created... \n')
-    # print('\nInitializing temp files analysis... \n')
-
-    # time.sleep(2)
-    # print('Colecting Gzip files...')
-    # for child in Path(meas_path).iterdir():
-    #     if child.is_file():
-    #         gz_list.append(meas_path + child.name)
-
-
-    # print('Decompressing Gzip files...')
-    # for gz_file in gz_list:
-    #     with gzip.open(gz_file,'r') as current_file:
-    #         file_content = current_file.read()
-    #         file = open(gz_file[:-3], "w")
-    #         file.write(file_content.decode('UTF-8'))
-    #         file.close()
-    #         file_list.append(gz_file[:-3])
-    #         os.remove(gz_file)
-
-    file_list = os.listdir(meas_path)
-    print('Reading JSONL files...')
-    for jsonl_file in file_list:
-        new_meas_list = []
-        #with open(jsonl_file) as f:
-        with open(meas_path+'/'+jsonl_file) as f:
-            for line in f:
-                result = json.loads(line)
-                if result['test_name'] == 'tor':
-                    if result['test_keys']==None:
-                        continue
-                    else:
-                        URL.objects.get_or_create(url='no_url')
-                        input_ = 'no_url'
-                else:
-                    if result['input'] == None:
-                        URL.objects.get_or_create(url='no_url')
-                        input_ = 'no_url'
-                    else:
-                        URL.objects.get_or_create(url=result['input'])
-                        input_ = result['input'] 
-
-
-                # Checking if the RM exists on the db
-                raw_object = RawMeasurement.objects.filter(input=input_, 
-                                                            report_id=result['report_id'], 
-                                                            probe_asn=result['probe_asn'], 
-                                                            test_name=result['test_name'], 
-                                                            measurement_start_time=result['measurement_start_time']
-                                                            )
-                if len(raw_object) > 0:
-                    pass
-                else:
-                    print ('-----CREANDO OBJETO------')
-                    ms = RawMeasurement(
-                        input=input_,
-                        report_id= result['report_id'],
-                        report_filename= result.get('report_filename','NO_AVAILABLE'), #
-                        options= result.get('options', "NO_AVAILABLE"), #
-                        probe_cc= result.get('probe_cc','VE'),
-                        probe_asn= result['probe_asn'],
-                        probe_ip=result.get('probe_ip'),
-                        data_format_version= result['data_format_version'],
-                        test_name= result['test_name'],
-                        test_start_time= result.get('test_start_time'),
-                        measurement_start_time= result['measurement_start_time'],
-                        test_runtime= result.get('test_runtime'),
-                        test_helpers= result.get('test_helpers',"NO_AVAILABLE"),
-                        software_name= result['software_name'],
-                        software_version= result['software_version'],
-                        test_version= result['test_version'],
-                        bucket_date= result.get('bucket_date'), #
-                        test_keys= result.get('test_keys',"NO_AVAILABLE"),
-                        annotations= result['annotations']
-                    )
-                    print ('-----LISTANDO------')
-                    new_meas_list.append(ms)
-
-
-        from vsf.utils import Colors as c
+    while next_url != None:
         try:
-            print(c.magenta(">>>>>Creating a new measurement<<<<"))
+            # If it wasn't able to get the next page data, just store the currently added data
+            # @TODO we have to think what to do in this cases
+            pag_ini = time.time()
+            req = requests.get(next_url)
+            pag_fin = time.time()
+        
+            if not page_req:
+                f.write('Tiempo en request a ooni de una pagina de 200 mediciones parciales: ')
+                f.write(str(pag_fin-pag_ini))
+                f.write('\n')
+                page_req = True
+ 
+            status_code = req.status_code
+            assert(req.status_code == 200)
+        except:
+            break
 
-            bulk_mgr = BulkCreateManager(chunk_size=500)
-            for ms_ in new_meas_list:
-                bulk_mgr.add(ms_)
-                start_time_datetime = datetime.datetime.strptime(ms_.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
-                print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-                if start_time_datetime < cache_min_date:
-                    cache_min_date = start_time_datetime
-                    print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
-            bulk_mgr.done()
+        # Since everything went ok, we get the data in json format
+        data = req.json()
+        metadata = data['metadata']
+        next_url = metadata.get('next_url')
+        if from_fastpath:
+            results = filter(
+            # since we just care about fast path data, we filter the ones whose measurement_id begins with
+            # 'temp-fid' according to what Federico (from ooni) told us
+            # UPDATE: by today, measurement_id is not reported by the ooni queries, so
+            # we can't rely on it to check whether a measurement comes from the fastpath or not.
+            # @TODO
+            lambda res:
+                    res.get('measurement_id',"").startswith("temp-fid"),
+                data['results']
+            )
+        else:
+            results = data['results']
 
-        except Exception as e: print(e)
-
-    # print('Removing temporal files...')
-    # for jsonl_file in file_list:
-    #    os.remove(jsonl_file)
+        # for result in results:
+        #     print(c.green('Creating FastPath Meas'), result['report_id'])
+        #     fp = FastPath(
+        #         anomaly = result['anomaly'],
+        #         confirmed = result['confirmed'],
+        #         failure = result['failure'],
+        #         input= str(result['input']),
+        #         tid= result.get('measurement_id'),
+        #         measurement_start_time=result['measurement_start_time'],
+        #         measurement_url=result['measurement_url'],
+        #         probe_asn= result['probe_asn'],
+        #         probe_cc= result['probe_cc'],
+        #         report_id= result['report_id'],
+        #         scores=result['scores'],
+        #         test_name= result['test_name'],
+        #     )
+        #     URL.objects.get_or_create(url=fp.input)
+        #     objects.append(fp)
+        
+        for result in results:
+            URL.objects.get_or_create(url=str(result['input']))
+            if result['test_name'] == 'tor':
+                URL.objects.get_or_create(url='tor')
+            try:
+                req = requests.get(result['measurement_url'])
+                status_code = req.status_code
+                assert req.status_code == 200
+            except:
+                continue
     
-    print('>>>>PROCESSING INFO<<<<')
-    paginator = Paginator(RawMeasurement.objects.filter(is_processed=False), 500)
-    for page in range(1, paginator.num_pages + 1):
-        raw_list_to_process = paginator.page(page).object_list
-        print(str(len(raw_list_to_process)))
-        post_save_rawmeasurement(raw_list_to_process)
+
+    # Save only if this measurement does not exists
+    # saved_measurements = []
+    # for fp in objects:
+    #     try:
+    #         fp_old = FastPath.objects.get(
+    #                     measurement_start_time=fp.measurement_start_time,
+    #                     input=fp.input,
+    #                     report_id=fp.report_id,
+    #                     test_name=fp.test_name)
+    #         continue
+    #     except FastPath.DoesNotExist:
+    #         pass
+
+        #Since this measurement is not yet stored, try to recover its complete data if possible
+        # try:
+        #     req = requests.get(fp.measurement_url)
+        #     status_code = req.status_code
+        #     assert req.status_code == 200
+        # except:
+        #     fp.save()
+        #     saved_measurements.append(fp.id)
+        #     continue
 
 
-    time_end = time.time()
-    print('\n\n1-Day Measurement ingest time: ', time_end-time_ini)
-    return (True)
+            raw_object = RawMeasurement.objects.filter(input=result['input'], 
+                                                        report_id=result['report_id'], 
+                                                        probe_asn=result['probe_asn'], 
+                                                        test_name=result['test_name'], 
+                                                        measurement_start_time=result['measurement_start_time']
+                                                        )
+
+
+
+            if len(raw_object) > 0:
+                pass
+            else:
+
+
+                from vsf.utils import Colors as c
+                try:
+                    print(c.magenta("Creating a new measurement"))
+                    data = req.json()
+                    if data['test_name'] == 'tor':
+                        input_ = 'tor'
+                    else:
+                        input_ = data['input'] 
+
+                    ms = RawMeasurement.objects.create(
+                        input=input_,
+                        report_id= data['report_id'],
+                        report_filename= data.get('report_filename','NO_AVAILABLE'), #
+                        options= data.get('options', "NO_AVAILABLE"), #
+                        probe_cc= data.get('probe_cc','VE'),
+                        probe_asn= data['probe_asn'],
+                        probe_ip=data.get('probe_ip'),
+                        data_format_version= data['data_format_version'],
+                        test_name= data['test_name'],
+                        test_start_time= data.get('test_start_time'),
+                        measurement_start_time= data['measurement_start_time'],
+                        test_runtime= data.get('test_runtime'),
+                        test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
+                        software_name= data['software_name'],
+                        software_version= data['software_version'],
+                        test_version= data['test_version'],
+                        bucket_date= data.get('bucket_date'), #
+                        test_keys= data['test_keys'],
+                        annotations= data['annotations']
+                    )
+
+                    # fp.report_ready = True
+                    # data_state = FastPath.DataReady.READY
+                    start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
+                    print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+                    if start_time_datetime < cache_min_date:
+                        cache_min_date = start_time_datetime
+                        print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+
+                except:
+                    pass
+                    # fp.report_ready = False
+                    # data_state = FastPath.DataReady.UNDETERMINED
+
+                # fp.data_ready = data_state
+                # fp.save()
+                # saved_measurements.append(fp.id)
+
+                # if limit and (len(saved_measurements) >= limit):
+                #     break
+
+    day_time_end=time.time()
+    f.write('Tiempo en un dia de ingesta: ')
+    f.write(str(day_time_end-day_time_ini))
+    f.write('\n')   
+    f.close()
+
+    return (status_code)
+
 
 def update_measurement_table(
                             n_measurements : int = None,

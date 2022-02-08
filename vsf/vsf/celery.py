@@ -89,12 +89,6 @@ app.conf.beat_schedule = {
         'args':(),
         'options' : {'queue' : user_transient_queue_name}
     },
-    'check-anomaly-rate':{
-        'task':'apps.main.early_alerts.tasks.check_anomaly_rate',
-        'schedule':600,
-        'args' : (),
-        'options' : {'queue' : transient_queue_name}
-    },
     'update-case-dates':{
         'task':'apps.main.cases.tasks.update_case_dates',
         'schedule':3600,

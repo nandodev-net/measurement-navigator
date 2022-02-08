@@ -13,8 +13,9 @@ from .utils         import update_last_anomaly_rate_on_config
 class EARLY_ALERTS_TASKS:
     CHECK_ANOMALY_RATE = "anomaly_rate"
     
-@shared_task(time_limit=3600, vsf_name=EARLY_ALERTS_TASKS.CHECK_ANOMALY_RATE, base=VSFTask)
 def check_anomaly_rate():
+    #@shared_task(time_limit=3600, vsf_name=EARLY_ALERTS_TASKS.CHECK_ANOMALY_RATE, base=VSFTask)
+
     name = EARLY_ALERTS_TASKS.CHECK_ANOMALY_RATE    
     state = cache.get(name)
     result = {'error' : None, 'ran' : False}

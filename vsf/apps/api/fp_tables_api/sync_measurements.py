@@ -12,9 +12,9 @@ _BUCKET = 'ooni-data-eu-fra'
 _PREFIX = 'raw/'
 
 
-def s3_measurements_download(test_type:str='webconnectivity', country:str='VE', 
-    first_date:str=(dt.date.today() - dt.timedelta(days=0)), 
-    last_date:str=(dt.date.today() + dt.timedelta(days=1)),
+def s3_measurements_download(test_type:str='tor', country:str='VE', 
+    first_date:str=(dt.date.today() - dt.timedelta(days=3)), 
+    last_date:str=(dt.date.today() - dt.timedelta(days=2)),
     output_dir:str='./media/ooni_data/'):
 
     print('Since: ', first_date, ' at 00:00 To: ', last_date,' at 00:00')

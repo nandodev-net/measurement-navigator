@@ -72,6 +72,8 @@ class RawMeasurement(TimeStampedModel):
     software_version = models.CharField(max_length=100)
     test_version = models.CharField(max_length=100)
     bucket_date = models.DateTimeField(null=True)
+    # boolean created for post_save the raw_measurement
+    is_processed = models.BooleanField(default=False)
 
     # ---------------------------------------------- #
     test_keys = JSONField()
@@ -81,38 +83,38 @@ class RawMeasurement(TimeStampedModel):
     # ---------------------------------------------- #
 
 
-    def save(   self, 
-                force_insert=False, 
-                force_update=False, 
-                using=None,
-                update_fields=None):
-        # When creating a new RawMeasurement, we have to add an entry
-        # for the Measurement table pointing to this new model
-        super().save(force_insert, force_update, using, update_fields)
+    # def save(   self, 
+    #             force_insert=False, 
+    #             force_update=False, 
+    #             using=None,
+    #             update_fields=None):
+    #     # When creating a new RawMeasurement, we have to add an entry
+    #     # for the Measurement table pointing to this new model
+    #     super().save(force_insert, force_update, using, update_fields)
 
 
-        # To avoid circular imports, we need to import this here:
-        from .submeasurements.utils  import create_sub_measurements
-        from .utils import anomaly
+    #     # To avoid circular imports, we need to import this here:
+    #     from .submeasurements.utils  import create_sub_measurements
+    #     from .utils import anomaly
         
-        measurement = Measurement(raw_measurement=self, anomaly=anomaly(self))
-        try:
-            measurement.save()
-        except:
-            # try to delete the already stored raw measurement
-            # if there was an error in somthing else
-            for m in RawMeasurement.objects.all(id=self.id):
-                m.delete()
-            return
+    #     measurement = Measurement(raw_measurement=self, anomaly=anomaly(self))
+    #     try:
+    #         measurement.save()
+    #     except:
+    #         # try to delete the already stored raw measurement
+    #         # if there was an error in somthing else
+    #         for m in RawMeasurement.objects.filter(id=self.id):
+    #             m.delete()
+    #         return
         
-        (sub_measurements,_) = create_sub_measurements(self)
+    #     (sub_measurements,_) = create_sub_measurements(self)
 
-        for sb in sub_measurements:
-            sb.measurement = measurement
-            try:
-                sb.save()
-            except: 
-                pass # I think we should put some loggin here @TODO
+    #     for sb in sub_measurements:
+    #         sb.measurement = measurement
+    #         try:
+    #             sb.save()
+    #         except: 
+    #             pass # I think we should put some loggin here @TODO
 
         
 
