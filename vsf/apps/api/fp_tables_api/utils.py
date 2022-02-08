@@ -20,6 +20,8 @@ import django.utils.dateparse   as dateparse
 from   django.shortcuts         import render
 from   rest_framework.views     import APIView
 from   django.core.cache        import cache
+from django.core.paginator import Paginator
+
 
 # Third party imports
 import sys
@@ -36,6 +38,10 @@ from apps.main.asns.models              import ASN
 from .                                  import utils
 from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
+
+# Bulk create manager import
+from vsf.bulk_create_manager import BulkCreateManager
+from apps.main.measurements.post_save_utils import post_save_rawmeasurement
 
 def checkPostData(data) -> bool:
         """
@@ -106,47 +112,9 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
 
     day_time_ini = time.time()
 
-    web_con = False
-    tor = False
-    http_requests = False
-    dns_consistency = False
-    http_invalid_request_line = False
-    bridge_reachability = False
-    tcp_connect = False
-    http_header_field_manipulation = False
-    http_host = False
-    multi_protocol_traceroute = False
-    meek_fronted_requests_test = False
-    whatsapp = False
-    vanilla_tor = False
-    facebook_messenger = False
-    ndt = False
-    dash = False
-    telegram = False
-    psiphon = False
-    sni_blocking = False   
-
     page_req = False
 
-    meas_req_wc = False
-    meas_req_tr = False
-    meas_req_http_requests = False
-    meas_req_dns_consistency = False
-    meas_req_http_invalid_request_line = False
-    meas_req_bridge_reachability = False
-    meas_req_tcp_connect = False
-    meas_req_http_header_field_manipulation = False
-    meas_req_http_host = False
-    meas_req_multi_protocol_traceroute = False
-    meas_req_meek_fronted_requests_test = False
-    meas_req_whatsapp = False
-    meas_req_vanilla_tor = False
-    meas_req_facebook_messenger = False
-    meas_req_ndt = False
-    meas_req_dash = False
-    meas_req_telegram = False
-    meas_req_psiphon = False
-    meas_req_sni_blocking = False  
+
 
     f = open( 'informe0.txt', 'w')
     f.write('INICIANDO DIAGNOSTICO ')
@@ -159,7 +127,7 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
         'probe_cc': 'VE', # In case we want to add other countries
         'since': since,
         'until': until,
-        'limit': 100,
+        'limit': 200,
         'order':'asc',
         'order_by' : 'measurement_start_time',
         'probe_asn': probe_asn,
@@ -194,9 +162,10 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
             pag_ini = time.time()
             req = requests.get(next_url)
             pag_fin = time.time()
+            new_meas_list = []
         
             if not page_req:
-                f.write('Tiempo en request a ooni de una pagina de 100 mediciones parciales: ')
+                f.write('Tiempo en request a ooni de una pagina de 200 mediciones parciales: ')
                 f.write(str(pag_fin-pag_ini))
                 f.write('\n')
                 page_req = True
@@ -224,325 +193,87 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
         else:
             results = data['results']
 
-        # for result in results:
-        #     print(c.green('Creating FastPath Meas'), result['report_id'])
-        #     fp = FastPath(
-        #         anomaly = result['anomaly'],
-        #         confirmed = result['confirmed'],
-        #         failure = result['failure'],
-        #         input= str(result['input']),
-        #         tid= result.get('measurement_id'),
-        #         measurement_start_time=result['measurement_start_time'],
-        #         measurement_url=result['measurement_url'],
-        #         probe_asn= result['probe_asn'],
-        #         probe_cc= result['probe_cc'],
-        #         report_id= result['report_id'],
-        #         scores=result['scores'],
-        #         test_name= result['test_name'],
-        #     )
-        #     URL.objects.get_or_create(url=fp.input)
-        #     objects.append(fp)
-        
+
+        # to TOR measurements we create an 'tor' url, because TOR is not a webpage it is a service.
         for result in results:
             URL.objects.get_or_create(url=str(result['input']))
             if result['test_name'] == 'tor':
                 URL.objects.get_or_create(url='tor')
             try:
-                meas_ini = time.time()
                 req = requests.get(result['measurement_url'])
-                meas_fin = time.time()
-                if result['test_name'] == 'tor' and not meas_req_tr:
-                    f.write('Tiempo en request a ooni de una medicion TOR: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_tr = True
-                elif result['test_name'] == 'web_connectivity' and not meas_req_wc:
-                    f.write('Tiempo en request a ooni de una medicion WebConn: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_wc = True
-                elif result['test_name'] == 'http_requests' and not meas_req_http_requests:
-                    f.write('Tiempo en request a ooni de una medicion http_requests: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_http_requests = True  
-                elif result['test_name'] == 'dns_consistency' and not meas_req_dns_consistency:
-                    f.write('Tiempo en request a ooni de una medicion dns_consistency: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_dns_consistency = True  
-                elif result['test_name'] == 'http_invalid_request_line' and not meas_req_http_invalid_request_line:
-                    f.write('Tiempo en request a ooni de una medicion http_invalid_request_line: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_http_invalid_request_line = True 
-                elif result['test_name'] == 'bridge_reachability' and not meas_req_bridge_reachability:
-                    f.write('Tiempo en request a ooni de una medicion bridge_reachability: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_bridge_reachability = True 
-                elif result['test_name'] == 'tcp_connect' and not meas_req_tcp_connect:
-                    f.write('Tiempo en request a ooni de una medicion tcp_connect: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_tcp_connect = True 
-                elif result['test_name'] == 'http_header_field_manipulation' and not meas_req_http_header_field_manipulation:
-                    f.write('Tiempo en request a ooni de una medicion http_header_field_manipulation: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_http_header_field_manipulation = True 
-                elif result['test_name'] == 'http_host' and not meas_req_http_host:
-                    f.write('Tiempo en request a ooni de una medicion http_host: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_http_host = True 
-                elif result['test_name'] == 'multi_protocol_traceroute' and not meas_req_multi_protocol_traceroute:
-                    f.write('Tiempo en request a ooni de una medicion multi_protocol_traceroute: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_multi_protocol_traceroute = True 
-                elif result['test_name'] == 'meek_fronted_requests_test' and not meas_req_meek_fronted_requests_test:
-                    f.write('Tiempo en request a ooni de una medicion meek_fronted_requests_test: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_meek_fronted_requests_test = True 
-                elif result['test_name'] == 'whatsapp' and not meas_req_whatsapp:
-                    f.write('Tiempo en request a ooni de una medicion whatsapp: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_whatsapp = True
-                elif result['test_name'] == 'vanilla_tor' and not meas_req_vanilla_tor:
-                    f.write('Tiempo en request a ooni de una medicion vanilla_tor: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_vanilla_tor = True
-                elif result['test_name'] == 'facebook_messenger' and not meas_req_facebook_messenger:
-                    f.write('Tiempo en request a ooni de una medicion facebook_messenger: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_facebook_messenger = True
-                elif result['test_name'] == 'ndt' and not meas_req_ndt:
-                    f.write('Tiempo en request a ooni de una medicion ndt: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_ndt = True
-                elif result['test_name'] == 'dash' and not meas_req_dash:
-                    f.write('Tiempo en request a ooni de una medicion dash: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_dash = True
-                elif result['test_name'] == 'telegram' and not meas_req_telegram:
-                    f.write('Tiempo en request a ooni de una medicion telegram: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_telegram = True
-                elif result['test_name'] == 'psiphon' and not meas_req_psiphon:
-                    f.write('Tiempo en request a ooni de una medicion psiphon: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_psiphon = True
-                elif result['test_name'] == 'sni_blocking' and not meas_req_sni_blocking:
-                    f.write('Tiempo en request a ooni de una medicion sni_blocking: ')
-                    f.write(str(meas_fin-meas_ini))
-                    f.write('\n')
-                    meas_req_sni_blocking = True
-
                 status_code = req.status_code
                 assert req.status_code == 200
             except:
                 continue
     
-
-    # Save only if this measurement does not exists
-    # saved_measurements = []
-    # for fp in objects:
-    #     try:
-    #         fp_old = FastPath.objects.get(
-    #                     measurement_start_time=fp.measurement_start_time,
-    #                     input=fp.input,
-    #                     report_id=fp.report_id,
-    #                     test_name=fp.test_name)
-    #         continue
-    #     except FastPath.DoesNotExist:
-    #         pass
-
-        #Since this measurement is not yet stored, try to recover its complete data if possible
-        # try:
-        #     req = requests.get(fp.measurement_url)
-        #     status_code = req.status_code
-        #     assert req.status_code == 200
-        # except:
-        #     fp.save()
-        #     saved_measurements.append(fp.id)
-        #     continue
-
-
+            # checking if the Raw meas exists, if not we create it.
             raw_object = RawMeasurement.objects.filter(input=result['input'], 
                                                         report_id=result['report_id'], 
                                                         probe_asn=result['probe_asn'], 
                                                         test_name=result['test_name'], 
                                                         measurement_start_time=result['measurement_start_time']
                                                         )
-
-
-
             if len(raw_object) > 0:
-                print('REPETIDOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO')
                 pass
             else:
+
+                print ('-----CREANDO OBJETO------')
+
+                data = req.json()
+                if data['test_name'] == 'tor':
+                    input_ = 'tor'
+                else:
+                    input_ = data['input'] 
+                ms = RawMeasurement(
+                    input=input_,
+                    report_id= data['report_id'],
+                    report_filename= data.get('report_filename','NO_AVAILABLE'), #
+                    options= data.get('options', "NO_AVAILABLE"), #
+                    probe_cc= data.get('probe_cc','VE'),
+                    probe_asn= data['probe_asn'],
+                    probe_ip=data.get('probe_ip'),
+                    data_format_version= data['data_format_version'],
+                    test_name= data['test_name'],
+                    test_start_time= data.get('test_start_time'),
+                    measurement_start_time= data['measurement_start_time'],
+                    test_runtime= data.get('test_runtime'),
+                    test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
+                    software_name= data['software_name'],
+                    software_version= data['software_version'],
+                    test_version= data['test_version'],
+                    bucket_date= data.get('bucket_date'), #
+                    test_keys= data['test_keys'],
+                    annotations= data['annotations']
+                )
+                print ('-----LISTANDO------')
+                new_meas_list.append(ms)
 
 
                 from vsf.utils import Colors as c
                 try:
                     print(c.magenta("Creating a new measurement"))
-                    data = req.json()
-                    if data['test_name'] == 'tor':
-                        input_ = 'tor'
-                    else:
-                        input_ = data['input'] 
-                    meas_cr_ini = time.time()
-                    ms = RawMeasurement.objects.create(
-                        input=input_,
-                        report_id= data['report_id'],
-                        report_filename= data.get('report_filename','NO_AVAILABLE'), #
-                        options= data.get('options', "NO_AVAILABLE"), #
-                        probe_cc= data.get('probe_cc','VE'),
-                        probe_asn= data['probe_asn'],
-                        probe_ip=data.get('probe_ip'),
-                        data_format_version= data['data_format_version'],
-                        test_name= data['test_name'],
-                        test_start_time= data.get('test_start_time'),
-                        measurement_start_time= data['measurement_start_time'],
-                        test_runtime= data.get('test_runtime'),
-                        test_helpers= data.get('test_helpers',"NO_AVAILABLE"),
-                        software_name= data['software_name'],
-                        software_version= data['software_version'],
-                        test_version= data['test_version'],
-                        bucket_date= data.get('bucket_date'), #
-                        test_keys= data['test_keys'],
-                        annotations= data['annotations']
-                    )
-                    meas_cr_fin = time.time()
-                    if data['test_name'] == 'tor' and not tor:
-                        f.write('Tiempo en creacion medicion TOR: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        tor = True
-                    elif data['test_name'] == 'web_connectivity' and not web_con:
-                        f.write('Tiempo en creacion medicion WebConn: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        web_con = True  
-                    elif result['test_name'] == 'http_requests' and not http_requests:
-                        f.write('Tiempo en creacion medicion http_requests: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        http_requests = True  
-                    elif result['test_name'] == 'dns_consistency' and not dns_consistency:
-                        f.write('Tiempo en creacion medicion dns_consistency: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        dns_consistency = True  
-                    elif result['test_name'] == 'http_invalid_request_line' and not http_invalid_request_line:
-                        f.write('Tiempo en creacion medicion http_invalid_request_line: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        http_invalid_request_line = True 
-                    elif result['test_name'] == 'bridge_reachability' and not bridge_reachability:
-                        f.write('Tiempo en creacion medicion bridge_reachability: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        bridge_reachability = True 
-                    elif result['test_name'] == 'tcp_connect' and not tcp_connect:
-                        f.write('Tiempo en creacion medicion tcp_connect: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        tcp_connect = True 
-                    elif result['test_name'] == 'tcp_connect' and not tcp_connect:
-                        f.write('Tiempo en creacion medicion tcp_connect: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        tcp_connect = True 
-                    elif result['test_name'] == 'http_header_field_manipulation' and not http_header_field_manipulation:
-                        f.write('Tiempo en creacion medicion http_header_field_manipulation: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        http_header_field_manipulation = True 
-                    elif result['test_name'] == 'http_host' and not http_host:
-                        f.write('Tiempo en creacion medicion http_host: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        http_host = True 
-                    elif result['test_name'] == 'multi_protocol_traceroute' and not multi_protocol_traceroute:
-                        f.write('Tiempo en creacion medicion multi_protocol_traceroute: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        multi_protocol_traceroute = True 
-                    elif result['test_name'] == 'meek_fronted_requests_test' and not meek_fronted_requests_test:
-                        f.write('Tiempo en creacion medicion meek_fronted_requests_test: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        meek_fronted_requests_test = True 
-                    elif result['test_name'] == 'whatsapp' and not whatsapp:
-                        f.write('Tiempo en creacion medicion whatsapp: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        whatsapp = True
-                    elif result['test_name'] == 'vanilla_tor' and not vanilla_tor:
-                        f.write('Tiempo en creacion medicion vanilla_tor: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        vanilla_tor = True
-                    elif result['test_name'] == 'facebook_messenger' and not facebook_messenger:
-                        f.write('Tiempo en creacion medicion facebook_messenger: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        facebook_messenger = True
-                    elif result['test_name'] == 'ndt' and not ndt:
-                        f.write('Tiempo en creacion medicion ndt: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        ndt = True
-                    elif result['test_name'] == 'dash' and not dash:
-                        f.write('Tiempo en creacion medicion dash: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        dash = True
-                    elif result['test_name'] == 'telegram' and not telegram:
-                        f.write('Tiempo en creacion medicion telegram: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        telegram = True
-                    elif result['test_name'] == 'psiphon' and not psiphon:
-                        f.write('Tiempo en creacion medicion psiphon: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        psiphon = True
-                    elif result['test_name'] == 'sni_blocking' and not sni_blocking:
-                        f.write('Tiempo en creacion medicion sni_blocking: ')
-                        f.write(str(meas_cr_fin-meas_cr_ini))
-                        f.write('\n')
-                        sni_blocking = True
-                    
-                    # fp.report_ready = True
-                    # data_state = FastPath.DataReady.READY
-                    start_time_datetime = datetime.datetime.strptime(ms.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
-                    print(c.green(f"Trying to update cache, start time: {ms.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-                    if start_time_datetime < cache_min_date:
-                        cache_min_date = start_time_datetime
-                        print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
 
+                    # Agregando data por lotes de 200
+                    bulk_mgr = BulkCreateManager(chunk_size=200)
+                    for ms_ in new_meas_list:
+                        bulk_mgr.add(ms_)
+                        start_time_datetime = datetime.datetime.strptime(ms_.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
+                        print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+                        if start_time_datetime < cache_min_date:
+                            cache_min_date = start_time_datetime
+                            print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+                    bulk_mgr.done()
                 except:
                     pass
-                    # fp.report_ready = False
-                    # data_state = FastPath.DataReady.UNDETERMINED
 
-                # fp.data_ready = data_state
-                # fp.save()
-                # saved_measurements.append(fp.id)
 
-                # if limit and (len(saved_measurements) >= limit):
-                #     break
+    print('>>>>PROCESSING INFO<<<<')
+    paginator = Paginator(RawMeasurement.objects.filter(is_processed=False), 500)
+    for page in range(1, paginator.num_pages + 1):
+        raw_list_to_process = paginator.page(page).object_list
+        print(str(len(raw_list_to_process)))
+        post_save_rawmeasurement(raw_list_to_process)
+
 
     day_time_end=time.time()
     f.write('Tiempo en un dia de ingesta: ')

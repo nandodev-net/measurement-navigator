@@ -311,8 +311,8 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
         ooni_blocking = ooni_blocking == "tcp_ip"
 
     new_tcp = []
-    for tcp_connect_item in tcp_connect:
-        try:
+    try:
+        for tcp_connect_item in tcp_connect:
             if  (tcp_connect_item['status']['blocked'] is not None) and (
                 (tcp_connect_item['status']['success'] is not None)):
                 new_tcp.append (TCP(
@@ -328,8 +328,9 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
                     probe_cc=measurement.probe_cc,
                     input=measurement.input
                 ))
-        except:
-            pass
+
+    except:
+        pass
 
     return new_tcp
 

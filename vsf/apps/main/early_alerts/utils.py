@@ -11,7 +11,7 @@ from typing   import List
 from .                      import ooni_data_processor as ooni_dp
 from .models                import Emails, Input,EarlyAlertConfig
 from vsf.utils              import Colors as c  
-from vsf.settings.settings  import EMAIL_HOST_USER
+#from vsf.settings.settings  import EMAIL_HOST_USER
 
 
 def update_last_anomaly_rate_on_config():
