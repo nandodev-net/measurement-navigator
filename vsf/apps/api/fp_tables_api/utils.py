@@ -113,13 +113,6 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
     day_time_ini = time.time()
 
     page_req = False
-
-
-
-    f = open( 'informe0.txt', 'w')
-    f.write('INICIANDO DIAGNOSTICO ')
-    f.write(datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
-    f.write('\n')
     
    
     # Data validation
@@ -127,7 +120,7 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
         'probe_cc': 'VE', # In case we want to add other countries
         'since': since,
         'until': until,
-        'limit': 200,
+        'limit': 500,
         'order':'asc',
         'order_by' : 'measurement_start_time',
         'probe_asn': probe_asn,
@@ -152,22 +145,18 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
     # when computing hard flags and updating measurement count
     cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
 
-    objects = [] # List of measurement objects obtained
+
     status_code = 200
 
     while next_url != None:
         try:
             # If it wasn't able to get the next page data, just store the currently added data
             # @TODO we have to think what to do in this cases
-            pag_ini = time.time()
+
             req = requests.get(next_url)
-            pag_fin = time.time()
             new_meas_list = []
         
             if not page_req:
-                f.write('Tiempo en request a ooni de una pagina de 200 mediciones parciales: ')
-                f.write(str(pag_fin-pag_ini))
-                f.write('\n')
                 page_req = True
  
             status_code = req.status_code
@@ -214,11 +203,11 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
                                                         measurement_start_time=result['measurement_start_time']
                                                         )
             if len(raw_object) > 0:
+                print('entra')
                 pass
             else:
 
                 print ('-----CREANDO OBJETO------')
-
                 data = req.json()
                 if data['test_name'] == 'tor':
                     input_ = 'tor'
@@ -243,32 +232,34 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
                     test_version= data['test_version'],
                     bucket_date= data.get('bucket_date'), #
                     test_keys= data['test_keys'],
-                    annotations= data['annotations']
+                    annotations= data['annotations'],
+                    is_processed = False
                 )
                 print ('-----LISTANDO------')
                 new_meas_list.append(ms)
+                print(len(new_meas_list))
 
 
-                from vsf.utils import Colors as c
-                try:
-                    print(c.magenta("Creating a new measurement"))
+        from vsf.utils import Colors as c
+        try:
+            print(c.magenta("Creating a new measurement"))
 
-                    # Agregando data por lotes de 200
-                    bulk_mgr = BulkCreateManager(chunk_size=200)
-                    for ms_ in new_meas_list:
-                        bulk_mgr.add(ms_)
-                        start_time_datetime = datetime.datetime.strptime(ms_.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
-                        print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-                        if start_time_datetime < cache_min_date:
-                            cache_min_date = start_time_datetime
-                            print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
-                    bulk_mgr.done()
-                except:
-                    pass
+            # Agregando data por lotes de 200
+            bulk_mgr = BulkCreateManager(chunk_size=500)
+            for ms_ in new_meas_list:
+                bulk_mgr.add(ms_)
+                start_time_datetime = datetime.datetime.strptime(ms_.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
+                print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+                if start_time_datetime < cache_min_date:
+                    cache_min_date = start_time_datetime
+                    print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+            bulk_mgr.done()
+        except:
+            pass
 
 
     print('>>>>PROCESSING INFO<<<<')
-    paginator = Paginator(RawMeasurement.objects.filter(is_processed=False), 500)
+    paginator = Paginator(RawMeasurement.objects.filter(is_processed=False).order_by('test_start_time'), 500)
     for page in range(1, paginator.num_pages + 1):
         raw_list_to_process = paginator.page(page).object_list
         print(str(len(raw_list_to_process)))
@@ -276,10 +267,9 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
 
 
     day_time_end=time.time()
-    f.write('Tiempo en un dia de ingesta: ')
-    f.write(str(day_time_end-day_time_ini))
-    f.write('\n')   
-    f.close()
+    print('Tiempo en un dia de ingesta: ')
+    print(str(day_time_end-day_time_ini))
+
 
     return (status_code)
 

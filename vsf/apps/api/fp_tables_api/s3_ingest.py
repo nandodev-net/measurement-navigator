@@ -209,7 +209,7 @@ def request_s3_meas_data(
        os.remove(jsonl_file)
     
     print('>>>>PROCESSING INFO<<<<')
-    paginator = Paginator(RawMeasurement.objects.filter(is_processed=False), 500)
+    paginator = Paginator(RawMeasurement.objects.filter(is_processed=False).order_by('test_start_time'), 500)
     for page in range(1, paginator.num_pages + 1):
         raw_list_to_process = paginator.page(page).object_list
         print(str(len(raw_list_to_process)))
