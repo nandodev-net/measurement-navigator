@@ -81,25 +81,32 @@ def checkPostData(data) -> bool:
         return True
 
 # 1-Day Avg time = 24424 segs. aprox 7hrs 47mins
-def request_s3_meas_data():
-    print('----------------------- 1263.9786775112152')
+def request_s3_meas_data(
+    test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 
+    'torsf', 'httpinvalidrequestline', 'httpheaderfieldmanipulation', 
+    'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 
+    'riseupvpn', 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 
+    'meekfrontedrequeststest', 'httprequests', 'httphost','dnscheck', 
+    'dnsconsistency', 'bridgereachability'],
+    first_date:str=(datetime.date.today() - datetime.timedelta(days=3)), 
+    last_date:str=(datetime.date.today() - datetime.timedelta(days=2)),
+    country: str = 'VE',
+    output_dir: str = './media/ooni_data/'  
+    ):
+
+
+    print('-----------------------')
     print('S3 INGEST BEGINS')
     print('-----------------------')
     print('-----------------------')
     print('\nRequesting ooni data... \n')
     time_ini = time.time()
     cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
-
-    test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 'torsf', 'httpinvalidrequestline', 
-    'httpheaderfieldmanipulation', 'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 'riseupvpn',
-    'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 'meekfrontedrequeststest', 'httprequests', 'httphost',
-    'dnscheck', 'dnsconsistency', 'bridgereachability']
-
-    #test_types = ['tor']
     
     
     for test in test_types:
-        s3_measurements_download(test)
+        print(first_date)
+        s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
 
     print('\nTemp files created... \n')
     print('\nInitializing temp files analysis... \n')
@@ -174,7 +181,7 @@ def request_s3_meas_data():
                         test_version= result['test_version'],
                         bucket_date= result.get('bucket_date'), #
                         test_keys= result.get('test_keys',"NO_AVAILABLE"),
-                        annotations= result['annotations']
+                        annotations= result['annotations'],
                         is_processed= False
                     )
                     print ('-----LISTANDO------')
