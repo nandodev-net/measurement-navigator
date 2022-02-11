@@ -1,4 +1,5 @@
 from django.conf        import settings
+import os
 import datetime as dt
 import boto3
 from botocore import UNSIGNED
@@ -16,6 +17,9 @@ def s3_measurements_download(test_type:str='tor', country:str='VE',
     first_date:str=(dt.date.today() - dt.timedelta(days=3)), 
     last_date:str=(dt.date.today() - dt.timedelta(days=2)),
     output_dir:str='./media/ooni_data/'):
+
+    # Collecting all file names in temp directory
+    out_dir_files = os.listdir(output_dir)
 
     print('Since: ', first_date, ' at 00:00 To: ', last_date,' at 00:00')
 
@@ -42,8 +46,13 @@ def s3_measurements_download(test_type:str='tor', country:str='VE',
                         key = entry['Key']
                         file_path = PosixPath(key)
                         if file_path.name.endswith('.jsonl.gz'):
-                            print('Downloading Gzip file: ',file_path)
-                            file_test_type = file_path.parent.name
                             url = SplitResult(
                                         's3', page['Name'], key, None, None)
-                            conn.download_file(url.netloc, url.path, output_dir+url.path.replace(prefix, ''))
+                            print(out_dir_files)
+                            print(url.path.replace(prefix, ''))
+                            if str(url.path.replace(prefix, '')) not in out_dir_files and str(url.path.replace(prefix, ''))[:-3] not in out_dir_files:
+                                print('Downloading Gzip file: ',file_path)
+                                conn.download_file(url.netloc, url.path, output_dir+url.path.replace(prefix, ''))
+                            else:
+                                print('Skip download, file: ',url.path.replace(prefix, ''),'already exists...')
+                                pass
