@@ -28,8 +28,6 @@ from apps.main.measurements.post_save_utils import post_save_rawmeasurement
 
 meas_path = './media/ooni_data/'
 
-gz_list = []
-file_list = []
 
 def checkPostData(data) -> bool:
         """
@@ -80,7 +78,7 @@ def checkPostData(data) -> bool:
 
         return True
 
-# 1-Day Avg time = 24424 segs. aprox 7hrs 47mins
+
 def request_s3_meas_data(
     test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 
     'torsf', 'httpinvalidrequestline', 'httpheaderfieldmanipulation', 
@@ -102,7 +100,8 @@ def request_s3_meas_data(
     print('\nRequesting ooni data... \n')
     time_ini = time.time()
     cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
-    
+    # output_dir file list
+    gz_list = []
     
     for test in test_types:
         print(first_date)
@@ -120,20 +119,22 @@ def request_s3_meas_data(
 
     print('Decompressing Gzip files...')
     for gz_file in gz_list:
-        with gzip.open(gz_file,'r') as current_file:
-            file_content = current_file.read()
-            file = open(gz_file[:-3], "w")
-            file.write(file_content.decode('UTF-8'))
-            file.close()
-            file_list.append(gz_file[:-3])
-            os.remove(gz_file)
+        file_name = gz_file
+        if not gz_file.endswith('jsonl'):
+            with gzip.open(gz_file,'r') as current_file:
+                file_content = current_file.read()
+                file = open(gz_file[:-3], "w")
+                file.write(file_content.decode('UTF-8'))
+                file.close()
+                file_name = gz_file[:-3]
+                # Deleting Gzip file
+                os.remove(gz_file)
+        else:
+            pass
 
-    file_list = os.listdir(meas_path)
-    print('Reading JSONL files...')
-    for jsonl_file in file_list:
+        print('Reading JSONL file...')
         new_meas_list = []
-        with open(jsonl_file) as f:
-        #with open(meas_path+'/'+jsonl_file) as f:
+        with open(file_name) as f:
             for line in f:
                 result = json.loads(line)
                 if result['test_name'] == 'tor':
@@ -160,6 +161,7 @@ def request_s3_meas_data(
                                                             )
                 if len(raw_object) > 0:
                     pass
+
                 else:
                     print ('-----CREANDO OBJETO------')
                     ms = RawMeasurement(
@@ -186,11 +188,11 @@ def request_s3_meas_data(
                     )
                     print ('-----LISTANDO------')
                     new_meas_list.append(ms)
-
+        
 
         from vsf.utils import Colors as c
         try:
-            print(c.magenta(">>>>>Creating a new measurement<<<<"))
+            print(c.magenta(">>>>>Bulk Creating new measurements<<<<"))
 
             bulk_mgr = BulkCreateManager(chunk_size=500)
             for ms_ in new_meas_list:
@@ -201,13 +203,11 @@ def request_s3_meas_data(
                     cache_min_date = start_time_datetime
                     print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
             bulk_mgr.done()
+            os.remove(file_name)
 
         except Exception as e: print(e)
 
-    print('Removing temporal files...')
-    for jsonl_file in file_list:
-       os.remove(jsonl_file)
-    
+           
     print('>>>>PROCESSING INFO<<<<')
     paginator = Paginator(RawMeasurement.objects.filter(is_processed=False).order_by('test_start_time'), 500)
     for page in range(1, paginator.num_pages + 1):
@@ -219,6 +219,7 @@ def request_s3_meas_data(
     time_end = time.time()
     print('\n\n1-Day Measurement ingest time: ', time_end-time_ini)
     return (True)
+
 
 def update_measurement_table(
                             n_measurements : int = None,
