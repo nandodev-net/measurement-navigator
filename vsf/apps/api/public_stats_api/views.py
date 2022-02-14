@@ -128,10 +128,11 @@ class SpeedInternetByISPTimeline(generics.GenericAPIView):
                     asn = asn
                 ).first()
 
-                aux.append({
-                    'date': date.strftime("%b %d, %Y"),
-                    'download_average': float(speed_data.download_average)
-                })
+                if speed_data:
+                    aux.append({
+                        'date': date.strftime("%b %d, %Y"),
+                        'download_average': float(speed_data.download_average)
+                    })
 
             response.append({
                 asn.name: aux
