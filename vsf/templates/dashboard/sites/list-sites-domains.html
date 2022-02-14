@@ -53,7 +53,7 @@
 
             <tbody>
                 {% for domain in domains %}
-                <tr id="{{domain.id}}" alt="{{ domain.domain }}">
+                <tr id="{{ domain.id }}" alt="{{ domain.domain }}">
                     <td class="text-center">
                         <a class="text-info" href="{% url 'dashboard:measurement:list_measurements'%}?input={{ domain.domain }}">
                             {{ domain.domain }}
@@ -139,6 +139,10 @@
 
         /* Save site only if all inputs are filled */
         $("#vsf-sites-input, #vsf-description-input").on("change paste keyup", function() {
+            console.log($("#vsf-sites-input").val());
+            console.log($("#vsf-description-input").val());
+
+
             if ($("#vsf-sites-input").val() === "" || $("#vsf-description-input").val() === "") {
                 $("#create-sites-btn").attr('disabled', true);
             } else {
