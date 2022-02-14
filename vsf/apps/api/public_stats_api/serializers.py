@@ -16,3 +16,11 @@ class CategoryPublicStatsDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = CategoryPublicStats
         fields = '__all__'
+
+class SpeedInternetTimelineSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    download_average = serializers.FloatField()
+
+class SpeedInternetByISPTimelineSerializer(serializers.Serializer):    
+    date = serializers.DateField()
+    download_average = serializers.FloatField()
