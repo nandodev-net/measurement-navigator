@@ -83,39 +83,6 @@ class RawMeasurement(TimeStampedModel):
     # ---------------------------------------------- #
 
 
-    # def save(   self, 
-    #             force_insert=False, 
-    #             force_update=False, 
-    #             using=None,
-    #             update_fields=None):
-    #     # When creating a new RawMeasurement, we have to add an entry
-    #     # for the Measurement table pointing to this new model
-    #     super().save(force_insert, force_update, using, update_fields)
-
-
-    #     # To avoid circular imports, we need to import this here:
-    #     from .submeasurements.utils  import create_sub_measurements
-    #     from .utils import anomaly
-        
-    #     measurement = Measurement(raw_measurement=self, anomaly=anomaly(self))
-    #     try:
-    #         measurement.save()
-    #     except:
-    #         # try to delete the already stored raw measurement
-    #         # if there was an error in somthing else
-    #         for m in RawMeasurement.objects.filter(id=self.id):
-    #             m.delete()
-    #         return
-        
-    #     (sub_measurements,_) = create_sub_measurements(self)
-
-    #     for sb in sub_measurements:
-    #         sb.measurement = measurement
-    #         try:
-    #             sb.save()
-    #         except: 
-    #             pass # I think we should put some loggin here @TODO
-
         
 
 class Measurement(TimeStampedModel):
