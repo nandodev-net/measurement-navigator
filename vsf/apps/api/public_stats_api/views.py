@@ -72,12 +72,22 @@ class StatsByASN(generics.GenericAPIView):
 class StatsByCategory(generics.GenericAPIView):
     def get(self, request):
         stats = CategoryPublicStats.objects.all()    
-        response = []
+        response = {
+            'category_name_1': '',
+            'blocked_domains_1': 0,
+            'category_name_2': '',
+            'blocked_domains_2': 0
+        }
+        
         for stat in stats:
-            response.append({
-                'category': stat.category.category_spa,
-                'blocked_domains': stat.blocked_domains_by_category
-            })    
+            if stat.blocked_domains_by_category > response['blocked_domains_1']:
+                response['category_name_1'] = stat.category.category_spa
+                response['blocked_domains_1'] = int(stat.blocked_domains_by_category)
+            elif stat.blocked_domains_by_category > response['blocked_domains_2']:
+                response['category_name_2'] = stat.category.category_spa
+                response['blocked_domains_2'] = int(stat.blocked_domains_by_category)
+
+
         response_json = json.dumps(response)
         return Response(json.loads(response_json), status=status.HTTP_200_OK)    
 
