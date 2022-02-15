@@ -45,3 +45,38 @@ class CategoryPublicStats(TimeStampedModel):
         on_delete=models.DO_NOTHING,
         primary_key=True,
     )
+
+class SpeedInternet(TimeStampedModel):
+
+    day = models.DateField(
+        primary_key=True
+    )
+    download_average = models.DecimalField(
+        max_digits = 4,
+        decimal_places = 1
+    )
+    upload_average = models.DecimalField(
+        max_digits = 4,
+        decimal_places = 1        
+    )
+
+
+class SpeedInternetByISP(TimeStampedModel):
+    
+    day = models.DateField()
+
+    download_average = models.DecimalField(
+        max_digits = 4,
+        decimal_places = 1
+    )
+    upload_average = models.DecimalField(
+        max_digits = 4,
+        decimal_places = 1        
+    )
+    asn = models.ForeignKey(
+        ASN,
+        null=False,
+        on_delete=models.DO_NOTHING,
+    )
+
+
