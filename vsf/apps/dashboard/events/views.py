@@ -215,8 +215,8 @@ class EventsData(VSFLoginRequiredMixin, BaseDatatableView):
                 'is_manual_start_date':event.start_date_manual,
                 'current_end_date': current_end_date,
                 'is_manual_end_date':event.end_date_manual,
-                'domain': event.domain.domain_name, 
-                'site': event.domain.site.name if event.domain.site else "No site associated", 
+                'domain': event.domain.domain_name if event.domain else None, 
+                'site': event.domain.site.name if event.domain and event.domain.site else "No site associated", 
                 'asn': event.asn.asn,
                 'muted': event.muted,
                 'it_continues': event.it_continues
