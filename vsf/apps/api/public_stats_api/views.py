@@ -59,12 +59,14 @@ class GetCategoryPublicStats(generics.GenericAPIView):
 class StatsByASN(generics.GenericAPIView):
     def get(self, request):
         stats = AsnPublicStats.objects.all()
-        response = []
+        response = {
+            'names': [],
+            'blocked_domains': []
+        }
         for stat in stats:
-            response.append({
-                'asn': stat.asn.name,
-                'blocked_domains': stat.blocked_domains_by_asn
-            })    
+            response['names'].append(stat.asn.name)
+            response['blocked_domains'].append(stat.bloacked_domains_by_asn)
+  
         response_json = json.dumps(response)
         return Response(json.loads(response_json), status=status.HTTP_200_OK)    
         
@@ -101,19 +103,24 @@ class SpeedInternetTimeline(generics.GenericAPIView):
         
         last_day = SpeedInternet.objects.last().day
 
-        response = []
+        response = {
+            'dates': [],
+            'data': []
+        }
         for i in range(0, 4):
             date = last_day - datetime.timedelta( days = (i*7) )
             speed_data = SpeedInternet.objects.filter(day = date).first()
             
-            response.append({
-                'date': date.strftime("%b %d, %Y"),
-                'download_average': speed_data.download_average
-            })
+            response['dates'].append(
+                date.strftime("%b %d, %Y")
+            )
+            response['data'].append(
+                speed_data.download_average
+            )
 
-        response_json = SpeedInternetTimelineSerializer(response, many=True)
+        response_json = json.dumps(response)
+        return Response(json.loads(response_json), status=status.HTTP_200_OK)
 
-        return Response(response_json.data, status=status.HTTP_200_OK)
 
 class SpeedInternetByISPTimeline(generics.GenericAPIView):
     serializer_class = SpeedInternetByISPTimelineSerializer
