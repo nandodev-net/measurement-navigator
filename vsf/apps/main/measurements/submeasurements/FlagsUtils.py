@@ -30,7 +30,7 @@ def count_flags_sql():
         but with raw SQL code so it should be faster
     """
 
-    submeasurements = ['dns','http','tcp']
+    submeasurements = ['dns','http','tcp', 'tor']
     with connection.cursor() as cursor:
         for subm in submeasurements:
             cursor.execute(
@@ -187,14 +187,10 @@ def select( measurements : List[SubMeasurement],
 
     # Measurement ammount, if not enough to fill a window or an interval, return an empty list
     n_meas : int = len(measurements)
-    print ('\n\nSELECT')
     if n_meas < event_openning_treshold:
-        print ('MURIO')
         return []
-    print(n_meas)
     # Resulting list
     result : List[List[SubMeasurement]] = []
-    print(result)
     # shortcuts
     start_time = lambda m : m.start_time
     anomaly_count = lambda lo, hi : measurements[hi].previous_counter -\
@@ -205,10 +201,8 @@ def select( measurements : List[SubMeasurement],
     lo : int = 0
     hi : int = min(interval_size - 1, n_meas-1)
     while n_meas - lo > event_openning_treshold:
-        print('ITE')
         # Search for anomaly measurements
         if measurements[lo].flag_type == Flag.FlagType.OK:
-            print('CONT')
             lo += 1
             hi = min(hi+1, n_meas-1)
             continue
@@ -217,21 +211,16 @@ def select( measurements : List[SubMeasurement],
         # anomalies
         max_in_date = _bin_search_max(measurements, start_time(measurements[lo]) + timedelta, lo, hi, start_time)
         n_anomalies = anomaly_count(lo, max_in_date)
-        print('ANOMALIAS: ',n_anomalies)
-        print(event_openning_treshold)
         # If too many anomalies in this interval:
         if n_anomalies < event_openning_treshold:
             lo += 1
             hi = min(hi+1, n_meas-1)
-            print('MUCHAS ANOMALIAS')
             continue
 
         # If too many anomalies, start a selecting process.
         current_block : List[Measurement] = []
-        print('AAAAAAAA')
         print("Openning new group")
         while n_anomalies > event_continue_treshold:
-            print('BBBBBBBBBBBBB')
             print(c.green(f"\t Taking from {measurements[lo].start_time} to {measurements[max_in_date].start_time}"))
             last_index = lo
             for i in range(lo, min(max_in_date + 1, n_meas)):
@@ -376,11 +365,10 @@ def hard_flag(
 
     """
 
-    submeasurements = [(TOR,'tor')]
+    submeasurements = [(DNS,'dns'), (HTTP,'http'), (TCP,'tcp'), (TOR,'tor')]
     
     # For every submeasurement type...
     for (SM, label) in submeasurements:
-        print('COMIENZO')
         # select every submeasurement such that partitioned by (domain, asn),
         # there's at the least one measurement in its partition that's 
         # not flagged.
@@ -422,8 +410,7 @@ def hard_flag(
                                     submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id\
                                                             JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
                                 ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
-        for p in meas:
-            print(p.flag_type,' ', p.probe_asn)
+
 
         groups = filter(
                         lambda l:len(l) >= event_openning_treshold,
@@ -433,20 +420,14 @@ def hard_flag(
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
         for group in groups:
-            print('hola')
-            print(group)
-            for i in group:
-                print(i.__dict__)
-            
+
             weird_measurements = select(group, time_window, event_openning_treshold, interval_size, event_continue_treshold)
-            print('EEEEE\n')
-            print(weird_measurements)
             for sub_group in weird_measurements:
                 merge(sub_group)
         
         SM.objects.filter(flagged=False).update(flagged=True)
 
-    return {
+    return { 
         'arguments' : {
             'interval_size' : interval_size,
             'event_openning_treshold' : event_openning_treshold,
