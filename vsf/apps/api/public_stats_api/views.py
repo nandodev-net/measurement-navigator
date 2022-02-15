@@ -65,7 +65,7 @@ class StatsByASN(generics.GenericAPIView):
         }
         for stat in stats:
             response['names'].append(stat.asn.name)
-            response['blocked_domains'].append(stat.bloacked_domains_by_asn)
+            response['blocked_domains'].append(stat.blocked_domains_by_asn)
   
         response_json = json.dumps(response)
         return Response(json.loads(response_json), status=status.HTTP_200_OK)    
