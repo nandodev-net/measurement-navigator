@@ -424,6 +424,8 @@ def hard_flag(
             weird_measurements = select(group, time_window, event_openning_treshold, interval_size, event_continue_treshold)
             for sub_group in weird_measurements:
                 merge(sub_group)
+                del(sub_group)
+
         
         SM.objects.filter(flagged=False).update(flagged=True)
 
