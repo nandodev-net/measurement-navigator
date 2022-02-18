@@ -128,6 +128,7 @@ class ModelDeleter():
         self.flush()
 
 def _bin_search_max(indexable, upper_bound, start : int = 0, end : int = None, key = lambda x : x) -> int:
+    print("Running binary search")
     lo : int = start
     hi : int = end or (len(indexable) - 1)
 
@@ -147,6 +148,7 @@ def _event_creator(min_date : datetime, max_date : datetime, asn : ASN, domain :
     """
         Helper function to create a new event
     """
+    print("Creating event")
     identification = f"{type} ISSUE FROM {min_date.strftime('%Y-%m-%d %H:%M:%S')} FOR ISP {asn.asn if asn else 'UNKNOWN_ASN'} ({asn.name if asn else 'UNKNOWN_ASN'})"
     return Event(
             identification=identification, 
@@ -378,10 +380,11 @@ def hard_flag(
             event_continue_treshold : int = how many anomaly measurements are required to expand an existent event with new measurements
 
     """
-    print("Testing HardFlags")
+    
     submeasurements = [(DNS,'dns'), (HTTP,'http'), (TCP,'tcp'), (TOR,'tor')]
     
     # For every submeasurement type...
+    print("Testing HardFlags")
     for (SM, label) in submeasurements:
         # select every submeasurement such that partitioned by (domain, asn),
         # there's at the least one measurement in its partition that's 
