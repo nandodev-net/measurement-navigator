@@ -2,6 +2,7 @@
 # directly. Instead, import utils.py so you can have a public api for this functions
 
 # Django imports:
+from concurrent.futures import process
 from django.db.models.query import QuerySet
 from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
@@ -178,7 +179,7 @@ def select( measurements : List[SubMeasurement],
         Return:
             A list of lists containing measurements that may be grouped together as a single event
     """
-
+    print("Running Select Function")
     # Check input
     assert interval_size > 0, "Interval size should be a possitive number"
     assert event_openning_treshold > 0, "Minimum ammount of measurements to open an event should be a possitive number"
@@ -190,7 +191,7 @@ def select( measurements : List[SubMeasurement],
     if n_meas < event_openning_treshold:
         return []
     # Resulting list
-    result : List[List[SubMeasurement]] = []
+    # result : List[List[SubMeasurement]] = []
     # shortcuts
     start_time = lambda m : m.start_time
     anomaly_count = lambda lo, hi : measurements[hi].previous_counter -\
@@ -202,7 +203,9 @@ def select( measurements : List[SubMeasurement],
     hi : int = min(interval_size - 1, n_meas-1)
     while n_meas - lo > event_openning_treshold:
         # Search for anomaly measurements
+        print('**Search for anomaly measurements')
         if measurements[lo].flag_type == Flag.FlagType.OK:
+            measurements[lo] = None
             lo += 1
             hi = min(hi+1, n_meas-1)
             continue
@@ -217,6 +220,9 @@ def select( measurements : List[SubMeasurement],
             hi = min(hi+1, n_meas-1)
             continue
 
+        import os, psutil
+        process = psutil.Process(os.getpid())
+        print("memoy: ", process.memory_info().rss / 1000000)
         # If too many anomalies, start a selecting process.
         current_block : List[Measurement] = []
         print("Openning new group")
@@ -233,6 +239,7 @@ def select( measurements : List[SubMeasurement],
             lo = last_index
             hi = min(lo + interval_size - 1, n_meas-1)
             # search for anomaly measurements whose start time is within the given window 
+            print('**search for anomaly measurements whose start time is within the given window ')
             max_in_date = _bin_search_max(
                                 measurements, 
                                 start_time(measurements[last_index]) + timedelta, 
@@ -246,9 +253,9 @@ def select( measurements : List[SubMeasurement],
             lo = min(lo+1, n_meas-1)
             hi = min(hi+1, n_meas-1)
 
-        result.append(current_block)
+        yield(current_block)
 
-    return result
+    
 
 def merge(measurements_with_flags : List[SubMeasurement]):
     """
@@ -259,7 +266,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             2) all hard flags are merged into a single hard flag, the earliest one
             3) closed hard flags are skiped from the logic: They are never merged to anything
     """
-
+    print("Running merge function")
     # If there's no measurements, we have nothing to do here
     if not measurements_with_flags: return 
 
@@ -272,6 +279,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     start_time = lambda m: m.start_time
 
     # Filter measurements by type
+    print('**update min date and max date')
     resulting_event : Event = None
     for measurement in measurements_with_flags:
         if measurement.flag_type == soft:
@@ -283,10 +291,12 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             continue
 
     # merge all hard flags as one hard flag
+    print('**update min date and max date')
     min_date : datetime = datetime.now(tz = pytz.utc) + timedelta(days=1)
     max_date = datetime(year=2000, day=1, month=1, tzinfo=pytz.utc)
 
     # if there's no hard flag, setup a new event 
+    print('**update min date and max date')
     if resulting_event is None:
         reference_measurement = measurements_with_flags[0]
         resulting_event = _event_creator(
@@ -299,15 +309,18 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     
     meas_to_update : List[SubMeasurement] = []
     # upgrade this measurements to hard flag
+    print('**update min date and max date')
     for measurement in soft_flags:
 
         # Update flag type and its event
+        print('**update min date and max date')
         measurement.flag_type = SubMeasurement.FlagType.HARD
         measurement.event = resulting_event
         measurement.flagged = True
 
         meas_to_update.append(measurement)
         # update min date and max date
+        print('**update min date and max date')
         start = start_time(measurement)
         if start < min_date:
             min_date = start
@@ -315,6 +328,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             max_date = start
 
     # Iterate over hard flags setting up new event
+    print('**Iterate over hard flags setting up new event')
     events_to_delete = ModelDeleter(Event)
     for measurement in  hard_flags:
         if measurement.event != resulting_event:
@@ -364,7 +378,7 @@ def hard_flag(
             event_continue_treshold : int = how many anomaly measurements are required to expand an existent event with new measurements
 
     """
-
+    print("Testing HardFlags")
     submeasurements = [(DNS,'dns'), (HTTP,'http'), (TCP,'tcp'), (TOR,'tor')]
     
     # For every submeasurement type...
@@ -373,7 +387,7 @@ def hard_flag(
         # there's at the least one measurement in its partition that's 
         # not flagged.
         # (so we can avoid run the logic over elements not recently updated)
-
+        print("Requesting ", label,)
         meas = SM.objects.raw(  f"WITH \
                                     measurements as (\
                                         SELECT  \
@@ -411,7 +425,7 @@ def hard_flag(
                                                             JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
                                 ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
 
-
+        print('Grouping measurements')
         groups = filter(
                         lambda l:len(l) >= event_openning_treshold,
                         Grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
