@@ -48,8 +48,6 @@ def s3_measurements_download(test_type:str='tor', country:str='VE',
                         if file_path.name.endswith('.jsonl.gz'):
                             url = SplitResult(
                                         's3', page['Name'], key, None, None)
-                            print(out_dir_files)
-                            print(url.path.replace(prefix, ''))
                             if str(url.path.replace(prefix, '')) not in out_dir_files and str(url.path.replace(prefix, ''))[:-3] not in out_dir_files:
                                 print('Downloading Gzip file: ',file_path)
                                 conn.download_file(url.netloc, url.path, output_dir+url.path.replace(prefix, ''))
