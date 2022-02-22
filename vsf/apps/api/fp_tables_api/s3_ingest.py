@@ -104,7 +104,6 @@ def request_s3_meas_data(
     gz_list = []
     
     for test in test_types:
-        print(first_date)
         s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
 
     print('\nTemp files created... \n')
