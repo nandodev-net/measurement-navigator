@@ -187,6 +187,7 @@ def select( measurements : List[SubMeasurement],
     assert event_openning_treshold > 0, "Minimum ammount of measurements to open an event should be a possitive number"
     assert event_continue_treshold <= event_openning_treshold, "Continuation treshold should be less than or equal openning treshold"
     assert event_continue_treshold > 0, "Continuation treshold should be a possitive number"
+    assert event_openning_treshold <= interval_size
 
     # Measurement ammount, if not enough to fill a window or an interval, return an empty list
     n_meas : int = len(measurements)
@@ -206,6 +207,9 @@ def select( measurements : List[SubMeasurement],
     while n_meas - lo > event_openning_treshold:
         # Search for anomaly measurements
         print('**Search for anomaly measurements')
+        print('nmeas: ',n_meas)
+        print('lo: ', lo)
+        print('hi: ', hi)
         if measurements[lo].flag_type == Flag.FlagType.OK:
             measurements[lo] = None
             lo += 1
