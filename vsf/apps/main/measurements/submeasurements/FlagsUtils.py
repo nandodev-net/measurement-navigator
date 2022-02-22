@@ -269,6 +269,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             3) closed hard flags are skiped from the logic: They are never merged to anything
     """
     print("Running merge function")
+    print('First: ', measurements_with_flags[0].measurement_id,' - ',measurements_with_flags[0].id)
+    print('Last: ', measurements_with_flags[-1].measurement_id,' - ',measurements_with_flags[1].id)
     # If there's no measurements, we have nothing to do here
     if not measurements_with_flags: return 
 
