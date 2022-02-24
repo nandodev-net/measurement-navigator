@@ -4,14 +4,9 @@
     to ease the ammount of data stored in your local computer. This is NOT INTENDED 
     to run in a production server BY ANY MEAN.
 """
-import asyncio
 from apps.main.measurements.models import RawMeasurement
-import os
-# Safety check
+from django.core.paginator import Paginator
 
-print("Keep in mind that you shouldn't be running this script in a production server, this is for local development only.")
-
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 def delete_body(measurement: RawMeasurement):
     """
@@ -28,44 +23,20 @@ def delete_body(measurement: RawMeasurement):
     for r in test_keys['requests']:
         if r['response'].get("body"):
             del r['response']['body']
-            r['response']['body'] = "<body removed to save space>"
+            r['response']['body'] = "\{ 'body': 'None'\}"
     
     measurement.test_keys = test_keys
     measurement.save()
 
-async def measurement_processor(name : str, queue : asyncio.Queue):
-    """
-        This worker will process every measurement it can, it will delete its 
-        body and save it to DB.
-    """
-    while True:
-        measurement : RawMeasurement = await queue.get()
-        delete_body(measurement)
-        del measurement
-        queue.task_done()
-
-async def main():
-    queue = asyncio.Queue(100)
-    tasks = [asyncio.create_task(measurement_processor(f"worker-{i}", queue)) for i in range(3)]
-
-    # Enqueue measurements to be processed
-    for ms in RawMeasurement.objects.all().iterator():
-
-        if queue.full():
-            print("Queue full, might need to wait until it's empty")
-
-        await queue.put(ms)
-
-    print("Done searching for measurements")
-    # wait for the work to be done
-    await queue.join()
-
-    print("All measurements processed")
-    for task in tasks:
-        task.cancel()
-
-    print("Waiting for tasks to end...")
-    await asyncio.gather(*tasks, return_exceptions=True)
 
 
-asyncio.run(main())
+paginator = Paginator(RawMeasurement.objects.all().order_by('test_start_time'), 200)
+for page in range(1, paginator.num_pages + 1):
+    raw_list_to_process = paginator.page(page).object_list
+    for raw_meas in raw_list_to_process:
+        try:
+            delete_body(raw_meas)
+            print('borrado')
+        except:
+            print('saltado')
+            pass
