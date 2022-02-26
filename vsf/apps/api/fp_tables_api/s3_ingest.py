@@ -131,7 +131,9 @@ def request_s3_meas_data(
         else:
             pass
 
-        print('Reading JSONL file...')
+        print('Processing JsonL: ', file_name)
+        print('from: ', first_date)
+
         new_meas_list = []
         with open(file_name) as f:
             for line in f:
@@ -162,7 +164,6 @@ def request_s3_meas_data(
                     pass
 
                 else:
-                    print ('-----CREANDO OBJETO------')
                     ms = RawMeasurement(
                         input=input_,
                         report_id= result['report_id'],
@@ -197,8 +198,6 @@ def request_s3_meas_data(
                                     del r['response']['body']
                                     r['response']['body'] = "Not_available"
 
-
-                    print ('-----LISTANDO------')
                     new_meas_list.append(ms)
         
         os.remove(file_name)
@@ -210,10 +209,10 @@ def request_s3_meas_data(
             for ms_ in new_meas_list:
                 bulk_mgr.add(ms_)
                 start_time_datetime = datetime.datetime.strptime(ms_.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
-                print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+                #print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
                 if start_time_datetime < cache_min_date:
                     cache_min_date = start_time_datetime
-                    print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+                    #print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
             bulk_mgr.done()
 
         except Exception as e: print(e)
