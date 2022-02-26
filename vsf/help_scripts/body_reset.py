@@ -36,7 +36,7 @@ for page in range(1, paginator.num_pages + 1):
     for raw_meas in raw_list_to_process:
         try:
             delete_body(raw_meas)
-            print('borrado')
+            print('borrado: ', str(raw_meas.id))
         except:
-            print('saltado')
+            print('saltado', str(raw_meas.id))
             pass
