@@ -13,5 +13,5 @@ delta = datetime.timedelta(days=1)
 
 while first_date <= last_date:
     print('Getting measurements from: ', first_date, ' to: ', first_date+delta)
-    request_s3_meas_data(first_date=first_date[0], last_date=last_date[0])
+    request_s3_meas_data(first_date=first_date, last_date=first_date+delta)
     first_date = first_date + delta
