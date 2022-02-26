@@ -96,33 +96,35 @@ def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
             cr['answers'] = None
 
     new_dns = []
-    for query in queries:
+    if queries:
+        for query in queries:
 
-        # Check query consistency
-        inconsistent = None # dns_consistency == 'reverse_match'
-        if dns_consistency == 'consistent':
-            inconsistent = False
-        elif dns_consistency == 'inconsistent':
-            inconsistent = True
-        jsonf = DNSJsonFields.objects.create(answers=query['answers'],control_resolver_answers=cr['answers'])        
-        dns = DNS(
-            measurement=None,
-            flag=None,
-            control_resolver_failure=cr['failure'],
-            failure=dns_experiment_failure,
-            hostname=query['hostname'],
-            dns_consistency= dns_consistency,
-            inconsistent= inconsistent,
-            jsons=jsonf,
-            client_resolver=client_resolver,
-            ooni_reason_for_blocking=ooni_blocking,
-            measurement_start_time=web_con_measurement.measurement_start_time,
-            probe_asn=web_con_measurement.probe_asn,
-            probe_cc=web_con_measurement.probe_cc,
-            input=web_con_measurement.input
-        )
-        new_dns.append(dns)
-
+            # Check query consistency
+            inconsistent = None # dns_consistency == 'reverse_match'
+            if dns_consistency == 'consistent':
+                inconsistent = False
+            elif dns_consistency == 'inconsistent':
+                inconsistent = True
+            jsonf = DNSJsonFields.objects.create(answers=query['answers'],control_resolver_answers=cr['answers'])        
+            dns = DNS(
+                measurement=None,
+                flag=None,
+                control_resolver_failure=cr['failure'],
+                failure=dns_experiment_failure,
+                hostname=query['hostname'],
+                dns_consistency= dns_consistency,
+                inconsistent= inconsistent,
+                jsons=jsonf,
+                client_resolver=client_resolver,
+                ooni_reason_for_blocking=ooni_blocking,
+                measurement_start_time=web_con_measurement.measurement_start_time,
+                probe_asn=web_con_measurement.probe_asn,
+                probe_cc=web_con_measurement.probe_cc,
+                input=web_con_measurement.input
+            )
+            new_dns.append(dns)
+    else:
+        pass
     return new_dns
 
 
