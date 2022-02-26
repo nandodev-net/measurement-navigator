@@ -235,6 +235,17 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
                     annotations= data['annotations'],
                     is_processed = False
                 )
+
+                # Eliminando body de las web_connectivity
+                if ms.test_name == 'web_connectivity':
+                    if not ms.test_keys or not ms.test_keys.get("requests"):
+                        pass
+                    else:
+                        for r in ms.test_keys['requests']:
+                            if r['response'].get("body"):
+                                del r['response']['body']
+                                r['response']['body'] = "Not_available"
+
                 print ('-----LISTANDO------')
                 new_meas_list.append(ms)
                 print(len(new_meas_list))
