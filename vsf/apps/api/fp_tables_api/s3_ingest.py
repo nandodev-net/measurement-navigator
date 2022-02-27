@@ -222,7 +222,7 @@ def request_s3_meas_data(
     paginator = Paginator(RawMeasurement.objects.filter(is_processed=False).order_by('test_start_time'), 500)
     for page in range(1, paginator.num_pages + 1):
         raw_list_to_process = paginator.page(page).object_list
-        post_save_rawmeasurement(raw_list_to_process)
+        post_save_rawmeasurement(raw_list_to_process, first_date)
 
 
     time_end = time.time()

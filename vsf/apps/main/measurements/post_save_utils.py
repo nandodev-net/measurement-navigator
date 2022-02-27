@@ -13,13 +13,13 @@ from apps.main.sites.models         import Domain
 from apps.main.asns.models          import ASN
 from .models import RawMeasurement, Measurement
 
-def post_save_rawmeasurement(raw_list):
+def post_save_rawmeasurement(raw_list, first_date):
     # To avoid circular imports, we need to import this here:
     from .submeasurements.utils  import create_sub_measurements
     from .utils import anomaly
 
     for raw in raw_list:
-        print('........creando la medicion')
+        print('........creando la medicion ', first_date)
         measurement = Measurement(raw_measurement=raw, anomaly=anomaly(raw))
         try:
             measurement.save()
