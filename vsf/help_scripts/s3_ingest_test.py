@@ -2,7 +2,7 @@ from apps.api.fp_tables_api.s3_ingest import request_s3_meas_data
 import datetime
 import time
 
-ini_date_str = '02-06-2021'
+ini_date_str = '06-06-2021'
 end_date_str = '26-02-2022'
 
 test_types = ['webconnectivity']
