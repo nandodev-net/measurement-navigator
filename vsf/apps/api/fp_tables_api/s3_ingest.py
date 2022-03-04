@@ -103,8 +103,8 @@ def request_s3_meas_data(
     # output_dir file list
     gz_list = []
     
-    # for test in test_types:
-    #     s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
+    for test in test_types:
+        s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
 
     print('\nTemp files created... \n')
     print('\nInitializing temp files analysis... \n')
