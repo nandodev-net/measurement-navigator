@@ -218,6 +218,7 @@ def request_s3_meas_data(
 
             except Exception as e: print(e)
         except:
+            print('SALTADO')
             continue
 
            
