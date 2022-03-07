@@ -210,7 +210,8 @@
 
                     <h5 class="font-weight-bold">Response Body</h5>
                     <div class="shadow-none p-3 mb-5 bg-light rounded">
-                        {{req.response.body}}
+                        <!-- Response body api call -->
+                        {{ http_body }}
                     </div>
                 {% endfor %}
             {% else %}

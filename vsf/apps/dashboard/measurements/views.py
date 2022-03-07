@@ -21,6 +21,7 @@ from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
 from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMModels
+from apps.api.measurements_api.utils            import GetRawMeasurementsBodyView
 from ..utils import *
 import logging
 
@@ -242,6 +243,28 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
         flagsDNS = [subm.flag_type for subm in measurement.dns_list.all()]
         flagsHTTP = [subm.flag_type for subm in measurement.http_list.all()]
         flagsTCP = [subm.flag_type for subm in measurement.tcp_list.all()]
+
+
+        http_body = ''
+        try:
+            req_data = {
+                'report_id': str(measurement.raw_measurement.report_id),
+                'input': str(measurement.raw_measurement.input),
+                'full': True
+            }
+
+            ooni_body_url = 'https://api.ooni.io/api/v1/measurement_meta'
+
+            import requests
+            req = requests.get(ooni_body_url, params = req_data)
+            data = req.json()
+            raw_measurement = json.loads(data['raw_measurement'])
+            test_keys = raw_measurement['test_keys']['requests']
+            http_body = test_keys[0]['response']['body']
+        except:
+            pass
+
+        context['http_body'] = http_body
 
         context['rawmeasurement'] = measurement.raw_measurement
         context['rawmeasurement'].test_keys = measurement.raw_measurement.test_keys

@@ -115,7 +115,7 @@ class SpeedInternetTimeline(generics.GenericAPIView):
                 date.strftime("%b %d, %Y")
             )
             response['data'].append(
-                speed_data.download_average
+                float(speed_data.download_average)
             )
 
         response_json = json.dumps(response)
