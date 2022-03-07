@@ -157,6 +157,7 @@ def request_s3_meas_data(
             try:
                 process_jsonl_file(file_name,cache_min_date)
             except:
+                os.remove(file_name)
                 continue           
 
     elif gz_list:
@@ -197,5 +198,8 @@ def request_s3_meas_data(
 
 
     time_end = time.time()
+    f = open("./media/inform.txt", "a+")
     print('\n\nS3 ingest time: ', time_end-time_ini)
+    f.write(str(first_date)+' - '+str(last_date)+': '+ str(time_end-time_ini)+'\n')
+    f.close()
     return (True)
