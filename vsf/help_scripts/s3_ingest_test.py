@@ -2,10 +2,11 @@ from apps.api.fp_tables_api.s3_ingest import request_s3_meas_data
 import datetime
 import time
 
-ini_date_str = '02-03-2022'
-end_date_str = '03-03-2022'
+ini_date_str = '24-06-2021'
+end_date_str = '28-02-2022'
 
-#test_types = ['tor']
+
+test_types = ['tor']
 
 first_date = datetime.datetime.strptime(ini_date_str, '%d-%m-%Y').date()
 first_date_ = datetime.datetime.strptime(ini_date_str, '%d-%m-%Y').date()
