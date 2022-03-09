@@ -2,7 +2,7 @@ from apps.api.fp_tables_api.s3_ingest import request_s3_meas_data
 import datetime
 import time
 
-ini_date_str = '24-06-2021'
+ini_date_str = '01-07-2021'
 end_date_str = '28-02-2022'
 
 
