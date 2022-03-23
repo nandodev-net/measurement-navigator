@@ -3,6 +3,7 @@
 """
 
 # Third party imports
+from django.utils import timezone
 import time
 import json
 import requests
@@ -12,7 +13,6 @@ from pathlib import Path
 import gzip
 import json
 import os
-
 # Local imports
 from apps.main.sites.models             import URL
 from apps.main.ooni_fp.fp_tables.models import FastPath
@@ -23,9 +23,12 @@ from .sync_measurements import *
 from vsf.bulk_create_manager import BulkCreateManager
 from apps.main.measurements.post_save_utils import post_save_rawmeasurement
 
+import pytz
+utc=pytz.UTC
+
 meas_path = './media/ooni_data/'
 
-def process_jsonl_file(file_name, cache_min_date):
+def process_jsonl_file(file_name, cache_min_date, is_macro_ingest):
     new_meas_list = []
     with open(file_name) as f:
         for line in f:
@@ -46,16 +49,23 @@ def process_jsonl_file(file_name, cache_min_date):
 
 
             # Checking if the RM exists on the db
-            raw_object = RawMeasurement.objects.filter(input=input_, 
-                                                        report_id=result['report_id'], 
-                                                        probe_asn=result['probe_asn'], 
-                                                        test_name=result['test_name'], 
-                                                        measurement_start_time=result['measurement_start_time']
-                                                        )
+            if not is_macro_ingest:
+                raw_object = RawMeasurement.objects.filter(input=input_, 
+                                                            report_id=result['report_id'], 
+                                                            probe_asn=result['probe_asn'], 
+                                                            test_name=result['test_name'], 
+                                                            measurement_start_time=result['measurement_start_time']
+                                                            )
+            else:
+                raw_object = []
+
             if len(raw_object) > 0:
                 pass
 
             else:
+
+                test_start_time = datetime.datetime.strptime(result['test_start_time'], "%Y-%m-%d %H:%M:%S")
+                measurement_start_time = datetime.datetime.strptime(result['measurement_start_time'], "%Y-%m-%d %H:%M:%S")
                 ms = RawMeasurement(
                     input=input_,
                     report_id= result['report_id'],
@@ -66,8 +76,8 @@ def process_jsonl_file(file_name, cache_min_date):
                     probe_ip=result.get('probe_ip'),
                     data_format_version= result['data_format_version'],
                     test_name= result['test_name'],
-                    test_start_time= result.get('test_start_time'),
-                    measurement_start_time= result['measurement_start_time'],
+                    test_start_time= test_start_time.replace(tzinfo=utc),
+                    measurement_start_time= measurement_start_time.replace(tzinfo=utc),
                     test_runtime= result.get('test_runtime'),
                     test_helpers= result.get('test_helpers',"NO_AVAILABLE"),
                     software_name= result['software_name'],
@@ -100,9 +110,9 @@ def process_jsonl_file(file_name, cache_min_date):
         bulk_mgr = BulkCreateManager(chunk_size=500)
         for ms_ in new_meas_list:
             bulk_mgr.add(ms_)
-            start_time_datetime = datetime.datetime.strptime(ms_.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
+            start_time_datetime = ms_.measurement_start_time # convert date into string
             #print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-            if start_time_datetime < cache_min_date:
+            if start_time_datetime < cache_min_date.replace(tzinfo=utc):
                 cache_min_date = start_time_datetime
                 #print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
         bulk_mgr.done()
@@ -121,7 +131,8 @@ def request_s3_meas_data(
     first_date:str=(datetime.date.today() - datetime.timedelta(days=3)), 
     last_date:str=(datetime.date.today() - datetime.timedelta(days=2)),
     country: str = 'VE',
-    output_dir: str = './media/ooni_data/'  
+    output_dir: str = './media/ooni_data/',
+    is_macro_ingest = False  
     ):
 
 
@@ -181,8 +192,9 @@ def request_s3_meas_data(
             print('from: ', first_date)
 
             try:
-                process_jsonl_file(file_name,cache_min_date)
-            except:
+                process_jsonl_file(file_name,cache_min_date, is_macro_ingest)
+            except Exception as e: 
+                print(e)
                 continue
 
            
