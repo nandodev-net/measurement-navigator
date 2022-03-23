@@ -370,8 +370,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     
 def hard_flag(
             time_window : timedelta = timedelta(days=15.5), 
-            event_openning_treshold : int = 7, 
-            interval_size : int = 10, 
+            event_openning_treshold : int = 7, #cantidad de mediciones para que, dentro del time, se cree evento
+            interval_size : int = 10, # numero de mediciones hacia atras, parado en medicion con flag en medicion con flag
             event_continue_treshold : int = 5
             ):
     """
