@@ -257,6 +257,15 @@ class CaseCreateView(VSFLoginRequiredMixin, CreateView):
             new_case.save()
             new_case.events.set(eventsObject)
             
+            print('-----')
+            try:
+                request.get(
+                    'http://felucia.estarguars.org/contents/createMedia/' + new_case.id 
+                )
+            except:
+                pass 
+            print('llego aqui')
+
             return JsonResponse({'error' : None})
 
         except Exception as e:
