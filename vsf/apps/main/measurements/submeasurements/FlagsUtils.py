@@ -308,8 +308,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     if resulting_event is None:
         reference_measurement = measurements_with_flags[0]
         resulting_event = _event_creator(
-                    min_date, 
-                    min_date, 
+                    reference_measurement.measurement_start_time, 
+                    measurements_with_flags[-1].measurement_start_time, 
                     reference_measurement.measurement.asn, 
                     reference_measurement.measurement.domain,
                     reference_measurement.__class__.__name__)    
