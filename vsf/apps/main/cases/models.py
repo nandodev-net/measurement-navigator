@@ -150,13 +150,12 @@ class Case(TimeStampedModel):
         return domains
 
     def get_asns(self) -> dict:
-        asns = {}
+        asns = []
         for e in self.events.all():
-            if e.domain.site and e.domain.site.name in asns:
-                asns[e.domain.site.name].add(e.asn.name)
-            else:
-                if e.domain.site:
-                    asns[e.domain.site.name] = {}
+            if e.asn.name not in asns:
+                asns.append(e.asn.name)
+
+                
         return asns
 
     def get_start_date(self) -> datetime:
