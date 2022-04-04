@@ -25,6 +25,7 @@ class CaseDataSerializer(serializers.ModelSerializer):
     start_date_beautify = serializers.ReadOnlyField(source='get_start_date_beautify')
     end_date_beautify = serializers.ReadOnlyField(source='get_end_date_beautify')
     sites = serializers.ReadOnlyField(source='get_sites')
+    domains = serializers.ReadOnlyField(source='get_domains')
     asns = serializers.ReadOnlyField(source='get_asns')
     case_expired = serializers.ReadOnlyField(source='is_case_expired')
 
@@ -38,7 +39,8 @@ class CaseDataSerializer(serializers.ModelSerializer):
             'category',
             'title', 
             'asns',
-            'case_expired'
+            'case_expired',
+            'domains'
         ]
         depth = 1
 
@@ -54,7 +56,7 @@ class CaseDetailDataSerializer(serializers.ModelSerializer):
     end_date_beautify = serializers.ReadOnlyField(source='get_end_date_beautify')
     sites = serializers.ReadOnlyField(source='get_sites')
     asns = serializers.ReadOnlyField(source='get_asns')
-
+    domains = serializers.ReadOnlyField(source='get_domains')
 
     class Meta:
         model = Case
@@ -67,8 +69,8 @@ class CaseDetailDataSerializer(serializers.ModelSerializer):
             'asns',
             'description',
             'category',
-            'case_expired'
-            
+            'case_expired',
+            'domains'
         ]
 
 class BlockedCasesNumberSerializer(serializers.Serializer):
