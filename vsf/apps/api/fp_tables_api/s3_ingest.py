@@ -107,7 +107,7 @@ def process_jsonl_file(file_name, cache_min_date, is_macro_ingest):
     try:
         print(c.magenta(">>>>>Bulk Creating new measurements<<<<"))
 
-        bulk_mgr = BulkCreateManager(chunk_size=500)
+        bulk_mgr = BulkCreateManager(chunk_size=1000)
         for ms_ in new_meas_list:
             bulk_mgr.add(ms_)
             start_time_datetime = ms_.measurement_start_time # convert date into string
@@ -203,7 +203,7 @@ def request_s3_meas_data(
     queryset_= RawMeasurement.objects.filter(is_processed=False)
     size_qs = len(queryset_)
     current_qs = 1
-    for raw_meas in queryset_.iterator(chunk_size=100):
+    for raw_meas in queryset_.iterator(chunk_size=1000):
         print(c.green(f'Processing '+str(current_qs)+' of '+str(size_qs)))
         post_save_rawmeasurement(raw_meas, first_date)
         current_qs+=1
