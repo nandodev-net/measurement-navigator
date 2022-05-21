@@ -152,7 +152,7 @@ class SubmeasurementType(enum.Enum):
 
     @classmethod
     def from_model(cls, model : Type[SubMeasurement]) -> Self:
-        mapper = {(v,k) for (k,v) in cls.mapper.items()}
+        mapper = {v:k for (k,v) in cls.mapper().items()}
 
         return mapper[model] # type: ignore
 

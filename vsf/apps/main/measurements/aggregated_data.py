@@ -10,11 +10,14 @@ from django.db.models import Count
 from datetime import datetime
 import enum
 import dataclasses
-from typing import List, Dict, Union, Tuple
+from typing import Any, List, Dict, Union, Tuple
 from collections import namedtuple
 
 # Local imports 
 from apps.main.measurements.submeasurements.models import SubMeasurement, SubmeasurementType, INSTALLED_SUBMEASUREMENTS
+
+# Third party imports
+import tabulate as tab
 
 class ListEnum(enum.Enum):
     """
@@ -50,6 +53,16 @@ class Block:
     block_value : Union[str, datetime]
     data : Dict[str, int]
 
+    @property
+    def as_row(self) -> List[Any]:
+        """
+            Return the data in this block as a list of values, being the first value the block value, and the remaining values
+            correspond to the values in the data dictionary sorted by key name.
+        """
+        keys = list(self.data.keys())
+        keys.sort()
+        return [self.block_value, *[self.data[key] for key in self.data]]
+
 @dataclasses.dataclass
 class AggregationResult:
     """
@@ -58,6 +71,20 @@ class AggregationResult:
     block_type : BlockType
     results : List[Block]
 
+    def __repr__(self) -> str:
+
+        # Get column names for the header:
+        header = [self.block_type.value, 
+                    *(list(
+                        self.results[0].data.keys()
+                        ) if self.results else []
+                    )
+                ]
+
+        # Get data for columns
+        data = [x.as_row for x in self.results]
+        
+        return str(tab.tabulate(data, headers=header))
 
 class DataAggregator:
     """
