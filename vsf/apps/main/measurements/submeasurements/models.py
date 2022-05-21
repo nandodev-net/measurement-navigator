@@ -1,18 +1,20 @@
+# Python imports
+import enum
+from typing import Dict, List, Type
+from typing_extensions import Self
 
 # Django imports
 from django.db                      import models
 from model_utils.models import TimeStampedModel
 from django.contrib.postgres.fields import JSONField
 
-# third party imports
-import uuid
 
 # Local imports
 from apps.main.measurements.models                       import Measurement
 from apps.main.measurements.flags.models                 import Flag
 from apps.main.events.models                             import Event
 
-# Create your models here.
+
 class SubMeasurement(TimeStampedModel):
     """
     Base class for a sub measurement. Depending on its type, 
@@ -27,7 +29,7 @@ class SubMeasurement(TimeStampedModel):
         SOFT 	     = "soft"   # The measurement has some problem
         HARD         = "hard"   # this measurement is grouped with other measurements as they have a common problem
         MUTED		 = "muted"  # ignore this measurement
-        MANUAL       = "manual" # The measurement has set as it has a possible problem
+        MANUAL       = "manual" # The measurement has been set as it has a possible problem
 
     measurement = models.ForeignKey(
                                     to=Measurement,
@@ -98,6 +100,68 @@ class SubMeasurement(TimeStampedModel):
 
     class Meta:
         abstract = True # When abstract is True, django wont make a table for this model
+class SubmeasurementType(enum.Enum):
+    """
+        Possible submeasurement types. This enum class is handy in cases where you need to apply an 
+        operation for every submeasurement and you want to iterate over them.
+
+        REMEMBER TO ADD SUBMEASUREMENT MODEL CLASS TO THE "INSTALLED_SUBMEASUREMENTS" LIST IN 
+        THE END OF THIS FILE WHENEVER YOU ADD A NEW SUBMEASUREMENT TYPE
+    """
+
+    DNS = "DNS"
+    HTTP = "HTTP"
+    TCP = "TCP"
+    TOR = "TOR"
+
+    @classmethod
+    def mapper(cls) -> Dict[Self, Type[SubMeasurement]]:
+        """
+            Return a dictionary mapping from enum variant to a model type
+        """
+
+        mapper = {
+            cls.DNS     : DNS ,
+            cls.HTTP    : HTTP,
+            cls.TCP     : TCP ,
+            cls.TOR     : TOR 
+        }
+
+        return mapper
+
+    @property
+    def model(self) -> Type[SubMeasurement]:
+        """
+            Return the model corresponding to this variant
+        """
+        return self.mapper()[self]
+
+    @property
+    def table_name(self) -> str:
+        """
+            Retrieve the table name for this variation
+        """
+        mapper = {
+            SubmeasurementType.DNS : "submeasurements_dns",
+            SubmeasurementType.HTTP : "submeasurements_http",
+            SubmeasurementType.TCP : "submeasurements_tcp",
+            SubmeasurementType.TOR : "submeasurements_tor"
+            }
+
+        return mapper[self]
+
+    @classmethod
+    def from_model(cls, model : Type[SubMeasurement]) -> Self:
+        mapper = {(v,k) for (k,v) in cls.mapper.items()}
+
+        return mapper[model] # type: ignore
+
+    @classmethod
+    def values(cls) -> List[str]:
+        """
+            return a list with possible values for this enum
+        """
+        return [x.value for x in cls]
 
 class DNSJsonFields(TimeStampedModel):
     """
@@ -170,3 +234,10 @@ class TOR(SubMeasurement):
     or_port_dirauth_accessible = models.IntegerField(default=0)
     class Meta:
         default_related_name = 'tor_list'
+
+
+# The following list provides all sub measurements models available so other parts of the project will which ones are 
+# available automatically
+INSTALLED_SUBMEASUREMENTS = [
+    DNS, TCP, HTTP, TOR
+]
