@@ -1,9 +1,9 @@
-from apps.api.fp_tables_api.s3_ingest import request_s3_meas_data
+from apps.api.fp_tables_api.s3_ingest import s3_ingest_manager
 import datetime
 import time
 
-ini_date_str = '27-04-2022'
-end_date_str = '30-04-2022'
+ini_date_str = '16-05-2022'
+end_date_str = '17-05-2022'
 
 
 test_types = ['tor']
@@ -17,7 +17,7 @@ time_ini = time.time()
 
 while first_date < last_date:
     print('Getting measurements from: ', first_date, ' to: ', first_date+delta)
-    request_s3_meas_data(first_date=first_date, last_date=first_date+delta, is_macro_ingest=True)
+    s3_ingest_manager(test_types=test_types,first_date=first_date, last_date=first_date+delta)
     first_date = first_date + delta
     
 
