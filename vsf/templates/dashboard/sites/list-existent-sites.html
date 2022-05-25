@@ -172,6 +172,7 @@
         };
         jQuery.noConflict();
         $.ajax({
+            timeout: 300000,
             type: "POST",
             url: "{% url 'dashboard:site:list_sites' %}",
             data: data,
@@ -251,6 +252,7 @@
                 if (result.isConfirmed) {
 
                     $.ajax({
+                    timeout: 300000,
                     type      : "POST",
                     url       : url,
                     data      : data,
@@ -312,6 +314,7 @@
             let url = '{% url "sites:create_site" %}';
 
             $.ajax({
+                timeout: 300000,
                 type: "POST",
                 url: url,
                 data: data,

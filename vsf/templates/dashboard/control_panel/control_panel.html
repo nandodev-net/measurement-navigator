@@ -189,6 +189,7 @@
         console.log(data)
         responding = true;
         $.ajax({
+          timeout: 300000,
           url : "{% url 'dashboard:control_panel:process_state' %}",
           type : "POST",
           data : data,
@@ -215,6 +216,7 @@
           // show the waiting message
           // Send the request
           $.ajax({
+            timeout: 300000,
               url : "{% url 'dashboard:control_panel:controls' %}",
               data : $("#" + e.target.id).serialize(),
               type : 'POST',

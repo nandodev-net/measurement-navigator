@@ -158,6 +158,7 @@
             let url = '{% url "sites:create_site" %}';
 
             $.ajax({
+                timeout: 300000,
                 type: "POST",
                 url: url,
                 data: data,
@@ -257,6 +258,7 @@
             };
             jQuery.noConflict();
             $.ajax({
+                timeout: 300000,
                 type: "POST",
                 url: url,
                 data: data,

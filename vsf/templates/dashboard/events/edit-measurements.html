@@ -470,6 +470,7 @@
       ));
 
       $.ajax({
+        timeout: 300000,
         type: "POST",
         url: "{% url 'dashboard:events:edit_measurements' object.id %}",
         data: {

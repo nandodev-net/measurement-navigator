@@ -335,6 +335,7 @@
     event.preventDefault();
 
     $.ajax({
+      timeout: 300000,
       url    : "{% url 'dashboard:get_measurement' %}",
       type   : "GET",
       data   : { 'id': event.target.id },

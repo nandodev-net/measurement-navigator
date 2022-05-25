@@ -175,6 +175,7 @@
             id = data[0].measurement__id;
 
             $.ajax({
+              timeout: 300000,
               type: "GET",
               url: '{% url "measurements:get_measurement" %}',
               data: { id: id },
@@ -287,6 +288,7 @@
       id = $( this ).attr( 'id' );
 
       $.ajax({
+        timeout: 300000,
         type: "GET",
         url: '{% url "measurements:get_measurement" %}',
         data: { id: id },

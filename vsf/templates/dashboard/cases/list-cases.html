@@ -206,6 +206,7 @@
     var id = $( this ).attr( 'id' );
     console.log(id);
     $.ajax({
+      timeout: 300000,
       url    : "{% url 'dashboard:event_cases:detail' %}",
       type   : "GET",
       data   : { 'id': id },
@@ -404,6 +405,7 @@
       ));
 
       $.ajax({
+        timeout: 300000,
         type: "GET",
         url: '{% url "dashboard:event_cases:case_delete" %}',
         data: {cases: casesSelected},
@@ -454,6 +456,7 @@
       ));
 
       $.ajax({
+        timeout: 300000,
         type: "POST",
         url: '{% url "dashboard:event_cases:publish" %}',
         data: {cases: casesSelected , csrfmiddlewaretoken: "{{ csrf_token }}"},

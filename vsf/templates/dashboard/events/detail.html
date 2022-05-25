@@ -442,6 +442,7 @@
     $( '#confirmTrigger' ).click(function(e) {
         jQuery.noConflict();
         $.ajax({
+            timeout: 300000,
             type: "POST",
             url: "{% url 'dashboard:events:confirm' %}",
             data: { events: ["{{object.id}}"] , csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -476,6 +477,7 @@
     $( '#muteTrigger' ).click(function(e) {
         jQuery.noConflict();
         $.ajax({
+            timeout: 300000,
             type: "POST",
             url: "{% url 'dashboard:events:mute' %}",
             data: { events: ["{{object.id}}"] , csrfmiddlewaretoken: "{{ csrf_token }}"},

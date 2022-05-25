@@ -88,6 +88,7 @@
 
     // SEND DATA TO DJANGO
     $.ajax({
+      timeout: 300000,
       type      : "POST",
       url       : url,
       data      : data,

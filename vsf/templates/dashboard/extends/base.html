@@ -314,6 +314,7 @@
                     tz: $('#tz_selector').val()
                 };
                 $.ajax({
+                    timeout: 300000,
                     url: "{% url 'dashboard:set_tz' %}",
                     contentType: "application/json; charset=utf-8",
                     type: "GET",

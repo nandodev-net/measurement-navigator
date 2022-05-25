@@ -304,6 +304,7 @@
     ));
 
     $.ajax({
+      timeout: 300000,
       type: "POST",
       url: "{% url 'dashboard:event_cases:edit_events' object.id %}",
       data: {
