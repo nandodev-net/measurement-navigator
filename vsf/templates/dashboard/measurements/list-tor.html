@@ -293,6 +293,7 @@
     jQuery.noConflict();
 
     $.ajax({
+      timeout: 300000,
       type: "GET",
       url: '{% url "measurements:get_measurement" %}',
       data: { id: id },

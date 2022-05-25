@@ -448,6 +448,7 @@
       };
 
       $.ajax({
+        timeout: 300000,
         type: "POST",
         url: "{% url 'dashboard:event_cases:create_case' %}",
         contentType: 'application/x-www-form-urlencoded',

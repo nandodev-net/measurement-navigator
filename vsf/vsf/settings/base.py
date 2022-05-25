@@ -79,7 +79,6 @@ THIRD_PARTY_APPS = [
     'widget_tweaks',
     'drf_yasg',
     'django_celery_results',
-    'django_celery_beat',
     'django_sass',
     'ckeditor',
     'django_wysiwyg'

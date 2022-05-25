@@ -135,6 +135,7 @@
           if ( result.isConfirmed ) {
 
             $.ajax({
+              timeout: 300000,
               type      : "POST",
               url       : urlToPost,
               data      : data,

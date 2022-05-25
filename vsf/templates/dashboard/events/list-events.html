@@ -348,6 +348,7 @@
       idLastSaved = id;
 
       $.ajax({
+        timeout: 300000,
         url    : "{% url 'dashboard:events:get' %}",
         type   : "GET",
         data   : { 'id': id },
@@ -390,6 +391,7 @@
     $('#confirm_toggle').change(function() {
 
       $.ajax({
+        timeout: 300000,
         type: "POST",
         url: "{% url 'dashboard:events:confirm' %}",
         data: { events: [idLastSaved] , csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -400,6 +402,7 @@
 
     $('#confirm_toggle_muted').change(function() {
       $.ajax({
+        timeout: 300000,
         type: "POST",
         url: "{% url 'dashboard:events:mute' %}",
         data: { events: [idLastSaved] , csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -420,6 +423,7 @@
       ))
 
       $.ajax({
+        timeout: 300000,
         type: "POST",
         url: "{% url 'dashboard:events:all' %}",
         data: {events: eventsSelected, cases: casesSelected, csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -514,6 +518,7 @@
             ));
 
             $.ajax({
+                timeout: 300000,
                 type: "POST",
                 url: "{% url 'dashboard:events:confirm' %}",
                 data: { events: eventsSelected , csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -580,6 +585,7 @@
             ));
 
             $.ajax({
+                timeout: 300000,
                 type: "POST",
                 url: "{% url 'dashboard:events:mute' %}",
                 data: { events: eventsSelected , csrfmiddlewaretoken: "{{ csrf_token }}"},

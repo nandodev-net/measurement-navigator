@@ -369,6 +369,7 @@
     jQuery.noConflict();
 
     $.ajax({
+      timeout: 300000,
       type: "GET",
       url: '{% url "measurements:get_measurement" %}',
       data: { id: id },
@@ -513,6 +514,7 @@
 
   $( '#histogramService' ).click( function() {
       $.ajax({
+        timeout: 300000,
         type: "GET",
         url: '{% url "dashboard:measurement:counter" %}',
         data: { 

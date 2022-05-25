@@ -342,6 +342,7 @@
 
     jQuery.noConflict();
     $.ajax({
+        timeout: 300000,
         type: "POST",
         url: "{% url 'dashboard:event_cases:separate_case' %}",
         data: { 
@@ -463,6 +464,7 @@
     $( '#publishTrigger' ).click(function(e) {
         jQuery.noConflict();
         $.ajax({
+            timeout: 300000,
             type: "POST",
             url: "{% url 'dashboard:event_cases:publish' %}",
             data: { cases: ["{{object.id}}"] , csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -496,6 +498,7 @@
     $( '#start_date_automatic' ).click(function(e) {
         jQuery.noConflict();
         $.ajax({
+            timeout: 300000,
             type: "POST",
             url: "{% url 'dashboard:event_cases:goAutomatic' %}",
             data: { cases: ["{{object.id}}"] , date: 'start_date', csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -538,6 +541,7 @@
     $( '#end_date_automatic' ).click(function(e) {
         jQuery.noConflict();
         $.ajax({
+            timeout: 300000,
             type: "POST",
             url: "{% url 'dashboard:event_cases:goAutomatic' %}",
             data: { cases: ["{{object.id}}"] , date: 'end_date', csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -581,6 +585,7 @@
     $( '#dates_automatic' ).click(function(e) {
         jQuery.noConflict();
         $.ajax({
+            timeout: 300000,
             type: "POST",
             url: "{% url 'dashboard:event_cases:goAutomatic' %}",
             data: { cases: ["{{object.id}}"] , date: 'dates', csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -624,6 +629,7 @@
     $( '#goActive' ).click(function(e) {
         jQuery.noConflict();
         $.ajax({
+            timeout: 300000,
             type: "POST",
             url: "{% url 'dashboard:event_cases:goActive' %}",
             data: { cases: ["{{object.id}}"] , csrfmiddlewaretoken: "{{ csrf_token }}"},
@@ -885,6 +891,7 @@
       var case_id = $("#id").val()
       
       $.ajax({
+        timeout: 300000,
         type: "GET",
         url: '{% url "dashboard:event_cases:event_remove" %}',
         data: {events: eventsSelected, case: case_id},
