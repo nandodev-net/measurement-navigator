@@ -17,8 +17,7 @@ Including another URLconf
 import debug_toolbar
 from django.contrib     import admin
 from django.conf        import settings
-from django.conf.urls   import url, include
-from django.urls        import include, path
+from django.urls        import include, path, re_path
 from django.conf.urls.static import static
 
 # Third party imports
@@ -52,7 +51,7 @@ urlpatterns = [
     path('measurements/',   include('apps.main.measurements.urls', namespace = 'measurements')),
     path('admin/',          admin.site.urls),
     path('', redirect_to_dashboard),
-    url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    url(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -154,12 +154,12 @@ def incompatible_file_collector(
                     os.rename(output_dir + file_name, incompatible_dir + file_name)
 
             else:
-                jsol_file = decompress_file(output_dir, file_name)
+                jsonl_file = decompress_file(output_dir, file_name)
                 try:
-                    process_jsonl_file(output_dir + jsol_file, cache_min_date)
+                    process_jsonl_file(output_dir + jsonl_file, cache_min_date)
                 except Exception as e:
                     print(e)
-                    os.rename(output_dir + jsol_file, incompatible_dir + jsol_file)
+                    os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
 
 
 def process_raw_measurements(first_date):
@@ -205,13 +205,17 @@ def s3_ingest_manager(
     gz_list = os.listdir(output_dir)
     for gzfile in gz_list:
         jsol_file = decompress_file(output_dir, gzfile)
-        jsonl_file_list.append(output_dir + jsol_file)
+        jsonl_file_list.append(jsol_file)
     
     # Try to add the resultant .jsonl files.
     for jsonl in jsonl_file_list:
         print('Processing JsonL: ', jsonl)
         print('from: ', first_date)
-        process_jsonl_file(jsonl, cache_min_date)
+        try:
+            process_jsonl_file(output_dir + jsonl, cache_min_date)
+        except:
+            os.rename(output_dir + jsonl, incompatible_dir + jsonl)
+
 
     # Process all rar measurements in order to obtain the submeasurements.
     process_raw_measurements(first_date)
