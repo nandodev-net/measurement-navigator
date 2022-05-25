@@ -242,3 +242,5 @@ def custom_show_toolbar(request):
 DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
 }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'

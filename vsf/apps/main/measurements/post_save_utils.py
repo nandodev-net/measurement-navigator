@@ -1,7 +1,7 @@
 # Django imports: 
 from django.db import models
 from model_utils.models import TimeStampedModel
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from django.db.models.deletion import SET_NULL
 
 # third party imports:

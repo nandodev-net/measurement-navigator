@@ -2,7 +2,7 @@
 from django.db                      import models
 from model_utils.models import TimeStampedModel
 
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 from django.utils 					import timezone
 
 """
@@ -23,7 +23,7 @@ class FastPath(TimeStampedModel):
 		fast path unless it's specified otherwise.
 
 		The only special fields are:
-			- report_ready : NullBooleanField. This Field tells if the report
+			- report_ready : BooleanField(null=True). This Field tells if the report
 			is ready in the ooni backend. If it is, this field returns true.
 			If it isn't ready, this field returns false. If the field should be ready
 			but it is not, this field returns null
@@ -81,7 +81,7 @@ class FastPath(TimeStampedModel):
 	scores = JSONField()
 	test_name = models.CharField(choices=Ootest.choices, max_length=40)
 	# The following fields are defined by our database logic.
-	report_ready = models.NullBooleanField(default=False) # DEPRECATE LATER
+	report_ready = models.BooleanField(null=True, default=False) # DEPRECATE LATER
 	#	data_ready = enum that checks if the measurement is ready, not ready, undefined or dead
 	data_ready = models.CharField(max_length=20, null=False, choices=DataReady.choices, default=DataReady.NOT_READY) 
 	#	when was this measurement catched ?

@@ -2,7 +2,7 @@
 # Django imports
 from django.db                      import models
 from model_utils.models import TimeStampedModel
-from django.contrib.postgres.fields import JSONField
+from django.db.models import JSONField
 
 # third party imports
 import uuid
@@ -66,7 +66,7 @@ class SubMeasurement(TimeStampedModel):
 
     # If ooni tells that this type of measurement is the blocking reason
     # If true, it is, if false, it is not, if null, we know nothing
-    ooni_reason_for_blocking = models.NullBooleanField(default=None)
+    ooni_reason_for_blocking = models.BooleanField(null=True)
 
     # The following fields are required for the hard flag logic:
     # The 'previous_counter' field stores an integer 'N' such that 
@@ -123,7 +123,7 @@ class DNS(SubMeasurement):
     resolver_hostname = models.GenericIPAddressField(
         null=True, blank=True)  # servidor DNS que se esta evaluando, (target)
 
-    inconsistent = models.NullBooleanField()
+    inconsistent = models.BooleanField(null=True)
     dns_consistency  = models.CharField(max_length=50, null=True, blank=True)
     hostname = models.CharField(max_length=100, null=True, blank=True) # añadido por Luis, Andrés debe revisar esto
     jsons = models.ForeignKey(to=DNSJsonFields, null=True, on_delete=models.SET_NULL)
