@@ -423,6 +423,7 @@ class EventConfirm(VSFLoginRequiredMixin, View):
         except Exception as e:
             print(e)
 
+
 class EventMute(VSFLoginRequiredMixin, View):
 
     def post(self, request, **kwargs):
@@ -539,9 +540,6 @@ class EventsByMeasurement(VSFLoginRequiredMixin, View):
             return JsonResponse(event_json)
         else:
             return JsonResponse({'error' : None})
-
-
-
 
 
 class EditMeasurements(VSFLoginRequiredMixin, DetailView):
