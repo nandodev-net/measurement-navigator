@@ -4,6 +4,7 @@
 
 # Third party imports
 from bz2 import decompress
+from typing import List
 from django.utils import timezone
 import time
 import json
@@ -32,6 +33,8 @@ meas_path = './media/ooni_data/'
 def process_jsonl_file(file_name, cache_min_date):
     new_meas_list = []
 
+    from vsf.utils import Colors as c
+    bulk_mgr = BulkCreateManager(chunk_size=1000)
     with open(file_name) as f:
         for line in f:
             result = json.loads(line)
@@ -57,10 +60,7 @@ def process_jsonl_file(file_name, cache_min_date):
                                                         test_name=result['test_name'], 
                                                         measurement_start_time=result['measurement_start_time'])
 
-            if len(raw_object) > 0:
-                pass
-
-            else:
+            if len(raw_object) == 0:
 
                 test_start_time = datetime.datetime.strptime(result['test_start_time'], "%Y-%m-%d %H:%M:%S")
                 measurement_start_time = datetime.datetime.strptime(result['measurement_start_time'], "%Y-%m-%d %H:%M:%S")
@@ -100,22 +100,19 @@ def process_jsonl_file(file_name, cache_min_date):
 
                 new_meas_list.append(ms)
 
+                try:
+                    print(c.magenta(">>>>>Bulk Creating new measurements<<<<"))
+
+                    bulk_mgr.add(ms)
+                    start_time_datetime = ms.measurement_start_time # convert date into string
+                    #print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
+                    if start_time_datetime < cache_min_date.replace(tzinfo=utc):
+                        cache_min_date = start_time_datetime
+                        #print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+
+                except Exception as e: print(e)
+                
     os.remove(file_name)
-    from vsf.utils import Colors as c
-    try:
-        print(c.magenta(">>>>>Bulk Creating new measurements<<<<"))
-
-        bulk_mgr = BulkCreateManager(chunk_size=1000)
-        for ms_ in new_meas_list:
-            bulk_mgr.add(ms_)
-            start_time_datetime = ms_.measurement_start_time # convert date into string
-            #print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-            if start_time_datetime < cache_min_date.replace(tzinfo=utc):
-                cache_min_date = start_time_datetime
-                #print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
-        bulk_mgr.done()
-
-    except Exception as e: print(e)
 
 
 def decompress_file(
@@ -177,14 +174,14 @@ def process_raw_measurements(first_date):
 
 
 def s3_ingest_manager(
-    test_types = ['tor','webconnectivity', 'vanillator', 'urlgetter', 
+    test_types : List[str] = ['tor','webconnectivity', 'vanillator', 'urlgetter', 
     'torsf', 'httpinvalidrequestline', 'httpheaderfieldmanipulation', 
     'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 
     'riseupvpn', 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 
     'meekfrontedrequeststest', 'httprequests', 'httphost','dnscheck', 
-    'dnsconsistency', 'bridgereachability'],
-    first_date:str=(datetime.date.today() - datetime.timedelta(days=3)), 
-    last_date:str=(datetime.date.today() - datetime.timedelta(days=2)),
+    'dnsconsistency', 'bridgereachability'] ,
+    first_date:datetime.datetime = (datetime.date.today() - datetime.timedelta(days=3)), 
+    last_date:datetime.datetime = (datetime.date.today() - datetime.timedelta(days=2)),
     country: str = 'VE',
     output_dir: str = './media/ooni_data/',
     incompatible_dir: str = './media/incompatible_data/'
