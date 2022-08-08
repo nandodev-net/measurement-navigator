@@ -36,7 +36,7 @@ def post_save_rawmeasurement(raw, first_date=0):
     for sb in sub_measurements:
         sb.measurement = measurement
         try:
-            sb.save()
+            sb.save() # Podemos hacer este save en lotes después
         except: 
             pass # I think we should put some loggin here @TODO
     raw.is_processed = True

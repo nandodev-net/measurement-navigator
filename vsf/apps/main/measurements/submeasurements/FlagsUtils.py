@@ -3,6 +3,7 @@
 
 # Django imports:
 from concurrent.futures import process
+from optparse import Option
 from django.db.models.query import QuerySet
 from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
@@ -11,7 +12,7 @@ from django.core.cache  import cache
 import sys
 
 # Third party imports:
-from typing import List
+from typing import List, Optional
 from datetime import datetime, timedelta
 import pytz
 
@@ -288,7 +289,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
 
     # Filter measurements by type
     print('**update min date and max date')
-    resulting_event : Event = None
+    resulting_event : Optional[Event] = None
     for measurement in measurements_with_flags:
         if measurement.flag_type == soft:
             soft_flags.append(measurement)
