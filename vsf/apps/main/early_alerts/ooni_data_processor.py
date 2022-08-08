@@ -2,7 +2,7 @@
 
 # Third party imports
 from datetime   import  timedelta, datetime
-from typing     import  List, Tuple
+from typing     import  List, Optional, Tuple
 from urllib     import  parse
 import sys
 import requests as r
@@ -59,8 +59,8 @@ class DataProcessor:
         If step is not provided, it's defaulted to one hour
     """
     step       : timedelta = timedelta(minutes=1)
-    start_time : datetime  = None
-    end_time   : datetime  = None
+    start_time : Optional[datetime]  = None
+    end_time   : Optional[datetime]  = None
     _probe_cc  : str       = 'VE'
     _date_format : str     = _DATE_FORMAT
     # results format: 
@@ -73,8 +73,8 @@ class DataProcessor:
     _results    : dict      = {}
 
     def __init__(   self, 
-                    since : datetime = None, 
-                    until : datetime = None, 
+                    since : Optional[datetime] = None, 
+                    until : Optional[datetime] = None, 
                     step : timedelta = timedelta(hours=1)):
         # Default values
         if since is None:
@@ -192,7 +192,7 @@ class DataProcessor:
         
         return success
 
-    def get_results(self, url_inpt : url, asn_inpt : asn) -> AnalysisResult:
+    def get_results(self, url_inpt : url, asn_inpt : asn) -> Optional[AnalysisResult]:
         """
             Retrieve the stored data for an stored result. It may return 
             nothing if no entry matches the provided url and asn.
