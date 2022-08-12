@@ -4,6 +4,7 @@
 
 # Third party imports
 from bz2 import decompress
+#from memory_profiler import profile
 from typing import List
 from django.utils import timezone
 import time
@@ -15,10 +16,15 @@ from pathlib import Path
 import gzip
 import json
 import os
+
+# Python imports
+import tracemalloc
+
 # Local imports
 from apps.main.sites.models             import URL
 from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
+from apps.api.fp_tables_api.utils import display_top_mem_intensive_lines
 from .sync_measurements import *
 
 # Bulk create manager import
@@ -30,14 +36,16 @@ utc=pytz.UTC
 
 meas_path = './media/ooni_data/'
 
+#@profile
 def process_jsonl_file(file_name, cache_min_date):
-    new_meas_list = []
 
     from vsf.utils import Colors as c
     bulk_mgr = BulkCreateManager(chunk_size=1000)
     with open(file_name) as f:
         for line in f:
             result = json.loads(line)
+            display_top_mem_intensive_lines(tracemalloc.take_snapshot())
+
             if result['test_name'] == 'tor':
                 if result['test_keys']==None:
                     continue
@@ -98,12 +106,11 @@ def process_jsonl_file(file_name, cache_min_date):
                                 del r['response']['body']
                                 r['response']['body'] = "Not_available"
 
-                new_meas_list.append(ms)
-
                 try:
                     print(c.magenta(">>>>>Bulk Creating new measurements<<<<"))
-
+                    
                     bulk_mgr.add(ms)
+                    print(c.yellow("OOM"))
                     start_time_datetime = ms.measurement_start_time # convert date into string
                     #print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
                     if start_time_datetime < cache_min_date.replace(tzinfo=utc):
@@ -111,6 +118,7 @@ def process_jsonl_file(file_name, cache_min_date):
                         #print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
 
                 except Exception as e: print(e)
+            
                 
     os.remove(file_name)
 
