@@ -17,16 +17,15 @@ from rest_framework.status      import  (
 )
 import django.utils.timezone    as timezone
 import django.utils.dateparse   as dateparse
-from   django.shortcuts         import render
-from   rest_framework.views     import APIView
-from   django.core.cache        import cache
 from django.core.paginator import Paginator
 
+# Python imports
+import tracemalloc
+import time
+import linecache
+import os
 
 # Third party imports
-import sys
-import time
-import json
 import requests
 import datetime
 import collections
@@ -34,8 +33,6 @@ from urllib.parse   import urlencode
 
 # Local imports
 from apps.main.sites.models             import URL
-from apps.main.asns.models              import ASN
-from .                                  import utils
 from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
 
@@ -490,3 +487,36 @@ def update_measurement_table(
             pass
 
     return results
+
+
+def display_top_mem_intensive_lines(snapshot : tracemalloc.Snapshot, limit : int =3, key_type : str ='lineno'):
+    """Display a tracemalloc snapshot of memory usage in a given function
+
+    Args:
+        snapshot (tracemalloc.Snapshot): A snapshot with information about memory usage profiling
+        key_type (str, optional): type of data to retrieve. Defaults to 'lineno'.
+        limit (int, optional): Amount of top consuming lines. Defaults to 3.
+    """
+    snapshot = snapshot.filter_traces((
+        tracemalloc.Filter(False, "<frozen importlib._bootstrap>"),
+        tracemalloc.Filter(False, "<unknown>"),
+    ))
+    top_stats = snapshot.statistics(key_type)
+
+    print("Top %s lines" % limit)
+    for index, stat in enumerate(top_stats[:limit], 1):
+        frame = stat.traceback[0]
+        # replace "/path/to/module/file.py" with "module/file.py"
+        filename = os.sep.join(frame.filename.split(os.sep)[-2:])
+        print("#%s: %s:%s: %.1f KiB"
+              % (index, filename, frame.lineno, stat.size / 1024))
+        line = linecache.getline(frame.filename, frame.lineno).strip()
+        if line:
+            print('    %s' % line)
+
+    other = top_stats[limit:]
+    if other:
+        size = sum(stat.size for stat in other)
+        print("%s other: %.1f KiB" % (len(other), size / 1024))
+    total = sum(stat.size for stat in top_stats)
+    print("Total allocated size: %.1f KiB" % (total / 1024))
