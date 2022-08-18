@@ -19,7 +19,7 @@ class BulkCreateManager(object):
     def _commit(self, model_class):
         model_key = model_class._meta.label
         model_class.objects.bulk_create(self._create_queues[model_key])
-        self._create_queues[model_key] = []
+        self._create_queues[model_key] = [] # Reset queue
 
     def add(self, obj):
         """
@@ -31,10 +31,11 @@ class BulkCreateManager(object):
         self._create_queues[model_key].append(obj)
         if len(self._create_queues[model_key]) >= self.chunk_size:
             self._commit(model_class)
+            
 
     def done(self):
         """
-        Always call this upon completion to make sure the final partial chunk
+ Always call this upon completion to make sure the final partial chunk
         is saved.
         """
         for model_name, objs in self._create_queues.items():

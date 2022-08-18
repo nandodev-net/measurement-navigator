@@ -8,12 +8,24 @@ from django.db.models.deletion import SET_NULL
 import uuid
 import sys
 
+from datetime import datetime
+
 # local imports
 from apps.main.sites.models         import Domain 
 from apps.main.asns.models          import ASN
 from .models import RawMeasurement, Measurement
 
-def post_save_rawmeasurement(raw, first_date=0):
+def post_save_rawmeasurement(raw : RawMeasurement, first_date : datetime):
+    """Utility function to process a raw measurement not yet processed
+
+    Args:
+        raw (RawMeasurement): Measurement to process
+        first_date (datetime): Logging information
+    """
+
+    if raw.is_processed:
+        return # nothing to do if already processed
+
     # To avoid circular imports, we need to import this here:
     from .submeasurements.utils  import create_sub_measurements
     from .utils import anomaly
@@ -41,3 +53,4 @@ def post_save_rawmeasurement(raw, first_date=0):
             pass # I think we should put some loggin here @TODO
     raw.is_processed = True
     raw.save()
+

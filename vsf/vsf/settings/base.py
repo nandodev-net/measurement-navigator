@@ -81,7 +81,8 @@ THIRD_PARTY_APPS = [
     'django_celery_results',
     'django_sass',
     'ckeditor',
-    'django_wysiwyg'
+    'django_wysiwyg',
+    'django_extensions'
 ]
 
 INSTALLED_APPS = INSTALLED_APPS + DJANGO_APPS + API_APPS + THIRD_PARTY_APPS
