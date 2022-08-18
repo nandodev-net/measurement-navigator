@@ -170,3 +170,9 @@ class TOR(SubMeasurement):
     or_port_dirauth_accessible = models.IntegerField(default=0)
     class Meta:
         default_related_name = 'tor_list'
+
+
+# Handy list of submeasurement types
+SUBMEASUREMENTS = [
+    HTTP, TCP, TOR, DNS
+]
