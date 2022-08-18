@@ -27,7 +27,7 @@ from vsf.utils import Colors as c
 
 # Bulk create manager import
 from vsf.bulk_create_manager import BulkCreateManager
-from apps.main.measurements.post_save_utils import post_save_rawmeasurement
+from apps.main.measurements.post_save_utils import RawMeasurementBulker, post_save_rawmeasurement, create_measurement_from_raw_measurement
 
 import pytz
 utc=pytz.UTC
@@ -50,7 +50,7 @@ class S3IngestManager:
         self._measurements_path = measurements_path 
         self._date_format = date_format
 
-    def process_jsonl_file(self, file_name : str, cache_min_date : datetime.datetime, save_chunk_size : int = 1000):
+    def process_jsonl_file(self, file_name : str, cache_min_date : datetime.datetime, save_chunk_size : int = 10000):
         """Process a single jsonl file, parsing its measurements and storing them in database
 
         Args:
@@ -208,14 +208,14 @@ class S3IngestManager:
         Args:
             first_date (datetime.datetime): Date of first measurement to update
         """
-
-        print(c.cyan("Processing measurements..."))
+        print(c.cyan("Processing raw measurements..."))
+        rms_bulker = RawMeasurementBulker()
         queryset_= RawMeasurement.objects.filter(is_processed=False)
         qs_size = len(queryset_)
-        
         for (i, raw_meas) in enumerate(queryset_.iterator(chunk_size=1000)):
             print(c.green(f'Processing {i + 1} of {qs_size}'))
-            post_save_rawmeasurement(raw_meas, first_date)
+            measurement, subms = create_measurement_from_raw_measurement(raw_meas)
+            rms_bulker.add(raw_meas, measurement, subms)
         
         print(c.green("Measurements succesfully processed!"))
 
