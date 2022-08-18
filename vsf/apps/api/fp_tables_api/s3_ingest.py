@@ -6,24 +6,20 @@
 from bz2 import decompress
 #from memory_profiler import profile
 from typing import List
-from django.utils import timezone
 import time
 import json
-import requests
 import datetime
-import collections
 from pathlib import Path
 import gzip
 import json
 import os
+import viztracer
 
 # Python imports
-import tracemalloc
 from pathlib import Path
 
 # Local imports
 from apps.main.sites.models             import URL
-from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
 from apps.api.fp_tables_api.utils import display_top_mem_intensive_lines
 from .sync_measurements import *
@@ -171,7 +167,7 @@ class S3IngestManager:
             for file_name in file_list:
                 if file_name.endswith('.jsonl'):
                     try:
-                        process_jsonl_file(output_dir + file_name, cache_min_date)
+                        self.process_jsonl_file(output_dir + file_name, cache_min_date)
                     except Exception as e:
                         print(e)
                         os.rename(output_dir + file_name, incompatible_dir + file_name)
@@ -179,7 +175,7 @@ class S3IngestManager:
                 else:
                     jsonl_file = self._decompress_file(output_dir, file_name)
                     try:
-                        process_jsonl_file(output_dir + jsonl_file, cache_min_date)
+                        self.process_jsonl_file(output_dir + jsonl_file, cache_min_date)
                     except Exception as e:
                         print(e)
                         os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
