@@ -157,5 +157,7 @@ class RawMeasurementBulker:
         self._sub_measurement_bulk = { mstype._meta.label : [] for mstype in SUBMEASUREMENTS }
 
 
-                
+    def __del__(self):
+        self._save()    
+
     
