@@ -19,6 +19,7 @@ import os
 
 # Python imports
 import tracemalloc
+from pathlib import Path
 
 # Local imports
 from apps.main.sites.models             import URL
@@ -26,6 +27,7 @@ from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
 from apps.api.fp_tables_api.utils import display_top_mem_intensive_lines
 from .sync_measurements import *
+from vsf.utils import Colors as c
 
 # Bulk create manager import
 from vsf.bulk_create_manager import BulkCreateManager
@@ -36,44 +38,80 @@ utc=pytz.UTC
 
 meas_path = './media/ooni_data/'
 
-#@profile
-def process_jsonl_file(file_name, cache_min_date):
+class S3IngestManager:
+    """All operations required to retrieve and store ooni data from s3
+    """
 
-    from vsf.utils import Colors as c
-    bulk_mgr = BulkCreateManager(chunk_size=1000)
-    with open(file_name) as f:
-        for line in f:
-            result = json.loads(line)
-            display_top_mem_intensive_lines(tracemalloc.take_snapshot())
+    # Test types in the same format as in s3
+    S3_TEST_TYPES : List[str] = ['tor','webconnectivity', 'vanillator', 'urlgetter', 
+        'torsf', 'httpinvalidrequestline', 'httpheaderfieldmanipulation', 
+        'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 
+        'riseupvpn', 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 
+        'meekfrontedrequeststest', 'httprequests', 'httphost','dnscheck', 
+        'dnsconsistency', 'bridgereachability']
 
-            if result['test_name'] == 'tor':
-                if result['test_keys']==None:
+    def __init__(self, measurements_path  : str = './media/ooni_data/', date_format : str = "%Y-%m-%d %H:%M:%S") -> None:
+        self._measurements_path = measurements_path 
+        self._date_format = date_format
+
+    def process_jsonl_file(self, file_name : str, cache_min_date : datetime.datetime, save_chunk_size : int = 1000):
+        """Process a single jsonl file, parsing its measurements and storing them in database
+
+        Args:
+            file_name (str): name of jsonl file
+            cache_min_date (datetime.datetime): @TODO Write meaning of this date 
+            save_chunk_size (int): how many measurements to save per batch
+        """
+        # Sanity check
+        assert save_chunk_size > 0
+        assert file_name.endswith(".jsonl"), "This should be a jsonl file"
+
+        # Check if file exists
+        path_to_jsonl = Path(file_name)
+        if not path_to_jsonl.exists():
+            raise ValueError(f"file {path_to_jsonl} does not exists")
+
+        # Use this object to save measurements
+        bulker = BulkCreateManager(chunk_size=save_chunk_size)
+
+        # Dummy object used when some measurements don't have an url field. We
+        # create it first in case it does not exists
+        no_url_obj = URL.objects.get_or_create(url='no_url')
+
+        # Get amount of line sin this file to plot progress
+        with path_to_jsonl.open("r") as file:
+            n_lines = sum(1 for _ in file)
+
+        # Process file line by line
+        with path_to_jsonl.open('r') as file:
+            for (i, line) in enumerate(file):
+                print(c.cyan(f"Processing line {i+1} / {n_lines}"))
+
+                result = json.loads(line)
+
+                # Get input of this measurement
+                if result['test_name'] == 'tor' and result['test_keys']==None:
+                        continue
+                elif result['test_name'] == 'tor' or result['input'] == None:
+                    measurement_input = 'no_url'
+                else:
+                    measurement_input = result['input']
+
+                # Checking if the RawMeasurement exists
+                raw_object = RawMeasurement.objects.filter(input=measurement_input, 
+                                                            report_id=result['report_id'], 
+                                                            probe_asn=result['probe_asn'], 
+                                                            test_name=result['test_name'], 
+                                                            measurement_start_time=result['measurement_start_time'])
+
+                # If the RawMeasurement does exists, then nothing to do here
+                if raw_object:
                     continue
-                else:
-                    URL.objects.get_or_create(url='no_url')
-                    input_ = 'no_url'
-            else:
-                if result['input'] == None:
-                    URL.objects.get_or_create(url='no_url')
-                    input_ = 'no_url'
-                else:
-                    URL.objects.get_or_create(url=result['input'])
-                    input_ = result['input'] 
-
-
-            # Checking if the RawMeasurement exists
-            raw_object = RawMeasurement.objects.filter(input=input_, 
-                                                        report_id=result['report_id'], 
-                                                        probe_asn=result['probe_asn'], 
-                                                        test_name=result['test_name'], 
-                                                        measurement_start_time=result['measurement_start_time'])
-
-            if len(raw_object) == 0:
-
+                
                 test_start_time = datetime.datetime.strptime(result['test_start_time'], "%Y-%m-%d %H:%M:%S")
                 measurement_start_time = datetime.datetime.strptime(result['measurement_start_time'], "%Y-%m-%d %H:%M:%S")
                 ms = RawMeasurement(
-                    input=input_,
+                    input=measurement_input,
                     report_id= result['report_id'],
                     report_filename= result.get('report_filename','NO_AVAILABLE'), #
                     options= result.get('options', "NO_AVAILABLE"), #
@@ -95,139 +133,147 @@ def process_jsonl_file(file_name, cache_min_date):
                     is_processed= False
                 )
 
-                # Eliminando body de las web_connectivity
-
+                # Delete web connectivity body, as it is takes too much memory
                 if ms.test_name == 'web_connectivity':
-                    if not ms.test_keys or not ms.test_keys.get("requests"):
-                        pass
-                    else:
+                    if ms.test_keys and ms.test_keys.get("requests"):
                         for r in ms.test_keys['requests']:
                             if r['response'].get("body"):
                                 del r['response']['body']
                                 r['response']['body'] = "Not_available"
-
                 try:
-                    print(c.magenta(">>>>>Bulk Creating new measurements<<<<"))
-                    
-                    bulk_mgr.add(ms)
-                    print(c.yellow("OOM"))
+                    bulker.add(ms)
                     start_time_datetime = ms.measurement_start_time # convert date into string
-                    #print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
                     if start_time_datetime < cache_min_date.replace(tzinfo=utc):
                         cache_min_date = start_time_datetime
-                        #print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
 
-                except Exception as e: print(e)
-            
-                
-    os.remove(file_name)
+                except Exception as e: 
+                    print(e) # Ignore errors and keep saving measurements
 
+        # Clean and quit
+        bulker.done()
+        os.remove(str(path_to_jsonl)) # Delete file when you're done with it
 
-def decompress_file(
-    output_dir,
-    gz_file,
-    ):
+        print(c.green(f"[SUCCESS] Finished processing jsonl file"))
 
-    full_route = output_dir + gz_file
-    with gzip.open(full_route,'r') as current_file:
-        file_content = current_file.read()
-        file = open(full_route[:-3], "w")
-        file.write(file_content.decode('UTF-8'))
-        file.close()
-        # Deleting Gzip file
-        os.remove(full_route)
-    return gz_file[:-3]
+    def collect_incompatible_files(self, output_dir : str, incompatible_dir : str,  cache_min_date : datetime.datetime):
+        """TODO explain this function
 
+        Args:
+            output_dir (str): TODO
+            incompatible_dir (str): TODO
+            cache_min_date (datetime.datetime): TODO
+        """
+        file_list = os.listdir(output_dir) # list of file names
+        if not file_list:
+            return
+        else:
+            print("Directory is not empty")
+            for file_name in file_list:
+                if file_name.endswith('.jsonl'):
+                    try:
+                        process_jsonl_file(output_dir + file_name, cache_min_date)
+                    except Exception as e:
+                        print(e)
+                        os.rename(output_dir + file_name, incompatible_dir + file_name)
 
-def incompatible_file_collector(
-    output_dir, 
-    incompatible_dir, 
-    cache_min_date, 
-    ):
+                else:
+                    jsonl_file = self._decompress_file(output_dir, file_name)
+                    try:
+                        process_jsonl_file(output_dir + jsonl_file, cache_min_date)
+                    except Exception as e:
+                        print(e)
+                        os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
 
-    file_list = os.listdir(output_dir) # list of file names
-    if not file_list:
-        return
-    else:
-        print("Directory is not empty")
-        for file_name in file_list:
-            if file_name.endswith('.jsonl'):
-                try:
-                    process_jsonl_file(output_dir + file_name, cache_min_date)
-                except Exception as e:
-                    print(e)
-                    os.rename(output_dir + file_name, incompatible_dir + file_name)
+    def _decompress_file(self, output_dir : str, gz_file : str):
+        """Decompress a file
 
-            else:
-                jsonl_file = decompress_file(output_dir, file_name)
-                try:
-                    process_jsonl_file(output_dir + jsonl_file, cache_min_date)
-                except Exception as e:
-                    print(e)
-                    os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
+        Args:
+            output_dir (str): Path where to store decompressed output
+            gz_file (str): file to decompress
 
+        Returns:
+            TODO: TODO
+        """
+        full_route = output_dir + gz_file
+        with gzip.open(full_route,'r') as current_file:
+            file_content = current_file.read()
+            file = open(full_route[:-3], "w")
+            file.write(file_content.decode('UTF-8'))
+            file.close()
+            # Deleting Gzip file
+            os.remove(full_route)
 
-def process_raw_measurements(first_date):
+        return gz_file[:-3]
 
-    print('>>>>PROCESSING INFO<<<<')
-    from vsf.utils import Colors as c
-    queryset_= RawMeasurement.objects.filter(is_processed=False)
-    size_qs = len(queryset_)
-    current_qs = 1
-    for raw_meas in queryset_.iterator(chunk_size=1000):
-        print(c.green(f'Processing '+str(current_qs)+' of '+str(size_qs)))
-        post_save_rawmeasurement(raw_meas, first_date)
-        current_qs+=1   
-            
+    def process_raw_measurements(self, first_date : datetime.datetime):
+        """Process measurements that are not still processed (measurements with is_processed == False),
+            creating their submeasurements as neeeded
 
+        Args:
+            first_date (datetime.datetime): Date of first measurement to update
+        """
 
-def s3_ingest_manager(
-    test_types : List[str] = ['tor','webconnectivity', 'vanillator', 'urlgetter', 
-    'torsf', 'httpinvalidrequestline', 'httpheaderfieldmanipulation', 
-    'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 
-    'riseupvpn', 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 
-    'meekfrontedrequeststest', 'httprequests', 'httphost','dnscheck', 
-    'dnsconsistency', 'bridgereachability'] ,
-    first_date:datetime.datetime = (datetime.date.today() - datetime.timedelta(days=3)), 
-    last_date:datetime.datetime = (datetime.date.today() - datetime.timedelta(days=2)),
-    country: str = 'VE',
-    output_dir: str = './media/ooni_data/',
-    incompatible_dir: str = './media/incompatible_data/'
-    ):
+        print(c.cyan("Processing measurements..."))
+        queryset_= RawMeasurement.objects.filter(is_processed=False)
+        qs_size = len(queryset_)
+        
+        for (i, raw_meas) in enumerate(queryset_.iterator(chunk_size=1000)):
+            print(c.green(f'Processing {i + 1} of {qs_size}'))
+            post_save_rawmeasurement(raw_meas, first_date)
+        
+        print(c.green("Measurements succesfully processed!"))
 
-    time_ini = time.time()
-    cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
-    jsonl_file_list = []
+    def ingest(
+        self,
+        test_types : List[str] = [],
+        first_date : datetime.date = (datetime.date.today() - datetime.timedelta(days=3)), 
+        last_date  : datetime.date = (datetime.date.today() - datetime.timedelta(days=2)),
+        country    : str = 'VE',
+        output_dir : str = './media/ooni_data/',
+        incompatible_dir: str = './media/incompatible_data/'
+        ):
+        """Perform an ingestion process, saving measurements stored in ooni s3
 
-    # Searching previous files to add or store them
-    incompatible_file_collector(output_dir, incompatible_dir, cache_min_date)
+        Args:
+            test_types (List[str], optional): List of types of measurements to save, if empty or not provided, defaults to all types. Defaults to [].
+            first_date (datetime.date, optional): min date of measurements to search for. Defaults to (datetime.date.today() - datetime.timedelta(days=3)).
+            last_date (datetime.date, optional): max date of measurements to search for. Defaults to (datetime.date.today() - datetime.timedelta(days=2)).
+            country (str, optional): country code for the country that all measurements should share. Defaults to 'VE'.
+            output_dir (str, optional): where to store data when downloading. Defaults to './media/ooni_data/'.
+            incompatible_dir (str, optional): Where to store incompatible data. Defaults to './media/incompatible_data/'.
+        """
 
-    # Downloading S3 measurements
-    for test in test_types:
-        s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
+        # Set up types
+        test_types = test_types or self.S3_TEST_TYPES
 
-    # Get all .gz names in the output directory in order to decompress them
-    gz_list = os.listdir(output_dir)
-    for gzfile in gz_list:
-        jsol_file = decompress_file(output_dir, gzfile)
-        jsonl_file_list.append(jsol_file)
-    
-    # Try to add the resultant .jsonl files.
-    for jsonl in jsonl_file_list:
-        print('Processing JsonL: ', jsonl)
-        print('from: ', first_date)
-        try:
-            process_jsonl_file(output_dir + jsonl, cache_min_date)
-        except:
-            os.rename(output_dir + jsonl, incompatible_dir + jsonl)
+        # Take time to have some idea in performance
+        time_ini = time.time()
+        cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
 
+        # Searching previous files to add or store them
+        self.collect_incompatible_files(output_dir, incompatible_dir, cache_min_date)
 
-    # Process all rar measurements in order to obtain the submeasurements.
-    process_raw_measurements(first_date)
+        # Downloading S3 measurements
+        for test in test_types:
+            s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
 
-    ####### LOG JUST FOR TAKE PROCESS TIME
-    time_end = time.time()
-    f = open("./media/inform.txt", "a+")
-    print('\n\nS3 ingest time: ', time_end-time_ini)
-    f.write(str(first_date)+' - '+str(last_date)+': '+ str(time_end-time_ini)+'\n')
-    f.close()
+        # Get all .gz names in the output directory in order to decompress them
+        gz_list = os.listdir(output_dir)
+        for (i, gzfile) in enumerate(gz_list):
+            print(c.blue(f"processing json {i+1} / {len(gz_list)}"))
+            json_file = self._decompress_file(output_dir, gzfile)
+
+            try:
+                # Create raw measurements
+                self.process_jsonl_file(output_dir + json_file, cache_min_date)
+                # Process raw measurements
+                self.process_raw_measurements(first_date)
+            except:
+                os.rename(output_dir + json_file, incompatible_dir + json_file)
+
+        ####### LOG JUST TO TAKE PROCESS TIME
+        time_end = time.time()
+        f = open("./media/inform.txt", "a+")
+        print('\n\nS3 ingest time: ', time_end-time_ini)
+        f.write(str(first_date)+' - '+str(last_date)+': '+ str(time_end-time_ini)+'\n')
+        f.close()

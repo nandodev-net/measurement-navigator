@@ -179,3 +179,5 @@ widgetsnbextension==3.6.0
 yarl==1.7.2
 zipp==3.8.0
 viztracer==0.4.1
+memory_profiler
+django-extensions==3.2.0
