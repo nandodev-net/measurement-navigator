@@ -5,7 +5,7 @@
 # Third party imports
 from bz2 import decompress
 #from memory_profiler import profile
-from typing import List
+from typing import List, Optional
 import time
 import json
 import datetime
@@ -13,7 +13,6 @@ from pathlib import Path
 import gzip
 import json
 import os
-from pyparsing import Optional
 import viztracer
 
 # Python imports
@@ -71,6 +70,7 @@ class S3IngestManager:
             raise ValueError(f"file {path_to_jsonl} does not exists")
 
         # Use this object to save measurements
+        end_bulker = bulker == None
         bulker = bulker or BulkCreateManager(chunk_size=save_chunk_size)
 
         # Dummy object used when some measurements don't have an url field. We
@@ -149,7 +149,8 @@ class S3IngestManager:
                     print(e) # Ignore errors and keep saving measurements
 
         # Clean and quit
-        bulker.done()
+        if end_bulker:
+            bulker.done()
         os.remove(str(path_to_jsonl)) # Delete file when you're done with it
 
         print(c.green(f"[SUCCESS] Finished processing jsonl file"))
