@@ -13,6 +13,7 @@ from pathlib import Path
 import gzip
 import json
 import os
+from pyparsing import Optional
 import viztracer
 
 # Python imports
@@ -50,14 +51,16 @@ class S3IngestManager:
         self._measurements_path = measurements_path 
         self._date_format = date_format
 
-    def process_jsonl_file(self, file_name : str, cache_min_date : datetime.datetime, save_chunk_size : int = 10000):
+    def process_jsonl_file(self, file_name : str, cache_min_date : datetime.datetime, save_chunk_size : int = 10000, bulker : Optional[BulkCreateManager] = None):
         """Process a single jsonl file, parsing its measurements and storing them in database
 
         Args:
             file_name (str): name of jsonl file
             cache_min_date (datetime.datetime): @TODO Write meaning of this date 
             save_chunk_size (int): how many measurements to save per batch
-        """
+            bulker (Optional[BulkCreateManager]): A bulker object used to save measurements in bulks, defaults to an internal one if not provided.
+            You might use this argument if you want a bulk size bigger than the content of each jsonl
+        """ 
         # Sanity check
         assert save_chunk_size > 0
         assert file_name.endswith(".jsonl"), "This should be a jsonl file"
@@ -68,7 +71,7 @@ class S3IngestManager:
             raise ValueError(f"file {path_to_jsonl} does not exists")
 
         # Use this object to save measurements
-        bulker = BulkCreateManager(chunk_size=save_chunk_size)
+        bulker = bulker or BulkCreateManager(chunk_size=save_chunk_size)
 
         # Dummy object used when some measurements don't have an url field. We
         # create it first in case it does not exists
@@ -208,10 +211,10 @@ class S3IngestManager:
         Args:
             first_date (datetime.datetime): Date of first measurement to update
         """
-        print(c.cyan("Processing raw measurements..."))
+        print(c.blue("Processing raw measurements..."))
         rms_bulker = RawMeasurementBulker()
         queryset_= RawMeasurement.objects.filter(is_processed=False)
-        qs_size = len(queryset_)
+        qs_size = queryset_.count()
         for (i, raw_meas) in enumerate(queryset_.iterator(chunk_size=1000)):
             print(c.green(f'Processing {i + 1} of {qs_size}'))
             measurement, subms = create_measurement_from_raw_measurement(raw_meas)
@@ -255,16 +258,19 @@ class S3IngestManager:
 
         # Get all .gz names in the output directory in order to decompress them
         gz_list = os.listdir(output_dir)
+        bulker = BulkCreateManager(chunk_size=10000)
         for (i, gzfile) in enumerate(gz_list):
             print(c.blue(f"processing json {i+1} / {len(gz_list)}"))
             json_file = self._decompress_file(output_dir, gzfile)
 
             try:
                 # Create raw measurements
-                self.process_jsonl_file(output_dir + json_file, cache_min_date)
+                self.process_jsonl_file(output_dir + json_file, cache_min_date, bulker=bulker)
+                bulker.done()
                 # Process raw measurements
                 self.process_raw_measurements(first_date)
-            except:
+            except Exception as e:
+                print(c.red(f"[ERROR] Could not finish processing json file content. Error: {e}"))
                 os.rename(output_dir + json_file, incompatible_dir + json_file)
 
         ####### LOG JUST TO TAKE PROCESS TIME
