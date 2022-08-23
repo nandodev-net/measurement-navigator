@@ -77,6 +77,9 @@ def create_measurement_from_raw_measurement(raw_measurement : RawMeasurement) ->
         
     (sub_measurements,_) = create_sub_measurements(raw_measurement)
 
+    for subms in sub_measurements:
+        subms.measurement = measurement
+
     return measurement, sub_measurements
 
 class RawMeasurementBulker:
@@ -152,8 +155,13 @@ class RawMeasurementBulker:
             print(c.red(f"[ERROR] Could not bulk create submeasurements. Error: {e}"), file=sys.stderr)
         
         # Reset bulks
+        del self._raw_measurement_bulk
         self._raw_measurement_bulk = []
+
+        del self._measurement_bulk
         self._measurement_bulk = []
+
+        del self._sub_measurement_bulk
         self._sub_measurement_bulk = { mstype._meta.label : [] for mstype in SUBMEASUREMENTS }
 
 
