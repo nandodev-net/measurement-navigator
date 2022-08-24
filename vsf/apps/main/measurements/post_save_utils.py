@@ -114,6 +114,9 @@ class RawMeasurementBulker:
             measurement (Measurement): Measurement instance related to the provided measurement
             submeasurements (List[SubMeasurement]): Submeasurements related to the provided measurement instance
         """
+        assert isinstance(raw_measurement, RawMeasurement)
+        assert isinstance(measurement, Measurement)
+        assert all(isinstance(subms, SubMeasurement) for subms in submeasurements)
         assert not raw_measurement.is_processed
 
         # Add measurement & raw measurement
