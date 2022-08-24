@@ -267,13 +267,14 @@ class S3IngestManager:
             try:
                 # Create raw measurements
                 self.process_jsonl_file(output_dir + json_file, cache_min_date, bulker=bulker)
-                bulker.done()
                 # Process raw measurements
                 self.process_raw_measurements(first_date)
             except Exception as e:
                 print(c.red(f"[ERROR] Could not finish processing json file content. Error: {e}"))
                 os.rename(output_dir + json_file, incompatible_dir + json_file)
 
+        bulker.done()
+        self.process_raw_measurements(first_date)
         ####### LOG JUST TO TAKE PROCESS TIME
         time_end = time.time()
         f = open("./media/inform.txt", "a+")
