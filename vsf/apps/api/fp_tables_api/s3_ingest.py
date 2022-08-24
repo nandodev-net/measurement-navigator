@@ -164,11 +164,14 @@ class S3IngestManager:
             cache_min_date (datetime.datetime): TODO
         """
         file_list = os.listdir(output_dir) # list of file names
+        n_files = len(file_list)
+        print(c.blue("Processing incompatible files."))
         if not file_list:
             return
         else:
             print("Directory is not empty")
-            for file_name in file_list:
+            for (i, file_name) in enumerate(file_list):
+                print(c.blue(f"Processing incompatible file {i} of {n_files}"))
                 if file_name.endswith('.jsonl'):
                     try:
                         self.process_jsonl_file(output_dir + file_name, cache_min_date)
@@ -183,6 +186,7 @@ class S3IngestManager:
                     except Exception as e:
                         print(e)
                         os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
+        print(c.green("[SUCCESS] Incompatible files collection finished"))
 
     def _decompress_file(self, output_dir : str, gz_file : str):
         """Decompress a file
