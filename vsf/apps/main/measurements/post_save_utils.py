@@ -152,7 +152,7 @@ class RawMeasurementBulker:
                 for rms in self._raw_measurement_bulk:
                     rms.is_processed = True
 
-                RawMeasurement.objects.bulk_update(self._measurement_bulk, ['is_processed'])
+                RawMeasurement.objects.bulk_update(self._raw_measurement_bulk, ['is_processed'])
             
         except Exception as e:
             print(c.red(f"[ERROR] Could not bulk create submeasurements. Error: {e}"), file=sys.stderr)
