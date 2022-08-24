@@ -112,19 +112,19 @@ class DNS(SubMeasurement):
     in web_connectivity or DNS tests
     """
     control_resolver_failure = models.CharField(
-        max_length=50,
+        max_length=200,
         null=True,
         blank=True,
     )
     control_resolver_hostname = models.GenericIPAddressField(
         null=True, blank=True)  # servidor DNS de control
 
-    failure = models.CharField(max_length=50, null=True, blank=True)
+    failure = models.CharField(max_length=200, null=True, blank=True)
     resolver_hostname = models.GenericIPAddressField(
         null=True, blank=True)  # servidor DNS que se esta evaluando, (target)
 
     inconsistent = models.BooleanField(null=True)
-    dns_consistency  = models.CharField(max_length=50, null=True, blank=True)
+    dns_consistency  = models.CharField(max_length=200, null=True, blank=True)
     hostname = models.CharField(max_length=100, null=True, blank=True) # añadido por Luis, Andrés debe revisar esto
     jsons = models.ForeignKey(to=DNSJsonFields, null=True, on_delete=models.SET_NULL)
     client_resolver = models.GenericIPAddressField(null=True)
@@ -152,7 +152,7 @@ class TCP(SubMeasurement):
     status_blocked = models.BooleanField(default=False)
     status_failure = models.TextField(null=True)
     status_success = models.BooleanField(default=True)
-    ip             = models.CharField(max_length=50, null=True)
+    ip             = models.CharField(max_length=200, null=True)
 
     class Meta:
         default_related_name = 'tcp_list'
