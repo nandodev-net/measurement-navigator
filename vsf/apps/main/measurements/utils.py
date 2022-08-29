@@ -159,7 +159,7 @@ def anomaly(measurement : RawMeasurement) -> bool:
     elif test_name == types.sni_blocking:
         return anomaly_SNI(measurement)
 
-    return False
+    assert False, f"Unknown type of submeasurement '{test_name}'"
 
 
 def anomaly_web_conn(measurement : RawMeasurement) -> bool:

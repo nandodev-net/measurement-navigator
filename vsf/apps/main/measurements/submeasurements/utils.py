@@ -6,7 +6,8 @@
 from django.core.paginator               import Paginator
 
 # Third party imports
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+
 
 # Local imports
 from .models                             import DNS, DNSJsonFields, HTTP, TCP, SubMeasurement, TOR
@@ -383,7 +384,7 @@ def create_tor_from_tor(measurement : RawMeasurement) -> TOR:
 
 # -- Flag Checking -------------------------------------------------------+
 
-def soft_flag(since=None, until=None, limit : int = None, page_size : int = 1000, absolute : bool = False):
+def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : int = 1000, absolute : bool = False):
     """
         This function Flags every measurement from the start time 
         "since" to "until".  if some of them is not provided, 
@@ -535,4 +536,4 @@ def check_tcp(tcp : TCP) -> bool:
     return tcp.ooni_reason_for_blocking == True 
 
 # @TODO format later
-from .FlagsUtils import count_flags_sql, hard_flag
+from .flags_utils import count_flags_sql, hard_flag

@@ -9,7 +9,7 @@ from celery import shared_task
 # Local imports
 from .utils              import count_flags_sql, hard_flag
 from vsf.utils           import ProcessState, VSFTask
-from .FlagsUtils         import *
+from .flags_utils         import *
 from apps.configs.models import Config
 
 class SUBMEASUREMENTS_TASKS:
