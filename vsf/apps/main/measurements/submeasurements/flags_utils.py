@@ -9,12 +9,14 @@ from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
 from django.db          import connection
 from django.core.cache  import cache
+from django.db.models import Model, QuerySet
 import sys
 
 # Third party imports:
-from typing import List, Optional
+from typing import List, Optional, Tuple, Type
 from datetime import datetime, timedelta
 import pytz
+import time
 
 # Local imports
 from .models                                import DNS, TCP, HTTP, TOR, SubMeasurement
@@ -31,6 +33,8 @@ def count_flags_sql():
         for every submeasurment according to its meaning, 
         but with raw SQL code so it should be faster
     """
+    print(c.blue("Starting flag counting process..."))
+    start_time = time.time()
 
     submeasurements = ['dns','http','tcp', 'tor']
     with connection.cursor() as cursor:
@@ -74,9 +78,11 @@ def count_flags_sql():
                     FROM sq\
                     WHERE {submsmnt}.id = sq.id AND (NOT counted OR {submsmnt}.previous_counter<>sq.prev_counter);"
                 ).format(submsmnt=subm))
+    end_time = time.time()
+    print(c.green(f"[SUCCESS] Finished flag counting process in {round(end_time - start_time, 4)}s"))
 
 # HARD FLAG LOGIC
-def Grouper(queryset, key = lambda m: m['measurement__raw_measurement__input']):
+def grouper(queryset, key = lambda m: m['measurement__raw_measurement__input']):
     """
         Provides a generator object for lazy grouping a list of objects.
         Given an iterator sorted by some key, and the function to retrieve such key,
@@ -107,7 +113,7 @@ class ModelDeleter():
         model: model class to whose objects are to be deleted
         treshold: how many measurements to store before deleting (defaults to 1000)
     """
-    def __init__(self, model, treshold : int = 1000):
+    def __init__(self, model : Type[Model], treshold : int = 1000):
         self.model = model
         self.buff  = set()
         self.treshold = treshold
@@ -190,7 +196,7 @@ def select( measurements : List[SubMeasurement],
     assert event_continue_treshold > 0, "Continuation treshold should be a possitive number"
     assert event_openning_treshold <= interval_size
 
-    # Measurement ammount, if not enough to fill a window or an interval, return an empty list
+    # Measurement amount, if not enough to fill a window or an interval, return an empty list
     n_meas : int = len(measurements)
     if n_meas < event_openning_treshold:
         return []
@@ -208,9 +214,6 @@ def select( measurements : List[SubMeasurement],
     while n_meas - lo > event_openning_treshold:
         # Search for anomaly measurements
         print('**Search for anomaly measurements')
-        print('nmeas: ',n_meas)
-        print('lo: ', lo)
-        print('hi: ', hi)
         if measurements[lo].flag_type == Flag.FlagType.OK:
             measurements[lo] = None
             lo += 1
@@ -227,9 +230,9 @@ def select( measurements : List[SubMeasurement],
             hi = min(hi+1, n_meas-1)
             continue
 
-        import os, psutil
-        process = psutil.Process(os.getpid())
-        print("memoy: ", process.memory_info().rss / 1000000)
+        # import os, psutil
+        # process = psutil.Process(os.getpid())
+        # print("memoy: ", process.memory_info().rss / 1000000)
         # If too many anomalies, start a selecting process.
         current_block : List[Measurement] = []
         print("Openning new group")
@@ -238,15 +241,15 @@ def select( measurements : List[SubMeasurement],
             last_index = lo
             for i in range(lo, min(max_in_date + 1, n_meas)):
                 if measurements[i].flag_type != SubMeasurement.FlagType.OK:
-                    print(c.blue(f"\t added {measurements[i].id}, flag: {measurements[i].flag_type}, "))
+                    # print(c.blue(f"\t added {measurements[i].id}, flag: {measurements[i].flag_type}, "))
                     current_block.append(measurements[i])
-                    print(current_block)
+                    # print(current_block)
                     last_index = i
 
             lo = last_index
             hi = min(lo + interval_size - 1, n_meas-1)
             # search for anomaly measurements whose start time is within the given window 
-            print('**search for anomaly measurements whose start time is within the given window ')
+            #print('**search for anomaly measurements whose start time is within the given window ')
             max_in_date = _bin_search_max(
                                 measurements, 
                                 start_time(measurements[last_index]) + timedelta, 
@@ -261,6 +264,7 @@ def select( measurements : List[SubMeasurement],
             hi = min(hi+1, n_meas-1)
 
         yield(current_block)
+    print(c.green("[SUCCESS] Finished selection algorithm"))
 
     
 
@@ -273,9 +277,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             2) all hard flags are merged into a single hard flag, the earliest one
             3) closed hard flags are skiped from the logic: They are never merged to anything
     """
-    print("Running merge function")
-    print('First: ', measurements_with_flags[0].measurement_id,' - ',measurements_with_flags[0].id)
-    print('Last: ', measurements_with_flags[-1].measurement_id,' - ',measurements_with_flags[1].id)
+    print(c.blue("Running merge function"))
+
     # If there's no measurements, we have nothing to do here
     if not measurements_with_flags: return 
 
@@ -288,7 +291,6 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     start_time = lambda m: m.start_time
 
     # Filter measurements by type
-    print('**update min date and max date')
     resulting_event : Optional[Event] = None
     for measurement in measurements_with_flags:
         if measurement.flag_type == soft:
@@ -300,12 +302,10 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             continue
 
     # merge all hard flags as one hard flag
-    print('**update min date and max date')
     min_date : datetime = datetime.now(tz = pytz.utc) + timedelta(days=1)
     max_date = datetime(year=2000, day=1, month=1, tzinfo=pytz.utc)
 
     # if there's no hard flag, setup a new event 
-    print('**update min date and max date')
     if resulting_event is None:
         reference_measurement = measurements_with_flags[0]
         resulting_event = _event_creator(
@@ -318,18 +318,15 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     
     meas_to_update : List[SubMeasurement] = []
     # upgrade this measurements to hard flag
-    print('**update min date and max date')
     for measurement in soft_flags:
 
         # Update flag type and its event
-        print('**update min date and max date')
         measurement.flag_type = SubMeasurement.FlagType.HARD
         measurement.event = resulting_event
         measurement.flagged = True
 
         meas_to_update.append(measurement)
         # update min date and max date
-        print('**update min date and max date')
         start = start_time(measurement)
         if start < min_date:
             min_date = start
@@ -337,7 +334,6 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             max_date = start
 
     # Iterate over hard flags setting up new event
-    print('**Iterate over hard flags setting up new event')
     events_to_delete = ModelDeleter(Event)
     for measurement in  hard_flags:
         if measurement.event != resulting_event:
@@ -367,7 +363,10 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     
     if SM_type is None: raise TypeError(f"ERROR, THIS IS NOT A SUBMEASUREMENT {reference_measurement}")
     
+    print(c.blue("Updating new event information to database..."))
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
+    print(c.green("[SUCCESS] Successfully finished merge function"))
+
     
 def hard_flag(
             time_window : timedelta = timedelta(days=15.5), 
@@ -388,16 +387,20 @@ def hard_flag(
 
     """
     
-    submeasurements = [(DNS,'dns'), (HTTP,'http'), (TCP,'tcp'), (TOR,'tor')]
+    submeasurements : List[Tuple[Type[Model], str]] = [(DNS,'dns'), (HTTP,'http'), (TCP,'tcp'), (TOR,'tor')]
     
     # For every submeasurement type...
-    print("Testing HardFlags")
+    print(c.blue("Starting hard flag process"))
+
+    # for timing
+    start = time.time()
+
     for (SM, label) in submeasurements:
         # select every submeasurement such that partitioned by (domain, asn),
         # there's at the least one measurement in its partition that's 
         # not flagged.
         # (so we can avoid run the logic over elements not recently updated)
-        print("Requesting ", label,)
+        print(c.blue(f"Requesting submeasurements of type: {label}"))
         meas = SM.objects.raw(  f"WITH \
                                     measurements as (\
                                         SELECT  \
@@ -435,14 +438,14 @@ def hard_flag(
                                                             JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
                                 ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
 
-        print('Grouping measurements')
         groups = filter(
                         lambda l:len(l) >= event_openning_treshold,
-                        Grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
+                        grouper(meas.iterator(), lambda m: (m.domain_id, m.probe_asn)) #group by domain and asn
                     )
 
         # A list of lists of measurements such that every measurement in an internal
         # list share the same hard flag
+        print(c.blue("Starting grouping and selection process"))
         for group in groups:
 
             weird_measurements = select(group, time_window, event_openning_treshold, interval_size, event_continue_treshold)
@@ -452,6 +455,9 @@ def hard_flag(
 
         
         SM.objects.filter(flagged=False).update(flagged=True)
+
+    end = time.time()
+    print(c.green(f"[SUCCESS] Finished hard flag process in {round(end-start, 4)} s"))
 
     return { 
         'arguments' : {
