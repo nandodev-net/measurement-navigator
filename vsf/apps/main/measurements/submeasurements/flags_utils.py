@@ -213,7 +213,6 @@ def select( measurements : List[SubMeasurement],
     hi : int = min(interval_size - 1, n_meas-1)
     while n_meas - lo > event_openning_treshold:
         # Search for anomaly measurements
-        print('**Search for anomaly measurements')
         if measurements[lo].flag_type == Flag.FlagType.OK:
             measurements[lo] = None
             lo += 1
@@ -235,7 +234,6 @@ def select( measurements : List[SubMeasurement],
         # print("memoy: ", process.memory_info().rss / 1000000)
         # If too many anomalies, start a selecting process.
         current_block : List[Measurement] = []
-        print("Openning new group")
         while n_anomalies > event_continue_treshold:
             print(c.green(f"\t Taking from {measurements[lo].start_time} to {measurements[max_in_date].start_time}"))
             last_index = lo
@@ -280,7 +278,9 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     print(c.blue("Running merge function"))
 
     # If there's no measurements, we have nothing to do here
-    if not measurements_with_flags: return 
+    if not measurements_with_flags: 
+        print(c.green("[SUCCESS] no measurements to process, so merge process ended before started"))
+        return 
 
     soft_flags : List[SubMeasurement] = [] # Measurements with soft flag
     hard_flags : List[SubMeasurement] = [] # Measurements with hard flag 
