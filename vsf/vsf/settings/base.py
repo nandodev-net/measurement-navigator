@@ -230,6 +230,10 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
         'LOCATION': 'process_state',
         'TIMEOUT' : 86400
+    },
+    'filesystem' : {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/var/tmp/django_cache',
     }
 }
 
