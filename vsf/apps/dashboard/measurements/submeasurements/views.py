@@ -1,14 +1,16 @@
 #Django imports
 from django.http import request
 from django.views.generic           import TemplateView
-from django.db.models               import F
+from django.db.models               import F, QuerySet
 
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
+
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
 from datetime                                   import datetime, timedelta
 from typing                                     import List
+
 # Local imports
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
@@ -18,6 +20,7 @@ from apps.main.measurements.flags               import models as FlagModels
 # DELETE LATER, DEBUG ONLY @TODO
 from vsf.utils                                  import Colors as c
 from ...utils import *
+import viztracer
 
 class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
     """
@@ -222,9 +225,18 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
     ]
     SubMeasurement = SubMeasModels.DNS
 
+    def get(self, request, *args, **kwargs):
+        print("In dns backend")
+        tracer = viztracer.VizTracer()
+        tracer.start()
+        result = super().get(request, *args, **kwargs)
+        tracer.stop()
+        tracer.save("dns_backend_test.json")
+        return result
+
     def filter_queryset(self, qs):
         """
-            Besides of the data provided by 'ListSubMeasurementTemplate' parent class, 
+            Besides of the data provided by 'ListSubMeasurementBackend' parent class, 
             this class provides additional filtering:
                 + in prefill, add a new field:
                     - consistency
@@ -238,7 +250,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
 
         return qs
 
-    def prepare_results(self, qs):
+    def prepare_results(self, qs : QuerySet):
         # prepare list with output column data
         # queryset is already paginated here
 
@@ -257,7 +269,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         )
         
         json_data = []
-        for item in qs:
+        for item in qs.iterator(chunk_size=100):
             json_data.append({
                 'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,

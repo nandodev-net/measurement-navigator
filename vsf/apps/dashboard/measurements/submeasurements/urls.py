@@ -1,6 +1,8 @@
 from django.conf.urls import include
 from django.urls import path
 from .views import *
+from django.views.decorators.cache  import cache_page
+
 
 app_name = 'submeasurements'
 
@@ -13,7 +15,8 @@ urlpatterns = [
     ),
     path(
         'dns_data/',
-        ListDNSBackEnd.as_view(),
+        # seconds * n_minutes
+        cache_page(60 * 5, cache='filesystem')(ListDNSBackEnd.as_view()),
         name='list_dns_data'
     ),
     path(
