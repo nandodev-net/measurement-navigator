@@ -2,14 +2,19 @@
 from django.http import request
 from django.views.generic           import TemplateView
 from django.db.models               import F, QuerySet
+from django.core.cache              import caches
 
 #Inheritance imports
 from vsf.views                      import VSFLoginRequiredMixin
 
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
+
+# Python imports
 from datetime                                   import datetime, timedelta
-from typing                                     import List
+from typing                                     import Any, Dict, List
+import hashlib
+import json
 
 # Local imports
 from apps.main.sites.models                     import Site
@@ -142,6 +147,9 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
     # SubMeasurement class to use (class inheriting SubMeasurement)
     SubMeasurement = None
 
+    # how many seconds cache will live before it is deleted
+    SECONDS_TO_STORE_CACHE = 60 * 5
+
     def get_initial_queryset(self):
         qs = self.SubMeasurement.objects.all()
         return qs
@@ -180,6 +188,53 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(flag_type__in = flags)
 
         return qs
+    
+    def prepare_results_no_cache(self, qs : QuerySet) -> List[Dict[str, Any]]:
+        raise NotImplementedError("Implement prepare_results_no_cache in your submeasurement backend view in order to fill the datatables table")
+
+    def prepare_results(self, qs : QuerySet) -> List[Dict[str, Any]]:
+        """Don't override this unless you want to prevent query caching. This function will search for a cached result of the provided query. you 
+        can do:
+            ```
+            def prepare_results(self, qs):
+                self.prepare_results_no_cache(qs)
+            ```
+        in case you want to avoid caching for this view
+
+        Args:
+            qs (QuerySet): Queryset whose result will be cached
+
+        Returns:
+            List[Dict[str, Any]]: Prepared results as a list of json-like dicts
+        """
+        key = self._get_key_from_query(qs)
+        fs_cache = caches['filesystem']
+
+        # try to retrieve key from cache
+        if key in fs_cache:
+            print(c.green("Cache found, using cache"))
+            return fs_cache.get(key)
+        
+        # If not found, then create it 
+        print(c.blue("Cache not found, creating from scratch"))
+        result = self.prepare_results_no_cache(qs)
+        fs_cache.set(key, result, self.SECONDS_TO_STORE_CACHE)
+
+        return result
+
+    def _get_key_from_query(self, qs : QuerySet) -> str:
+        """Generate a sha256 key from a given queryset, so it can be used to cache results for a few minutes
+
+        Args:
+            qs (QuerySet): Query in database to cache
+
+        Returns:
+            str: sha256 hash for the given query
+        """
+        query_str = str(qs.query)
+        query_hash = hashlib.sha256(bytes(query_str, 'utf-8')).digest()
+        return str(query_hash)
+
 
 class ListDNSTemplate(ListSubMeasurementTemplate):
     """
@@ -225,14 +280,18 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
     ]
     SubMeasurement = SubMeasModels.DNS
 
-    def get(self, request, *args, **kwargs):
-        print("In dns backend")
-        tracer = viztracer.VizTracer()
-        tracer.start()
-        result = super().get(request, *args, **kwargs)
-        tracer.stop()
-        tracer.save("dns_backend_test.json")
-        return result
+    def _get_req_key(self) -> str:
+
+        dict_to_hash = {}
+        for field in self.get_filter_fields():
+            value = dict_to_hash[field] = self.request.GET.get(field, None)
+            if isinstance(value, list) and all(isinstance(elem, str) for elem in value):
+                value.sort(key=lambda x: x) 
+
+        dict_json = json.dumps(dict_to_hash, sort_keys=True)
+        key_hash = hashlib.sha256(bytes(dict_json, 'utf-8')).digest()
+
+        return str(key_hash)
 
     def filter_queryset(self, qs):
         """
@@ -250,7 +309,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
 
         return qs
 
-    def prepare_results(self, qs : QuerySet):
+    def prepare_results_no_cache(self, qs : QuerySet):
         # prepare list with output column data
         # queryset is already paginated here
 
@@ -330,6 +389,12 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             return {'isOk' : True, 'json' : out}
         except:
             return {'isOk' : False, 'json' : cr_answers}
+
+    @staticmethod
+    def get_filter_fields() -> List[str]:
+        fields = ListSubMeasurementBackend.get_filter_fields()
+        fields.append("dns_consistency")
+        return fields
 
 class ListHTTPTemplate(ListSubMeasurementTemplate):
     """
@@ -428,7 +493,7 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
 
         return qs
 
-    def prepare_results(self, qs):
+    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
@@ -545,7 +610,7 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
 
         return qs
 
-    def prepare_results(self, qs):
+    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
@@ -670,7 +735,7 @@ class ListTORBackEnd(ListSubMeasurementBackend):
             
         return qs
 
-    def prepare_results(self, qs):
+    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
