@@ -156,7 +156,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         qs = self.SubMeasurement.objects.select_related('measurement', 'measurement__raw_measurement').all()
         return qs
 
-    def filter_queryset(self, qs):
+    def filter_queryset(self, qs : QuerySet):
         get = self.request.GET or {}
 
         # Get filter data
@@ -298,7 +298,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
 
         return str(key_hash)
 
-    def filter_queryset(self, qs):
+    def filter_queryset(self, qs : QuerySet):
         """
             Besides of the data provided by 'ListSubMeasurementBackend' parent class, 
             this class provides additional filtering:
@@ -329,9 +329,19 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             "jsons__answers",
             "jsons__control_resolver_answers",
             "client_resolver",
-            "dns_consistency" 
+            "dns_consistency",
+
+            "measurement__raw_measurement__measurement_start_time",
+            "measurement__raw_measurement__probe_cc",
+            "measurement__raw_measurement__probe_asn",
+            "measurement__raw_measurement__input",
+            "measurement__domain__site__name",
+            "measurement__anomaly",
+            "flag_type",
         )
-        
+
+        print(qs.query)
+
         json_data = []
         for item in qs.iterator(chunk_size=100):
             json_data.append({
