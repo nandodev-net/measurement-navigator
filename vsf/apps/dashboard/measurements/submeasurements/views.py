@@ -1,7 +1,7 @@
 #Django imports
 from django.http import request
 from django.views.generic           import TemplateView
-from django.db.models               import F, QuerySet
+from django.db.models               import F, QuerySet, Model
 from django.core.cache              import caches
 
 #Inheritance imports
@@ -12,7 +12,7 @@ from django_datatables_view.base_datatable_view import BaseDatatableView
 
 # Python imports
 from datetime                                   import datetime, timedelta
-from typing                                     import Any, Dict, List
+from typing                                     import Any, Dict, List, Type, Optional
 import hashlib
 import json
 
@@ -145,20 +145,21 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         ]
     
     # SubMeasurement class to use (class inheriting SubMeasurement)
-    SubMeasurement = None
+    SubMeasurement : Optional[Type[Model]]= None
 
     # how many seconds cache will live before it is deleted
     SECONDS_TO_STORE_CACHE = 60 * 5
 
     def get_initial_queryset(self):
-        qs = self.SubMeasurement.objects.all()
+        assert self.SubMeasurement, "Submeasurement not properly configured"
+
+        qs = self.SubMeasurement.objects.select_related('measurement', 'measurement__raw_measurement').all()
         return qs
 
     def filter_queryset(self, qs):
         get = self.request.GET or {}
 
         # Get filter data
-
         input       = get.get('input')
         since       = get.get('since')
         asn         = get.get('asn')
@@ -213,12 +214,12 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         # try to retrieve key from cache
         if key in fs_cache:
             print(c.green("Cache found, using cache"))
-            return fs_cache.get(key)
-        
-        # If not found, then create it 
-        print(c.blue("Cache not found, creating from scratch"))
-        result = self.prepare_results_no_cache(qs)
-        fs_cache.set(key, result, self.SECONDS_TO_STORE_CACHE)
+            result = fs_cache.get(key)
+        else: 
+            # If not found, then create it 
+            print(c.blue("Cache not found, creating from scratch"))
+            result = self.prepare_results_no_cache(qs)
+            fs_cache.set(key, result, self.SECONDS_TO_STORE_CACHE)
 
         return result
 
@@ -279,6 +280,10 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         'dns_consistency'
     ]
     SubMeasurement = SubMeasModels.DNS
+
+    def get_initial_queryset(self):
+        return super().get_initial_queryset().select_related('jsons')
+
 
     def _get_req_key(self) -> str:
 
