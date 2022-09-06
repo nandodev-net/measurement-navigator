@@ -236,6 +236,19 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         query_hash = hashlib.sha256(bytes(query_str, 'utf-8')).digest()
         return str(query_hash)
 
+    def count_records(self, qs : QuerySet):
+
+        # Overriden to provide caching to this query
+        key = self._get_key_from_query(qs)
+        key = "count_" + key
+        fs_cache = caches['filesystem']
+        if key in fs_cache:
+            return fs_cache.get(key)
+        
+        result = super().count_records(qs)
+        fs_cache.set(key, result, self.SECONDS_TO_STORE_CACHE)
+
+        return result 
 
 class ListDNSTemplate(ListSubMeasurementTemplate):
     """
@@ -280,6 +293,15 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         'dns_consistency'
     ]
     SubMeasurement = SubMeasModels.DNS
+
+    def get(self, request, *args, **kwargs):
+        tracer = viztracer.VizTracer()
+        tracer.start()
+        result = super().get(request, *args, **kwargs)
+        tracer.stop()
+        tracer.save("dns_backend_trace_select_related.json")
+
+        return result
 
     def get_initial_queryset(self):
         return super().get_initial_queryset().select_related('jsons')
