@@ -43,7 +43,7 @@ class S3IngestManager:
         'torsf', 'httpinvalidrequestline', 'httpheaderfieldmanipulation', 
         'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 
         'riseupvpn', 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 
-        'meekfrontedrequeststest', 'httprequests', 'httphost','dnscheck', 
+        'meekfrontedrequeststest', 'httprequests', 'httphost', 
         'dnsconsistency', 'bridgereachability']
 
     def __init__(self, measurements_path  : str = './media/ooni_data/', date_format : str = "%Y-%m-%d %H:%M:%S") -> None:
