@@ -153,8 +153,8 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
     def get_initial_queryset(self):
         assert self.SubMeasurement, "Submeasurement not properly configured"
 
-        #qs = self.SubMeasurement.objects.select_related('measurement', 'measurement__raw_measurement').all()
-        qs = self.SubMeasurement.objects.all()
+        qs = self.SubMeasurement.objects.select_related('measurement', 'measurement__raw_measurement').all()
+        # qs = self.SubMeasurement.objects.all()
         return qs
 
     def filter_queryset(self, qs : QuerySet):
@@ -341,7 +341,9 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         # prepare list with output column data
         # queryset is already paginated here
 
-        qs = qs.only(
+        # It's important to use .values(...) so we only load the necessary fields in the select clause
+        # in the underlying sql query, no more no less
+        qs = qs.values(
             "measurement_start_time",
             "probe_cc",
             "probe_asn",
@@ -361,20 +363,21 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
 
         json_data = []
         for item in qs.iterator(chunk_size=100):
+            print('\n'.join(item.keys()))
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'measurement__raw_measurement__probe_cc':item.probe_cc,
-                'measurement__raw_measurement__probe_asn':item.probe_asn,
-                'measurement__raw_measurement__input':item.input,
-                'measurement__id' : item.measurement.id,
-                'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
-                'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
-                'measurement__anomaly' : item.anomaly,
-                'jsons__answers' :  self._get_answers(item.jsons.answers),
-                'jsons__control_resolver_answers' : self._get_control_resolver_answers(item.jsons.control_resolver_answers),
-                'client_resolver' : item.client_resolver,
-                'dns_consistency' : item.dns_consistency,
-                'flag_type'       : item.flag_type
+                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__probe_cc':item['probe_cc'],
+                'measurement__raw_measurement__probe_asn':item['probe_asn'],
+                'measurement__raw_measurement__input':item['input'],
+                'measurement__id' : item['measurement_id'],
+                'site' : item['measurement__domain__site_id'] if item.get('measurement__domain') and item.get('measurement__domain__site') else -1,
+                'site_name' : item['measurement__domain__site__name'] if item.get('measurement__domain') and item.get('measurement__domain__site_id') else "(no site)",
+                'measurement__anomaly' : item['anomaly'],
+                'jsons__answers' :  self._get_answers(item['jsons__answers']),
+                'jsons__control_resolver_answers' : self._get_control_resolver_answers(item['jsons__control_resolver_answers']),
+                'client_resolver' : item['client_resolver'],
+                'dns_consistency' : item['dns_consistency'],
+                'flag_type'       : item['flag_type']
             })
         return json_data
 
