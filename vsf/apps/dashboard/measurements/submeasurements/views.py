@@ -345,20 +345,14 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             "probe_cc",
             "probe_asn",
             "input",
-            "measurement__id",
+            "measurement_id",
+            "measurement__domain__site_id",
             "measurement__domain__site__name",
             "anomaly",
             "jsons__answers",
             "jsons__control_resolver_answers",
             "client_resolver",
             "dns_consistency",
-
-            "measurement__raw_measurement__measurement_start_time",
-            "measurement__raw_measurement__probe_cc",
-            "measurement__raw_measurement__probe_asn",
-            "measurement__raw_measurement__input",
-            "measurement__domain__site__name",
-            "measurement__anomaly",
             "flag_type",
         )
 
@@ -367,14 +361,14 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         json_data = []
         for item in qs.iterator(chunk_size=100):
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
-                'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
-                'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
+                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__probe_cc':item.probe_cc,
+                'measurement__raw_measurement__probe_asn':item.probe_asn,
+                'measurement__raw_measurement__input':item.input,
                 'measurement__id' : item.measurement.id,
                 'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
                 'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
-                'measurement__anomaly' : item.measurement.anomaly,
+                'measurement__anomaly' : item.anomaly,
                 'jsons__answers' :  self._get_answers(item.jsons.answers),
                 'jsons__control_resolver_answers' : self._get_control_resolver_answers(item.jsons.control_resolver_answers),
                 'client_resolver' : item.client_resolver,
