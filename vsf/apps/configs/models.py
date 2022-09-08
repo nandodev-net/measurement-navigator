@@ -5,25 +5,6 @@ from model_utils.models import TimeStampedModel
 from django.core.exceptions import ValidationError
 
 
-
-class SingletonModel(models.Model):
-    """Singleton Django Model"""
-
-    class Meta:
-        abstract = True
-
-   
-
-    @classmethod
-    def load(cls):
-        """
-        Load object from the database. Failing that, create a new empty
-        (default) instance of the object and return it (without saving it
-        to the database).
-        """
-
-        
-
 class Config(TimeStampedModel):
 
     hardflag_timewindow = models.FloatField(
