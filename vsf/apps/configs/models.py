@@ -42,7 +42,7 @@ class Config(TimeStampedModel):
         are any.
         """
         self.__class__.objects.exclude(id=self.id).delete()
-        super(SingletonModel, self).save(*args, **kwargs)
+        super(Config, self).save(*args, **kwargs)
 
     def clean(self):
             num_configs = Config.objects.all().count()
