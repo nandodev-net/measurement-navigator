@@ -4,15 +4,16 @@
 
 # Django imports 
 from django.core.paginator               import Paginator
+from django.db.models                    import Model   
 
-# Third party imports
-from typing import Dict, List, Tuple, Optional
-
+# python party imports
+from typing import Dict, List, Tuple, Optional, Type
 
 # Local imports
 from .models                             import DNS, DNSJsonFields, HTTP, TCP, SubMeasurement, TOR
 from apps.main.measurements.models       import RawMeasurement
 from apps.main.measurements.flags.models import Flag
+from vsf.utils                           import BulkUpdater
 
 # -- SubMeasurement Creation -------------------------------------------------------+
 
@@ -45,16 +46,19 @@ def create_sub_measurements(measurement : RawMeasurement) -> Tuple[List[SubMeasu
         count['tcp']  = len(tcp)
         count['http'] = len(http)
 
-        return (dns + tcp + http, count)
-        
-    elif measurement.test_name == RawMeasurement.TestTypes.DNS_CONSISTENCY :
-        return (create_dns_from_dns_cons(measurement), count)
+        result = dns + tcp + http
+
+    elif measurement.test_name == RawMeasurement.TestTypes.DNS_CONSISTENCY:
+        result = create_dns_from_dns_cons(measurement)
+        count['dns'] += len(result)
 
     elif measurement.test_name == RawMeasurement.TestTypes.TOR :
-        tor = [create_tor_from_tor(measurement)]
-        count['tor'] = len(tor)
-        return (tor, count)
-    return ([], count)
+        result = [create_tor_from_tor(measurement)]
+        count['tor'] = len(result)
+    else:
+        assert False, f"unsupported test type '{measurement.test_name}'"
+
+    return (result, count)
 
 def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
     """
@@ -394,28 +398,26 @@ def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : 
         the maximum ammount of measurements to check per measurement type. 
         
         "Absolute" means that every measurement will be considered, even if it is already checked.
-        Use with aution
+        Use with caution
 
         "page_size" means the size of the page while paginating the query
     """
 
     # Argument checker
-    assert isinstance(page_size, int), "Limit argument should be an integer number"
-    assert page_size > 0, "Limit argument should be a positive number"
-
-    meas_types = [DNS, TCP, HTTP, TOR]
+    meas_types : List[Type[SubMeasurement]] = [DNS, TCP, HTTP, TOR]
 
     tagged = 0
     not_tagged = 0
     for MS in meas_types:
-        measurements = MS.objects.all()\
-                            .select_related('measurement', 'measurement__raw_measurement', 'flag')\
+
+        bulker = BulkUpdater(MS, ['flag_type'])
+        measurements = MS.objects.all()
         
         # Apply optional filtering
         if until:
-            measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__lt = until)
+            measurements = measurements.filter(measurement_start_time__lt = until)
         if since:
-            measurements = measurements.filter(measurement__raw_measurement__measurement_start_time__gt = since) 
+            measurements = measurements.filter(measurement_start_time__gt = since) 
         if not absolute:
             measurements = measurements.filter(flag = None)
 
@@ -424,25 +426,15 @@ def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : 
         if limit and limit > 0:
             measurements = measurements[:limit]
 
-
-        # Apply pagination
-        paginator = Paginator(measurements, page_size)
-        
-        for i in paginator.page_range:
-            page = paginator.page(i)
-            for m in page:
-                if check_submeasurement(m):
-                    new_flag = Flag.objects.create(flag = Flag.FlagType.SOFT) # create a new flag
-                    m.flag = new_flag   # set the new flag
-                    m.save()            # Store the measurement
-                    tagged += 1         # annotate the saved objects
-                else:
-                    new_flag = Flag.objects.create(flag = Flag.FlagType.OK) # create a new flag
-                    m.flag = new_flag       # set the new flag
-                    m.save()                # Store the measurement
-                    not_tagged += 1    # annotate the saved objects
-
-            del page
+        for m in measurements.iterator(chunk_size=10000):
+            if check_submeasurement(m):
+                m.flag_type = Flag.FlagType.SOFT.value
+                tagged += 1         # annotate the saved objects
+            else:
+                m.flag_type = SubMeasurement.FlagType.OK.value
+                not_tagged += 1    # annotate the saved objects
+            bulker.add(m)
+        bulker.save()
 
     return {
             'tagged':tagged, 
