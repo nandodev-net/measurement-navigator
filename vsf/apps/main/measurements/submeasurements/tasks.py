@@ -53,7 +53,7 @@ def hard_flag_task():
     cache.set(name, ProcessState.RUNNING)
 
     # parse config
-    config = Config.objects.all().first()
+    config = Config.get()
     if config:
         delta = timedelta(days=config.hardflag_timewindow)  
         openning_treshold = config.hardflag_openning_treshold 

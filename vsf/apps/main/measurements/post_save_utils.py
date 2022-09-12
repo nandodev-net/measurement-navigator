@@ -14,6 +14,7 @@ from datetime import datetime
 
 # local imports
 from apps.main.measurements.submeasurements.models import SUBMEASUREMENTS, SubMeasurement
+from apps.main.measurements.submeasurements.utils import check_submeasurement
 from .models import RawMeasurement, Measurement
 from vsf.utils import Colors as c
 
@@ -77,8 +78,14 @@ def create_measurement_from_raw_measurement(raw_measurement : RawMeasurement) ->
         
     (sub_measurements,_) = create_sub_measurements(raw_measurement)
 
+
     for subms in sub_measurements:
         subms.measurement = measurement
+
+        if check_submeasurement(subms):
+            subms.flag_type = SubMeasurement.FlagType.SOFT.value
+        else:
+            subms.flag_type = SubMeasurement.FlagType.OK.value
 
     return measurement, sub_measurements
 
