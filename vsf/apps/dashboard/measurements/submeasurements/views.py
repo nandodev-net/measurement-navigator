@@ -337,9 +337,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
 
         return qs
 
-    def prepare_results_no_cache(self, qs : QuerySet):
-        # prepare list with output column data
-        # queryset is already paginated here
+    def prepare_results(self, qs: QuerySet) -> List[Dict[str, Any]]:
 
         # It's important to use .values(...) so we only load the necessary fields in the select clause
         # in the underlying sql query, no more no less
@@ -359,16 +357,22 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
             "flag_type",
         )
 
+        return super().prepare_results(qs)
+
+    def prepare_results_no_cache(self, qs : QuerySet):
+        # prepare list with output column data
+        # queryset is already paginated here
+
         print(qs.query)
 
         json_data = []
         for item in qs.iterator(chunk_size=100):
             print('\n'.join(item.keys()))
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'measurement__raw_measurement__probe_cc':item['probe_cc'],
-                'measurement__raw_measurement__probe_asn':item['probe_asn'],
-                'measurement__raw_measurement__input':item['input'],
+                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__probe_cc' : item['probe_cc'],
+                'measurement__raw_measurement__probe_asn' : item['probe_asn'],
+                'measurement__raw_measurement__input' : item['input'],
                 'measurement__id' : item['measurement_id'],
                 'site' : item['measurement__domain__site_id'] if item.get('measurement__domain') and item.get('measurement__domain__site') else -1,
                 'site_name' : item['measurement__domain__site__name'] if item.get('measurement__domain') and item.get('measurement__domain__site_id') else "(no site)",
@@ -528,17 +532,14 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
 
         return qs
 
-    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
-        # prepare list with output column data
-        # queryset is already paginated here
-        json_data = []
-
-        qs = qs.only(
+    def prepare_results(self, qs: QuerySet) -> List[Dict[str, Any]]:
+        qs = qs.values(
             'measurement_start_time',
             'probe_cc',
             'probe_asn',
             'input',
-            'measurement__id',
+            'measurement_id',
+            "measurement__domain__site_id",
             'measurement__domain__site__name',
             'anomaly',
             'flag_type',
@@ -547,22 +548,28 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
             'body_length_match',
             'body_proportion'
         )
+        return super().prepare_results(qs)
+
+    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
+        # prepare list with output column data
+        # queryset is already paginated here
+        json_data = []
 
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
-                'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
-                'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
-                'measurement__id' : item.measurement.id,
-                'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
-                'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
-                'measurement__anomaly' : item.measurement.anomaly,
-                'flag_type'           : item.flag_type,
-                'status_code_match' : item.status_code_match,
-                'headers_match' : item.headers_match,
-                'body_length_match' : item.body_length_match,
-                'body_proportion' : item.body_proportion,
+                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__probe_cc' : item['probe_cc'],
+                'measurement__raw_measurement__probe_asn': item['probe_asn'],
+                'measurement__raw_measurement__input' : item['input'],
+                'measurement__id' : item['measurement_id'],
+                'site' : item['measurement__domain__site_id'] if item.get('measurement__domain') and item.get('measurement__domain__site') else -1,
+                'site_name' : item['measurement__domain__site__name'] if item.get('measurement__domain') and item.get('measurement__domain__site_id') else "(no site)",
+                'measurement__anomaly' : item['anomaly'],
+                'flag_type'           : item['flag_type'],
+                'status_code_match' : item['status_code_match'],
+                'headers_match' : item['headers_match'],
+                'body_length_match' : item['body_length_match'],
+                'body_proportion' : item['body_proportion'],
             })
         return json_data
 
@@ -645,17 +652,14 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
 
         return qs
 
-    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
-        # prepare list with output column data
-        # queryset is already paginated here
-        json_data = []
-
-        qs = qs.only(
+    def prepare_results(self, qs: QuerySet) -> List[Dict[str, Any]]:
+        qs = qs.values(
             'measurement_start_time',
             'probe_cc',
             'probe_asn',
             'input',
-            'measurement__id',
+            'measurement_id',
+            "measurement__domain__site_id",
             'measurement__domain__site__name',
             'anomaly',
             'flag_type',
@@ -665,21 +669,28 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
             'ip'
         )
 
+        return super().prepare_results(qs)
+
+    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
+        # prepare list with output column data
+        # queryset is already paginated here
+        json_data = []
+
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'measurement__raw_measurement__probe_cc':item.measurement.raw_measurement.probe_cc,
-                'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
-                'measurement__raw_measurement__input':item.measurement.raw_measurement.input,
-                'measurement__id' : item.measurement.id,
-                'site' : item.measurement.domain.site.id if item.measurement.domain and item.measurement.domain.site else -1,
-                'site_name' : item.measurement.domain.site.name if item.measurement.domain and item.measurement.domain.site else "(no site)",
-                'measurement__anomaly' : item.measurement.anomaly,
-                'flag_type'           : item.flag_type,
-                'status_blocked' : item.status_blocked,
-                'status_failure' : item.status_failure or "N/A",
-                'status_success' : item.status_success,
-                'ip' : item.ip,
+                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__probe_cc' : item['probe_cc'],
+                'measurement__raw_measurement__probe_asn': item['probe_asn'],
+                'measurement__raw_measurement__input' : item['input'],
+                'measurement__id' : item['measurement_id'],
+                'site' : item['measurement__domain__site_id'] if item.get('measurement__domain') and item.get('measurement__domain__site') else -1,
+                'site_name' : item['measurement__domain__site__name'] if item.get('measurement__domain') and item.get('measurement__domain__site_id') else "(no site)",
+                'measurement__anomaly' : item['anomaly'],
+                'flag_type'           : item['flag_type'],
+                'status_blocked' : item['status_blocked'],
+                'status_failure' : item['status_failure'] or "N/A",
+                'status_success' : item['status_success'],
+                'ip' : item['ip'],
             })
         return json_data
 
@@ -770,15 +781,12 @@ class ListTORBackEnd(ListSubMeasurementBackend):
             
         return qs
 
-    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
-        # prepare list with output column data
-        # queryset is already paginated here
-        json_data = []
+    def prepare_results(self, qs: QuerySet) -> List[Dict[str, Any]]:
 
-        qs = qs.only(
+        qs = qs.values(
             'measurement_start_time',
             'probe_asn',
-            'measurement__id',
+            'measurement_id',
             'flag_type',
             'dir_port_total',
             'dir_port_accessible',
@@ -787,19 +795,26 @@ class ListTORBackEnd(ListSubMeasurementBackend):
             'or_port_dirauth_total',
             'or_port_dirauth_accessible'
         )
+
+        return super().prepare_results(qs)
+
+    def prepare_results_no_cache(self, qs: QuerySet) -> List[Dict[str, Any]]:
+        # prepare list with output column data
+        # queryset is already paginated here
+        json_data = []
         
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.measurement.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'measurement__raw_measurement__probe_asn':item.measurement.raw_measurement.probe_asn,
-                'measurement__id' : item.measurement.id,
-                'dir_port_total' : item.dir_port_total or 0,
-                'dir_port_accessible' : item.dir_port_accessible or 0,
-                'obfs4_total' : item.obfs4_total or 0,
-                'flag_type'   : item.flag_type,
-                'obfs4_accessible' : item.obfs4_accessible or 0, 
-                'or_port_dirauth_total': item.or_port_dirauth_total,
-                'or_port_dirauth_accessible': item.or_port_dirauth_accessible
+                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__probe_asn':item['probe_asn'],
+                'measurement__id' : item['measurement_id'],
+                'dir_port_total' : item['dir_port_total'] or 0,
+                'dir_port_accessible' : item['dir_port_accessible'] or 0,
+                'obfs4_total' : item['obfs4_total'] or 0,
+                'flag_type'   : item['flag_type'],
+                'obfs4_accessible' : item['obfs4_accessible'] or 0, 
+                'or_port_dirauth_total': item['or_port_dirauth_total'],
+                'or_port_dirauth_accessible': item['or_port_dirauth_accessible']
             })
 
         return json_data
