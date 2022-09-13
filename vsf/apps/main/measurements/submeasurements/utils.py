@@ -439,7 +439,7 @@ def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : 
                 m.flag_type = SubMeasurement.FlagType.OK.value
                 not_tagged += 1    # annotate the saved objects
             bulker.add(m)
-            print(c.blue(f"Setting flag to {m.flag_Type} in measurement of type {MS.__name__}, {i} / {measurement_count}"))
+            print(c.blue(f"Setting flag to {m.flag_type} in measurement of type {MS.__name__}, {i} / {measurement_count}"))
         bulker.save()
 
     result = {
