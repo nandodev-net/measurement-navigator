@@ -5,11 +5,15 @@
 from django.db.models       import OuterRef, Subquery
 from django.db.models.query import QuerySet
 from django.core.cache      import cache
+from django.db.models       import Model
 
 # Third party imports
 from celery.worker.request  import Request
 from celery.app.task        import Task
 from urllib.parse           import urlparse
+
+# python imports
+from typing                 import List, Type
 
 # Local imports
 from apps.main.measurements.models  import Measurement, RawMeasurement
@@ -121,6 +125,44 @@ class VSFTask(Task):
         # Set this process as a failure
         cache.set(self.vsf_name, ProcessState.FAILED)
         return super().on_failure(exc, task_id, args, kwargs, einfo)
+
+# --- Processing models --- # 
+
+class BulkUpdater:
+    """Use this class to schedule bulk updates for models
+    """
+
+    def __init__(self, model_class : Type[Model], fields_to_update : List[str], bulk_size : int = 1000) -> None:
+        assert bulk_size > 0
+        assert len(fields_to_update) > 0
+
+        self._bulk_size = bulk_size
+        self._model_class = model_class
+        self._queued_instances = []
+        self._fields_to_update = fields_to_update
+    
+    def add(self, instance : Model):
+        """Add a new instance to the queue to be processed
+
+        Args:
+            instance (Model): instance to queue for update
+        """
+        self._queued_instances.append(instance)
+        if len(self._queued_instances) >= self._bulk_size:
+            self.save()
+
+    def save(self):
+        """Perform a bulk update operation, flushing the queue of instances to update
+        """
+        if self._queued_instances == []:
+            return # return if nothing to do
+        
+        self._model_class.objects.bulk_update(self._queued_instances, self._fields_to_update)
+        self._queued_instances = []
+
+    def __del__(self):
+        self.save()
+
 
 # --- MISC --- #
 class Colors:
