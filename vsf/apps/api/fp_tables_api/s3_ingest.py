@@ -259,6 +259,7 @@ class S3IngestManager:
 
         # Downloading S3 measurements
         for test in test_types:
+            print(c.blue(f"Downloading measurements of type {test}"))
             s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
 
         # Get all .gz names in the output directory in order to decompress them
