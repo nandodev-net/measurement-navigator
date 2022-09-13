@@ -3,6 +3,7 @@
 
 
 # Django imports 
+from traceback import print_tb
 from django.core.paginator               import Paginator
 from django.db.models                    import Model   
 
@@ -14,6 +15,7 @@ from .models                             import DNS, DNSJsonFields, HTTP, TCP, S
 from apps.main.measurements.models       import RawMeasurement
 from apps.main.measurements.flags.models import Flag
 from vsf.utils                           import BulkUpdater
+from vsf.utils                           import Colors as c
 
 # -- SubMeasurement Creation -------------------------------------------------------+
 
@@ -388,7 +390,7 @@ def create_tor_from_tor(measurement : RawMeasurement) -> TOR:
 
 # -- Flag Checking -------------------------------------------------------+
 
-def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : int = 1000, absolute : bool = False):
+def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : int = 10000, absolute : bool = False):
     """
         This function Flags every measurement from the start time 
         "since" to "until".  if some of them is not provided, 
@@ -402,13 +404,14 @@ def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : 
 
         "page_size" means the size of the page while paginating the query
     """
-
+    print(c.blue("Starting soft flag process..."))
     # Argument checker
     meas_types : List[Type[SubMeasurement]] = [DNS, TCP, HTTP, TOR]
 
     tagged = 0
     not_tagged = 0
     for MS in meas_types:
+        print(c.blue(f"Soft flagging measurements of type: {MS.__name__}"))
 
         bulker = BulkUpdater(MS, ['flag_type'])
         measurements = MS.objects.all()
@@ -426,7 +429,9 @@ def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : 
         if limit and limit > 0:
             measurements = measurements[:limit]
 
-        for m in measurements.iterator(chunk_size=10000):
+        measurement_count = measurements.count()
+
+        for (i, m) in enumerate(measurements.iterator(chunk_size=page_size)):
             if check_submeasurement(m):
                 m.flag_type = Flag.FlagType.SOFT.value
                 tagged += 1         # annotate the saved objects
@@ -434,12 +439,16 @@ def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : 
                 m.flag_type = SubMeasurement.FlagType.OK.value
                 not_tagged += 1    # annotate the saved objects
             bulker.add(m)
+            print(c.blue(f"Setting flag to {m.flag_Type} in measurement of type {MS.__name__}, {i} / {measurement_count}"))
         bulker.save()
 
-    return {
+    result = {
             'tagged':tagged, 
             'not_tagged':not_tagged, 
         }
+
+    print(c.green(f"Succesfully finished soft flag process. Results: {result}"))
+    return result 
         
 
 def check_submeasurement(submeasurement : SubMeasurement) -> bool:
