@@ -124,7 +124,7 @@ def create_dns_from_webconn(web_con_measurement : RawMeasurement) -> List[DNS]:
                 jsons=jsonf,
                 client_resolver=client_resolver,
                 ooni_reason_for_blocking=ooni_blocking,
-                measurement_start_time=web_con_measurement.measurement_start_time,
+                time=web_con_measurement.measurement_start_time,
                 probe_asn=web_con_measurement.probe_asn,
                 probe_cc=web_con_measurement.probe_cc,
                 input=web_con_measurement.input
@@ -229,7 +229,7 @@ def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
                         jsons=jsonf,
                         client_resolver=client_resolver,
                         ooni_reason_for_blocking=ooni_blocking,
-                        measurement_start_time=measurement.measurement_start_time,
+                        time=measurement.measurement_start_time,
                         probe_asn=measurement.probe_asn,
                         probe_cc=measurement.probe_cc,
                         input=measurement.input,
@@ -247,7 +247,7 @@ def create_dns_from_dns_cons(measurement : RawMeasurement) -> List[DNS]:
                         jsons=jsonf,
                         client_resolver=client_resolver,
                         ooni_reason_for_blocking=ooni_blocking,
-                        measurement_start_time=measurement.measurement_start_time,
+                        time=measurement.measurement_start_time,
                         probe_asn=measurement.probe_asn,
                         probe_cc=measurement.probe_cc,
                         input=measurement.input,
@@ -295,7 +295,7 @@ def create_http_from_web_conn(measurement : RawMeasurement) -> HTTP:
             body_length_match=body_length_match,
             body_proportion=body_proportion,
             ooni_reason_for_blocking=ooni_blocking,
-            measurement_start_time=measurement.measurement_start_time,
+            time=measurement.measurement_start_time,
             probe_asn=measurement.probe_asn,
             probe_cc=measurement.probe_cc,
             input=measurement.input
@@ -332,7 +332,7 @@ def create_tcp_from_webconn(measurement : RawMeasurement) -> List [TCP]:
                     status_success=tcp_connect_item['status']['success'],
                     ip=tcp_connect_item['ip'],
                     ooni_reason_for_blocking = ooni_blocking,
-                    measurement_start_time=measurement.measurement_start_time,
+                    time=measurement.measurement_start_time,
                     probe_asn=measurement.probe_asn,
                     probe_cc=measurement.probe_cc,
                     input=measurement.input
@@ -378,7 +378,7 @@ def create_tor_from_tor(measurement : RawMeasurement) -> TOR:
             obfs4_accessible=obfs4_accessible,
             or_port_dirauth_total=or_port_dirauth_total,
             or_port_dirauth_accessible=or_port_dirauth_accessible,
-            measurement_start_time=measurement.measurement_start_time,
+            time=measurement.measurement_start_time,
             probe_asn=measurement.probe_asn,
             probe_cc=measurement.probe_cc,
             input=measurement.input
@@ -424,7 +424,7 @@ def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : 
         if not absolute:
             measurements = measurements.filter(flag = None)
 
-        measurements = measurements.order_by('measurement')
+        # measurements = measurements.order_by('measurement')
         
         if limit and limit > 0:
             measurements = measurements[:limit]
