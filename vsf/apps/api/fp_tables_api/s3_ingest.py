@@ -38,13 +38,21 @@ class S3IngestManager:
     """All operations required to retrieve and store ooni data from s3
     """
 
-    # Test types in the same format as in s3
-    S3_TEST_TYPES : List[str] = ['tor','webconnectivity', 'vanillator', 'urlgetter', 
-        'torsf', 'httpinvalidrequestline', 'httpheaderfieldmanipulation', 
-        'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 
-        'riseupvpn', 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 
-        'meekfrontedrequeststest', 'httprequests', 'httphost', 
-        'dnsconsistency', 'bridgereachability']
+    # Test types in the same format as in s3. 
+    # This is the entire list, some of them are unsupported right now 
+    # S3_TEST_TYPES : List[str] = ['tor','webconnectivity', 'vanillator', 'urlgetter', 
+    #     'torsf', 'httpinvalidrequestline', 'httpheaderfieldmanipulation', 
+    #     'whatsapp', 'facebookmessenger', 'ndt', 'tcpconnect', 'signal', 
+    #     'riseupvpn', 'dash', 'telegram', 'psiphon', 'multiprotocoltraceroute', 
+    #     'meekfrontedrequeststest', 'httprequests', 'httphost', 
+    #     'dnsconsistency', 'bridgereachability', 'dnscheck' ]
+
+    S3_TEST_TYPES : List[str] = ['tor','webconnectivity', 'vanillator', 
+        'torsf', 
+        'tcpconnect', 'httprequests', 'httphost', 
+        'dnsconsistency'
+    ]
+
 
     def __init__(self, measurements_path  : str = './media/ooni_data/', date_format : str = "%Y-%m-%d %H:%M:%S") -> None:
         self._measurements_path = measurements_path 
