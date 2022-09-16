@@ -47,11 +47,7 @@ class S3IngestManager:
     #     'meekfrontedrequeststest', 'httprequests', 'httphost', 
     #     'dnsconsistency', 'bridgereachability', 'dnscheck' ]
 
-    S3_TEST_TYPES : List[str] = ['tor','webconnectivity', 'vanillator', 
-        'torsf', 
-        'tcpconnect', 'httprequests', 'httphost', 
-        'dnsconsistency'
-    ]
+    S3_TEST_TYPES : List[str] = ['tor','webconnectivity', 'dnsconsistency']
 
 
     def __init__(self, measurements_path  : str = './media/ooni_data/', date_format : str = "%Y-%m-%d %H:%M:%S") -> None:
@@ -140,7 +136,7 @@ class S3IngestManager:
                     is_processed= False
                 )
 
-                # Delete web connectivity body, as it is takes too much memory
+                # Delete  connectivity body, as it is takes too much memory
                 if ms.test_name == 'web_connectivity':
                     if ms.test_keys and ms.test_keys.get("requests"):
                         for r in ms.test_keys['requests']:
