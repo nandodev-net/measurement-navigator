@@ -1,4 +1,4 @@
-from apps.main.measurements.submeasurements.FlagsUtils import *
+from vsf.apps.main.measurements.submeasurements.flags_utils import *
 
 
 
@@ -29,7 +29,7 @@ for (SM, label) in submeasurements:
         ).format(label=label)
     )
     
-    groups = Grouper(meas, lambda m: m.group_id)
+    groups = grouper(meas, lambda m: m.group_id)
 
 
     for group in groups:

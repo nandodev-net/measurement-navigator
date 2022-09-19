@@ -144,7 +144,7 @@ WSGI_APPLICATION = 'vsf.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'timescale.db.backends.postgresql',
         'NAME': env.str('VSF_DB_NAME'),
         'USER': env.str('VSF_DB_USER'),
         'PASSWORD': env.str('VSF_DB_PASSWORD'),

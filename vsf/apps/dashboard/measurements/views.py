@@ -496,6 +496,9 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
            measurements = SubMModels.HTTP.objects.filter(measurement__in = measurements)
         elif measurement_type == 'tcp':        
             measurements = SubMModels.TCP.objects.filter(measurement__in = measurements)
+        elif measurement_type == 'tor':        
+            measurements = SubMModels.TOR.objects.filter(measurement__in = measurements)
+
 
         today = datetime.now()
         delta = today - datetime.strptime(since, "%Y-%m-%d")
@@ -511,7 +514,7 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
         for index in range(1, delta.days + 1):
             aux = datetime.strptime(since, "%Y-%m-%d") + timedelta(days=index)
             dates_array.append(aux.strftime("%Y-%m-%d"))
-            x = measurements.filter(measurement_start_time__date = aux.strftime("%Y-%m-%d"))
+            x = measurements.filter(time__date = aux.strftime("%Y-%m-%d"))
 
             ok = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.OK).count()
             ok_qtty.append(ok)

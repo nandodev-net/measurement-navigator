@@ -40,7 +40,7 @@ from apps.main.measurements.models      import RawMeasurement
 from vsf.bulk_create_manager import BulkCreateManager
 from apps.main.measurements.post_save_utils import post_save_rawmeasurement
 
-def checkPostData(data) -> bool:
+def check_post_data(data) -> bool:
         """
         This function will check if the input data on the post request is valid.
         The input data should contain:
@@ -128,7 +128,7 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
         data['test_name'] = test_name
 
     # Check if the post data is valid:
-    if not checkPostData(data):
+    if not check_post_data(data):
         raise AttributeError("Unvalid input arguments. Given: \n" +
                                 "   Since: " + since + "\n" +
                                 "   Until: " + until)

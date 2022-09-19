@@ -418,9 +418,9 @@ def soft_flag(since=None, until=None, limit : Optional[int] = None, page_size : 
         
         # Apply optional filtering
         if until:
-            measurements = measurements.filter(measurement_start_time__lt = until)
+            measurements = measurements.filter(time__lt = until)
         if since:
-            measurements = measurements.filter(measurement_start_time__gt = since) 
+            measurements = measurements.filter(time__gt = since) 
         if not absolute:
             measurements = measurements.filter(flag = None)
 
