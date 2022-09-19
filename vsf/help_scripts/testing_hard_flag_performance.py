@@ -1,9 +1,9 @@
-from apps.main.measurements.submeasurements.FlagsUtils import hard_flag, count_flags_sql
+from apps.main.measurements.submeasurements.flags_utils import hard_flag, count_flags_sql
 from apps.configs.models    import Config
 from datetime import datetime, timedelta
 
 
-config = Config.objects.all().first()
+config = Config.get()
 
 if config:
     interval = timedelta(days=config.hardflag_timewindow) 

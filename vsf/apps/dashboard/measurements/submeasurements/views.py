@@ -125,7 +125,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
     # Columns to be shown
     columns = [
             'input',
-            'measurement_start_time',
+            'time',
             'probe_asn',
             'probe_cc',
             'site_name',
@@ -136,7 +136,7 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
     # Columns to be ordered
     order_columns = [
             'input',
-            'measurement_start_time',
+            'time',
             'probe_asn',
             'probe_cc',
             'site_name',
@@ -174,13 +174,13 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
         if input:
             qs = qs.filter(input__contains=input)
         if since:
-            qs = qs.filter(measurement_start_time__gte = since)
+            qs = qs.filter(time__gte = since)
         if asn:
             qs = qs.filter(probe_asn=asn)
         if country:
             qs = qs.filter(probe_cc=country)
         if until:
-            qs = qs.filter(measurement_start_time__lte=until)
+            qs = qs.filter(time__lte=until)
         if site:
             qs = qs.filter(measurement__domain__site=site)
         if anomaly:
@@ -342,7 +342,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         # It's important to use .values(...) so we only load the necessary fields in the select clause
         # in the underlying sql query, no more no less
         qs = qs.values(
-            "measurement_start_time",
+            "time",
             "probe_cc",
             "probe_asn",
             "input",
@@ -369,7 +369,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
         for item in qs.iterator(chunk_size=100):
             print('\n'.join(item.keys()))
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_cc' : item['probe_cc'],
                 'measurement__raw_measurement__probe_asn' : item['probe_asn'],
                 'measurement__raw_measurement__input' : item['input'],
@@ -534,7 +534,7 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
 
     def prepare_results(self, qs: QuerySet) -> List[Dict[str, Any]]:
         qs = qs.values(
-            'measurement_start_time',
+            'time',
             'probe_cc',
             'probe_asn',
             'input',
@@ -557,7 +557,7 @@ class ListHTTPBackEnd(ListSubMeasurementBackend):
 
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_cc' : item['probe_cc'],
                 'measurement__raw_measurement__probe_asn': item['probe_asn'],
                 'measurement__raw_measurement__input' : item['input'],
@@ -654,7 +654,7 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
 
     def prepare_results(self, qs: QuerySet) -> List[Dict[str, Any]]:
         qs = qs.values(
-            'measurement_start_time',
+            'time',
             'probe_cc',
             'probe_asn',
             'input',
@@ -678,7 +678,7 @@ class ListTCPBackEnd(ListSubMeasurementBackend):
 
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__measurement_start_time' : datetime.strftime(utc_aware_date(item['time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_cc' : item['probe_cc'],
                 'measurement__raw_measurement__probe_asn': item['probe_asn'],
                 'measurement__raw_measurement__input' : item['input'],
@@ -784,7 +784,7 @@ class ListTORBackEnd(ListSubMeasurementBackend):
     def prepare_results(self, qs: QuerySet) -> List[Dict[str, Any]]:
 
         qs = qs.values(
-            'measurement_start_time',
+            'time',
             'probe_asn',
             'measurement_id',
             'flag_type',
@@ -805,7 +805,7 @@ class ListTORBackEnd(ListSubMeasurementBackend):
         
         for item in qs:
             json_data.append({
-                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item['measurement_start_time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
+                'measurement__raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item['time'], self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
                 'measurement__raw_measurement__probe_asn':item['probe_asn'],
                 'measurement__id' : item['measurement_id'],
                 'dir_port_total' : item['dir_port_total'] or 0,

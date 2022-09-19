@@ -6,7 +6,7 @@ from django.db.models import JSONField
 
 # third party imports
 import uuid
-
+from timescale.db.models.fields import TimescaleDateTimeField
 # Local imports
 from apps.main.measurements.models                       import Measurement
 from apps.main.measurements.flags.models                 import Flag
@@ -57,7 +57,7 @@ class SubMeasurement(TimeStampedModel):
     )
 
     ############################################### data duplicada
-    measurement_start_time = models.DateTimeField(null=True, blank=True, db_index=True)
+    time = TimescaleDateTimeField(null=True, blank=True, db_index=True, interval= '1 week')
     input = models.TextField(null=True, blank=True, db_index=True)
     probe_cc = models.CharField(null=True, blank=True, max_length=50)
     probe_asn = models.CharField(null=True, blank=True, max_length=50)

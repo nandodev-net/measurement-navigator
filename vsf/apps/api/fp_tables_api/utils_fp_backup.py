@@ -37,7 +37,7 @@ from .                                  import utils
 from apps.main.ooni_fp.fp_tables.models import FastPath
 from apps.main.measurements.models      import RawMeasurement
 
-def checkPostData(data) -> bool:
+def check_post_data(data) -> bool:
         """
         This function will check if the input data on the post request is valid.
         The input data should contain:
@@ -132,7 +132,7 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
         data['test_name'] = test_name
 
     # Check if the post data is valid:
-    if not checkPostData(data):
+    if not check_post_data(data):
         raise AttributeError("Unvalid input arguments. Given: \n" +
                                 "   Since: " + since + "\n" +
                                 "   Until: " + until)

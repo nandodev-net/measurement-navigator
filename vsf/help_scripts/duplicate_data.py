@@ -73,12 +73,12 @@ for page_idx in range(1, tcp.num_pages):
     for instance in tcp.page(page_idx).object_list:
         print ('duplicating TCP: ', i, 'from', count_tcp)
 
-        if not instance.measurement_start_time:
+        if not instance.time:
             if instance.measurement.raw_measurement.input:
                 instance.input = instance.measurement.raw_measurement.input
 
             if instance.measurement.raw_measurement.measurement_start_time:
-                instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
+                instance.time = instance.measurement.raw_measurement.measurement_start_time     
 
             if instance.measurement.raw_measurement.probe_asn:
                 instance.probe_asn = instance.measurement.raw_measurement.probe_asn
@@ -104,12 +104,12 @@ for page_idx in range(1, tor.num_pages):
     for instance in tor.page(page_idx).object_list:
         print ('duplicating TOR: ', i, 'from', count_tor)
 
-        if not instance.measurement_start_time:
+        if not instance.time:
             if instance.measurement.raw_measurement.input:
                 instance.input = instance.measurement.raw_measurement.input
 
             if instance.measurement.raw_measurement.measurement_start_time:
-                instance.measurement_start_time = instance.measurement.raw_measurement.measurement_start_time     
+                instance.time = instance.measurement.raw_measurement.measurement_start_time     
 
             if instance.measurement.raw_measurement.probe_asn:
                 instance.probe_asn = instance.measurement.raw_measurement.probe_asn
