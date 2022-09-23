@@ -15,6 +15,8 @@ from datetime import datetime
 # local imports
 from apps.main.measurements.submeasurements.models import SUBMEASUREMENTS, SubMeasurement
 from apps.main.measurements.submeasurements.utils import check_submeasurement
+from apps.main.asns.models import ASN
+from apps.main.sites.models import Domain
 from .models import RawMeasurement, Measurement
 from vsf.utils import Colors as c
 
@@ -34,7 +36,25 @@ def post_save_rawmeasurement(raw : RawMeasurement, first_date : datetime):
     from .utils import anomaly
 
     print('........creating measurement from ', first_date)
-    measurement = Measurement(raw_measurement=raw, anomaly=anomaly(raw))
+    if raw.input:
+        domain = None
+        try: 
+            from vsf.utils import get_domain
+            domain, _ = Domain.objects.get_or_create(domain_name=get_domain(raw.input), defaults={'site' : None})
+        except Exception as e:
+            # If could not create this object, don't discard entire measurement, it's still important
+            print(f"Could not create domain for the following url: {raw.input}. Error: {str(e)}", file=sys.stderr)
+    else:
+        domain = None
+    
+    asn = raw.probe_asn
+    if asn is not None:
+        try:
+            asn,_ = ASN.objects.get_or_create(asn=str(asn))
+        except Exception as e:
+            print(f"Could not create asn for the following code: {asn}. Error: {str(e)}", file=sys.stderr)
+
+    measurement = Measurement(raw_measurement=raw, anomaly=anomaly(raw), asn=asn, domain=domain)
     try:
         measurement.save()
         print(measurement.id)
