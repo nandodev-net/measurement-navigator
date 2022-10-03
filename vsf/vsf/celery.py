@@ -8,6 +8,7 @@ import os
 from datetime       import datetime, timedelta
 from celery         import Celery
 from kombu          import Queue, Exchange
+from celery.schedules import crontab
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'vsf.settings.production')
@@ -72,7 +73,7 @@ app.conf.beat_schedule = {
     # fp update to search for new recent measurements in the fast path
     'update-fastpath':{
         'task': 'apps.api.fp_tables_api.tasks.fp_update',
-        'schedule':3600,
+        'schedule':crontab(hour=3, minute=0),
         'args':(None, None, False),
         'options' : {'queue' : transient_queue_name}
     },
@@ -83,18 +84,18 @@ app.conf.beat_schedule = {
         'args':(),
         'options' : {'queue' : transient_queue_name}
     },
-    'update-hard-flags':{
-        'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
-        'schedule':7200,
-        'args':(),
-        'options' : {'queue' : user_transient_queue_name}
-    },
-    'update-case-dates':{
-        'task':'apps.main.cases.tasks.update_case_dates',
-        'schedule':3600,
-        'args' : (),
-        'options' : {'queue' : transient_queue_name}
-    }
+    # 'update-hard-flags':{
+    #     'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
+    #     'schedule':7200,
+    #     'args':(),
+    #     'options' : {'queue' : user_transient_queue_name}
+    # },
+    # 'update-case-dates':{
+    #     'task':'apps.main.cases.tasks.update_case_dates',
+    #     'schedule':3600,
+    #     'args' : (),
+    #     'options' : {'queue' : transient_queue_name}
+    # }
 }
 
 
