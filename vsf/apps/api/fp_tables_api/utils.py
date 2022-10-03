@@ -314,18 +314,21 @@ def update_measurement_table(
 
     treshold = timezone.now() - timezone.timedelta(days=1)
     # Get interesting measurements:
-    fpMeasurements =    FastPath.objects\
+    fp_measurements =    FastPath.objects\
                                 .exclude(data_ready=FastPath.DataReady.READY)\
                                 .exclude(data_ready=FastPath.DataReady.DEAD)\
                                 .filter(catch_date__lt=treshold)
 
+    if fp_measurements.count() == 0:
+        return {"sucess" : 0, "error":0}
+
     # Filter by test_name
     if test_name:
-        fpMeasurements = fpMeasurements.filter(test_name=test_name)
+        fp_measurements = fp_measurements.filter(test_name=test_name)
 
     # Limit to n_measurements
     if n_measurements:
-        fpMeasurements = fpMeasurements[:n_measurements]
+        fp_measurements = fp_measurements[:n_measurements]
 
     measurements_url = "https://api.ooni.io/api/v1/measurements"
 
@@ -333,7 +336,7 @@ def update_measurement_table(
     # in case something fails
     meas_to_save = []       # Measurements with errors
     new_measurements = []   # New Measurements with their fp equivalent
-    for fp in fpMeasurements:
+    for fp in fp_measurements:
 
         # Ask for the measurement based on its report id
 
