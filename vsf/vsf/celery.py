@@ -84,6 +84,12 @@ app.conf.beat_schedule = {
         'args':(),
         'options' : {'queue' : transient_queue_name}
     },
+    'update-measurements':{
+        'task':'apps.api.fp_tables_api.tasks.s3_ingest_task',
+        'schedule':3600 * 24,
+        'args':(),
+        'options' : {'queue' : transient_queue_name}
+    },
     # 'update-hard-flags':{
     #     'task':'apps.main.measurements.submeasurements.tasks.hard_flag_task',
     #     'schedule':7200,
