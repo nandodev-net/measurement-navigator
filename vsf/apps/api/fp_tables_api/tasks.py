@@ -1,21 +1,30 @@
 from __future__         import absolute_import, unicode_literals
-from celery             import shared_task
+from os import stat
+
 # Django imports
 from django.core.cache  import cache
-# Third party imports 
-from datetime           import datetime, timedelta
 
-from django.db.models import base
+# Third party imports 
+from celery             import shared_task
+
+# Python imports
+from datetime           import datetime, timedelta
+from typing import Optional
+
+from vsf.apps.api.fp_tables_api import s3_ingest
+
 # Local imports
 from .utils             import request_fp_data, update_measurement_table
 from vsf.utils          import VSFTask, ProcessState
-    
+from apps.api.fp_tables_api.s3_ingest import S3IngestManager
+
 class API_TASKS:
     UPDATE_FASTPATH = "update-fastpath"
     RECOVER_MEASUREMENTS = "recover-measurements"
+    S3_INGEST = "s3-ingest"
 
 @shared_task(time_limit=7200, base=VSFTask, vsf_name = API_TASKS.UPDATE_FASTPATH)
-def fp_update(since : str = None, until : str = None, only_fastpath : bool = False):
+def fp_update(since :  Optional[str] = None, until : Optional[str] = None, only_fastpath : bool = False):
     """
         Update the fast path table;
         This function will request fast path table to the ooni api
@@ -92,3 +101,39 @@ def measurement_update():
 
     return  result 
 
+@shared_task(time_limit = 3600 * 24, vsf_name=API_TASKS.S3_INGEST, base=VSFTask)
+def s3_ingest_task():
+    """
+        Download all measurements available from the last 24 hours to now.
+    """
+
+    name = API_TASKS.S3_INGEST
+    status = cache.get(name)
+    result = {'error' : None, "ran" : False}
+
+    # Check if should run 
+    if status == ProcessState.RUNNING or status == ProcessState.STARTING:
+        return result
+    
+    # Set running state to running
+
+    cache.set(name, ProcessState.RUNNING)
+
+    # Set up date
+    until = datetime.now()
+    since = until - timedelta(days=1)
+
+    # Try to ingest 
+    try:
+        s3_ingestor = S3IngestManager()
+        s3_ingestor.ingest(first_date=since, last_date=until)
+        result['output'] = None
+        cache.set(name, ProcessState.IDLE)
+    except Exception as e:
+        cache.set(name, ProcessState.FAILED)
+        result['error'] = str(e)
+
+    result['ran'] = True
+
+    return result
+        
