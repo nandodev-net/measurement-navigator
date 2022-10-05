@@ -1,5 +1,4 @@
 from __future__         import absolute_import, unicode_literals
-from os import stat
 
 # Django imports
 from django.core.cache  import cache
@@ -11,7 +10,6 @@ from celery             import shared_task
 from datetime           import datetime, timedelta
 from typing import Optional
 
-from vsf.apps.api.fp_tables_api import s3_ingest
 
 # Local imports
 from .utils             import request_fp_data, update_measurement_table
