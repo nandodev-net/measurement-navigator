@@ -11,6 +11,7 @@ from .utils              import count_flags_sql, hard_flag
 from vsf.utils           import ProcessState, VSFTask
 from .flags_utils         import *
 from apps.configs.models import Config
+from apps.main.measurements.submeasurements.models import SUBMEASUREMENTS
 
 class SUBMEASUREMENTS_TASKS:
     COUNT_FLAGS = 'count_flags'
@@ -74,3 +75,15 @@ def hard_flag_task():
 
     result['ran'] = True
     return result
+
+@shared_task(time_limit=3600)
+def ping_databse():
+    """Just a test task to try ping the database looking for the newest 100 measurements
+    for each submeasurement. We do this because the web page becomes slow after a few 
+    time without any query, so we want to test if doing a few querys once in a while
+    keeps the site from slowing down
+    """
+
+    for SBMS in SUBMEASUREMENTS:
+        SBMS : Type[SubMeasurement] = SBMS
+        list(SBMS.objects.all().order_by('time')[:100])
