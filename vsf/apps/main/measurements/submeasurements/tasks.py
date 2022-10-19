@@ -77,7 +77,7 @@ def hard_flag_task():
     return result
 
 @shared_task(time_limit=3600)
-def ping_databse():
+def ping_database():
     """Just a test task to try ping the database looking for the newest 100 measurements
     for each submeasurement. We do this because the web page becomes slow after a few 
     time without any query, so we want to test if doing a few querys once in a while

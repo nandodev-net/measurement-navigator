@@ -91,7 +91,7 @@ app.conf.beat_schedule = {
         'options' : {'queue' : transient_queue_name}
     },
     'ping-db':{
-        'task':'apps.main.measurements.submeasurements.tasks.ping_databse',
+        'task':'apps.main.measurements.submeasurements.tasks.ping_database',
         'schedule':60 * 30,
         'args':(),
         'options' : {'queue' : user_transient_queue_name}
