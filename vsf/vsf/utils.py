@@ -85,6 +85,11 @@ class VSFRequest(Request):
 
 
 class VSFTask(Task):
+    pass
+
+# This class is "commented" to check for a weird bug where some process never fail 
+# even after their timeout was well out of schedule
+class _VSFTask(Task):
     """
         Every task inheriting this class will report itself to 
         cache so we can query if it is running at any time.
