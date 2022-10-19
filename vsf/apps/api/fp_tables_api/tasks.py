@@ -7,7 +7,7 @@ from django.core.cache  import cache
 from celery             import shared_task
 
 # Python imports
-from datetime           import datetime, timedelta
+from datetime           import date, timedelta
 from typing import Optional
 
 
@@ -118,7 +118,7 @@ def s3_ingest_task():
     cache.set(name, ProcessState.RUNNING)
 
     # Set up date
-    until = datetime.now()
+    until = date.today()
     since = until - timedelta(days=1)
 
     # Try to ingest 
