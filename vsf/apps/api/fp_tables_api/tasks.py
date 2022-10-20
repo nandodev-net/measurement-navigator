@@ -118,7 +118,7 @@ def s3_ingest_task():
     cache.set(name, ProcessState.RUNNING)
 
     # Set up date
-    until = date.today()
+    until = date.today() + timedelta(days=1)
     since = until - timedelta(days=1)
 
     # Try to ingest 
