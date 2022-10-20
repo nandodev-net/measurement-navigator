@@ -7,7 +7,7 @@ from django.core.cache  import cache
 from celery             import shared_task
 
 # Python imports
-from datetime           import date, timedelta
+from datetime           import date, timedelta, datetime
 from typing import Optional
 
 
