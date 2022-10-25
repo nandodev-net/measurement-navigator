@@ -1,27 +1,25 @@
 #Django imports
-from django.db.models.query         import QuerySet
-from django.http import  JsonResponse
-from django.db.models               import Subquery, OuterRef
-from django.http.response           import Http404
+from django.http                    import JsonResponse
 from django.core                    import serializers
 from django.views.generic           import TemplateView, DetailView, View
-from apps.main                      import measurements
-from apps.main.measurements         import submeasurements
-#Inheritance imports
-from vsf.views                      import VSFLoginRequiredMixin
+import viztracer
+
 #Third party imports
 from django_datatables_view.base_datatable_view import BaseDatatableView
+
+# Python imports
 from typing                                     import List
-from datetime                                   import date, datetime, timedelta
+from datetime                                   import datetime, timedelta
 import json
-#Utils import
-from apps.main.measurements.utils               import search_measurement_by_queryset, _filter_by_flag_no_ok
+
 #Local imports
+from vsf.views                                  import VSFLoginRequiredMixin
+from apps.main.measurements.utils               import search_measurement_by_queryset, _filter_by_flag_no_ok
 from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
 from apps.main.measurements                     import models as MeasModels
 from apps.main.measurements.submeasurements     import models as SubMModels
-from apps.api.measurements_api.utils            import GetRawMeasurementsBodyView
+from apps.dashboard.measurements.utils          import VSFCachedDatatableView
 from ..utils import *
 import logging
 
@@ -335,7 +333,7 @@ class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
 
         return context
 
-class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
+class ListMeasurementsBackEnd(VSFCachedDatatableView):
     """
         This is the backend view for the ListMeasurementsDataTable view, who
         just renders the template
@@ -421,7 +419,7 @@ class ListMeasurementsBackEnd(VSFLoginRequiredMixin, BaseDatatableView):
 
         return measurements
 
-    def prepare_results(self, qs):
+    def prepare_results_no_cache(self, qs):
         # prepare list with output column data
         # queryset is already paginated here
         json_data = []
