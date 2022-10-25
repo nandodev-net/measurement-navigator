@@ -21,6 +21,7 @@ from apps.main.sites.models                     import Site
 from apps.main.asns                             import models as AsnModels
 from apps.main.measurements.submeasurements     import models as SubMeasModels
 from apps.main.measurements.flags               import models as FlagModels
+from apps.dashboard.measurements.utils          import VSFCachedDatatableView
 
 # DELETE LATER, DEBUG ONLY @TODO
 from vsf.utils                                  import Colors as c
@@ -32,7 +33,7 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
         Base class for submeasurement template listing, it wont work
         if you dont provide a "Submeasurement" object
     """
-    SubMeasurement : SubMeasModels.SubMeasurement = None
+    SubMeasurement : Optional[SubMeasModels.SubMeasurement] = None
     def get_context_data(self, **kwargs):
         """
             Returned by context:
@@ -113,7 +114,7 @@ class ListSubMeasurementTemplate(VSFLoginRequiredMixin, TemplateView):
 
         return context
     
-class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
+class ListSubMeasurementBackend(VSFCachedDatatableView):
     """
         Base class for backend listing in submeasurement tables. To use this class you should:
             + Append additional columns to "columns" variable
@@ -190,66 +191,6 @@ class ListSubMeasurementBackend(VSFLoginRequiredMixin, BaseDatatableView):
             qs = qs.filter(flag_type__in = flags)
 
         return qs
-    
-    def prepare_results_no_cache(self, qs : QuerySet) -> List[Dict[str, Any]]:
-        raise NotImplementedError("Implement prepare_results_no_cache in your submeasurement backend view in order to fill the datatables table")
-
-    def prepare_results(self, qs : QuerySet) -> List[Dict[str, Any]]:
-        """Don't override this unless you want to prevent query caching. This function will search for a cached result of the provided query. you 
-        can do:
-            ```
-            def prepare_results(self, qs):
-                self.prepare_results_no_cache(qs)
-            ```
-        in case you want to avoid caching for this view
-
-        Args:
-            qs (QuerySet): Queryset whose result will be cached
-
-        Returns:
-            List[Dict[str, Any]]: Prepared results as a list of json-like dicts
-        """
-        key = self._get_key_from_query(qs)
-        fs_cache = caches['filesystem']
-
-        # try to retrieve key from cache
-        if key in fs_cache:
-            print(c.green("Cache found, using cache"))
-            result = fs_cache.get(key)
-        else: 
-            # If not found, then create it 
-            print(c.blue("Cache not found, creating from scratch"))
-            result = self.prepare_results_no_cache(qs)
-            fs_cache.set(key, result, self.SECONDS_TO_STORE_CACHE)
-
-        return result
-
-    def _get_key_from_query(self, qs : QuerySet) -> str:
-        """Generate a sha256 key from a given queryset, so it can be used to cache results for a few minutes
-
-        Args:
-            qs (QuerySet): Query in database to cache
-
-        Returns:
-            str: sha256 hash for the given query
-        """
-        query_str = str(qs.query)
-        query_hash = hashlib.sha256(bytes(query_str, 'utf-8')).digest()
-        return str(query_hash)
-
-    def count_records(self, qs : QuerySet):
-
-        # Overriden to provide caching to this query
-        key = self._get_key_from_query(qs)
-        key = "count_" + key
-        fs_cache = caches['filesystem']
-        if key in fs_cache:
-            return fs_cache.get(key)
-        
-        result = super().count_records(qs)
-        fs_cache.set(key, result, self.SECONDS_TO_STORE_CACHE)
-
-        return result 
 
 class ListDNSTemplate(ListSubMeasurementTemplate):
     """
