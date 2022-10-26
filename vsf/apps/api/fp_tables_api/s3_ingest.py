@@ -21,13 +21,12 @@ from pathlib import Path
 # Local imports
 from apps.main.sites.models             import URL
 from apps.main.measurements.models      import RawMeasurement
-from apps.api.fp_tables_api.utils import display_top_mem_intensive_lines
 from .sync_measurements import *
 from vsf.utils import Colors as c
 
 # Bulk create manager import
 from vsf.bulk_create_manager import BulkCreateManager
-from apps.main.measurements.post_save_utils import RawMeasurementBulker, post_save_rawmeasurement, create_measurement_from_raw_measurement
+from apps.main.measurements.post_save_utils import RawMeasurementBulker, create_measurement_from_raw_measurement
 
 import pytz
 utc=pytz.UTC
