@@ -260,6 +260,11 @@ class S3IngestManager:
         # Searching previous files to add or store them
         self.collect_incompatible_files(output_dir, incompatible_dir, cache_min_date)
 
+        output_dir_path = Path(output_dir)
+        if not output_dir_path.exists():
+            print(f"Output dir not found, creating output dir: {output_dir_path}")
+            output_dir_path.mkdir(parents=True)
+
         # Downloading S3 measurements
         for test in test_types:
             print(c.blue(f"Downloading measurements of type {test}"))
