@@ -257,13 +257,14 @@ class S3IngestManager:
         time_ini = time.time()
         cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
 
-        # Searching previous files to add or store them
-        self.collect_incompatible_files(output_dir, incompatible_dir, cache_min_date)
-
         output_dir_path = Path(output_dir)
         if not output_dir_path.exists():
             print(f"Output dir not found, creating output dir: {output_dir_path}")
             output_dir_path.mkdir(parents=True)
+            
+        # Searching previous files to add or store them
+        self.collect_incompatible_files(output_dir, incompatible_dir, cache_min_date)
+
 
         # Downloading S3 measurements
         for test in test_types:
