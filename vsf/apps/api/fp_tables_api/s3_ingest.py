@@ -262,6 +262,11 @@ class S3IngestManager:
             print(f"Output dir not found, creating output dir: {output_dir_path}")
             output_dir_path.mkdir(parents=True)
             
+        incompatible_dir_path = Path(incompatible_dir)
+        if not incompatible_dir_path.exists():
+            print(f"Output dir not found, creating output dir: {incompatible_dir}")
+            incompatible_dir_path.mkdir(parents=True)
+            
         # Searching previous files to add or store them
         self.collect_incompatible_files(output_dir, incompatible_dir, cache_min_date)
 
