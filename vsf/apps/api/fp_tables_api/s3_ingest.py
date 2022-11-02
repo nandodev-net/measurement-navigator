@@ -13,7 +13,6 @@ from pathlib import Path
 import gzip
 import json
 import os
-import viztracer
 
 # Python imports
 from pathlib import Path
@@ -208,7 +207,10 @@ class S3IngestManager:
             file.write(file_content.decode('UTF-8'))
             file.close()
             # Deleting Gzip file
+        try:
             os.remove(full_route)
+        except FileNotFoundError:
+            print(c.yellow(f"[WARNING] Could not find file {full_route} that was just decompressed"))
 
         return gz_file[:-3]
 
