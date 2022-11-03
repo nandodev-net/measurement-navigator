@@ -294,7 +294,7 @@ class S3IngestManager:
                 print(c.yellow(f"Warning: trying to move file {json_file} from '{output_dir}' to '{incompatible_dir}', but couldn't find it"))
             except Exception as e:
                 print(c.red(f"[ERROR] Could not finish processing json file content. Error: {e}"))
-                os.rename(output_dir + json_file, incompatible_dir + json_file)
+                #os.rename(output_dir + json_file, incompatible_dir + json_file)
 
         bulker.done()
         self.process_raw_measurements(first_date)
