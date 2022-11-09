@@ -2,8 +2,6 @@
     Utility functions to use throughout the project.
 """
 # Django imports
-from django.db.models       import OuterRef, Subquery
-from django.db.models.query import QuerySet
 from django.core.cache      import cache
 from django.db.models       import Model
 
@@ -14,10 +12,7 @@ from urllib.parse           import urlparse
 
 # python imports
 from typing                 import List, Type
-
-# Local imports
-from apps.main.measurements.models  import Measurement, RawMeasurement
-from apps.main.sites.models         import Site, URL
+import atexit
 
 # --- URL helpers --- #
 
@@ -164,9 +159,6 @@ class BulkUpdater:
         
         self._model_class.objects.bulk_update(self._queued_instances, self._fields_to_update)
         self._queued_instances = []
-
-    def __del__(self):
-        self.save()
 
 
 # --- MISC --- #
