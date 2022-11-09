@@ -1,0 +1,252 @@
+<div
+  class="modal fade"
+  id="modalMeasurementInfo"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="modalMeasurementInfoTitle"
+  aria-hidden="true"
+>
+  <div class="modal-dialog mw-100 w-75" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalMeasurementInfoTitle">
+          Detailed Measurement's Report
+        </h5>
+
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="container-fluid">
+
+          {% if measurement_type == 'web_connectivity' %}
+          <div class="row border-bottom my-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Input</strong>
+            </div>
+            <div class="col-8">
+              <p id="input-detailed"></p>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Test Name</strong>
+            </div>
+            <div class="col-8">
+              <p id="test-name-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Measurement Start Time</strong>
+            </div>
+            <div class="col-8">
+              <p id="measurement-start-time-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Probe ASN</strong>
+            </div>
+            <div class="col-8">
+              <p id="probe-asn-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize text-center text-uppercase"
+                >Test Keys</strong
+              >
+            </div>
+            <div class="col-8">
+              <p>
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  data-toggle="collapse"
+                  data-target="#collapseTestKeys"
+                  aria-expanded="false"
+                  aria-controls="collapseTestKeys"
+                >
+                  Show Test Keys
+                </button>
+
+                <button
+                  id="detailed-measurement-page"
+                  type="button"
+                  class="btn btn-success mr-2"
+                >
+                  Show Test Keys on a New Tab
+                </button>
+              </p>
+            </div>
+
+            <div class="col-12 mt-2">
+              <div class="collapse" id="collapseTestKeys">
+                <div class="card card-body">
+                  <pre id="test-keys-detailed"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Annotations</strong>
+            </div>
+            <div class="col-8">
+              <pre id="annotations-detailed"></pre>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Bucket Date</strong>
+            </div>
+            <div class="col-8">
+              <p id="bucket-date-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Data Format Version</strong>
+            </div>
+            <div class="col-8">
+              <p id="data-format-version-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Options</strong>
+            </div>
+            <div class="col-8">
+              <p id="options-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Probe CC</strong>
+            </div>
+            <div class="col-8">
+              <p id="probe-cc-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Probe IP</strong>
+            </div>
+            <div class="col-8">
+              <p id="probe-ip-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Report Filename</strong>
+            </div>
+            <div class="col-8">
+              <p id="report-filename-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Report ID</strong>
+            </div>
+            <div class="col-8">
+              <p id="report-id-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Software Name</strong>
+            </div>
+            <div class="col-8">
+              <p id="software-name-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Software Version</strong>
+            </div>
+            <div class="col-8">
+              <p id="software-version-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Test Helpers</strong>
+            </div>
+            <div class="col-8">
+              <p id="test-helpers-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Test Runtime</strong>
+            </div>
+            <div class="col-8">
+              <p id="test-runtime-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Test Start Time</strong>
+            </div>
+            <div class="col-8">
+              <p id="test-start-time-detailed"></p>
+            </div>
+          </div>
+
+          <div class="row border-bottom mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Test Version</strong>
+            </div>
+            <div class="col-8">
+              <p id="test-version-detailed"></p>
+            </div>
+          </div>
+          
+          {% if measurement_type == 'web_connectivity' %}
+          <div class="row mb-4">
+            <div class="col-4">
+              <strong class="text-capitalize">Flags</strong>
+            </div>
+            <div class="col-8">
+              <div id="flags"></div>
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

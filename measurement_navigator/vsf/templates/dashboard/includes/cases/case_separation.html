@@ -1,0 +1,91 @@
+<div 
+    class="modal fade" 
+    id="separate_case" 
+    tabindex="-1" 
+    role="dialog" 
+    aria-labelledby="separate_case_label" 
+    aria-hidden="true"
+>
+
+    <form id="separate_case_form"> 
+      <div class="modal-dialog mw-100 w-75" role="document">
+        <div class="modal-content">
+          
+          <div class="modal-header">
+            <h5 class="modal-title" id="separate_case_label">
+              Separate Case
+            </h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+  
+          <div class="modal-body">
+            <div class="container-fluid">
+
+                <div class="row mb-2">
+                    <div class="col-4">
+                        Select in how many cases you want to separate this case.
+                    </div>
+                    <div class="col-3">
+                        <select id='cases_quantity'>
+                            <option value="">-</option>
+                            {% for i in cases_quantity %}
+                            <option value={{i}}>
+                                {{i}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-5"></div>
+                </div>
+
+                <span id='variable_content_case_separation' class=""></span>
+
+                <table class="table table-striped mt-5 mb-3 datatable" id="events_to_separate_datatable">
+                    <thead>
+                        <th class="text-center" scope="col">Event Type</th>
+                        <th class="text-center" scope="col">Start Date</th>
+                        <th class="text-center" scope="col">End Date</th>
+                        <th class="text-center" scope="col">Domain</th>
+                        <th class="text-center" scope="col">Select Case Number</th>
+                    </thead>
+                    <tbody>
+                        {% for event in events %}
+                          <tr>
+                            <td>
+                              <a href="{% url 'dashboard:events:detail' event.id %}" target="_blank"> {{event.issue_type}} </a>
+                            </td>
+                            <td> {{event.start_date}} </td>
+                            <td> {{event.end_date}} </td>
+                            <td> {{event.domain}} </td>
+                            <td class='selector'>
+                                <select id={{event.id}} class='selector_quantity'>
+                                    <option value=1 selected>1</option>
+                                </select>
+                            </td>
+                          </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot></tfoot>
+                </table>
+
+
+            </div>
+          </div>
+  
+  
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">
+              Close
+            </button>
+            <button type="button" id="submit_case_separation" class="btn btn-primary">
+              Submit
+            </button>
+          </div>
+          
+        </div>
+      </div>
+    </form>
+  </div>
+  

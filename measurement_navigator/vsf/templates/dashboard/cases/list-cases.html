@@ -1,0 +1,503 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+{% block custom_stylesheet %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+{% endblock custom_stylesheet %}
+
+{% block tab_title %} VSF - Cases {% endblock tab_title %}
+{% block title %} Cases {% endblock title %}
+{% block sub_title %} List and filter all the currently available cases {% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+  <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:event_cases:list_cases' %}">Cases List</a>
+</li>
+
+{% endblock route %}
+
+{% block content %}
+  <form id="urlForm">
+    <nav class="navbar navbar-light bg-light mb-5">
+      <div class="container-fluid">
+        <div class="row">
+
+
+          <div class="col-3">
+            <input
+            id="title"
+            class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent text-primary"
+            type="search"
+            placeholder="Title"
+            aria-label="Search title"
+            value="{{ prefill.title }}"
+            name="title"
+            />
+          </div>
+
+          <div class="col-3">
+            <div class="row align-items-center">
+              <div class="col-4 mx-auto">
+                <label class='font-weight-bold '>
+                  Start Date
+                </label>
+              </div>
+              <div class="col-8 mx-auto">
+                <input id="start_date" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.start_date }}" name="start_date"/>
+              </div>
+            </div> 
+          </div>
+
+
+          <div class="col-3">
+            <div class="row align-items-center ml-1">
+              <div class="col-4 mx-auto">
+                <label class='font-weight-bold'>
+                  End Date
+                </label>
+              </div>
+              <div class="col-8 mx-auto">
+                <input id="end_date" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ prefill.end_date }}" name="end_date"/>
+              </div>
+            </div> 
+          </div>
+      
+
+          <div class="col-3">
+            <div class="row align-items-center ml-1">
+              <div class="col-4 mx-auto">
+                <label class='font-weight-bold' for="category">
+                  Category
+                </label>
+              </div>
+              <div class="col-8 mx-auto">
+                <select id="category" class="custom-select additional-filter" name="category">
+                  <option selected value="">Choose Category</option>
+                  {% for cat in categoryNames %}
+                    <option {% if cat == prefill.category %} selected {% endif %} value="{{ cat }}">
+                      {{ cat }}
+                    </option>
+                  {% endfor %}
+                  
+                </select>
+              </div>
+            </div> 
+          </div>
+
+          <div class="col-3 mt-3">
+            <div class="row align-items-center ml-1">
+              <div class="col-5 mx-auto">
+                <label class='font-weight-bold' for="is_active">
+                  Active
+                </label>
+              </div>
+              <div class="col-7 mx-auto">
+                <select id="is_active" class="custom-select additional-filter" name="is_active">
+                  <option value="">Any</option>
+                  
+                  <option {% if prefill.is_active == "true" %} selected {% endif %} value="true">True</option>
+                  <option {% if prefill.is_active == "false" %} selected {% endif %} value="false">False</option>
+                  
+                </select>
+              </div>
+            </div> 
+          </div>
+
+          <div class="col-3 mt-3">
+            <div class="row align-items-center ml-1">
+              <div class="col-4 mx-auto">
+                <label class="font-weight-bold" for="published">Published</label>
+              </div>
+              <div class="col-8 mx-auto">
+                <select id="published" class="custom-select additional-filter" name="published">
+                  <option selected value="">Any</option>
+                  <option {% if prefill.published == 'false' %} selected {% endif %} value="false">False</option>
+                  <option {% if prefill.published == 'true' %} selected {% endif %} value="true">True</option>
+                </select>
+              </div>
+            </div>   
+          </div>
+
+
+
+
+          <div class="col-3"></div>
+
+          <div class="col-3 my-auto mx-auto">
+            <button id="url-form-button" class="btn btn-blue btn-block mt-2" type="submit">
+              <i class="fa fa-search"></i> <bold>Search</bold>
+            </button>
+          </div>
+        </div> 
+      </div>   
+    </nav>
+  </form>
+
+  <!-- <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="detailNewTab">
+    <i class="fas fa-info mr-1"></i> Details in New Tab
+  </button> -->
+  <button type="button" class="btn btn-dark rounded ml-1 mb-4" id="deletecaseBtn">
+    <i class="fas fa-info mr-1"></i> Delete Cases
+  </button>
+  <button type="button" class="btn btn-dark rounded mb-4 ml-1"  id="publishTrigger">
+    <i class="fa fa-check"></i> Publish Toggle
+    </button>
+
+  <div class="card rounded p-5 mt-4" style="width: 100%;">
+      <table class="table table-striped mt-5 datatable"  id="cases-table">
+        <thead>
+          <tr>
+            <th class="text-center" scope="col"> </th>
+            <th class="text-center" scope="col">Title</th>
+            <th class="text-center" scope="col">Start Date</th>
+            <th class="text-center" scope="col">End Date</th>
+            <th class="text-center" scope="col">Category</th>
+            <th class="text-center" scope="col">Published</th>
+            <th class="text-center" scope="col">Active</th>
+            {% if user.is_editor %}
+              <th class="text-center" scope="col">Actions</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+        </tbody>
+      </table>
+  </div>
+  
+  <!--{% include "includes/cases/create.html" %}-->
+  {% include "includes/cases/detail.html" %}
+
+
+{% endblock content %}
+{% block custom_scripts %}
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+
+<script>
+  'use strict';
+
+  var eventsTable;
+  var table;
+
+  /* Filter Form */
+  $("#urlForm").on("submit", function (event) {
+    
+    event.preventDefault();
+  
+    let data = {
+      title: $("#title").val(), start_date: $("#start_date").val(),
+      end_date: $("#end_date").val(), category: $("#category").val(), 
+      published: $('#published').val(), is_active: $( '#is_active' ).val()
+    };
+
+    let urlSearch = "{% url 'dashboard:event_cases:list_cases' %}";
+    let url = urlSearch + "?" + $.param(data);
+    window.location.href = url;
+
+  });
+
+
+  /* Detail Case Trigger with double click */
+  $( '#cases-table' ).on('dblclick', 'tbody tr', function() {
+
+    var id = $( this ).attr( 'id' );
+    console.log(id);
+    $.ajax({
+      timeout: 300000,
+      url    : "{% url 'dashboard:event_cases:detail' %}",
+      type   : "GET",
+      data   : { 'id': id },
+      success: function (json) {
+        var url = "{% url 'dashboard:event_cases:detail_page' pk=1 %}".replace(1, id);
+
+        $( '#linkdetail' ).attr("href", url);
+        $('#events > tbody').empty();
+        $( '#continues' ).empty();
+        $( '#title_detail' ).text(json["title"]);
+        $( '#description_detail' ).text(json["description"]);
+        $( '#description_eng_detail' ).text(json["description_eng"]);
+        $( '#case_type_detail' ).text(json["case_type"]);
+        $( '#start_date_detail' ).text(json["start_date"]);
+        $( '#end_date_detail' ).text(json["end_date"]);
+        $( '#category_detail' ).text(json["category"]);
+        $( '#published_detail' ).text(json["published"]);
+        $( '#twitter_search_detail' ).text(json["twitter_search"]);
+        
+        $(' #icon_start ').empty();
+        $(' #icon_end ').empty();
+        if (json['start_date_manual']) {
+          $(' #icon_start ').append('<i class="fas fa-pencil-alt"></i>');
+        } else {
+          $(' #icon_start ').append('<i class="fas fa-magic"></i>');
+        }
+        if (json['end_date_manual']) {
+          $(' #icon_end ').append('<i class="fas fa-pencil-alt"></i>');
+        } else {
+          $(' #icon_end ').append('<i class="fas fa-magic"></i>');
+        }
+
+        if (json['is_active']) {
+          $( '#continues' ).append(
+            `<i class="fas fa-circle-notch text-danger"></i> Active`
+          );
+        } else {
+          $( '#continues' ).append(
+            `<i class="fas fa-window-close text-success"></i> Not Active`
+          );
+        }
+
+        var eventsJson = json["events"];
+        var body = '';
+        eventsJson.forEach(el => {
+          var url = "{% url 'dashboard:events:detail' pk=1 %}".replace(1, el.id);
+          body = body + `<tr><td><a href=${url} target="_blank">${el.issue_type}</a></td><td>${el.confirmed}</td><td>${el.start_date}</td><td>${el.end_date}</td><td>${el.domain}</td><td>${el.asn}</td></tr>`;
+        });
+        $('#events > tbody').append(body);
+      }
+    });
+    jQuery.noConflict();
+
+    $("#caseDetail").modal("show");
+  });
+  
+  $( '#detailNewTab' ).click(function (event) {
+      var selectedRows = table.rows( { selected: true }).data().toArray().map(
+        (selected) => selected.id
+      );
+      if (selectedRows.length < 1) { 
+        Swal.fire({
+          icon: "warning",
+          title: "You must select at least one row to get the details.",
+          confirmButtonColor: "#ffc107",
+          confirmButtonText: "Continue",
+        });
+      } else {
+        selectedRows.forEach(function(id){
+          window.open("{% url 'dashboard:event_cases:detail_page' pk=1 %}".replace(1, id), '_blank')
+        });
+      }
+
+
+  });
+
+  $(document).ready(function() { 
+
+    table = $("#cases-table").DataTable({
+      order: [[1, "desc"]],
+      searching: true,
+      processing: true,
+      fixedColumns: true,
+      language: {
+      },
+      serverSide: true,
+      rowId: "id",
+      ajax: {
+        url: '{% url "dashboard:event_cases:data" %}',
+        data: function (data) {
+          data.title = $("#title").val();
+          data.start_date = $("#start_date").val();
+          data.end_date = $("#end_date").val();
+          data.category = $("#category").val();
+          data.published = $('#published').val();
+          data.is_active = $('#is_active').val();
+        },
+        contentType: "application/json; charset=utf-8",  
+        type: "GET",
+      },
+      columnDefs: [ {
+            orderable: false,
+            className: 'select-checkbox',
+            targets:   0
+        } ],
+      columns: [
+        {
+          data: 'id',
+          orderable: false,
+          render: function (data, type, row, meta) { 
+            return `<div class="p-2"></div>`
+          }
+        },
+        {
+          data: "title",
+          orderable: true,
+          searchable: true,
+          render: function (data, type, row, meta) {
+            return `<div class='wrapper-dt'> ${data} </div>`
+          }
+        },
+        {
+          data: "start_date",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "end_date",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "category",
+          orderable: true,
+          searchable: true,
+        },
+        {
+          data: "published",
+          orderable: false,
+          searchable: true,
+          render: function (data, type, row, meta) {
+            if (data) {
+              return `<div class="text-success w-100 text-center">
+                        <i class="far fa-check-circle text-success" title="User is Active"></i>
+                    </div>`
+            } else {
+              return `<div class="text-danger w-100 text-center">
+                        <i class="far fa-check-circle text-default" title="User is Inactive"></i>
+                    </div>`
+            }            
+          },
+        },
+        {
+          data: "is_active",
+          orderable: false,
+          searchable: true,
+          render: function (data, type, row, meta) {
+            if (data) {
+              return `<div class="text-success w-100 text-center">
+                        <i class="far fa-check-circle text-success" title="True"></i>
+                    </div>`
+            } else {
+              return `<div class="text-danger w-100 text-center">
+                        <i class="far fa-check-circle text-default" title="False"></i>
+                    </div>`
+            }            
+          },
+        },
+        {
+          data: "actions",
+          orderable: false,
+          searchable: true,
+          render: function (data, type, row, meta) {
+            var url = "{% url 'dashboard:event_cases:detail_page' 1 %}".replace(1, row.id);
+            
+            return `
+            <a href=${url} target='_blank' id="link">
+                <button type="button" class="btn btn-sm btn-blue confirm-case">Detail in new Tab</button>
+            </a>`       
+          },
+        },
+      ],
+      initComplete: function () {},
+      buttons: [],
+      select: {
+        style: 'multi'
+      },
+    });
+
+  });
+
+  $( '#deletecaseBtn' ).click(function (event) {
+      var casesSelected = table.rows( { selected: true }).data().toArray();
+      var casesSelected = table.rows( { selected: true }).data().toArray().map((selected) => (
+        selected.id
+      ));
+
+      $.ajax({
+        timeout: 300000,
+        type: "GET",
+        url: '{% url "dashboard:event_cases:case_delete" %}',
+        data: {cases: casesSelected},
+        success: function(data) {
+
+          if (casesSelected.length > 0) {
+            Swal.fire({
+                icon: "success",
+                title: "Successful Delete!",
+                confirmButtonColor: "#28a745",
+                confirmButtonText: "Continue"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+          } else {
+            console.log(data)
+            Swal.fire({
+                icon: "error",
+                title: "Bad request.",
+                text: `Select at least one event.`,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+            });
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $("associateModal").modal("hide");
+          Swal.fire({
+              icon: "error",
+              title: "There was an error!",
+              text: `${ textStatus }, ${ errorThrown }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+      });
+      
+
+    });
+
+
+    $( '#publishTrigger' ).click(function (event) {
+      var casesSelected = table.rows( { selected: true }).data().toArray();
+      var casesSelected = table.rows( { selected: true }).data().toArray().map((selected) => (
+        selected.id
+      ));
+
+      $.ajax({
+        timeout: 300000,
+        type: "POST",
+        url: '{% url "dashboard:event_cases:publish" %}',
+        data: {cases: casesSelected , csrfmiddlewaretoken: "{{ csrf_token }}"},
+        success: function(data) {
+
+          if (casesSelected.length > 0) {
+            Swal.fire({
+                icon: "success",
+                title: "Successful Publish status change!",
+                confirmButtonColor: "#28a745",
+                confirmButtonText: "Continue"
+            }).then(result => {
+                if (result.isConfirmed) {
+                    location.reload();
+                }
+            });
+          } else {
+            console.log(data)
+            Swal.fire({
+                icon: "error",
+                title: "Bad request.",
+                text: `Select at least one event.`,
+                confirmButtonColor: "#dc3545",
+                confirmButtonText: "Continue"
+            });
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $("associateModal").modal("hide");
+          Swal.fire({
+              icon: "error",
+              title: "There was an error!",
+              text: `${ textStatus }, ${ errorThrown }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+          });
+        }
+      });
+      
+
+    });
+
+</script>
+{% endblock custom_scripts %}
