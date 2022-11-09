@@ -1,0 +1,789 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+{% block custom_stylesheet %}
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'css/select2.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datepicker/datetimepicker.css' %}" /> 
+
+<style>
+    table a {
+        color: blue;
+    }
+</style>
+{% endblock custom_stylesheet %}
+
+{% block tab_title %} VSF - Event {{object.id}} {% endblock tab_title %}
+{% block title %} Events {% endblock title %}
+{% block sub_title %} Event Detail {% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item">
+  <a href="{% url home %}"><i class="feather icon-home"></i></a>
+</li>
+<li class="breadcrumb-item">
+  <a href="{% url 'dashboard:events:all' %}">Events List</a>
+</li>
+<li class="breadcrumb-item">
+    <a href="{% url 'dashboard:events:detail' object.id %}">Event Detail</a>
+  </li>
+
+{% endblock route %}
+{% block content %}
+
+<div class="col-12">
+    <div class="card p-5 bg-success">
+        <h3 class="text-white text-center px-5 mb-5">Event {{object.id}}</h3>
+        <div class="row mt-5">
+            <div class="col-5">
+                <h5 class="text-white">{{ object.domain }}</h5>
+                <h3 class="text-white">Domain</h3>
+            </div>
+            <div class="col-5">
+                <h5 class="text-white">{{ object.asn }}</h5>
+                <h3 class="text-white">Network</h3>
+            </div>
+            <div class="col-2">
+                <h5 class="text-white">{{ object.issue_type }}</h5>
+                <h3 class="text-white">Isuue Type</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-1"></div>
+<div class="col-2">
+    {% if object.it_continues %}
+        <h5 class="mb-5">It continues: <i class="fas fa-circle-notch ml-2 text-success"></i></h5>
+    {% else %}
+        <h5 class="mb-5">It continues: <i class="fas fa-circle-notch ml-2 text-danger"></i></h5>
+    {% endif %}
+
+</div>
+<div class="col-2 ">
+    <h5>Status: </h5> 
+    <div class="d-inline-flex">
+        {% if status == 'active' %}
+            <i class="fas fa-check mr-3 mt-1" title="Active"></i><h5 class="">Active</h5> 
+        {% elif status == 'muted' %}
+            <i class="fas fa-volume-mute mr-3 mt-1" title="Muted"></i><h5 class="">Muted</h5> 
+        {% elif status == 'closed' %}
+            <i class="fas fa-times mr-3 mt-1" title="Closed"></i><h5 class="">Closed</h5> 
+        {% endif %}
+    </div>
+    
+
+</div>
+<div class="col-4"></div>
+{% if object.muted  %}
+<div class="col-1"><button class='btn btn-success' id="muteTrigger" type='button'> Unmute </button></div>
+{% else %}
+<div class="col-1"><button class='btn btn-danger' id="muteTrigger" type='button'> Mute </button></div>
+{% endif %}
+
+{% if object.confirmed  %}
+    <div class="col-1"><button class='btn btn-danger' id="confirmTrigger" type='button'> Deny </button></div>
+{% else %}
+    <div class="col-1"><button class='btn btn-success' id="confirmTrigger" type='button'> Confirm </button></div>
+{% endif %}
+
+
+
+
+
+<div class="col-7">
+    <div class="card mt-4 p-5">
+        <div class="row mb-3">
+            <div class="col-9"></div>
+            <div class="col-3">
+                <button type="button" id="edit" class="btn btn-secondary float-right">
+                    <i class="fas fa-pencil-alt text-white"></i> Edit
+                </button>
+            </div>
+        </div>
+        
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="id" id="id" value="{{object.id}}">
+
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Identification:</h5>
+                </div>
+                <div class="col-9">
+                    <p><span id="identification_slug">{{ object.identification }}</span></p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Start Date:</h5>
+                </div>
+                <div class="col-9 d-inline-flex">
+                    <p><span id="start_date_slug">{{ object.current_start_date }}</span></p>
+                    {% if start_manual %}
+                        <i class="fas fa-pencil-alt ml-2"></i>
+                    {% else %}
+                        <i class="fas fa-magic ml-2"></i>
+                    {% endif %}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">End Date:</h5>
+                </div>
+                <div class="col-9 d-inline-flex">
+                    <p><span id="end_date_slug">{{ object.current_end_date }}</span></p>
+                    {% if end_manual %}
+                        <i class="fas fa-pencil-alt ml-2"></i>
+                    {% else %}
+                        <i class="fas fa-magic ml-2"></i>
+                    {% endif %}
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Public Evidence:</h5>
+                </div>
+                <div class="col-9">
+                    <p><span id="public_evidence_slug">{{ object.public_evidence }}</span></p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Private Evidence:</h5>
+                </div>
+                <div class="col-9">
+                    <p><span id="private_evidence_slug">{{ object.private_evidence }}</span></p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Issue Type:</h5>
+                </div>
+                <div class="col-9">
+                    <p><span id="issue_type_slug">{{ object.issue_type }}</span></p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">Domain:</h5>
+                </div>
+                <div class="col-9">
+                    <p><span id="domain_slug">{{ object.domain }}</span></p>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-3">
+                    <h5 class="font-weight-bold">ASN:</h5>
+                </div>
+                <div class="col-9">
+                    <p><span id="asn_slug">{{ object.asn }}</span></p>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-8"></div>
+                <div class="col-4">
+                    <button type="button" id="cancel" class="btn btn-sm btn-secondary">
+                        Cancel
+                    </button>
+                    <button type="submit" id="submit" class="btn btn-sm btn-success">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="col-5">
+    <div class="card mt-4 p-5">
+        {% if case.id %} 
+            <h4 class="mb-4">Related Case</h4> 
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Case id:</h5></div>
+                <div class="col-8"><p>{{ case.id }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Title:</h5></div>
+                <div class="col-8"><p>{{ case.title }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Description:</h5></div>
+                <div class="col-8"><p>{{ case.description }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Case Type:</h5></div>
+                <div class="col-8"><p>{{ case.case_type }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Start Date:</h5></div>
+                <div class="col-8"><p>{{ case.start_date }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">End Date:</h5></div>
+                <div class="col-8"><p>{{ case.end_date }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Category:</h5></div>
+                <div class="col-8"><p>{{ case.category }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Published:</h5></div>
+                <div class="col-8"><p>{{ case.published }}</p></div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col-4"><h5 class="font-weight-bold">Twitter Search:</h5></div>
+                <div class="col-8"><p>{{ case.twitter_search }}</p></div>
+            </div>
+        {% else %}
+            <h4>No Case Related!</h4> 
+        {% endif %}
+    </div>
+</div>
+
+<div class="col-12">
+    <div class="card" id="events-card">
+        <div class="card-header">
+          <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#relatedSubmeasures" aria-expanded="true" aria-controls="relatedSubmeasures">Related Submeasures</a></h5>
+          <a 
+            href="{% url 'dashboard:events:edit_measurements' object.id %}" 
+            target="_blank"
+            class='p-2 float-right btn btn-outline-dark'
+          > 
+            <i class="fas fa-plus"></i> <span class="">Edit Measurements</span>
+          </a>
+        </div>
+        <div class="collapse show" id="relatedSubmeasures">
+            <div class="card-body p-3">
+
+                <div class="bg-light p-2 mb-5">
+                    <div class="row">
+                        <div class="col-6">
+                            <input
+                                id="input"
+                                class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+                                type="search"
+                                placeholder="URL"
+                                aria-label="Search URL"
+                                value="{{ submeasurements_filter.input }}"
+                                name="input"
+                            />
+                        </div>
+                        <div class="col-3">
+                        <div class="row align-items-center">
+                            <div class="col-3 mx-auto">
+                            <label class='font-weight-bold'>
+                                Since
+                            </label>
+                            </div>
+                            <div class="col-9 mx-auto">
+                            <input id="since" class="text-secondary form-control mr-2 additional-filter" type="date" value="" name="since"/>
+                            </div>
+                        </div> 
+                        </div>
+                        <div class="col-3">
+                            <div class="row align-items-center ml-1">
+                                <div class="col-3 mx-auto">
+                                <label class='font-weight-bold'>
+                                    Until
+                                </label>
+                                </div>
+                                <div class="col-9 mx-auto">
+                                <input id="until" class="text-secondary form-control mr-2 additional-filter" type="date" value="" name='until'/>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+                    <div class="row">
+
+                        <div class="col-4 mt-3">
+                            <div class="row align-items-center ml-1">
+                                <div class="col-4 mx-auto">
+                                <label class="font-weight-bold" for="test-name">Test Type</label>
+                                </div>
+                                <div class="col-8 mx-auto">
+                                <select id="test-name" class="custom-select additional-filter" name="test_name">
+                                    <option selected value="">Choose Test Type</option>
+                                    {% for test in submeasurements_filter.test_types %}
+                                    <option value="{{ test.value }}">
+                                        {{ test.name }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                </div>
+                            </div> 
+                        </div>
+                              
+                
+                        <div class="col-4 mt-3">
+                            <div class="row align-items-center">
+                              <div class="col-4 mx-auto">
+                                <label class="font-weight-bold" for="anomaly-state">Anomaly</label>
+                              </div>
+                              <div class="col-8 mx-auto">
+                                <select id="anomaly-state" class="custom-select additional-filter" name="anomaly">
+                                  <option selected value="">Any</option>
+                                  <option {% if submeasurements_filter.anomaly == 'false' %} selected {% endif %} value="false">
+                                    Anomaly False
+                                  </option>
+                                  <option {% if submeasurements_filter.anomaly == 'true' %} selected {% endif %}value="true">
+                                    Anomaly True
+                                  </option>
+                                </select>
+                              </div>
+                            </div> 
+                        </div>
+                              
+                
+                        <div class="col-4 mt-3">
+                            <div class="row align-items-center ml-1">
+                              <div class="col-4 mx-auto">
+                                <label class="font-weight-bold" for="site">Site</label>
+                              </div>
+                              <div class="col-8 mx-auto">
+                                <select class="custom-select additional-filter" id="site" name="site">
+                                  <option selected value="">
+                                    Any Site
+                                  </option>
+                                  {% for site in submeasurements_filter.sites %}
+                                    <option value="{{ site.id }}" title="{{ site.description }}">
+                                      {{ site.name }}
+                                    </option>
+                                  {% endfor %}
+                                </select>
+                              </div>
+                            </div>   
+                        </div>
+                
+                
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-5 mt-3 ">
+                            <div class="row align-items-center rounded p-2">
+                              <div class="col-4 mx-auto">
+                                <label class="font-weight-bold" for="flag">Flag Existence</label>
+                              </div>
+                              <div class="col-8 mx-auto">
+                                <select class="custom-select additional-filter select2" id="flag" name="flag" multiple="multiple">
+                                  {% for flag in submeasurements_filter.flags %}
+                                    <option value="{{ flag }}">
+                                      {{ flag }}
+                                    </option>
+                                  {% endfor %}
+
+                                </select>
+                              </div>
+                            </div> 
+                        </div>
+                        <div class="col-7"></div>
+                    </div>
+                </div>
+
+
+                <table class="table table-striped mt-5 datatable" id="submeasures">
+                    <thead>
+                      <tr>
+                        <th class="text-center text-capitalize" scope="col">Test Name</th>
+                        <th class="text-center text-capitalize" scope="col">Start Time</th>
+                        <th class="text-center text-capitalize" scope="col">Country</th>
+                        <th class="text-center text-capitalize" scope="col">ASN</th>
+                        <th class="text-center text-capitalize" scope="col">Input</th>
+                        <th class="text-center text-capitalize" scope="col">Site</th>
+                        <th class="text-center text-capitalize" scope="col">Anomaly</th>
+                        <th class="text-center text-capitalize" scope="col">Flag</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    <tfoot></tfoot>
+                  </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+{% block custom_scripts %}
+<script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/select2.min.js' %}"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"></script>
+<script type="text/javascript" src="{% static 'plugins/datepicker/datetimepicker.js' %}"></script>  
+
+
+<script>
+
+    var table; 
+    $(' .additional-filter ').change( function() {
+        table.ajax.reload();
+    });
+
+    $( '#confirmTrigger' ).click(function(e) {
+        jQuery.noConflict();
+        $.ajax({
+            timeout: 300000,
+            type: "POST",
+            url: "{% url 'dashboard:events:confirm' %}",
+            data: { events: ["{{object.id}}"] , csrfmiddlewaretoken: "{{ csrf_token }}"},
+            success: function (data) {
+                if (data.error === null) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Successful Confirm status change!",
+                        confirmButtonColor: "#28a745",
+                        confirmButtonText: "Continue"
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Bad request.",
+                        text: `${data.error}`,
+                        confirmButtonColor: "#dc3545",
+                        confirmButtonText: "Continue"
+                    });
+                }
+            
+            }
+        });
+
+    });
+
+
+    $( '#muteTrigger' ).click(function(e) {
+        jQuery.noConflict();
+        $.ajax({
+            timeout: 300000,
+            type: "POST",
+            url: "{% url 'dashboard:events:mute' %}",
+            data: { events: ["{{object.id}}"] , csrfmiddlewaretoken: "{{ csrf_token }}"},
+            success: function (data) {
+                if (data.error === null) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Successful Mute status change!",
+                        confirmButtonColor: "#28a745",
+                        confirmButtonText: "Continue"
+                    }).then(result => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+                } else {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Bad request.",
+                        text: `${data.error}`,
+                        confirmButtonColor: "#dc3545",
+                        confirmButtonText: "Continue"
+                    });
+                }
+            
+            }
+        });
+
+    });
+
+
+    $( "#edit" ).click(function() {
+        $( "#edit" ).hide();
+        $( "#confirmTrigger" ).hide();
+
+        let monthsNumbers = {
+            "Jan.": "01", "Feb.": "02", "March": "03", "April": "04", "May": "05", "June": "06", 
+            "Jul.": "07", "Aug.": "08", "Sept.": "09", "October": "10", "November": "11", "December": "12"
+        }
+
+        function parseDate (date) {
+            var splitted = date.split(", ");
+            var dayAndMonth = splitted[0].split(" ");
+            var month = dayAndMonth[0];
+            var day = dayAndMonth[1];
+            var year = splitted[1];
+
+            if (parseInt(day) < 10) {day = '0' + day;}
+
+            var time = splitted[2].split(" ")[0].split(":");
+            dayornight = splitted[2].split(" ")[1]
+            hour = time[0]
+            if (dayornight == "p.m.") {hour = parseInt(hour) + 12;}
+            minutes = "00"
+            if (time.length === 2) {minutes = time[1]}
+            if (hour === 'midnight' ) {hour = "00"}
+             
+            return year + "-" + monthsNumbers[month] + "-" + day + " " + hour + ":" + minutes;
+        }
+        var identification = `<input
+            id="identification"
+            class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
+            placeholder="Identification"
+            aria-label="Search identification"
+            value="{{ object.identification }}"
+            name="identification"
+            />`;
+        $( '#identification_slug' ).empty().append(identification);
+        var parseStart_Date = parseDate("{{ object.current_start_date }}");
+        var start_date = `
+        <div id="start_date_picker"></div>
+        <input 
+        type="hidden" 
+        class="form-control w-75" 
+        id="start_date" 
+        value="${parseStart_Date}" 
+        name="current_start_date"
+        />`
+
+        $( '#start_date_slug' ).empty().append(start_date);
+        $('#start_date_picker').dateTimePicker({
+            selectData: parseStart_Date
+        });
+        
+        parseEnd_Date = parseDate("{{ object.current_end_date }}");
+        var end_date = `
+        <div id="end_date_picker"> </div>
+        <input 
+        type="hidden"
+        class="form-control w-75"  
+        id="end_date" 
+        value="${parseEnd_Date}" 
+        name="current_end_date" 
+        />`;
+        $( '#end_date_slug').empty().append(end_date);
+        $('#end_date_picker').dateTimePicker({
+            selectData: parseEnd_Date
+        });
+        var public_evidence = `<input
+            id="public_evidence"
+            class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Public Evidence"
+            aria-label="Search public evidence"
+            value="{{ object.public_evidence }}"
+            name="public_evidence"
+            />`;
+        $( '#public_evidence_slug').empty().append(public_evidence);
+        var private_evidence = `<input
+            id="private_evidence"
+            class="form-control w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Public Evidence"
+            aria-label="Search public evidence"
+            value="{{ object.private_evidence }}"
+            name="private_evidence"
+            />`;
+        $( '#private_evidence_slug').empty().append(private_evidence);
+
+
+        var issue_type = `
+            <select class="custom-select additional-filter" id="issue_type" name="issue_type">
+                {% for issue in issueTypes %}
+                    <option value="{{ issue.name }}">
+                        {{ issue.name }}
+                    </option>
+                {% endfor %}
+            </select>
+            `;
+        $( '#issue_type_slug' ).empty().append(issue_type)
+        $("#issue_type").val('{{object.issue_type}}');
+
+        var domain = `<input
+            id="domain"
+            class="form-control additional-filter w-75 border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="search"
+            placeholder="Domain"
+            aria-label="Search domain"
+            value="{{ object.domain }}"
+            name="domain"
+            />`;
+        $( '#domain_slug' ).empty().append(domain);
+        var asn = `<select id="asn" class="custom-select additional-filter w-75" name="asn">
+                {% for asn in asns %}
+                <option value="{{ asn.asn }}" >
+                    {{ asn.asn }}
+                </option>
+                {% endfor %}
+            </select>`;
+        $( '#asn_slug' ).empty().append(asn);
+        $("#asn").val('{{object.asn}}');
+        $( "#cancel" ).show();
+        $( "#submit" ).show();
+
+    });
+
+    $( "#cancel" ).click(function() {
+        $( "#edit" ).show();
+        $( "#confirmTrigger" ).show();
+        var identification = `<p>{{ object.identification }}</p>`;
+        $( '#identification_slug').empty().append(identification);
+        var start_date = `<p>{{ object.current_start_date }}</p>`;
+        $( '#start_date_slug').empty().append(start_date);
+        var end_date = `<p>{{ object.current_end_date }}</p>`;
+        $( '#end_date_slug').empty().append(end_date);
+        var public_evidence = `<p>{{ object.public_evidence }}</p>`;
+        $( '#public_evidence_slug').empty().append(public_evidence);
+        var private_evidence = `<p>{{ object.private_evidence }}</p>`;
+        $( '#private_evidence_slug').empty().append(private_evidence);
+        var issue_type = `<p>{{ object.issue_type }}</p>`;
+        $( '#issue_type_slug').empty().append(issue_type);
+        var domain = `<p>{{ object.domain }}</p>`;
+        $( '#domain_slug' ).empty().append(domain);
+        var asn = `<p>{{ object.asn }}</p>`;
+        $( '#asn_slug' ).empty().append(asn);
+        $("#asn").val('{{object.asn}}');
+        $( "#cancel" ).hide();
+        $( "#submit" ).hide();
+    });
+
+    $(document).ready(function() {
+        $( "#cancel" ).hide();
+        $( "#submit" ).hide();
+
+
+        table = $("#submeasures").DataTable({
+            order: [[1, "desc"]],
+            searching: true,
+            processing: true,
+            language: {
+            },
+            serverSide: true,
+            rowId: "id",
+            ajax: {
+                url: '{% url "dashboard:measurement:list_measurements_data" %}',
+                data: function (data) {
+                data.event_id = "{{object.id}}";
+                data.issue_type = "{{ object.issue_type }}"
+                data.input = $("#input").val();
+                data.since = $("#since").val();
+                data.until = $("#until").val();
+                data.asn = $("#asn").val();
+                data.test_name = $("#test-name").val();
+                data.anomaly = $("#anomaly-state").val();
+                data.site = $("#site").val();
+                data.flags = $("#flag").val();
+            },
+            contentType: "application/json; charset=utf-8",  
+            type: "GET",
+            },
+            columns: [
+                {
+                    data: "raw_measurement__test_name",
+                    orderable: true,
+                    searchable: true,
+                },
+                {
+                    data: "raw_measurement__measurement_start_time",
+                    orderable: true,
+                    searchable: true,
+                },
+                {
+                    data: "raw_measurement__probe_cc",
+                    orderable: true,
+                    searchable: true,
+                },
+                {
+                    data: "raw_measurement__probe_asn",
+                    orderable: true,
+                    searchable: true,
+                },
+                {
+                    data: "raw_measurement__input",
+                    orderable: true,
+                    searchable: true,
+                    render: function (data, type, row, meta) {
+                        return `<div class='wrapper-dt'> ${data} </div>`
+                    }
+                },
+                {
+                    data: "site_name",
+                    orderable: true,
+                    searchable: true,
+                },
+                {
+                    data: "anomaly",
+                    orderable: true,
+                    searchable: true,
+                },
+                {
+                    data: "flags",
+                    orderable: false,
+                    searchable: true,
+                    render: function (data, type, row, meta) {
+
+                        if ( type === "sort" ) {
+                            return data['id'];
+                        } else {
+                            var line = ``;
+
+                            if ( data['dns'] ) {
+                                line = line + `<span class="badge badge-pill badge-warning">DNS</span>`;
+                            }
+                            if ( data['http'] ) {
+                                line = line + `<span class="badge badge-pill badge-warning">HTTP</span>`;
+                            } 
+                            if ( data['tcp'] ) {
+                                line = line + `<span class="badge badge-pill badge-warning">TCP</span>`;
+                            } 
+
+                            return line;
+                        }
+                        
+                        
+                    },
+                }
+                
+            ],
+            initComplete: function () {},
+            buttons: [],
+            select: {
+                style: 'single'
+            },
+        });
+
+
+
+        $('.select2').select2({
+            theme: "flat",
+            allowClear: true,
+            placeholder: "Select flags existence"
+        }).on("select2:unselecting", function(e) {
+                $(this).data('state', 'unselected');
+            }).on("select2:open", function(e) {
+                if ($(this).data('state') === 'unselected') {
+                    $(this).removeData('state'); 
+
+                    var self = $(this);
+                    setTimeout(function() {
+                        self.select2('close');
+                    }, 1);
+                }    
+            });
+
+
+    });
+</script>
+{% endblock custom_scripts %}
+

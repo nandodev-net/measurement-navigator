@@ -1,0 +1,181 @@
+{
+  "test_keys": {
+    "accessible": false,
+    "control": {
+      "tcp_connect": {
+        "74.6.231.21:443": {
+          "status": true,
+          "failure": null
+        },
+        "72.30.35.9:443": {
+          "status": true,
+          "failure": null
+        },
+        "74.6.231.20:443": {
+          "status": true,
+          "failure": null
+        },
+        "72.30.35.10:443": {
+          "status": true,
+          "failure": null
+        }
+      },
+      "http_request": {
+        "body_length": 18784,
+        "failure": null,
+        "status_code": 200,
+        "headers": {
+          "X-XSS-Protection": "1; mode=block",
+          "X-Content-Type-Options": "nosniff",
+          "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+          "Server": "guce",
+          "Content-Security-Policy-Report-Only": "default-src 'none'; block-all-mixed-content; connect-src https://*.huffingtonpost.co.uk https://*.huffingtonpost.com 'self'; frame-ancestors 'none'; img-src https://s.yimg.com https://*.huffingtonpost.co.uk https://*.huffingtonpost.com; media-src 'none'; script-src 'self' 'nonce-cG+Kgi+FmSTHGDKyYXTgvlR7LHzQ++YJ' https://s.yimg.com https://*.huffingtonpost.co.uk https://*.huffingtonpost.com; style-src 'self' 'nonce-cG+Kgi+FmSTHGDKyYXTgvlR7LHzQ++YJ' https://s.yimg.com https://*.huffingtonpost.co.uk https://*.huffingtonpost.com; font-src 'self'; object-src 'none'; frame-src 'none'; report-uri https://csp.yahoo.com/beacon/csp?src=guce",
+          "Pragma": "no-cache",
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Date": "Tue, 28 Jul 2020 22:14:31 GMT",
+          "X-Frame-Options": "DENY",
+          "Referrer-Policy": "origin-when-cross-origin",
+          "Content-Type": "text/html;charset=UTF-8",
+          "Expires": "0"
+        },
+        "title": "Yahoo is now a part of Verizon Media"
+      },
+      "dns": {
+        "failure": null,
+        "addrs": [
+          "atsv2-fp-shed.wg1.b.yahoo.com",
+          "202.165.107.50",
+          "202.165.107.49"
+        ]
+      }
+    },
+    "control_failure": null,
+    "socksproxy": null,
+    "http_experiment_failure": "connection_reset",
+    "agent": "redirect",
+    "retries": null,
+    "client_resolver": "201.249.172.77",
+    "dns_consistency": "inconsistent",
+    "dns_experiment_failure": null,
+    "body_proportion": 0,
+    "blocking": "dns",
+    "queries": [
+      {
+        "engine": "system",
+        "resolver_hostname": null,
+        "query_type": "A",
+        "hostname": "espanol.yahoo.com",
+        "answers": [
+          {
+            "hostname": "atsv2-fp-shed.wg1.b.yahoo.com",
+            "answer_type": "CNAME",
+            "ttl": null
+          },
+          {
+            "ipv4": "74.6.231.21",
+            "answer_type": "A",
+            "ttl": null
+          },
+          {
+            "ipv4": "74.6.231.20",
+            "answer_type": "A",
+            "ttl": null
+          },
+          {
+            "ipv4": "72.30.35.10",
+            "answer_type": "A",
+            "ttl": null
+          },
+          {
+            "ipv4": "72.30.35.9",
+            "answer_type": "A",
+            "ttl": null
+          }
+        ],
+        "failure": null,
+        "resolver_port": null
+      }
+    ],
+    "body_length_match": null,
+    "requests": [
+      {
+        "failure": "connection_reset"
+      }
+    ],
+    "tcp_connect": [
+      {
+        "status": {
+          "failure": null,
+          "success": true,
+          "blocked": false
+        },
+        "ip": "74.6.231.20",
+        "port": 443
+      },
+      {
+        "status": {
+          "failure": null,
+          "success": true,
+          "blocked": false
+        },
+        "ip": "72.30.35.10",
+        "port": 443
+      },
+      {
+        "status": {
+          "failure": null,
+          "success": true,
+          "blocked": false
+        },
+        "ip": "72.30.35.9",
+        "port": 443
+      },
+      {
+        "status": {
+          "failure": null,
+          "success": true,
+          "blocked": false
+        },
+        "ip": "74.6.231.21",
+        "port": 443
+      }
+    ],
+    "title_match": null,
+    "headers_match": null,
+    "status_code_match": null
+  },
+  "test_start_time": "2020-07-28 17:29:34",
+  "input_hashes": [],
+  "probe_ip": "127.0.0.1",
+  "probe_city": null,
+  "test_helpers": {
+    "backend": {
+      "type": "https",
+      "address": "https://wcth.ooni.io"
+    }
+  },
+  "probe_cc": "VE",
+  "id": "c04746ed-2a62-4cea-a640-daecc825779a",
+  "test_runtime": 25.2169218063,
+  "input": "https://espanol.yahoo.com/",
+  "probe_asn": "AS8048",
+  "annotations": {
+    "engine_name": "libmeasurement_kit",
+    "engine_version_full": "v0.10.11",
+    "engine_version": "0.10.11",
+    "platform": "android",
+    "flavor": "stableFull",
+    "network_type": "wifi"
+  },
+  "software_name": "ooniprobe-android",
+  "software_version": "2.5.1",
+  "data_format_version": "0.2.0",
+  "report_filename": "2020-07-28/20200728T172934Z-VE-AS8048-web_connectivity-20200728T173000Z_AS8048_BlQiS8DZZUPGY7vtn2NDK5S6OiX9FeFGqtvEjfc3nshMnKMXxv-0.2.0-probe.json",
+  "test_version": "0.0.1",
+  "bucket_date": "2020-07-28",
+  "test_name": "web_connectivity",
+  "report_id": "20200728T173000Z_AS8048_BlQiS8DZZUPGY7vtn2NDK5S6OiX9FeFGqtvEjfc3nshMnKMXxv",
+  "measurement_start_time": "2020-07-28 22:14:07",
+  "backend_version": null,
+  "options": []
+}

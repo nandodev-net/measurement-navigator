@@ -1,0 +1,588 @@
+{% extends 'extends/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block custom_stylesheet %}
+<style>
+  .pcoded-main-container { width: -webkit-fill-available; } 
+  #events { min-width: -webkit-fill-available; }
+  #dates { opacity: 1; transition: opacity 1s; }
+  #dates.fade { opacity: 0; }
+  .dtp_modal-content { margin-top:  2%; margin-left: -35%;}
+</style>
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/DataTables/datatables.min.css' %}" /> 
+<link rel="stylesheet" type="text/css" href="{% static 'plugins/datepicker/datetimepicker.css' %}" /> 
+
+
+{% endblock custom_stylesheet %}
+
+{% block tab_title %} VSF - Cases {% endblock tab_title %}
+{% block title %} Create Case {% endblock title %}
+{% block sub_title %} Create a new case {% endblock sub_title %}
+
+{% block route %}
+
+<li class="breadcrumb-item text-white">
+    <a href="{% url home %}">Home</a>
+  </li>
+  <li class="breadcrumb-item text-white">
+    <a href="{% url 'dashboard:event_cases:create_case' %}">Create Case</a>
+  </li>
+
+{% endblock route %}
+
+{% block content %}
+  <div class="col-12">
+    <form method="post">{% csrf_token %}
+
+      <div class="card p-5">
+      
+
+        <div class="row mb-4">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="floating-label font-weight-bold" for="title">Title</label>
+              <input id="title" class="form-control" type="text" aria-label="Title" name="title" required/>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="floating-label font-weight-bold" for="title_eng">Title English</label>
+              <input id="title_eng" class="form-control" type="text" aria-label="Title English" name="title_eng" required/>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="row mb-3">
+          <div class="col-6">
+            <div class="form-group">
+              <label class="floating-label font-weight-bold" for="description">Description</label>
+              <textarea id="description" class="form-control" type="text" aria-label="Description" name="description" ></textarea>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="form-group">
+              <label class="floating-label font-weight-bold" for="description_eng">Description English</label>
+              <textarea id="description_eng" class="form-control" type="text" aria-label="Description English" name="description_eng" ></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-5">
+            <h6><i class="fas fa-info-circle"></i><strong> Do you want to add the start date of this case manually?</strong></h6>
+          </div>
+          <div class="col-2">
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="start_date_manual">
+              <label class="custom-control-label font-weight-bold" id='start_date_manual_label' for="start_date_manual">NO</label>
+            </div>
+          </div>
+          <div class="col-5">
+            <div id='start_date_manual_input' class="">
+              <div class="row">
+                <div class="col-4">
+                  <label class='font-weight-bold mt-2'>
+                    Start Date
+                  </label>
+                </div>
+                <div class="col-8">
+                  <div id="start_date_picker"> </div>
+                  <input type="hidden" id="start_date" value="" name="start_date">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      
+        
+        <div class="row mb-4">
+          <div class="col-5">
+            <h6><i class="fas fa-info-circle"></i><strong> Do you want to add the end date of this case manually?</strong></h6>
+          </div>
+          <div class="col-2">
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="end_date_manual">
+              <label class="custom-control-label font-weight-bold" id='end_date_manual_label' for="end_date_manual">NO</label>
+            </div>
+          </div>
+          <div class="col-5">
+            <div id='end_date_manual_input' class="">
+              <div class="row">
+                <div class="col-4">
+                  <label class='font-weight-bold mt-2'>
+                    End Date
+                  </label>
+                </div>
+                <div class="col-8">
+                  <div id="end_date_picker"> </div>
+                  <input type="hidden" id="end_date" value="" name="end_date">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+
+        <div class="row mb-5">
+          <div class="col-2">
+            <label class='font-weight-bold mt-2'>
+              Select Case Type
+            </label>
+          </div>
+          <div class="col-4">
+            <select id="case_type" class="custom-select" name="case_type">
+              <option value="Bloqueo"> Bloqueo </option>
+              <option value="Desconexion"> Desconexion </option>
+              <option value="Relentizacion de servicio en Linea"> 
+                Relentizacion de servicio en Linea
+              </option>
+              <option value="Conexion inusualmente lenta">
+                Conexion inusualmente lenta
+              </option>
+              <option value="Intercepcion de trafico">
+                Intercepcion de trafico
+              </option>
+              <option value="Falla Importante"> Falla Importante </option>
+              <option value="DoS" >DoS </option>
+            </select>
+          </div>
+          <div class="col-2">
+            <label class='font-weight-bold mt-2'>
+              Select Category
+            </label>
+          </div>
+          <div class="col-4">
+            <select id="category" class="custom-select additional-filter" name="category" required>
+              {% for cat in categoryNames %}
+                <option value="{{ cat }}">
+                  {{ cat }}
+                </option>
+              {% endfor %}   
+            </select>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-3"></div>
+          <div class="col-4">
+            <h6><i class="fas fa-info-circle"></i><strong> 
+              Do you want to keep this case as active even where there could be no active events related?
+            </strong></h6>
+          </div>
+          <div class="col-3">
+            <div class="custom-control custom-switch">
+              <input type="checkbox" class="custom-control-input" id="activate">
+              <label class="custom-control-label font-weight-bold" id='activate_label' for="activate">NO</label>
+            </div>
+          </div>
+          <div class="col-2"></div>
+        </div>
+
+
+        <div class="row">
+          <div class="col-10">
+            <div class="form-group">
+              <label class="floating-label font-weight-bold" for="twitter_search">Twitter Search</label>
+              <input id="twitter_search" class="form-control" type="text" aria-label="Twitter Search" name="twitter_search" />
+            </div>
+          </div>
+          <div class="col-2">
+            <div class="custom-control custom-switch mt-3 ml-5">
+              <input type="checkbox" class="custom-control-input" id="published_new">
+              <label class="custom-control-label font-weight-bold" for="published_new">Published</label>
+            </div>
+          </div>
+        </div>
+
+      
+      </div>
+      
+      <div class="card mt-5" id="events-card">
+        <div class="card-header">
+          <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events-to-pick" aria-expanded="true" aria-controls="events-to-pick">Click here to choose the events to be related</a></h5>
+        </div>
+        <div class="collapse" id="events-to-pick">
+            <div class="card-body p-5">
+
+              <!-- Events selector -->
+              <div class="bg-light p-2 mb-5">
+                <div class="row">
+
+                  <div class="col-4">
+                    <div class="row align-items-center ml-1">
+                      <div class="col-5 mx-auto">
+                        <label class='font-weight-bold' for="confirmed">
+                          Confirmed
+                        </label>
+                      </div>
+                      <div class="col-7 mx-auto">
+                        <select id="confirmed" class="custom-select additional-filter" name="confirmed">
+                          <option value="">Any Confirmation</option>
+                          <option value="true">True</option>
+                          <option value="false">False</option>
+                        </select>
+                      </div>
+                    </div> 
+                  </div>
+
+                  <div class="col-4">
+                    <div class="row align-items-center ml-1">
+                      <div class="col-5 mx-auto">
+                        <label class='font-weight-bold'>
+                          Start Time
+                        </label>
+                      </div>
+                      <div class="col-7 mx-auto">
+                        <input id="start_time" class="text-secondary form-control mr-2 additional-filter" type="date" value="{{ event_filter.start_time }}" name="start_time"/>
+                      </div>
+                    </div> 
+                  </div>
+
+                  <div class="col-4">
+                    <div class="row align-items-center">
+                      <div class="col-5 mx-auto">
+                        <label class='font-weight-bold'>
+                          End Time
+                        </label>
+                      </div>
+                      <div class="col-7 mx-auto">
+                        <input id="end_time" class="text-secondary form-control mr-2 additional-filter" type="date" value="" name="end_time"/>
+                      </div>
+                    </div> 
+                  </div>
+
+                </div>
+
+                <div class="row mt-4">
+
+                  <div class="col-4">
+                    <div class="row align-items-center ml-1">
+                      <div class="col-5 mx-auto">
+                        <label class="font-weight-bold" for="site">Issue Type</label>
+                      </div>
+                      <div class="col-7 mx-auto">
+                        <select class="custom-select additional-filter" id="issue_type" name="issue_type">
+                          <option selected value="">
+                            Any Issue
+                          </option>
+                          {% for issue in event_filter.issues %}
+                            <option value="{{ issue.name }}"> {{ issue.name }} </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>   
+                  </div>
+        
+                  <div class="col-4">
+                    <input
+                    id="domain"
+                    class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+                    type="search"
+                    placeholder="Domain"
+                    aria-label="Search domain"
+                    value=""
+                    name="domain"
+                    />
+                  </div>
+        
+                  <div class="col-4">
+                    <div class="row align-items-center">
+                      <div class="col-3 mx-auto">
+                        <label class='font-weight-bold' for="asn">
+                          ASN
+                        </label>
+                      </div>
+                      <div class="col-9 mx-auto">
+                        <select id="asn" class="custom-select additional-filter" name="asn">
+                          <option value="">Any ASN</option>
+                          {% for asn in event_filter.asns %}
+                            <option value="{{ asn.asn }}">
+                              {{ asn.asn }} - {{ asn.name }}
+                            </option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div> 
+                  </div>
+
+                </div>
+
+              </div>
+
+              
+              <table class="table table-striped mt-5 datatable" id="events">
+                <thead>
+                  <tr>
+                    <th class="text-center" scope="col"> </th>
+                    <th class="text-center" scope="col">Event Type</th>
+                    <th class="text-center" scope="col">Confirmed</th>
+                    <th class="text-center" scope="col">Start Date</th>
+                    <th class="text-center" scope="col">End Date</th>
+                    <th class="text-center" scope="col">Domain</th>
+                    <th class="text-center" scope="col">ASN</th>
+                  </tr>
+                </thead>
+                <tbody>
+                </tbody>
+              </table>
+
+
+
+            </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-10"></div>
+        <div class="col-2">
+          <button type="button" id="submit_case" class="btn btn-md btn-primary">
+            Submit
+          </button>
+        </div>
+      </div>
+      
+    </form>
+  </div>
+
+
+  
+
+
+{% endblock content %}
+{% block custom_scripts %}
+
+  <script type="text/javascript" src="{% static 'js/scripts.js' %}"></script>
+  <script type="text/javascript" src="{% static 'plugins/DataTables/datatables.min.js' %}"></script>  
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.0/moment.min.js"></script>
+  <script type="text/javascript" src="{% static 'plugins/datepicker/datetimepicker.js' %}"></script>  
+
+  <script>
+
+    $(' .additional-filter ').change( function() {
+      events.ajax.reload();
+    });
+
+    var events; 
+
+    $(' #end_date_manual' ).on('click', function() {
+      var checked = $(this).is(":checked");
+      if (checked) {
+        $(' #end_date_manual_label' ).text('YES');
+        $( '#end_date_manual_input' ).show();
+      } else {
+        $(' #end_date_manual_label' ).text('NO');
+        $( '#end_date_manual_input' ).hide();
+      }
+    });
+
+    $(' #start_date_manual' ).on('click', function() {
+      var checked = $(this).is(":checked");
+      if (checked) {
+        $(' #start_date_manual_label' ).text('YES');
+        $( '#start_date_manual_input' ).show();
+      } else {
+        $(' #start_date_manual_label' ).text('NO');
+        $( '#start_date_manual_input' ).hide();
+      }
+    });
+
+    $(' #activate' ).on('click', function() {
+      var checked = $(this).is(":checked");
+      if (checked) {
+        $(' #activate_label' ).text('YES');
+      } else {
+        $(' #activate_label' ).text('NO');
+      }
+    });
+    $(".form-control").each(function() {
+        formmat($(this));
+    });
+    $('.form-control').on('blur', function() {
+        formmat($(this));
+    });
+    $('.form-control').on('focus', function() {
+        $(this).parent('.form-group').addClass("fill");
+    });
+
+    function formmat(e) {
+        var $temp = 0;
+        try {
+            $temp = e.attr('placeholder').length;
+        } catch (err) {
+            $temp = 0;
+        }
+        if (e.val().length > 0 || $temp > 0) {
+            e.parent('.form-group').addClass("fill");
+        } else {
+            e.parent('.form-group').removeClass("fill");
+        }
+    }
+    
+
+    $( '#submit_case' ).click(function (e) {
+
+      var eventsSelected = events.rows({ selected: true }).data().toArray();
+
+      var eventsID = events.rows( { selected: true }).data().toArray().map((selected) => (
+        selected.id
+      ));
+
+      var data = {
+        title: $( '#title' ).val(), 
+        title_eng: $( '#title_eng' ).val(), 
+        description: $( '#description' ).val(), 
+        description_eng: $( '#description_eng' ).val(),
+        manual: $( '#manual' ).is(":checked"),
+        activate: $( '#activate' ).is(":checked"),
+        start_date: $( '#start_date' ).val(), 
+        end_date: $( '#end_date' ).val(),
+        case_type: $( '#case_type option:selected' ).val(), 
+        category: $( '#category option:selected' ).val(),
+        twitter_search: $( '#twitter_search' ).val(), 
+        published: $( '#published_new' ).is(":checked"),
+        events: eventsID,
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+      };
+
+      $.ajax({
+        timeout: 300000,
+        type: "POST",
+        url: "{% url 'dashboard:event_cases:create_case' %}",
+        contentType: 'application/x-www-form-urlencoded',
+        data: data,
+        success: function(data) {
+          if (data.error === null) {
+            Swal.fire({
+              icon: "success",
+              title: "Successful Creation!",
+              confirmButtonColor: "#28a745",
+              confirmButtonText: "Continue"
+            }).then(result => {
+              if (result.isConfirmed) {
+                  window.location = "{% url 'dashboard:event_cases:list_cases' %}";
+              }
+            });
+          } else {
+            Swal.fire({
+              icon: "error",
+              title: "Error!",
+              text: `${ data.error }`,
+              confirmButtonColor: "#dc3545",
+              confirmButtonText: "Continue"
+            });
+          }
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          Swal.fire({
+            icon: "error",
+            title: "There was an error!",
+            text: `${ textStatus }, ${ errorThrown }`,
+            confirmButtonColor: "#dc3545",
+            confirmButtonText: "Continue"
+          });
+        }
+      });
+      
+    });
+
+
+    $(document).ready(function() {
+      
+      $('#start_date_picker').dateTimePicker();
+      $('#end_date_picker').dateTimePicker();
+      $( '#start_date_manual_input' ).hide();
+      $( '#end_date_manual_input' ).hide();
+      events = $('#events').DataTable({
+        searching: true,
+        processing: true,
+        language: {
+        },
+        serverSide: true,
+        rowId: "id",
+        order: [[3, "desc"]],
+        ajax: {
+          url: '{% url "dashboard:events:data" %}',
+          data: function (data) {
+
+            data.identification = $("#identification").val() ;
+            data.confirmed = $("#confirmed").val();
+            data.current_start_date = $("#start_time").val();
+            data.current_end_date = $("#end_time").val();
+            data.domain = $("#domain").val();
+            data.asn = $("#asn").val();
+            data.issue_type = $('#issue_type').val();
+          },
+          contentType: "application/json; charset=utf-8",  
+          type: "GET",
+        },
+        columnDefs: [ {
+            orderable: false,
+            className: 'select-checkbox',
+            targets:   0
+        } ],
+        columns: [
+          {
+            data: 'id',
+            orderable: false,
+            render: function (data, type, row, meta) { 
+              return `<div class="p-2"></div>`
+            }
+          },
+          {
+            data: "issue_type",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "confirmed",
+            orderable: true,
+            searchable: false,
+            render: function (data, type, row, meta) {
+              if (data) {
+                return `<div class="text-success w-100 text-center">
+                          <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                        </div>`
+              } else {
+                return `<div class="text-danger w-100 text-center">
+                          <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                        </div>`
+              }
+            },
+          },
+          {
+            data: "current_start_date",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "current_end_date",
+            orderable: true,
+            searchable: true,
+          },
+          {
+            data: "domain",
+            orderable: false,
+            searchable: true,
+          },
+          {
+            data: "asn",
+            orderable: false,
+            searchable: true,
+          },
+        ],
+        initComplete: function () {},
+        buttons: [],
+        select: {
+          style: 'multi',
+        },
+      });
+    });
+
+  </script>
+ 
+{% endblock custom_scripts %}
+
+

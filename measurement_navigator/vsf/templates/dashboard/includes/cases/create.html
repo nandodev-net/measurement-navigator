@@ -1,0 +1,176 @@
+<div class="modal fade" id="createCase" tabindex="-1" role="dialog" aria-labelledby="createCaseLabel" aria-hidden="true">
+  {% if user.is_editor %}
+  <form id="createCaseForm"> 
+    <div class="modal-dialog mw-100 w-75" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createCaseLabel">
+            Create Case
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="container-fluid">
+
+            <input id="title_new" class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="text" placeholder="Title spa" aria-label="Title" name="title_new" required/>
+
+            <input id="title_eng_new" class="form-control mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="text" placeholder="Title eng" aria-label="Title English" name="title_eng_new" required/>
+
+            <input id="description_new" class="form-control mt-4 mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="text" placeholder="Description spa" aria-label="Description" name="description_new" />
+
+            <input id="description_eng_new" class="form-control mt-4 mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+            type="text" placeholder="Description eng" aria-label="Description English" name="description_eng_new" />
+
+            <div class="row mt-5">
+              <div class="col-2">
+                <label class='font-weight-bold mt-2 ml-3'>
+                  Start Date
+                </label>
+              </div>
+              <div class="col-4">
+                <input id="start_date_new" class="form-control mr-2 additional-filter" type="date" name="start_date_new"/>
+              </div>
+              <div class="col-2">
+                <label class='font-weight-bold mt-2 ml-3'>
+                  End Date
+                </label>
+              </div>
+              <div class="col-4">
+                <input id="end_date_new" class="form-control mr-2 additional-filter" type="date" name="end_date_new"/>
+              </div>
+            </div>
+
+            <div class="row mt-5">
+              <div class="col-2">
+                <label class='font-weight-bold mt-2 ml-3'>
+                  Select Case Type
+                </label>
+              </div>
+              <div class="col-4">
+                <select id="case_type_new" class="custom-select additional-filter" name="case_type_new">
+                  <option value="Bloqueo"> Bloqueo </option>
+                  <option value="Desconexion"> Desconexion </option>
+                  <option value="Relentizacion de servicio en Linea"> 
+                    Relentizacion de servicio en Linea
+                  </option>
+                  <option value="Conexion inusualmente lenta">
+                    Conexion inusualmente lenta
+                  </option>
+                  <option value="Intercepcion de trafico">
+                    Intercepcion de trafico
+                  </option>
+                  <option value="Falla Importante"> Falla Importante </option>
+                  <option value="DoS" >DoS </option>
+                </select>
+              </div>
+              <div class="col-2">
+                <label class='font-weight-bold mt-2 ml-3'>
+                  Select Category
+                </label>
+              </div>
+              <div class="col-4">
+                <select id="category_new" class="custom-select additional-filter" name="category_new" required>
+                  {% for cat in categoryNames %}
+                    <option value="{{ cat }}">
+                      {{ cat }}
+                    </option>
+                  {% endfor %}   
+                </select>
+              </div>
+            </div>
+
+            <div class="row mt-3">
+              <div class="col-9">
+                <input id="twitter_search_new" class="form-control mt-4 mr-2 additional-filter border-top-0 border-left-0 border-right-0 bg-transparent"
+                type="text" placeholder="Twitter Search" aria-label="Twitter Search" name="twitter_search_new" />
+              </div>
+              <div class="col3">
+                <div class="custom-control custom-switch mt-3 ml-5">
+                  <input type="checkbox" class="custom-control-input" id="published_new">
+                  <label class="custom-control-label font-weight-bold" for="published_new">Published</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="card mt-5" id="events-card">
+              <div class="card-header">
+                <h5 class="mb-0"><a href="#!" data-toggle="collapse" data-target="#events-to-pick" aria-expanded="true" aria-controls="events-to-pick">Click here to choose the events to be related</a></h5>
+              </div>
+              <div class="collapse" id="events-to-pick">
+                  <div class="card-body p-3">
+
+
+                    <table class="table table-striped mt-5 datatable" id="events">
+                      <thead>
+                        <tr>
+                          <th class="text-center" scope="col">Event Type</th>
+                          <th class="text-center" scope="col">Confirmed</th>
+                          <th class="text-center" scope="col">Start Date</th>
+                          <th class="text-center" scope="col">End Date</th>
+                          <th class="text-center" scope="col">Domain</th>
+                          <th class="text-center" scope="col">ASN</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for event in events %}
+                          <tr id="{{event.id}}">
+                            <td>
+                              {{ event.issue_type }}
+                            </td>
+                            <td>
+                              {% if event.confirmed %}
+                                <div class="text-success w-100 text-center">
+                                  <i class="far fa-check-circle text-success" title="Event is Confirmed"></i>
+                                </div>
+                                {% else %}
+                                <div class="text-danger w-100 text-center">
+                                  <i class="far fa-check-circle text-default" title="Event not Confirmed"></i>
+                                </div>
+                              {% endif %}
+                            </td>
+                            <td>
+                              {{ event.start_date }}
+                            </td>
+                            <td>
+                              {{ event.end_date }}
+                            </td>
+                            <td>
+                              {{ event.domain }}
+                            </td>
+                            <td>
+                              {{ event.asn }}
+                            </td>  
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+
+
+                  </div>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">
+            Close
+          </button>
+          <button type="submit" id="submit_case" class="btn btn-primary">
+            Submit
+          </button>
+        </div>
+        
+      </div>
+    </div>
+  </form>
+  {% endif %}
+</div>
