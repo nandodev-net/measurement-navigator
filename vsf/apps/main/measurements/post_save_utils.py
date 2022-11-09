@@ -94,7 +94,26 @@ def create_measurement_from_raw_measurement(raw_measurement : RawMeasurement) ->
     from .submeasurements.utils  import create_sub_measurements
     from .utils import anomaly
 
-    measurement = Measurement(raw_measurement=raw_measurement, anomaly=anomaly(raw_measurement))
+    if raw_measurement.input:
+        domain = None
+        try: 
+            from vsf.utils import get_domain
+            domain, _ = Domain.objects.get_or_create(domain_name=get_domain(raw_measurement.input), defaults={'site' : None})
+        except Exception as e:
+            # If could not create this object, don't discard entire measurement, it's still important
+            print(f"Could not create domain for the following url: {raw_measurement.input}. Error: {str(e)}", file=sys.stderr)
+    else:
+        domain = None
+    
+    asn = raw_measurement.probe_asn
+    if asn is not None:
+        try:
+            asn,_ = ASN.objects.get_or_create(asn=str(asn))
+        except Exception as e:
+            print(f"Could not create asn for the following code: {asn}. Error: {str(e)}", file=sys.stderr)
+
+
+    measurement = Measurement(raw_measurement=raw_measurement, anomaly=anomaly(raw_measurement), asn=asn, domain=domain)
         
     (sub_measurements,_) = create_sub_measurements(raw_measurement)
 
