@@ -1,4 +1,0 @@
-[
-    {"model": "events.event", "pk": 1118, "fields": 
-        {"identification": "HTTP ISSUE FROM 2021-02-16 09:33:02 FOR ISP AS6306 (null)", "confirmed": false, "start_date": "2021-02-12T07:38:48Z", "end_date": "2021-02-17T07:38:26Z", "public_evidence": null, "private_evidence": null, "issue_type": "HTTP", "domain": 249, "asn": 5, "closed": false}}
-] 
