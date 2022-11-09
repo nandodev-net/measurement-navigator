@@ -13,7 +13,6 @@ from pathlib import Path
 import gzip
 import json
 import os
-import viztracer
 
 # Python imports
 from pathlib import Path
@@ -21,13 +20,12 @@ from pathlib import Path
 # Local imports
 from apps.main.sites.models             import URL
 from apps.main.measurements.models      import RawMeasurement
-from apps.api.fp_tables_api.utils import display_top_mem_intensive_lines
 from .sync_measurements import *
 from vsf.utils import Colors as c
 
 # Bulk create manager import
 from vsf.bulk_create_manager import BulkCreateManager
-from apps.main.measurements.post_save_utils import RawMeasurementBulker, post_save_rawmeasurement, create_measurement_from_raw_measurement
+from apps.main.measurements.post_save_utils import RawMeasurementBulker, create_measurement_from_raw_measurement
 
 import pytz
 utc=pytz.UTC
@@ -209,7 +207,10 @@ class S3IngestManager:
             file.write(file_content.decode('UTF-8'))
             file.close()
             # Deleting Gzip file
+        try:
             os.remove(full_route)
+        except FileNotFoundError:
+            print(c.yellow(f"[WARNING] Could not find file {full_route} that was just decompressed"))
 
         return gz_file[:-3]
 
@@ -258,8 +259,19 @@ class S3IngestManager:
         time_ini = time.time()
         cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
 
+        output_dir_path = Path(output_dir)
+        if not output_dir_path.exists():
+            print(f"Output dir not found, creating output dir: {output_dir_path}")
+            output_dir_path.mkdir(parents=True)
+            
+        incompatible_dir_path = Path(incompatible_dir)
+        if not incompatible_dir_path.exists():
+            print(f"Output dir not found, creating output dir: {incompatible_dir}")
+            incompatible_dir_path.mkdir(parents=True)
+            
         # Searching previous files to add or store them
         self.collect_incompatible_files(output_dir, incompatible_dir, cache_min_date)
+
 
         # Downloading S3 measurements
         for test in test_types:
@@ -282,7 +294,7 @@ class S3IngestManager:
                 print(c.yellow(f"Warning: trying to move file {json_file} from '{output_dir}' to '{incompatible_dir}', but couldn't find it"))
             except Exception as e:
                 print(c.red(f"[ERROR] Could not finish processing json file content. Error: {e}"))
-                os.rename(output_dir + json_file, incompatible_dir + json_file)
+                #os.rename(output_dir + json_file, incompatible_dir + json_file)
 
         bulker.done()
         self.process_raw_measurements(first_date)
