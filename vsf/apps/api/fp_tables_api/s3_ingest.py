@@ -25,7 +25,7 @@ from vsf.utils import Colors as c
 
 # Bulk create manager import
 from vsf.bulk_create_manager import BulkCreateManager
-from apps.main.measurements.post_save_utils import RawMeasurementBulker, create_measurement_from_raw_measurement
+from apps.main.measurements.post_save_utils import MeasurementCreator, RawMeasurementBulker
 
 import pytz
 utc=pytz.UTC
@@ -51,6 +51,7 @@ class S3IngestManager:
     def __init__(self, measurements_path  : str = './media/ooni_data/', date_format : str = "%Y-%m-%d %H:%M:%S") -> None:
         self._measurements_path = measurements_path 
         self._date_format = date_format
+        self._measurement_creator = MeasurementCreator()
 
     def process_jsonl_file(self, file_name : str, cache_min_date : datetime.datetime, save_chunk_size : int = 10000, bulker : Optional[BulkCreateManager] = None):
         """Process a single jsonl file, parsing its measurements and storing them in database
@@ -227,7 +228,7 @@ class S3IngestManager:
         qs_size = queryset_.count()
         for (i, raw_meas) in enumerate(queryset_.iterator(chunk_size=1000)):
             print(c.green(f'Processing {i + 1} of {qs_size}'))
-            measurement, subms = create_measurement_from_raw_measurement(raw_meas)
+            measurement, subms = self._measurement_creator.create_measurement_from_raw_measurement(raw_meas)
             rms_bulker.add(raw_meas, measurement, subms)
         
         print(c.green("Measurements succesfully processed!"))
