@@ -151,5 +151,4 @@ vsf/settings/development.py
 vsf/settings/production.py
 vsf/settings/settings.py
 asgi.py
-celery.py
 wsgi.py
