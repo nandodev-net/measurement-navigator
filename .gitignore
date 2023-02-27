@@ -150,5 +150,3 @@ media/ooni_data/*
 vsf/settings/development.py
 vsf/settings/production.py
 vsf/settings/settings.py
-asgi.py
-wsgi.py
