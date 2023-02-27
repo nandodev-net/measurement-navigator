@@ -111,7 +111,7 @@ celerybeat-schedule.dir
 *.sage.py
 
 # Environments
-.env
+.env*
 .venv
 env/
 venv/
@@ -147,7 +147,6 @@ test.py
 !**/migrations
 !**/migrations/__init__.py
 media/ooni_data/*
-manage.py
 vsf/settings/development.py
 vsf/settings/production.py
 vsf/settings/settings.py
