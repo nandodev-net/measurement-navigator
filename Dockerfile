@@ -56,8 +56,6 @@ RUN chmod +x  $APP_HOME/entrypoint.sh
 
 COPY . $APP_HOME
 
-# chown all the files to the app user
-RUN chown -R vsf:vsf $APP_HOME
 
 # Install project
 WORKDIR $APP_HOME/measurement_navigator/vsf
@@ -65,6 +63,8 @@ RUN mv /home/vsf/web/run_web_service.sh .
 RUN poetry config virtualenvs.create false --local
 RUN poetry install && rm -rf ~/.cache/pypoetry/{cache,artifacts}
 
+# chown all the files to the app user
+RUN chown -R vsf:vsf $APP_HOME
 # change to the app user
 USER vsf
 
