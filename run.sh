@@ -35,6 +35,7 @@ docker-compose -f docker-compose.yml down &&\
 printf "${COLOR_LIGHT_BLUE}Building docker composer file...${COLOR_NC}\n" &&\
 docker-compose -f docker-compose.yml up -d $SHOULD_BUILD &&\
 printf "${COLOR_LIGHT_BLUE}Collecting static files...${COLOR_NC}\n" &&\
+docker-compose -f docker-compose.yml exec --user root web chown -R vsf:vsf ../static &&\
 docker-compose -f docker-compose.yml exec web python manage.py collectstatic --no-input --clear &&\
 printf "${COLOR_LIGHT_GREEN}Ready to go!${COLOR_NC}\n" &&\
 printf "${COLOR_LIGHT_BLUE}to run migrations, use the following commnad:${COLOR_NC}\n" &&\
