@@ -31,14 +31,14 @@ COLOR_LIGHT_GRAY='\e[0;37m'
 COLOR_WHITE='\e[1;37m'
 
 printf "${COLOR_LIGTH_BLUE}Shutting down active servers...${COLOR_NC}\n" &&\
-docker-compose -f docker-compose.yml down &&\
+docker compose -f docker-compose.yml down &&\
 printf "${COLOR_LIGHT_BLUE}Building docker composer file...${COLOR_NC}\n" &&\
-docker-compose -f docker-compose.yml up -d $SHOULD_BUILD &&\
+docker compose -f docker-compose.yml up -d $SHOULD_BUILD &&\
 printf "${COLOR_LIGHT_BLUE}Collecting static files...${COLOR_NC}\n" &&\
-docker-compose -f docker-compose.yml exec --user root web chown -R vsf:vsf ../static &&\
-docker-compose -f docker-compose.yml exec web python manage.py collectstatic --no-input --clear &&\
+docker compose -f docker-compose.yml exec --user root web chown -R vsf:vsf ../static &&\
+docker compose -f docker-compose.yml exec web python manage.py collectstatic --no-input --clear &&\
 printf "${COLOR_LIGHT_GREEN}Ready to go!${COLOR_NC}\n" &&\
 printf "${COLOR_LIGHT_BLUE}to run migrations, use the following commnad:${COLOR_NC}\n" &&\
-printf "${COLOR_YELLOW}   docker-compose -f docker-compose.yml exec web python manage.py migrate --noinput${COLOR_NC}\n" &&\
+printf "${COLOR_YELLOW}   docker compose -f docker-compose.yml exec web python manage.py migrate --noinput${COLOR_NC}\n" &&\
 printf "${COLOR_LIGHT_BLUE}You can test this server by requesting to ${COLOR_YELLOW}localhost:1337/admin${COLOR_NC}\n" &&\
-printf "${COLOR_LIGHT_BLUE}Check the logs using: ${COLOR_YELLOW}docker-compose -f docker-compose.yml logs -f${COLOR_NC}\n"
+printf "${COLOR_LIGHT_BLUE}Check the logs using: ${COLOR_YELLOW}docker compose -f docker-compose.yml logs -f${COLOR_NC}\n"
