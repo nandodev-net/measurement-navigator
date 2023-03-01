@@ -186,8 +186,8 @@ class S3IngestManager:
                     try:
                         self.process_jsonl_file(output_dir + jsonl_file, cache_min_date)
                     except Exception as e:
-                        print(e)
-                        os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
+                        print(c.red(f"[ERROR] Could not parse json file: {file_name}. Error: {e}"))
+                        # os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
         print(c.green("[SUCCESS] Incompatible files collection finished"))
 
     def _decompress_file(self, output_dir : str, gz_file : str):
