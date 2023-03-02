@@ -17,7 +17,7 @@ services:
   db:
     image: timescale/timescaledb-ha:pg14-latest
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
+      - postgres_data:/home/postgres/pgdata/data
     env_file:
       - ./.env.prod.db
     hostname: postgres
