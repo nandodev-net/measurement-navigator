@@ -3,8 +3,6 @@
 """
 
 # Third party imports
-from bz2 import decompress
-#from memory_profiler import profile
 from typing import List, Optional
 import time
 import json
@@ -20,7 +18,7 @@ from pathlib import Path
 # Local imports
 from apps.main.sites.models             import URL
 from apps.main.measurements.models      import RawMeasurement
-from .sync_measurements import *
+from vsf.apps.api.fp_tables_api.sync_measurements import s3_measurements_download, s3_measurements_download_iter 
 from vsf.utils import Colors as c
 
 # Bulk create manager import
@@ -168,27 +166,28 @@ class S3IngestManager:
         file_list = os.listdir(output_dir) # list of file names
         n_files = len(file_list)
         print(c.blue("Processing incompatible files."))
+
         if not file_list:
             return
-        else:
-            print("Directory is not empty")
-            for (i, file_name) in enumerate(file_list):
-                print(c.blue(f"Processing incompatible file {i} of {n_files}"))
-                if file_name.endswith('.jsonl'):
-                    try:
-                        self.process_jsonl_file(output_dir + file_name, cache_min_date)
-                    except Exception as e:
-                        print(e)
-                        os.rename(output_dir + file_name, incompatible_dir + file_name)
 
-                else:
-                    jsonl_file = self._decompress_file(output_dir, file_name)
-                    try:
-                        self.process_jsonl_file(output_dir + jsonl_file, cache_min_date)
-                    except Exception as e:
-                        print(c.red(f"[ERROR] Could not parse json file: {file_name}. Error: {e}"))
-                        os.remove(output_dir + jsonl_file)
-                        # os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
+        print("Directory is not empty")
+        for (i, file_name) in enumerate(file_list):
+            print(c.blue(f"Processing incompatible file {i} of {n_files}"))
+            if file_name.endswith('.jsonl'):
+                try:
+                    self.process_jsonl_file(output_dir + file_name, cache_min_date)
+                except Exception as e:
+                    print(e)
+                    os.rename(output_dir + file_name, incompatible_dir + file_name)
+
+            else:
+                jsonl_file = self._decompress_file(output_dir, file_name)
+                try:
+                    self.process_jsonl_file(output_dir + jsonl_file, cache_min_date)
+                except Exception as e:
+                    print(c.red(f"[ERROR] Could not parse json file: {file_name}. Error: {e}"))
+                    os.remove(output_dir + jsonl_file)
+                    # os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
         print(c.green("[SUCCESS] Incompatible files collection finished"))
 
     def _decompress_file(self, output_dir : str, gz_file : str):
@@ -275,15 +274,17 @@ class S3IngestManager:
 
 
         # Downloading S3 measurements
+
         for test in test_types:
             print(c.blue(f"Downloading measurements of type {test}"))
             s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
 
         # Get all .gz names in the output directory in order to decompress them
-        gz_list = os.listdir(output_dir)
+        # gz_list = os.listdir(output_dir)
+        gz_list = (file for test in test_types for file in s3_measurements_download_iter(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir))
         bulker = BulkCreateManager(chunk_size=10000)
         for (i, gzfile) in enumerate(gz_list):
-            print(c.blue(f"processing json {i+1} / {len(gz_list)}"))
+            print(c.blue(f"processing json {i+1}"))
             json_file = self._decompress_file(output_dir, gzfile)
 
             try:
