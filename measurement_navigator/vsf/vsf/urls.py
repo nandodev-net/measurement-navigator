@@ -51,6 +51,7 @@ urlpatterns = [
     path('measurements/',   include('apps.main.measurements.urls', namespace = 'measurements')),
     path('admin/',          admin.site.urls),
     path('', redirect_to_dashboard),
+    path('prometheus/', include('django_prometheus.urls')),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
