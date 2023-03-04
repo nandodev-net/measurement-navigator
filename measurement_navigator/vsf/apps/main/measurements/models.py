@@ -10,6 +10,7 @@ from django.db.models import JSONField
 from django.db.models.deletion import SET_NULL
 
 # third party imports:
+from django_prometheus.models import ExportModelOperationsMixin
 import uuid
 import sys
 
@@ -18,7 +19,9 @@ from apps.main.sites.models         import Domain
 from apps.main.asns.models          import ASN
 
 
-class RawMeasurement(TimeStampedModel):
+# class RawMeasurement(TimeStampedModel):
+class RawMeasurement(ExportModelOperationsMixin('RawMeasurement'), TimeStampedModel):
+
     """
         This models holds the information provided by an ooni
         measurement. We may not work with this model directly, instead, 

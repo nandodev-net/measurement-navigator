@@ -18,7 +18,7 @@ from pathlib import Path
 # Local imports
 from apps.main.sites.models             import URL
 from apps.main.measurements.models      import RawMeasurement
-from vsf.apps.api.fp_tables_api.sync_measurements import s3_measurements_download, s3_measurements_download_iter 
+from apps.api.fp_tables_api.sync_measurements import s3_measurements_download, s3_measurements_download_iter 
 from vsf.utils import Colors as c
 
 # Bulk create manager import
