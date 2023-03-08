@@ -29,6 +29,15 @@ class RawMeasurement(ExportModelOperationsMixin('RawMeasurement'), TimeStampedMo
         layer for this model.
     """
 
+    index_together = [
+        [   "input",
+            "report_id",
+            "probe_asn",
+            "test_name",
+            "measurement_start_time"
+        ]
+    ] # This is used to quickly check if a given raw measurement is already in database
+
     class TestTypes(models.TextChoices):
         """
             An enum with the valid test names

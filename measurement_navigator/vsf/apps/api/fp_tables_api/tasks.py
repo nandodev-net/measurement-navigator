@@ -56,7 +56,7 @@ def fp_update(since :  Optional[str] = None, until : Optional[str] = None, only_
         since = datetime.strftime(since, date_format)
     
     try: 
-        ret['output'] = request_fp_data(since, until, only_fastpath)
+        ret['output'] = request_fp_data(since, until, from_fastpath = only_fastpath)
         cache.set(name, ProcessState.IDLE)
     except Exception as e:
         cache.set(name, ProcessState.FAILED)

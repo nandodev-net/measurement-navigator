@@ -16,8 +16,8 @@ from apps.api.fp_tables_api.utils import display_top_mem_intensive_lines
 import signal
 
 
-ini_date_str = '01-07-2022'
-end_date_str = '30-07-2022'
+ini_date_str = '01-01-2023'
+end_date_str = '30-01-2023'
 
 
 test_types = ['tor']

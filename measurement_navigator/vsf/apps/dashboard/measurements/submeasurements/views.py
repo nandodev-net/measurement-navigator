@@ -218,6 +218,9 @@ class ListDNSTemplate(ListSubMeasurementTemplate):
         context['prefill'] = prefill
         return context
 
+async def say_hello():
+    print("Hello async")
+
 class ListDNSBackEnd(ListSubMeasurementBackend):
     """
         This is the backend that talks to the template to perform
@@ -236,14 +239,8 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
     ]
     SubMeasurement = SubMeasModels.DNS
 
-    def get(self, request, *args, **kwargs):
-        tracer = viztracer.VizTracer()
-        tracer.start()
-        result = super().get(request, *args, **kwargs)
-        tracer.stop()
-        tracer.save("dns_backend_trace_select_related.json")
-
-        return result
+    async_ready = True
+    async_func = say_hello()
 
     def get_initial_queryset(self):
          return super().get_initial_queryset().select_related('jsons')
@@ -252,6 +249,7 @@ class ListDNSBackEnd(ListSubMeasurementBackend):
     def _get_req_key(self) -> str:
 
         dict_to_hash = {}
+        print(self.get_filter_fields())
         for field in self.get_filter_fields():
             value = dict_to_hash[field] = self.request.GET.get(field, None)
             if isinstance(value, list) and all(isinstance(elem, str) for elem in value):

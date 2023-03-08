@@ -20,7 +20,7 @@ print("Requesting ooni data")
 
 
 today = datetime.now()
-now = today - timedelta(days=5) 
+now = today
 n_months_ago = today - timedelta(days=6) 
 now = now.strftime("%Y-%m-%d") 
 n_months_ago = n_months_ago.strftime("%Y-%m-%d")
@@ -34,8 +34,11 @@ asn_list = [
 ]
 
 inicio = time.time()
+
 for current_asn in asn_list:
     request_fp_data(test_name='web_connectivity',since=n_months_ago, until=now, from_fastpath=False, probe_asn=current_asn)
+
+    
 fin = time.time()
 
 print('Tiempo de ejecucion API: ', str(fin-inicio))
