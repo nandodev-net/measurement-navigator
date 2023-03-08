@@ -47,7 +47,7 @@ class FastPathIngestView(APIView):
 
     def post(self, request, since, until, only_fastpath : bool = False, format=None):
         #try:
-        (status, measurements) = utils.request_fp_data(since, until, only_fastpath)        
+        (status, measurements) = utils.request_fp_data(since, until, from_fastpath = only_fastpath)        
         #except:
         #    return Response([], status=HTTP_400_BAD_REQUEST)
 

@@ -24,6 +24,7 @@ import tracemalloc
 import time
 import linecache
 import os
+from typing import List, Optional, Tuple
 
 # Third party imports
 import requests
@@ -38,7 +39,7 @@ from apps.main.measurements.models      import RawMeasurement
 
 # Bulk create manager import
 from vsf.bulk_create_manager import BulkCreateManager
-from apps.main.measurements.post_save_utils import post_save_rawmeasurement
+from apps.main.measurements.post_save_utils import post_save_rawmeasurement, post_save_rawmeasurement_list
 
 def check_post_data(data) -> bool:
         """
@@ -89,40 +90,42 @@ def check_post_data(data) -> bool:
 
         return True
 
-def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None, anomaly: str=None, from_fastpath: bool = True, limit:int =None) -> (int, [str]):
-    """
+def request_fp_data(since: str, until: str, test_name: Optional[str] = None, probe_asn: Optional[str]=None, anomaly: Optional[str]=None, from_fastpath: bool = True, limit : Optional[int] = None) -> Tuple[int, List[str]]:
+    """ 
         Given the start and end date for a set of measurements,
         perform a get request to ooni in order to get the
         recent fast path objects and store them in the database.
 
-        The function returns the status code for the ooni request
-        and a list of tid corresponding to the actually added measurements.
+    Args:
+        since (str): Start date for when to ask for measurements. Expected in format: YYYY-mm-dd.
+        until (str): Final date for when to ask for measurements. Expected in format: YYYY-mm-dd.
+        test_name (Optional[str], optional): Name of test whose data you want to pull, all tests if not specified. Defaults to None.
+        probe_asn (Optional[str], optional): ASN whose data you want to pull, all ASNs if not specified. Defaults to None.
+        anomaly (Optional[str], optional): Anomaly value for this measurements, any value if not specified. Defaults to None.
+        from_fastpath (bool, optional): [LEGACY] if measurements should come from the fastpath. Defaults to True.
+        limit (Optional[int], optional): How many measurements to pull, as much as possible if not provided. Defaults to None.
 
-        'from_fastpath' param remains unused for now, we need this in the first place
-        to recover not-ready measurements, but that concept seems to be gone. 
-
-        'limit' param provides a limit for the maximum ammount of stored measurements
-
-        both the since and until date should be in the following format:
-        YYYY-mm-dd.
+    Returns:
+        Tuple[int, List[str]]: (Status code for request, List of ids of actually added measurements)
     """
 
-    day_time_ini = time.time()
+    from vsf.utils import Colors as c
 
     page_req = False
     
-   
     # Data validation
     data = {
         'probe_cc': 'VE', # In case we want to add other countries
         'since': since,
         'until': until,
-        'limit': 500,
         'order':'asc',
         'order_by' : 'measurement_start_time',
         'probe_asn': probe_asn,
         'anomaly': anomaly,
     }
+
+    if limit is not None and limit > 0:
+        data['limit'] = limit
 
     if test_name:
         data['test_name'] = test_name
@@ -135,21 +138,15 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
 
     # Perform a get request from Ooni
     next_url = 'https://api.ooni.io/api/v1/measurements?' + urlencode(data)
-    from vsf.utils import Colors as c
-    print(c.magenta("\n\nRequesting URL: \n"), next_url)
-
-    # We store the earliest measurement so we can update just what needs to be updated 
-    # when computing hard flags and updating measurement count
-    cache_min_date = datetime.datetime.now() + datetime.timedelta(days=1)
-
 
     status_code = 200
-
+    new_ms_to_report = []
     while next_url != None:
         try:
             # If it wasn't able to get the next page data, just store the currently added data
             # @TODO we have to think what to do in this cases
 
+            print(c.magenta("\n\nRequesting URL: \n"), next_url)
             req = requests.get(next_url)
             new_meas_list = []
         
@@ -193,18 +190,13 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
                 continue
     
             # checking if the Raw meas exists, if not we create it.
-            raw_object = RawMeasurement.objects.filter(input=result['input'], 
+            raw_object = RawMeasurement.objects.filter( input=result['input'], 
                                                         report_id=result['report_id'], 
                                                         probe_asn=result['probe_asn'], 
                                                         test_name=result['test_name'], 
                                                         measurement_start_time=result['measurement_start_time']
                                                         )
-            if len(raw_object) > 0:
-                print('entra')
-                pass
-            else:
-
-                print ('-----CREANDO OBJETO------')
+            if len(raw_object) == 0:
                 data = req.json()
                 if data['test_name'] == 'tor':
                     input_ = 'tor'
@@ -243,12 +235,10 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
                                 del r['response']['body']
                                 r['response']['body'] = "Not_available"
 
-                print ('-----LISTANDO------')
                 new_meas_list.append(ms)
-                print(len(new_meas_list))
+                print("current new measuremnt list size: ", len(new_meas_list))
 
 
-        from vsf.utils import Colors as c
         try:
             print(c.magenta("Creating a new measurement"))
 
@@ -256,35 +246,23 @@ def request_fp_data(test_name: str, since: str, until: str, probe_asn: str=None,
             bulk_mgr = BulkCreateManager(chunk_size=500)
             for ms_ in new_meas_list:
                 bulk_mgr.add(ms_)
-                start_time_datetime = datetime.datetime.strptime(ms_.measurement_start_time, "%Y-%m-%d %H:%M:%S") # convert date into string
-                print(c.green(f"Trying to update cache, start time: {ms_.measurement_start_time}, cache: {cache_min_date}. Is less: {start_time_datetime < cache_min_date}"))
-                if start_time_datetime < cache_min_date:
-                    cache_min_date = start_time_datetime
-                    print(c.red("Updating min date cache:"), c.cyan(cache_min_date))
+                new_ms_to_report.append(ms_.id)
             bulk_mgr.done()
         except:
             pass
 
-
-    print('>>>>PROCESSING INFO<<<<')
     paginator = Paginator(RawMeasurement.objects.filter(is_processed=False).order_by('test_start_time'), 500)
     for page in range(1, paginator.num_pages + 1):
         raw_list_to_process = paginator.page(page).object_list
-        print(str(len(raw_list_to_process)))
-        post_save_rawmeasurement(raw_list_to_process)
+        for raw in raw_list_to_process:
+            post_save_rawmeasurement(raw)
 
-
-    day_time_end=time.time()
-    print('Tiempo en un dia de ingesta: ')
-    print(str(day_time_end-day_time_ini))
-
-
-    return (status_code)
+    return (status_code, new_ms_to_report)
 
 
 def update_measurement_table(
-                            n_measurements : int = None,
-                            test_name      : str = None,
+                            n_measurements : Optional[int] = None,
+                            test_name      : Optional[str] = None,
                             retrys         : int = -1
                             ) -> dict:
     """

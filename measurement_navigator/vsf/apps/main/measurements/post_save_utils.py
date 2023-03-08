@@ -20,7 +20,16 @@ from apps.main.sites.models import Domain
 from .models import RawMeasurement, Measurement
 from vsf.utils import Colors as c
 
-def post_save_rawmeasurement(raw : RawMeasurement, first_date : datetime):
+def post_save_rawmeasurement_list(raw_measurements : List[RawMeasurement]):
+    """Same as post_save_rawmeasruement, but with a list
+
+    Args:
+        raw_measurements (List[RawMeasurement]): List of raw measurements to post-save
+    """
+    for raw in raw_measurements:
+        post_save_rawmeasurement(raw)
+
+def post_save_rawmeasurement(raw : RawMeasurement):
     """Utility function to process a raw measurement not yet processed
 
     Args:
@@ -35,7 +44,6 @@ def post_save_rawmeasurement(raw : RawMeasurement, first_date : datetime):
     from .submeasurements.utils  import create_sub_measurements
     from .utils import anomaly
 
-    print('........creating measurement from ', first_date)
     if raw.input:
         domain = None
         try: 
@@ -65,7 +73,6 @@ def post_save_rawmeasurement(raw : RawMeasurement, first_date : datetime):
             m.delete()
         return
 
-    print('........creating la Submeasurement')
     (sub_measurements,_) = create_sub_measurements(raw)
 
     for sb in sub_measurements:
