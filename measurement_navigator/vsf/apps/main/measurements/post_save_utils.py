@@ -84,56 +84,113 @@ def post_save_rawmeasurement(raw : RawMeasurement):
     raw.is_processed = True
     raw.save()
 
-def create_measurement_from_raw_measurement(raw_measurement : RawMeasurement) -> Optional[Tuple[Measurement, List[SubMeasurement]]]:
-    """Create the measurement object with its corresponding submeasurements. Objects are not saved to database, so 
-    you should do it yourself however it fits the best with your processing structure
-
-    Args:
-        raw_measurement (RawMeasurement): Measurement to process
-
-    Returns:
-        Tuple[Measurement, List[SubMeasurement]]: List of submeasurements connected to this measurement
+class MeasurementCreator:
+    """Class to help create measurements in an efficient manner, reducing database queries
     """
-    if raw_measurement.is_processed:
-        return None # nothing to do if already processed
 
-    # To avoid circular imports, we need to import this here:
-    from .submeasurements.utils  import create_sub_measurements
-    from .utils import anomaly
+    def __init__(self) -> None:
+        self._cache_asns = {}
+        self._cache_domains = {}
 
-    if raw_measurement.input:
+    def create_measurement_from_raw_measurement(self, raw_measurement : RawMeasurement) -> Optional[Tuple[Measurement, List[SubMeasurement]]]:
+        """Create the measurement object with its corresponding submeasurements. Objects are not saved to database, so 
+        you should do it yourself however it fits the best with your processing structure
+
+        Args:
+            raw_measurement (RawMeasurement): Measurement to process
+
+        Returns:
+            Tuple[Measurement, List[SubMeasurement]]: List of submeasurements connected to this measurement
+        """
+        if raw_measurement.is_processed:
+            return None # nothing to do if already processed
+
+        # To avoid circular imports, we need to import this here:
+        from .submeasurements.utils  import create_sub_measurements
+        from .utils import anomaly
+
+        if raw_measurement.input:
+            domain = self.get_domain_object(raw_measurement.input)
+        else:
+            domain = None
+        
+        asn = raw_measurement.probe_asn
+        if asn is not None:
+            asn = self.get_asn_object(asn)
+
+        measurement = Measurement(raw_measurement=raw_measurement, anomaly=anomaly(raw_measurement), asn=asn, domain=domain)
+            
+        (sub_measurements,_) = create_sub_measurements(raw_measurement)
+
+
+        for subms in sub_measurements:
+            subms.measurement = measurement
+
+            if check_submeasurement(subms):
+                subms.flag_type = SubMeasurement.FlagType.SOFT.value
+            else:
+                subms.flag_type = SubMeasurement.FlagType.OK.value
+
+        return measurement, sub_measurements
+
+    def get_domain_object(self, input : str) -> Domain:
+        """Try to get domain of specified input str, caching it to reduce amount of required database querys
+
+        Args:
+            input (str): input url for some raw measurement
+
+        Returns:
+            Domain: domain object for this url
+        """
+        from vsf.utils import get_domain
+
+        domain_name = get_domain(input)
+
+        # Try to retrieve it from cache if available
+        if domain_name in self._cache_domains:
+            return self._cache_domains[domain_name]
+
         domain = None
         try: 
             from vsf.utils import get_domain
-            domain, _ = Domain.objects.get_or_create(domain_name=get_domain(raw_measurement.input), defaults={'site' : None})
+            domain, _ = Domain.objects.get_or_create(domain_name=domain_name, defaults={'site' : None})
         except Exception as e:
             # If could not create this object, don't discard entire measurement, it's still important
-            print(f"Could not create domain for the following url: {raw_measurement.input}. Error: {str(e)}", file=sys.stderr)
-    else:
-        domain = None
-    
-    asn = raw_measurement.probe_asn
-    if asn is not None:
+            print(f"Could not create domain for the following url: {input}. Error: {str(e)}", file=sys.stderr)
+
+        # Only add it to cache if you could retrieve actual object 
+        if domain:
+            self._cache_domains[domain_name] = domain
+        
+        return domain
+
+
+    def get_asn_object(self, asn : str) -> ASN:
+        """Get asn object in an efficient manner, trying to cache results to reduce database hits
+
+        Args:
+            asn (str): asn string
+
+        Returns:
+            ASN: asn object
+        """
+        
+        # Try to retrieve it from cache
+        if asn in self._cache_asns:
+            return self._cache_asns[asn]
+        
+        # Try to retrieve it from database
         try:
-            asn,_ = ASN.objects.get_or_create(asn=str(asn))
+            asn_obj,_ = ASN.objects.get_or_create(asn=str(asn))
         except Exception as e:
             print(f"Could not create asn for the following code: {asn}. Error: {str(e)}", file=sys.stderr)
-
-
-    measurement = Measurement(raw_measurement=raw_measurement, anomaly=anomaly(raw_measurement), asn=asn, domain=domain)
+            asn_obj = None
         
-    (sub_measurements,_) = create_sub_measurements(raw_measurement)
-
-
-    for subms in sub_measurements:
-        subms.measurement = measurement
-
-        if check_submeasurement(subms):
-            subms.flag_type = SubMeasurement.FlagType.SOFT.value
-        else:
-            subms.flag_type = SubMeasurement.FlagType.OK.value
-
-    return measurement, sub_measurements
+        # cache it if could retrieve it
+        if asn_obj:
+            self._cache_asns[asn] = asn_obj
+        
+        return asn_obj
 
 class RawMeasurementBulker:
     """If you try to save a set of raw measurements, you won't be able to use the post save
