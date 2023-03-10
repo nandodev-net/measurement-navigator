@@ -112,14 +112,14 @@ class DNS(SubMeasurement):
     in web_connectivity or DNS tests
     """
     control_resolver_failure = models.CharField(
-        max_length=200,
+        max_length=400,
         null=True,
         blank=True,
     )
     control_resolver_hostname = models.GenericIPAddressField(
         null=True, blank=True)  # servidor DNS de control
 
-    failure = models.CharField(max_length=200, null=True, blank=True)
+    failure = models.CharField(max_length=400, null=True, blank=True)
     resolver_hostname = models.GenericIPAddressField(
         null=True, blank=True)  # servidor DNS que se esta evaluando, (target)
 
