@@ -27,6 +27,7 @@ services:
     volumes:
       - static_volume:/home/vsf/web/measurement_navigator/static
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./measurement_navigator/robots.txt:/home/vsf/web/measurement_navigator/robots.txt
     ports:
       - 1337:80
       - 5555:5555
