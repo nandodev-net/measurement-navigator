@@ -20,6 +20,7 @@ services:
       - postgres_data:/home/postgres/pgdata/data
     env_file:
       - ./.env.prod.db
+    shm_size: 1g
     hostname: postgres
   nginx:
     image: nginx:latest
