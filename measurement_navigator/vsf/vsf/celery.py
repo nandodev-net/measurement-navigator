@@ -71,22 +71,22 @@ app.conf.task_queues = (transient_queue, user_transient_queue, celery_queue)
 # --------- Celery Beat config: Set up periodic tasks --------- #
 app.conf.beat_schedule = {
     # fp update to search for new recent measurements in the fast path
-    'update-fastpath':{
-        'task': 'apps.api.fp_tables_api.tasks.fp_update',
-        'schedule':crontab(hour=3, minute=0),
-        'args':(None, None, False),
-        'options' : {'queue' : transient_queue_name}
-    },
+    # 'update-fastpath':{
+    #     'task': 'apps.api.fp_tables_api.tasks.fp_update',
+    #     'schedule':crontab(hour=3, minute=0),
+    #     'args':(None, None, False),
+    #     'options' : {'queue' : transient_queue_name}
+    # },
     # measurement_update to check for complete measurements to download
-    'update-measurements':{
-        'task':'apps.api.fp_tables_api.tasks.measurement_update',
-        'schedule':3600,
-        'args':(),
-        'options' : {'queue' : transient_queue_name}
-    },
+    # 'update-measurements':{
+    #     'task':'apps.api.fp_tables_api.tasks.measurement_update',
+    #     'schedule':3600,
+    #     'args':(),
+    #     'options' : {'queue' : transient_queue_name}
+    # },
     'download-measurements-s3':{
         'task':'apps.api.fp_tables_api.tasks.s3_ingest_task',
-        'schedule':3600 * 24,
+        'schedule':3600,
         'args':(),
         'options' : {'queue' : transient_queue_name}
     },
