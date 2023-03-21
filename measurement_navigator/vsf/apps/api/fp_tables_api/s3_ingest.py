@@ -182,7 +182,7 @@ class S3IngestManager:
                     os.rename(output_dir + file_name, incompatible_dir + file_name)
 
             else:
-                jsonl_file = self._decompress_file(output_dir, file_name)
+                jsonl_file = self._decompress_file(output_dir + file_name)
                 try:
                     self.process_jsonl_file(output_dir + jsonl_file, cache_min_date)
                 except Exception as e:
@@ -191,7 +191,7 @@ class S3IngestManager:
                     # os.rename(output_dir + jsonl_file, incompatible_dir + jsonl_file)
         print(c.green("[SUCCESS] Incompatible files collection finished"))
 
-    def _decompress_file(self, output_dir : str, gz_file : str):
+    def _decompress_file(self, gz_file : str):
         """Decompress a file
 
         Args:
@@ -201,7 +201,7 @@ class S3IngestManager:
         Returns:
             TODO: TODO
         """
-        full_route = output_dir + gz_file
+        full_route = gz_file
         with gzip.open(full_route,'r') as current_file:
             file_content = current_file.read()
             file = open(full_route[:-3], "w")
@@ -273,20 +273,12 @@ class S3IngestManager:
         # Searching previous files to add or store them
         self.collect_incompatible_files(output_dir, incompatible_dir, cache_min_date)
 
-
-        # Downloading S3 measurements
-
-        for test in test_types:
-            print(c.blue(f"Downloading measurements of type {test}"))
-            s3_measurements_download(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir)
-
         # Get all .gz names in the output directory in order to decompress them
-        # gz_list = os.listdir(output_dir)
         gz_list = (file for test in test_types for file in s3_measurements_download_iter(test, first_date=first_date, last_date=last_date, country=country, output_dir=output_dir))
         bulker = BulkCreateManager(chunk_size=10000)
         for (i, gzfile) in enumerate(gz_list):
             print(c.blue(f"processing json {i+1}"))
-            json_file = self._decompress_file(output_dir, gzfile)
+            json_file = self._decompress_file(gzfile)
 
             try:
                 # Create raw measurements
