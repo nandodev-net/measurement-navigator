@@ -298,7 +298,4 @@ class S3IngestManager:
         self.process_raw_measurements(first_date)
         ####### LOG JUST TO TAKE PROCESS TIME
         time_end = time.time()
-        f = open("./media/inform.txt", "a+")
         print('\n\nS3 ingest time: ', time_end-time_ini)
-        f.write(str(first_date)+' - '+str(last_date)+': '+ str(time_end-time_ini)+'\n')
-        f.close()
