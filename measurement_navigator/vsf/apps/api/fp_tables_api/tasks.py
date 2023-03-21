@@ -9,7 +9,8 @@ from celery             import shared_task
 # Python imports
 from datetime           import date, timedelta, datetime
 from typing import Optional
-
+import tempfile
+from pathlib import Path
 
 # Local imports
 from .utils             import request_fp_data, update_measurement_table
@@ -47,13 +48,11 @@ def fp_update(since :  Optional[str] = None, until : Optional[str] = None, only_
     # | yesterday | today | tomorrow 
     cache.set(name, ProcessState.RUNNING)
     if until is None:
-        until = datetime.now() + timedelta(days=1)
-        until = datetime.strftime(until, date_format)
+        until = datetime.strftime(datetime.now() + timedelta(days=1), date_format)
 
     if since is None:
         until_datetime = datetime.strptime(until, date_format)
-        since = until_datetime - timedelta(days=1)
-        since = datetime.strftime(since, date_format)
+        since = datetime.strftime(until_datetime - timedelta(days=1), date_format)
     
     try: 
         ret['output'] = request_fp_data(since, until, from_fastpath = only_fastpath)
@@ -121,10 +120,15 @@ def s3_ingest_task():
     until = date.today() + timedelta(days=1)
     since = until - timedelta(days=1)
 
+    # Set up intermediate files dir
+    tempdir = tempfile.gettempdir()
+    ooni_data_dir = str(Path(tempdir, "media", "ooni_data"))
+    incompatible_files_dir = str(Path(tempdir, "media", "incompatible_files"))
+
     # Try to ingest 
     try:
         s3_ingestor = S3IngestManager()
-        s3_ingestor.ingest(first_date=since, last_date=until)
+        s3_ingestor.ingest(first_date=since, last_date=until, output_dir= ooni_data_dir, incompatible_dir=incompatible_files_dir)
         result['output'] = None
         cache.set(name, ProcessState.IDLE)
     except Exception as e:
