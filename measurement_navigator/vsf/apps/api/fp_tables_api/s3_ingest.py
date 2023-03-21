@@ -284,7 +284,10 @@ class S3IngestManager:
                 # Create raw measurements
                 self.process_jsonl_file(json_file, cache_min_date, bulker=bulker)
                 # Process raw measurements
-                self.process_raw_measurements(first_date)
+                # self.process_raw_measurements(first_date)
+                # I commented the above line since I think it's issuing too many database hits, I think
+                # we should just keep the call to process_raw_measurements below
+
             except FileNotFoundError as e:
                 print(c.yellow(f"Warning: trying to move file {json_file} from '{output_dir}' to '{incompatible_dir}', but couldn't find it"))
             except Exception as e:
