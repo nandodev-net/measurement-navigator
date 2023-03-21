@@ -282,7 +282,7 @@ class S3IngestManager:
 
             try:
                 # Create raw measurements
-                self.process_jsonl_file(output_dir + json_file, cache_min_date, bulker=bulker)
+                self.process_jsonl_file(json_file, cache_min_date, bulker=bulker)
                 # Process raw measurements
                 self.process_raw_measurements(first_date)
             except FileNotFoundError as e:
