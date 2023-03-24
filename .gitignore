@@ -150,3 +150,4 @@ media/ooni_data/*
 vsf/settings/development.py
 vsf/settings/production.py
 vsf/settings/settings.py
+measurement_navigator/vsf/run_web_service.sh
