@@ -1,5 +1,10 @@
 #!/bin/bash
-# Use this file to start the production server
+# Use this file to start the production server.
+# Possible options:
+#   --dev: Create a development container, the user will be root and the code folder will be on synch with your host,
+#          this way you can iterate faster
+#   --build: rebuild the container instead of just starting it, it's way slower, but it's required in case you want to update changes 
+#            to the project.
 
 # Check if should rebuild entire docker 
 
@@ -14,6 +19,8 @@ fi
 if [[ $* == *--dev* ]] 
 then 
     DOCKERCOMPOSE_FILE=docker-compose.dev.yml
+    cp ./run_web_service.sh measurement_navigator/vsf
+    chmod +x measurement_navigator/vsf/run_web_service.sh
 else 
     DOCKERCOMPOSE_FILE=docker-compose.yml 
 fi
