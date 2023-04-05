@@ -408,7 +408,7 @@ def hard_flag(
                                             subms.id as id,\
                                             flagged,\
                                             ms.asn_id as probe_asn,\
-                                            raw_measurement_id\
+                                            time\
                                         FROM    \
                                             measurements_measurement ms JOIN  submeasurements_{label} subms ON ms.id=subms.measurement_id\
                                     ),\
@@ -420,7 +420,7 @@ def hard_flag(
                                         WHERE NOT flagged\
                                     ),\
                                     valid_subms as (\
-                                        SELECT id, probe_asn, domain_id, raw_measurement_id \
+                                        SELECT id, probe_asn, domain_id, time\
                                         FROM \
                                             measurements ms JOIN dom_to_update ON dom_to_update.domain = ms.domain_id AND ms.probe_asn=dom_to_update.asn\
                                     )\
@@ -432,10 +432,9 @@ def hard_flag(
                                     domain_id,\
                                     previous_counter,\
                                     valid_subms.probe_asn as probe_asn, \
-                                    rms.measurement_start_time as start_time\
+                                    valid_subms.time as start_time\
                                 FROM \
                                     submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id\
-                                                            JOIN measurements_rawmeasurement rms ON rms.id=raw_measurement_id\
                                 ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
 
         groups = filter(
