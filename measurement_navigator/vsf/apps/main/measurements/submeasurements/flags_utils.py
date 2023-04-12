@@ -2,14 +2,10 @@
 # directly. Instead, import utils.py so you can have a public api for this functions
 
 # Django imports:
-from concurrent.futures import process
-from optparse import Option
-from django.db.models.query import QuerySet
 from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
 from django.db          import connection
-from django.core.cache  import cache
-from django.db.models import Model, QuerySet
+from django.db.models import Model
 import sys
 
 # Third party imports:
@@ -17,6 +13,7 @@ from typing import List, Optional, Tuple, Type
 from datetime import datetime, timedelta
 import pytz
 import time
+import viztracer
 
 # Local imports
 from .models                                import DNS, TCP, HTTP, TOR, SubMeasurement
@@ -276,7 +273,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             3) closed hard flags are skiped from the logic: They are never merged to anything
     """
     print(c.blue("Running merge function"))
-
+    tracer = viztracer.VizTracer(output_file="merge_trace.json")
+    tracer.start()
     # If there's no measurements, we have nothing to do here
     if not measurements_with_flags: 
         print(c.green("[SUCCESS] no measurements to process, so merge process ended before started"))
@@ -339,8 +337,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
         if measurement.event != resulting_event:
             events_to_delete.delete(measurement.event)
             measurement.event = resulting_event
-            meas_to_update.append(measurement)
             measurement.flagged = True
+            meas_to_update.append(measurement)
     
     if resulting_event.end_date < max_date or resulting_event.start_date > min_date:
         resulting_event.end_date   = max(max_date, resulting_event.end_date)
@@ -360,12 +358,15 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     for t in SM_types:
         if isinstance(reference_measurement, t):
             SM_type = t
+            break
     
     if SM_type is None: raise TypeError(f"ERROR, THIS IS NOT A SUBMEASUREMENT {reference_measurement}")
     
     print(c.blue("Updating new event information to database..."))
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
     print(c.green("[SUCCESS] Successfully finished merge function"))
+    tracer.stop()
+    tracer.save()
 
     
 def hard_flag(
@@ -386,7 +387,6 @@ def hard_flag(
             event_continue_treshold : int = how many anomaly measurements are required to expand an existent event with new measurements
 
     """
-    
     submeasurements : List[Tuple[Type[Model], str]] = [(DNS,'dns'), (HTTP,'http'), (TCP,'tcp'), (TOR,'tor')]
     
     # For every submeasurement type...
@@ -401,41 +401,44 @@ def hard_flag(
         # not flagged.
         # (so we can avoid run the logic over elements not recently updated)
         print(c.blue(f"Requesting submeasurements of type: {label}"))
-        meas = SM.objects.raw(  f"WITH \
-                                    measurements as (\
-                                        SELECT  \
-                                            domain_id,\
-                                            subms.id as id,\
-                                            flagged,\
-                                            ms.asn_id as probe_asn,\
-                                            time\
-                                        FROM    \
-                                            measurements_measurement ms JOIN  submeasurements_{label} subms ON ms.id=subms.measurement_id\
-                                    ),\
-                                    dom_to_update as (\
-                                        SELECT DISTINCT \
-                                            ms.domain_id as domain,  \
-                                            ms.probe_asn as asn    \
-                                        FROM measurements ms \
-                                        WHERE NOT flagged\
-                                    ),\
-                                    valid_subms as (\
-                                        SELECT id, probe_asn, domain_id, time\
-                                        FROM \
-                                            measurements ms JOIN dom_to_update ON dom_to_update.domain = ms.domain_id AND ms.probe_asn=dom_to_update.asn\
-                                    )\
-                                SELECT \
-                                    submeasurements_{label}.id, \
-                                    submeasurements_{label}.flagged, \
-                                    submeasurements_{label}.measurement_id,  \
-                                    submeasurements_{label}.flag_type,\
-                                    domain_id,\
-                                    previous_counter,\
-                                    valid_subms.probe_asn as probe_asn, \
-                                    valid_subms.time as start_time\
-                                FROM \
-                                    submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id\
-                                ORDER BY domain_id, probe_asn, start_time asc, previous_counter;")
+        meas = SM.objects.raw(  f"""WITH
+                                    measurements as (
+                                        SELECT  
+                                            domain_id,
+                                            subms.id as id,
+                                            flagged,
+                                            ms.asn_id as probe_asn,
+                                            time
+                                        FROM    
+                                            measurements_measurement ms JOIN  submeasurements_{label} subms ON ms.id=subms.measurement_id
+                                    ),
+                                    dom_to_update as (
+                                        SELECT DISTINCT 
+                                            ms.domain_id as domain,  
+                                            ms.probe_asn as asn    
+                                        FROM measurements ms 
+                                        WHERE NOT flagged
+                                    ),
+                                    valid_subms as (
+                                        SELECT id, probe_asn, domain_id, time
+                                        FROM 
+                                            measurements ms JOIN dom_to_update ON dom_to_update.domain = ms.domain_id AND ms.probe_asn=dom_to_update.asn
+                                    )
+                                SELECT 
+                                    submeasurements_{label}.id, 
+                                    submeasurements_{label}.flagged, 
+                                    submeasurements_{label}.measurement_id,  
+                                    submeasurements_{label}.flag_type,
+                                    valid_subms.domain_id as domain_id,
+                                    previous_counter,
+                                    valid_subms.probe_asn as probe_asn, 
+                                    valid_subms.time as start_time,
+                                    events_event.id,
+                                    events_event.confirmed
+                                FROM 
+                                    submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id 
+                                    LEFT JOIN events_event ON submeasurements_{label}.event_id = events_event.id 
+                                ORDER BY domain_id, probe_asn, start_time asc, previous_counter;""")
 
         groups = filter(
                         lambda l:len(l) >= event_openning_treshold,
