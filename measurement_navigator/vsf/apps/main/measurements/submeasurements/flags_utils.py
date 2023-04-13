@@ -274,7 +274,6 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     """
     print(c.blue("Running merge function"))
     tracer = viztracer.VizTracer(output_file="merge_trace.json")
-    tracer.start()
     # If there's no measurements, we have nothing to do here
     if not measurements_with_flags: 
         print(c.green("[SUCCESS] no measurements to process, so merge process ended before started"))
@@ -289,6 +288,7 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     start_time = lambda m: m.start_time
 
     # Filter measurements by type
+    tracer.start()
     resulting_event : Optional[Event] = None
     for measurement in measurements_with_flags:
         if measurement.flag_type == soft:
@@ -298,6 +298,8 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             if resulting_event is None: resulting_event = measurement.event
         elif measurement.flag_type == muted:
             continue
+
+    tracer.stop()
 
     # merge all hard flags as one hard flag
     min_date : datetime = datetime.now(tz = pytz.utc) + timedelta(days=1)
@@ -365,7 +367,6 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     print(c.blue("Updating new event information to database..."))
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
     print(c.green("[SUCCESS] Successfully finished merge function"))
-    tracer.stop()
     tracer.save()
 
     
@@ -433,7 +434,7 @@ def hard_flag(
                                     previous_counter,
                                     valid_subms.probe_asn as probe_asn, 
                                     valid_subms.time as start_time,
-                                    events_event.id,
+                                    submeasurements_{label}.event_id,
                                     events_event.confirmed
                                 FROM 
                                     submeasurements_{label} JOIN valid_subms ON valid_subms.id = submeasurements_{label}.id 
