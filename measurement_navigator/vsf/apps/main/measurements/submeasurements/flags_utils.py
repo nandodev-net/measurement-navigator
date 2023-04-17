@@ -288,7 +288,6 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     start_time = lambda m: m.start_time
 
     # Filter measurements by type
-    tracer.start()
     resulting_event : Optional[Event] = None
     for measurement in measurements_with_flags:
         if measurement.flag_type == soft:
@@ -298,8 +297,6 @@ def merge(measurements_with_flags : List[SubMeasurement]):
             if resulting_event is None: resulting_event = measurement.event
         elif measurement.flag_type == muted:
             continue
-
-    tracer.stop()
 
     # merge all hard flags as one hard flag
     min_date : datetime = datetime.now(tz = pytz.utc) + timedelta(days=1)
@@ -365,9 +362,14 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     if SM_type is None: raise TypeError(f"ERROR, THIS IS NOT A SUBMEASUREMENT {reference_measurement}")
     
     print(c.blue("Updating new event information to database..."))
+    from django.db import connection
+    connection.force_debug_cursor = True
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
+    querys = connection.queries_log
+    for query in querys:
+        print(query['sql'])
+        
     print(c.green("[SUCCESS] Successfully finished merge function"))
-    tracer.save()
 
     
 def hard_flag(
