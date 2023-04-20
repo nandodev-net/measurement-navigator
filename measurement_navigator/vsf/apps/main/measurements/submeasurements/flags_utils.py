@@ -6,7 +6,7 @@ from apps.main.sites.models import Domain
 from apps.main.asns.models import ASN
 from django.db          import connection
 from django.db.models import Model
-import sys
+from django.db import transaction
 
 # Third party imports:
 from typing import List, Optional, Tuple, Type
@@ -365,13 +365,10 @@ def merge(measurements_with_flags : List[SubMeasurement]):
     from django.db import connection
     connection.force_debug_cursor = True
     SM_type.objects.bulk_update(meas_to_update, ['flag_type', 'event', 'flagged'])
-    querys = connection.queries_log
-    for query in querys:
-        print(query['sql'])
         
     print(c.green("[SUCCESS] Successfully finished merge function"))
 
-    
+@transaction.atomic()    
 def hard_flag(
             time_window : timedelta = timedelta(days=15.5), 
             event_openning_treshold : int = 7, #cantidad de mediciones para que, dentro del time, se cree evento
