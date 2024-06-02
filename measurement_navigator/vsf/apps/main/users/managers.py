@@ -1,20 +1,22 @@
 from django.contrib.auth.base_user import BaseUserManager
 from django.utils.translation import gettext as _
 
+
 class CustomUserManager(BaseUserManager):
     """
     Custom user model manager where email is the unique identifiers
     for authentication instead of usernames.
     """
+
     def create_user(self, username, email, password, **extra_fields):
         """
         Create and save a User with the given email and password.
         """
         if not username:
-            raise ValueError(_('The Username must be set'))
+            raise ValueError(_("The Username must be set"))
 
         if not email:
-            raise ValueError(_('The Email must be set'))
+            raise ValueError(_("The Email must be set"))
         email = self.normalize_email(email)
 
         user = self.model(email=email, username=username, **extra_fields)
@@ -26,24 +28,24 @@ class CustomUserManager(BaseUserManager):
         """
         Create and save a SuperUser with the given email and password.
         """
-        extra_fields.setdefault('is_admin', True)
-        extra_fields.setdefault('is_analist', True)
-        extra_fields.setdefault('is_editor', True)
-        extra_fields.setdefault('is_guest', True)
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault("is_admin", True)
+        extra_fields.setdefault("is_analist", True)
+        extra_fields.setdefault("is_editor", True)
+        extra_fields.setdefault("is_guest", True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+        extra_fields.setdefault("is_active", True)
 
-        if extra_fields.get('is_analist') is not True:
-            raise ValueError(_('Superuser must have is_analist=True.'))
-        if extra_fields.get('is_editor') is not True:
-            raise ValueError(_('Superuser must have is_editor=True.'))
-        if extra_fields.get('is_guest') is not True:
-            raise ValueError(_('Superuser must have is_guest=True.'))
-        if extra_fields.get('is_admin') is not True:
-            raise ValueError(_('Superuser must have is_admin=True.'))
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError(_('Superuser must have is_staff=True.'))
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError(_('Superuser must have is_superuser=True.'))
-        return self.create_user(username, email, password, **extra_fields)    
+        if extra_fields.get("is_analist") is not True:
+            raise ValueError(_("Superuser must have is_analist=True."))
+        if extra_fields.get("is_editor") is not True:
+            raise ValueError(_("Superuser must have is_editor=True."))
+        if extra_fields.get("is_guest") is not True:
+            raise ValueError(_("Superuser must have is_guest=True."))
+        if extra_fields.get("is_admin") is not True:
+            raise ValueError(_("Superuser must have is_admin=True."))
+        if extra_fields.get("is_staff") is not True:
+            raise ValueError(_("Superuser must have is_staff=True."))
+        if extra_fields.get("is_superuser") is not True:
+            raise ValueError(_("Superuser must have is_superuser=True."))
+        return self.create_user(username, email, password, **extra_fields)

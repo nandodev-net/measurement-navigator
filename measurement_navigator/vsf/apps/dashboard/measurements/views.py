@@ -1,127 +1,139 @@
-#Django imports
-from django.http                    import JsonResponse
-from django.core                    import serializers
-from django.views.generic           import TemplateView, DetailView, View
-import viztracer
-
-#Third party imports
-from django_datatables_view.base_datatable_view import BaseDatatableView
-
-# Python imports
-from typing                                     import List
-from datetime                                   import datetime, timedelta
+# Django imports
 import json
-
-#Local imports
-from vsf.views                                  import VSFLoginRequiredMixin
-from apps.main.measurements.utils               import search_measurement_by_queryset, _filter_by_flag_no_ok
-from apps.main.sites.models                     import Site
-from apps.main.asns                             import models as AsnModels
-from apps.main.measurements                     import models as MeasModels
-from apps.main.measurements.submeasurements     import models as SubMModels
-from apps.dashboard.measurements.utils          import VSFCachedDatatableView
-from ..utils import *
 import logging
+from datetime import datetime, timedelta
+# Python imports
+from typing import List
+
+from django.core import serializers
+from django.http import JsonResponse
+from django.views.generic import DetailView, TemplateView, View
+
+from apps.dashboard.measurements.utils import VSFCachedDatatableView
+from apps.main.asns import models as AsnModels
+from apps.main.measurements import models as MeasModels
+from apps.main.measurements.submeasurements import models as SubMModels
+from apps.main.measurements.utils import (_filter_by_flag_no_ok,
+                                          search_measurement_by_queryset)
+from apps.main.sites.models import Site
+# Local imports
+from vsf.views import VSFLoginRequiredMixin
+
+from ..utils import *
+
+# Third party imports
+
+
+
 
 logger = logging.getLogger(__name__)
 
 # --- MEASUREMENTS VIEWS --- #
 
+
 class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
     """
-        This is the template that just renders the dynamic table listing
-        measurements. All the interaction logic is in the DataBack view.
+    This is the template that just renders the dynamic table listing
+    measurements. All the interaction logic is in the DataBack view.
 
-        This view can receive some special input to pre-fill some input search
-        fields.
-            Possible inputs:
-                - input: Measurement input
-                - since: Measurement start time lower bound
-                - until: Measurement start time upper bound
-                - site: site id for every measurement
-                - anomaly: true, false, or an empty string
-                - test_name: name of the test for all measurements
+    This view can receive some special input to pre-fill some input search
+    fields.
+        Possible inputs:
+            - input: Measurement input
+            - since: Measurement start time lower bound
+            - until: Measurement start time upper bound
+            - site: site id for every measurement
+            - anomaly: true, false, or an empty string
+            - test_name: name of the test for all measurements
     """
 
-    template_name = 'measurements/list-measurements.html'
+    template_name = "measurements/list-measurements.html"
 
     def get_context_data(self, **kwargs):
         """
-            Return in the context:
-                + test_types: The list of available test types, each described by dict with 
-                the following format:
-                    - name : str = human readable name
-                    - value : str = actual name in the database
-                + sites: Site objects describing a site by id, name and description
-                + asns: List of ASN Objects
-                + prefill: additional searching values to pre-fill the search parameters:
-                    - input
-                    - since
-                    - until
-                    - site
-                    - anomaly
-                    - asn
-                    - test_name
+        Return in the context:
+            + test_types: The list of available test types, each described by dict with
+            the following format:
+                - name : str = human readable name
+                - value : str = actual name in the database
+            + sites: Site objects describing a site by id, name and description
+            + asns: List of ASN Objects
+            + prefill: additional searching values to pre-fill the search parameters:
+                - input
+                - since
+                - until
+                - site
+                - anomaly
+                - asn
+                - test_name
         """
         # Note that the 'choices' member in a textchoice returns a
         # list of pairs [(s1, s2)] where s2 is the human readable (label) of the choice
         # and s1 is the value itself of the choice
         test_types = MeasModels.RawMeasurement.TestTypes.choices
-        test_types = list(map(lambda m: {'name':m[1], 'value':m[0]}, test_types))
+        test_types = list(map(lambda m: {"name": m[1], "value": m[0]}, test_types))
 
         # Now the available sites:
-        sites = Site.objects.all().values('name', 'description_spa', 'description_eng', 'id')
+        sites = Site.objects.all().values(
+            "name", "description_spa", "description_eng", "id"
+        )
 
         # Get the pre-fill search fields and filter results:
         get = self.request.GET or {}
         prefill = {}
 
-        measurements = MeasModels.Measurement.objects.all()\
-                                                .select_related('raw_measurement')\
-                                                .select_related('domain')\
-                                                .select_related('domain__site')
-        
+        measurements = (
+            MeasModels.Measurement.objects.all()
+            .select_related("raw_measurement")
+            .select_related("domain")
+            .select_related("domain__site")
+        )
+
         inpt = get.get("input")
 
         if inpt:
-            prefill['input'] = inpt
+            prefill["input"] = inpt
             measurements = measurements.filter(raw_measurement__input__contains=inpt)
 
-        since = get.get("since") or (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d')
-        prefill['since'] = since 
-        
-        #measurements = measurements.filter(raw_measurement__measurement_start_time__gte=since)
+        since = get.get("since") or (datetime.now() - timedelta(days=10)).strftime(
+            "%Y-%m-%d"
+        )
+        prefill["since"] = since
+
+        # measurements = measurements.filter(raw_measurement__measurement_start_time__gte=since)
 
         until = get.get("until")
         if until:
-            prefill['until'] = until
-            measurements = measurements.filter(raw_measurement__measurement_start_time__lte=until)
-        
+            prefill["until"] = until
+            measurements = measurements.filter(
+                raw_measurement__measurement_start_time__lte=until
+            )
+
         site = get.get("site")
         if site:
-            prefill['site'] = site
+            prefill["site"] = site
             measurements = measurements.filter(domain__site=site)
 
         anomaly = get.get("anomaly")
         if anomaly:
-            prefill['anomaly'] = anomaly
+            prefill["anomaly"] = anomaly
             measurements = measurements.filter(anomaly=True)
 
         asn = get.get("asn")
         if asn:
-            prefill['asn'] = asn
+            prefill["asn"] = asn
             measurements = measurements.filter(raw_measurement__probe_asn=asn)
 
-        test_name = get.get('test_name')
+        test_name = get.get("test_name")
         if test_name:
-            prefill['test_name'] = test_name
+            prefill["test_name"] = test_name
             measurements = measurements.filter(raw_measurement__test_name=test_name)
-        
-        flags_list = [ 'DNS', 'HTTP', 'TCP' ]
+
+        flags_list = ["DNS", "HTTP", "TCP"]
         if get != {}:
-            flags = get.getlist('flags[]')
+            flags = get.getlist("flags[]")
             if flags:
-                prefill['flags'] = flags
+                prefill["flags"] = flags
                 measurements = _filter_by_flag_no_ok(measurements, flags)
 
         measurements.only(
@@ -133,7 +145,7 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
             "anomaly",
             "site",
             "site__name",
-            "flags"
+            "flags",
         )
 
         # Get most recent measurement:
@@ -143,7 +155,6 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         #                         .order_by("-raw_measurement__measurement_start_time")\
         #                         .values("raw_measurement__measurement_start_time")\
         #                         .first()
-                                
 
         #   If there is no measurements, result is going to be none, cover that case.
         # if last_measurement_date is None:
@@ -151,257 +162,295 @@ class ListMeasurementsTemplate(VSFLoginRequiredMixin, TemplateView):
         # else:
         #     last_measurement_date = utc_aware_date(last_measurement_date["raw_measurement__measurement_start_time"], self.request.session['system_tz'])
         #     last_measurement_date = datetime.strftime(last_measurement_date, "%Y-%m-%d %H:%M:%S")
-            
-        
+
         context = super().get_context_data()
-        context['test_types'] = test_types
-        context['sites'] = sites
-        context['prefill'] = prefill
-        context['flags'] = flags_list
-        context['asns'] = AsnModels.ASN.objects.all()
+        context["test_types"] = test_types
+        context["sites"] = sites
+        context["prefill"] = prefill
+        context["flags"] = flags_list
+        context["asns"] = AsnModels.ASN.objects.all()
         # context['last_measurement_date'] = last_measurement_date
         return context
 
+
 class MeasurementDetails(VSFLoginRequiredMixin, TemplateView):
     """
-        Given the uuid "id" for some measurement through a GET request, 
-        return a page with the following data passed within context:
+    Given the uuid "id" for some measurement through a GET request,
+    return a page with the following data passed within context:
 
-            + measurement: The simple measurement object itself
-            + submeasurements: A dict object with the following fields:
-                - dns  : A list (possibly empty) with dns submeasurements
-                - tcp  : A list (possibly empty) with tcp submeasurements
-                - http : A list (possibly empty) with http submeasurements
-            + test_keys_string : test_keys json object but as string instead of object
-            + error : a string specifying an error type
-                - id_not_provided  : unable to find an 'id' atribute in the get request
-                - not_found        : there's no measurement with the provided id
-                - null             : Everything ok
-        
+        + measurement: The simple measurement object itself
+        + submeasurements: A dict object with the following fields:
+            - dns  : A list (possibly empty) with dns submeasurements
+            - tcp  : A list (possibly empty) with tcp submeasurements
+            - http : A list (possibly empty) with http submeasurements
+        + test_keys_string : test_keys json object but as string instead of object
+        + error : a string specifying an error type
+            - id_not_provided  : unable to find an 'id' atribute in the get request
+            - not_found        : there's no measurement with the provided id
+            - null             : Everything ok
+
     """
+
     template_name = "measurements/detailed-info-url.html"
 
     def get_context_data(self, **kwargs):
-
 
         # Get the context so far
         context = super().get_context_data()
 
         # Get the measurement
         # id = kwargs.get('id')
-        id = self.request.GET.get('id')
+        id = self.request.GET.get("id")
         # Raise 404 if id is not provided
         if id is None:
-            context['error'] = 'id_not_provided'
+            context["error"] = "id_not_provided"
             return context
 
         try:
             measurement = MeasModels.Measurement.objects.get(id=id)
         except:
-            context['error'] = 'not_found'
+            context["error"] = "not_found"
             return context
 
         # List the models, so it is easy to change when adding new submeasurement models
-        models : List[(SubMModels.SubMeasurement, str)] = [ (SubMModels.DNS, 'dns'),
-                                                            (SubMModels.TCP, 'tcp'),
-                                                            (SubMModels.HTTP, 'http')
-                                                        ]
+        models: List[(SubMModels.SubMeasurement, str)] = [
+            (SubMModels.DNS, "dns"),
+            (SubMModels.TCP, "tcp"),
+            (SubMModels.HTTP, "http"),
+        ]
 
         # Ask every submeasurement related to this measurement for each type
-        context['submeasurements'] = {}
-        for (Model, label) in models:
-            context['submeasurements'][label] = Model.objects.filter(measurement=measurement)
+        context["submeasurements"] = {}
+        for Model, label in models:
+            context["submeasurements"][label] = Model.objects.filter(
+                measurement=measurement
+            )
 
-        #Test-keys in json string format
-        context['test_keys_string'] = json.dumps(measurement.raw_measurement.test_keys)
+        # Test-keys in json string format
+        context["test_keys_string"] = json.dumps(measurement.raw_measurement.test_keys)
 
         # Return the context
-        context['measurement'] = measurement
-        context['error'] = None
+        context["measurement"] = measurement
+        context["error"] = None
         return context
 
+
 class MeasurementDetailView(VSFLoginRequiredMixin, DetailView):
-    template_name = 'extends/measurement-detail.html'
-    slug_field = 'pk'
+    template_name = "extends/measurement-detail.html"
+    slug_field = "pk"
     model = MeasModels.Measurement
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        measurement = context['measurement']
+
+        measurement = context["measurement"]
 
         events = []
-        for subm in measurement.dns_list.all(): 
-            if subm.event: events.append(subm.event) 
-        for subm in measurement.http_list.all(): 
-            if subm.event: events.append(subm.event) 
-        for subm in measurement.tcp_list.all(): 
-            if subm.event: events.append(subm.event) 
+        for subm in measurement.dns_list.all():
+            if subm.event:
+                events.append(subm.event)
+        for subm in measurement.http_list.all():
+            if subm.event:
+                events.append(subm.event)
+        for subm in measurement.tcp_list.all():
+            if subm.event:
+                events.append(subm.event)
 
         flagsDNS = [subm.flag_type for subm in measurement.dns_list.all()]
         flagsHTTP = [subm.flag_type for subm in measurement.http_list.all()]
         flagsTCP = [subm.flag_type for subm in measurement.tcp_list.all()]
 
-
-        http_body = ''
+        http_body = ""
         try:
             req_data = {
-                'report_id': str(measurement.raw_measurement.report_id),
-                'input': str(measurement.raw_measurement.input),
-                'full': True
+                "report_id": str(measurement.raw_measurement.report_id),
+                "input": str(measurement.raw_measurement.input),
+                "full": True,
             }
 
-            ooni_body_url = 'https://api.ooni.io/api/v1/measurement_meta'
+            ooni_body_url = "https://api.ooni.io/api/v1/measurement_meta"
 
             import requests
-            req = requests.get(ooni_body_url, params = req_data)
+
+            req = requests.get(ooni_body_url, params=req_data)
             data = req.json()
-            raw_measurement = json.loads(data['raw_measurement'])
-            test_keys = raw_measurement['test_keys']['requests']
-            http_body = test_keys[0]['response']['body']
+            raw_measurement = json.loads(data["raw_measurement"])
+            test_keys = raw_measurement["test_keys"]["requests"]
+            http_body = test_keys[0]["response"]["body"]
         except:
             pass
 
-        context['http_body'] = http_body
+        context["http_body"] = http_body
 
-        context['rawmeasurement'] = measurement.raw_measurement
-        context['rawmeasurement'].test_keys = measurement.raw_measurement.test_keys
-        context['rawmeasurement'].test_helpers = json.dumps(measurement.raw_measurement.test_helpers)
-        context['rawmeasurement'].flags = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
-        context['events'] = events 
-        context['rawmeasurement'].platform = measurement.raw_measurement.annotations['platform'] 
-        context['rawmeasurement'].engine = measurement.raw_measurement.annotations['engine_name'] + ' (' + measurement.raw_measurement.annotations['engine_version'] + ')'
-        
+        context["rawmeasurement"] = measurement.raw_measurement
+        context["rawmeasurement"].test_keys = measurement.raw_measurement.test_keys
+        context["rawmeasurement"].test_helpers = json.dumps(
+            measurement.raw_measurement.test_helpers
+        )
+        context["rawmeasurement"].flags = {
+            "dns": flagsDNS,
+            "http": flagsHTTP,
+            "tcp": flagsTCP,
+        }
+        context["events"] = events
+        context["rawmeasurement"].platform = measurement.raw_measurement.annotations[
+            "platform"
+        ]
+        context["rawmeasurement"].engine = (
+            measurement.raw_measurement.annotations["engine_name"]
+            + " ("
+            + measurement.raw_measurement.annotations["engine_version"]
+            + ")"
+        )
 
-        if measurement.raw_measurement.test_name == 'web_connectivity':
-            if measurement.raw_measurement.test_keys['tcp_connect']:
-                context['rawmeasurement'].hasTcpConnections = len(measurement.raw_measurement.test_keys['tcp_connect']) > 0
+        if measurement.raw_measurement.test_name == "web_connectivity":
+            if measurement.raw_measurement.test_keys["tcp_connect"]:
+                context["rawmeasurement"].hasTcpConnections = (
+                    len(measurement.raw_measurement.test_keys["tcp_connect"]) > 0
+                )
                 tcp_connections = []
-                for connection in measurement.raw_measurement.test_keys['tcp_connect']:
+                for connection in measurement.raw_measurement.test_keys["tcp_connect"]:
                     aux = {
-                        'ip': connection['ip'],
-                        'status': connection['status'],
-
+                        "ip": connection["ip"],
+                        "status": connection["status"],
                     }
-                    
-                    for key, value in measurement.raw_measurement.test_keys['control']['tcp_connect'].items():
-                        if connection['ip'] in key.lower():
-                            aux['control_status'] = value['status']
-                            aux['control_failure'] = value['failure']
+
+                    for key, value in measurement.raw_measurement.test_keys["control"][
+                        "tcp_connect"
+                    ].items():
+                        if connection["ip"] in key.lower():
+                            aux["control_status"] = value["status"]
+                            aux["control_failure"] = value["failure"]
 
                     tcp_connections.append(aux)
-                context['rawmeasurement'].tcp_connections = tcp_connections
+                context["rawmeasurement"].tcp_connections = tcp_connections
 
-            if measurement.raw_measurement.test_keys['requests']:
-                context['rawmeasurement'].hasHttpRequests = len(measurement.raw_measurement.test_keys['requests']) > 0            
+            if measurement.raw_measurement.test_keys["requests"]:
+                context["rawmeasurement"].hasHttpRequests = (
+                    len(measurement.raw_measurement.test_keys["requests"]) > 0
+                )
 
-            
-            context['beautify_test_name'] = 'Web Connectivity'
+            context["beautify_test_name"] = "Web Connectivity"
 
- 
-
-
-            flagsDNS  = [subm.flag_type for subm in measurement.dns_list.all()]
+            flagsDNS = [subm.flag_type for subm in measurement.dns_list.all()]
             flagsHTTP = [subm.flag_type for subm in measurement.http_list.all()]
-            flagsTCP  = [subm.flag_type for subm in measurement.tcp_list.all()]
-            context['flags'] = {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
-            
-        elif measurement.raw_measurement.test_name == 'tor':
-            keys = [] 
-            for key, value in measurement.raw_measurement.test_keys['targets'].items():
-                keys.append({
-                    'name': value['target_name'] if 'target_name' in value else key,
-                    'address': value['target_address'],
-                    'type': value['target_protocol'],
-                    'connect': value['summary']['connect']['failure'],
-                    'handshake': value['tls_handshakes']
+            flagsTCP = [subm.flag_type for subm in measurement.tcp_list.all()]
+            context["flags"] = {"dns": flagsDNS, "http": flagsHTTP, "tcp": flagsTCP}
 
-                })
-                context['beautify_test_name'] = 'TOR'
+        elif measurement.raw_measurement.test_name == "tor":
+            keys = []
+            for key, value in measurement.raw_measurement.test_keys["targets"].items():
+                keys.append(
+                    {
+                        "name": value["target_name"] if "target_name" in value else key,
+                        "address": value["target_address"],
+                        "type": value["target_protocol"],
+                        "connect": value["summary"]["connect"]["failure"],
+                        "handshake": value["tls_handshakes"],
+                    }
+                )
+                context["beautify_test_name"] = "TOR"
 
-            context['keys'] = keys
-            context['obfs4'] = str(measurement.raw_measurement.test_keys['obfs4_accessible']) + '/' + str(measurement.raw_measurement.test_keys['obfs4_total'])
-            context['dir'] = str(measurement.raw_measurement.test_keys['dir_port_accessible']) + '/' + str(measurement.raw_measurement.test_keys['dir_port_total'])
+            context["keys"] = keys
+            context["obfs4"] = (
+                str(measurement.raw_measurement.test_keys["obfs4_accessible"])
+                + "/"
+                + str(measurement.raw_measurement.test_keys["obfs4_total"])
+            )
+            context["dir"] = (
+                str(measurement.raw_measurement.test_keys["dir_port_accessible"])
+                + "/"
+                + str(measurement.raw_measurement.test_keys["dir_port_total"])
+            )
         else:
-            context['beautify_test_name'] = measurement.raw_measurement.test_name.capitalize()
+            context["beautify_test_name"] = (
+                measurement.raw_measurement.test_name.capitalize()
+            )
 
-
-        
-        context['rawmeasurement'].annotations = json.dumps(measurement.raw_measurement.annotations)
-        context['rawmeasurement'].urlFlag = '/static/img/flags/' + measurement.raw_measurement.probe_cc.lower() + '.svg'
-        context['rawmeasurement'].rawjson = serializers.serialize('json', [measurement.raw_measurement])
+        context["rawmeasurement"].annotations = json.dumps(
+            measurement.raw_measurement.annotations
+        )
+        context["rawmeasurement"].urlFlag = (
+            "/static/img/flags/" + measurement.raw_measurement.probe_cc.lower() + ".svg"
+        )
+        context["rawmeasurement"].rawjson = serializers.serialize(
+            "json", [measurement.raw_measurement]
+        )
 
         return context
 
+
 class ListMeasurementsBackEnd(VSFCachedDatatableView):
     """
-        This is the backend view for the ListMeasurementsDataTable view, who
-        just renders the template
-        This View requires datatables to send server-side
-        paginated data to the front, and it's highly coupled
-        with its corresponding template.
+    This is the backend view for the ListMeasurementsDataTable view, who
+    just renders the template
+    This View requires datatables to send server-side
+    paginated data to the front, and it's highly coupled
+    with its corresponding template.
     """
+
     columns = [
-            'raw_measurement__input',
-            'raw_measurement__test_name',
-            'raw_measurement__measurement_start_time',
-            'raw_measurement__probe_asn',
-            'raw_measurement__probe_cc',
-            'domain__site__name',
-            'anomaly',
-        ]
+        "raw_measurement__input",
+        "raw_measurement__test_name",
+        "raw_measurement__measurement_start_time",
+        "raw_measurement__probe_asn",
+        "raw_measurement__probe_cc",
+        "domain__site__name",
+        "anomaly",
+    ]
 
     order_columns = [
-            'raw_measurement__input',
-            'raw_measurement__test_name',
-            'raw_measurement__measurement_start_time',
-            'raw_measurement__probe_asn',
-            'raw_measurement__probe_cc',
-            'domain__site__name',
-            'anomaly',
-        ]
+        "raw_measurement__input",
+        "raw_measurement__test_name",
+        "raw_measurement__measurement_start_time",
+        "raw_measurement__probe_asn",
+        "raw_measurement__probe_cc",
+        "domain__site__name",
+        "anomaly",
+    ]
 
     def get_initial_queryset(self):
-        return MeasModels.Measurement.objects.all()\
-                                        .select_related('raw_measurement')\
-                                        .select_related('domain')\
-                                        .select_related('domain__site')\
+        return (
+            MeasModels.Measurement.objects.all()
+            .select_related("raw_measurement")
+            .select_related("domain")
+            .select_related("domain__site")
+        )
 
     def filter_queryset(self, qs):
         # Get request params
         get = self.request.GET or {}
 
         # Parse the input data
-        event_id    = get.get('event_id')
-        issue_type  = get.get('issue_type')
-        input       = get.get('input')
-        test_name   = get.get('test_name')
-        since       = get.get('since')
-        ASN         = get.get('asn')
-        country     = get.get('country')
-        anomaly     = get.get('anomaly')
-        until       = get.get('until')
-        site        = get.get('site')
-        flags        = get.getlist('flags[]') if get != {} else []
-        
-        
+        event_id = get.get("event_id")
+        issue_type = get.get("issue_type")
+        input = get.get("input")
+        test_name = get.get("test_name")
+        since = get.get("since")
+        ASN = get.get("asn")
+        country = get.get("country")
+        anomaly = get.get("anomaly")
+        until = get.get("until")
+        site = get.get("site")
+        flags = get.getlist("flags[]") if get != {} else []
+
         if event_id:
-            subms = ['dns', 'tcp', 'http']
+            subms = ["dns", "tcp", "http"]
             measurements = []
 
             for subm in subms:
-                ms = qs.raw(   
+                ms = qs.raw(
                     f"SELECT DISTINCT measurements_measurement.* \
                     FROM measurements_measurement   JOIN submeasurements_{subm} subm ON subm.measurement_id=measurements_measurement.id \
                                                     JOIN measurements_rawmeasurement rms ON rms.id = measurements_measurement.raw_measurement_id\
-                    WHERE subm.event_id=%s", 
-                    [event_id])
+                    WHERE subm.event_id=%s",
+                    [event_id],
+                )
 
                 measurements += list(ms)
             # This solution is awful
             meas_id = [meas.id for meas in measurements]
-            qs = qs.filter(id__in = meas_id)
-        
+            qs = qs.filter(id__in=meas_id)
 
         # Get desired measurements
         measurements = search_measurement_by_queryset(
@@ -413,8 +462,8 @@ class ListMeasurementsBackEnd(VSFCachedDatatableView):
             country=country,
             until=until,
             site=site,
-            anomaly= anomaly.lower() == "true" if anomaly else None,
-            flags=flags
+            anomaly=anomaly.lower() == "true" if anomaly else None,
+            flags=flags,
         )
 
         return measurements
@@ -426,77 +475,98 @@ class ListMeasurementsBackEnd(VSFCachedDatatableView):
         ok_flag = SubMModels.SubMeasurement.FlagType.OK
 
         qs = qs.only(
-                'raw_measurement__measurement_start_time',
-                "raw_measurement__probe_cc",
-                "raw_measurement__probe_asn",
-                "raw_measurement__input",
-                "raw_measurement__test_name",
-                "id",
-                "domain",
-                "domain__site__name"
-            )
+            "raw_measurement__measurement_start_time",
+            "raw_measurement__probe_cc",
+            "raw_measurement__probe_asn",
+            "raw_measurement__input",
+            "raw_measurement__test_name",
+            "id",
+            "domain",
+            "domain__site__name",
+        )
 
         for item in qs:
-            flagsDNS  = any(subm.flag_type != ok_flag for subm in item.dns_list.all())
+            flagsDNS = any(subm.flag_type != ok_flag for subm in item.dns_list.all())
             flagsHTTP = any(subm.flag_type != ok_flag for subm in item.http_list.all())
-            flagsTCP  = any(subm.flag_type != ok_flag for subm in item.tcp_list.all())
+            flagsTCP = any(subm.flag_type != ok_flag for subm in item.tcp_list.all())
 
-            json_data.append({
-                'raw_measurement__measurement_start_time':datetime.strftime(utc_aware_date(item.raw_measurement.measurement_start_time, self.request.session['system_tz']), "%Y-%m-%d %H:%M:%S"),
-                'raw_measurement__probe_cc':item.raw_measurement.probe_cc,
-                'raw_measurement__probe_asn':item.raw_measurement.probe_asn,
-                'raw_measurement__input':item.raw_measurement.input,
-                'raw_measurement__test_name':item.raw_measurement.test_name,
-                'id' : item.id,
-                'site' : item.domain.site.id if item.domain and item.domain.site else -1,
-                'site_name' : item.domain.site.name if item.domain and item.domain.site else "(no site)",
-                'anomaly' : item.anomaly,
-                'flags' : {'dns': flagsDNS, 'http': flagsHTTP, 'tcp': flagsTCP}
-            })
+            json_data.append(
+                {
+                    "raw_measurement__measurement_start_time": datetime.strftime(
+                        utc_aware_date(
+                            item.raw_measurement.measurement_start_time,
+                            self.request.session["system_tz"],
+                        ),
+                        "%Y-%m-%d %H:%M:%S",
+                    ),
+                    "raw_measurement__probe_cc": item.raw_measurement.probe_cc,
+                    "raw_measurement__probe_asn": item.raw_measurement.probe_asn,
+                    "raw_measurement__input": item.raw_measurement.input,
+                    "raw_measurement__test_name": item.raw_measurement.test_name,
+                    "id": item.id,
+                    "site": (
+                        item.domain.site.id if item.domain and item.domain.site else -1
+                    ),
+                    "site_name": (
+                        item.domain.site.name
+                        if item.domain and item.domain.site
+                        else "(no site)"
+                    ),
+                    "anomaly": item.anomaly,
+                    "flags": {"dns": flagsDNS, "http": flagsHTTP, "tcp": flagsTCP},
+                }
+            )
 
         return json_data
 
-class MeasurementCounter(VSFLoginRequiredMixin, View): 
+
+class MeasurementCounter(VSFLoginRequiredMixin, View):
 
     def get(self, request, **kwargs):
         get = self.request.GET or {}
-        
+
         measurements = MeasModels.Measurement.objects.all()
 
-        #--------------- Starting Filter -----------------#
+        # --------------- Starting Filter -----------------#
 
         # -- Input Filter
         input = get.get("input")
         if input:
             measurements = measurements.filter(raw_measurement__input__contains=input)
         # -- Start Date Filter
-        since = get.get("since") or (datetime.now() - timedelta(days=10)).strftime('%Y-%m-%d')        
+        since = get.get("since") or (datetime.now() - timedelta(days=10)).strftime(
+            "%Y-%m-%d"
+        )
         # measurements = measurements.filter(raw_measurement__measurement_start_time__gte=since)
         # -- End Date Filter
         until = get.get("until")
         if until:
-            measurements = measurements.filter(raw_measurement__measurement_start_time__lte=until)
+            measurements = measurements.filter(
+                raw_measurement__measurement_start_time__lte=until
+            )
         # -- Site Filter
         site = get.get("site")
-        if site: measurements = measurements.filter(domain__site=site)
+        if site:
+            measurements = measurements.filter(domain__site=site)
         # -- Anomaly Filter
         anomaly = get.get("anomaly")
-        if anomaly: measurements = measurements.filter(anomaly=True)
+        if anomaly:
+            measurements = measurements.filter(anomaly=True)
         # -- ASN Filter
         asn = get.get("asn")
-        if asn: measurements = measurements.filter(raw_measurement__probe_asn=asn)
-        
+        if asn:
+            measurements = measurements.filter(raw_measurement__probe_asn=asn)
+
         # -- Measurement Type Filter
         measurement_type = get.get("measurement_type")
-        if measurement_type == 'dns':
-            measurements = SubMModels.DNS.objects.filter(measurement__in = measurements)
-        elif measurement_type == 'http':
-           measurements = SubMModels.HTTP.objects.filter(measurement__in = measurements)
-        elif measurement_type == 'tcp':        
-            measurements = SubMModels.TCP.objects.filter(measurement__in = measurements)
-        elif measurement_type == 'tor':        
-            measurements = SubMModels.TOR.objects.filter(measurement__in = measurements)
-
+        if measurement_type == "dns":
+            measurements = SubMModels.DNS.objects.filter(measurement__in=measurements)
+        elif measurement_type == "http":
+            measurements = SubMModels.HTTP.objects.filter(measurement__in=measurements)
+        elif measurement_type == "tcp":
+            measurements = SubMModels.TCP.objects.filter(measurement__in=measurements)
+        elif measurement_type == "tor":
+            measurements = SubMModels.TOR.objects.filter(measurement__in=measurements)
 
         today = datetime.now()
         delta = today - datetime.strptime(since, "%Y-%m-%d")
@@ -512,7 +582,7 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
         for index in range(1, delta.days + 1):
             aux = datetime.strptime(since, "%Y-%m-%d") + timedelta(days=index)
             dates_array.append(aux.strftime("%Y-%m-%d"))
-            x = measurements.filter(time__date = aux.strftime("%Y-%m-%d"))
+            x = measurements.filter(time__date=aux.strftime("%Y-%m-%d"))
 
             ok = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.OK).count()
             ok_qtty.append(ok)
@@ -527,14 +597,19 @@ class MeasurementCounter(VSFLoginRequiredMixin, View):
             muted = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.MUTED).count()
             muted_qtty.append(muted)
 
-            manual = x.filter(flag_type=SubMModels.SubMeasurement.FlagType.MANUAL).count()
+            manual = x.filter(
+                flag_type=SubMModels.SubMeasurement.FlagType.MANUAL
+            ).count()
             manual_qtty.append(manual)
 
-        return JsonResponse({
-            'dates': dates_array,
-            'ok': ok_qtty,
-            'soft': soft_qtty,
-            'hard': hard_qtty,
-            'muted': muted_qtty,
-            'manual': manual_qtty,
-        }, safe=False)
+        return JsonResponse(
+            {
+                "dates": dates_array,
+                "ok": ok_qtty,
+                "soft": soft_qtty,
+                "hard": hard_qtty,
+                "muted": muted_qtty,
+                "manual": manual_qtty,
+            },
+            safe=False,
+        )

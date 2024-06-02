@@ -1,36 +1,35 @@
 from distutils.command.config import config
-from django.db import models
-from model_utils.models import TimeStampedModel
 
 from django.core.exceptions import ValidationError
+from django.db import models
+from model_utils.models import TimeStampedModel
 
 
 class Config(TimeStampedModel):
 
     hardflag_timewindow = models.FloatField(
         default=15.5,
-        verbose_name = 'Hard Flag Time Window',
+        verbose_name="Hard Flag Time Window",
     )
 
     hardflag_openning_treshold = models.IntegerField(
         default=7,
-        verbose_name = 'HardFlag Minimum Measurements',
+        verbose_name="HardFlag Minimum Measurements",
     )
 
     hardflag_continue_treshold = models.IntegerField(
         default=5,
-        verbose_name = 'HardFlag Minimum Measurements',
+        verbose_name="HardFlag Minimum Measurements",
     )
 
     hardflag_interval_size = models.IntegerField(
         default=10,
-        verbose_name = "How many measurements to check in each iteration of the algorithm"
+        verbose_name="How many measurements to check in each iteration of the algorithm",
     )
 
     @classmethod
     def get(cls):
-        """Get a model instance. Create one if no instance exists.
-        """
+        """Get a model instance. Create one if no instance exists."""
         try:
             return cls.objects.get()
         except cls.DoesNotExist:
@@ -45,6 +44,10 @@ class Config(TimeStampedModel):
         super(Config, self).save(*args, **kwargs)
 
     def clean(self):
-            num_configs = Config.objects.all().count()
-            if num_configs > 1:
-                raise ValidationError("You can't create more than {} config instance, please edit the last one.".format(num_configs))
+        num_configs = Config.objects.all().count()
+        if num_configs > 1:
+            raise ValidationError(
+                "You can't create more than {} config instance, please edit the last one.".format(
+                    num_configs
+                )
+            )

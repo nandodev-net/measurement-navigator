@@ -1,19 +1,20 @@
 from django.contrib import admin
+
 from .models import *
+
 
 class SiteAdmin(admin.ModelAdmin):
     list_display = (
-        'name',
-        'category',
+        "name",
+        "category",
         "description_spa",
         "description_eng",
     )
 
+
 class UrlAdmin(admin.ModelAdmin):
-    list_display = (
-        "url",
-        "site"
-    )
+    list_display = ("url", "site")
+
 
 class SiteCategoryAdmin(admin.ModelAdmin):
     list_display = (
@@ -22,8 +23,9 @@ class SiteCategoryAdmin(admin.ModelAdmin):
         "category_spa",
         "category_eng",
         "description_spa",
-        "description_eng"
+        "description_eng",
     )
+
 
 admin.site.register(Site, SiteAdmin)
 admin.site.register(URL, UrlAdmin)

@@ -1,15 +1,12 @@
 from django.test import TestCase
-from .models import Measurement
-import datetime
-import json
-import requests
+
 from .utils import *
 
 
 class SoftFlagCheckTest(TestCase):
     """
-        Test class for checking functionality of
-        soft flags checking functions
+    Test class for checking functionality of
+    soft flags checking functions
     """
 
     def setUp(self):
@@ -51,122 +48,64 @@ class SoftFlagCheckTest(TestCase):
 
     def testDnsTestingOk(self):
         """
-            Normal test: given a non anomaly "measurement", return False
+        Normal test: given a non anomaly "measurement", return False
         """
-        control = {
-            "addrs": [
-                "1.1.1.1",
-                "2.2.2.2",
-                "3.3.3.3"
-            ],
-            "failure": None
-        }
+        control = {"addrs": ["1.1.1.1", "2.2.2.2", "3.3.3.3"], "failure": None}
         test_keys = {
             "queries": [
                 {
                     "answers": [
-                        {
-                            "answer_type": "A",
-                            "ipv4": "1.1.1.1"
-                        },
-                        {
-                            "answer_type": "A",
-                            "ipv4": "2.2.2.2"
-                        },
-                        {
-                            "answer_type": "CNAME",
-                            "hostname": "You may ignore me"
-                        }
+                        {"answer_type": "A", "ipv4": "1.1.1.1"},
+                        {"answer_type": "A", "ipv4": "2.2.2.2"},
+                        {"answer_type": "CNAME", "hostname": "You may ignore me"},
                     ],
                     "answers": [
-                        {
-                            "answer_type": "A",
-                            "ipv4": "1.1.1.1"
-                        },
-                        {
-                            "answer_type": "A",
-                            "ipv4": "3.3.3.3"
-                        }
-                    ]
+                        {"answer_type": "A", "ipv4": "1.1.1.1"},
+                        {"answer_type": "A", "ipv4": "3.3.3.3"},
+                    ],
                 }
             ]
         }
 
-        assert(not check_dns_test(test_keys, control))
+        assert not check_dns_test(test_keys, control)
 
     def testDnsTestingAnomaly(self):
         """
-            Normal test: given an anomaly "measurement", return True
+        Normal test: given an anomaly "measurement", return True
         """
-        control = {
-            "addrs": [
-                "1.1.1.1",
-                "2.2.2.2",
-                "3.3.3.3"
-            ],
-            "failure": None
-        }
+        control = {"addrs": ["1.1.1.1", "2.2.2.2", "3.3.3.3"], "failure": None}
         test_keys = {
             "queries": [
                 {
                     "answers": [
-                        {
-                            "answer_type": "A",
-                            "ipv4": "1.1.1.1"
-                        },
-                        {
-                            "answer_type": "A",
-                            "ipv4": "2.2.2.2"
-                        },
-                        {
-                            "answer_type": "CNAME",
-                            "hostname": "You may ignore me"
-                        }
+                        {"answer_type": "A", "ipv4": "1.1.1.1"},
+                        {"answer_type": "A", "ipv4": "2.2.2.2"},
+                        {"answer_type": "CNAME", "hostname": "You may ignore me"},
                     ],
                     "answers": [
-                        {
-                            "answer_type": "A",
-                            "ipv4": "1.1.1.1"
-                        },
-                        {
-                            "answer_type": "A",
-                            "ipv4": "4.3.3.3"
-                        }
-                    ]
+                        {"answer_type": "A", "ipv4": "1.1.1.1"},
+                        {"answer_type": "A", "ipv4": "4.3.3.3"},
+                    ],
                 }
             ]
         }
 
-        assert(check_dns_test(test_keys, control))
+        assert check_dns_test(test_keys, control)
 
     def testDnsTestingOkEmpty(self):
         """
-            Normal test: given a non anomaly "measurement" with emmpty queries, return False
+        Normal test: given a non anomaly "measurement" with emmpty queries, return False
         """
-        control = {
-            "addrs": [
-                "1.1.1.1",
-                "2.2.2.2",
-                "3.3.3.4"
-            ],
-            "failure": None
-        }
-        test_keys = {
-            "queries": []
-        }
+        control = {"addrs": ["1.1.1.1", "2.2.2.2", "3.3.3.4"], "failure": None}
+        test_keys = {"queries": []}
 
-        assert(not check_dns_test(test_keys, control))
+        assert not check_dns_test(test_keys, control)
 
     def testDnsTestingOkFailure(self):
         """
-            Check that the check returns false when the control
-            measurement failed
+        Check that the check returns false when the control
+        measurement failed
         """
-        control = {
-            "addrs": None,
-            "failure": "I failed"
-        }
-        test_keys = {
-            "queries": []
-        }
-        assert(not check_dns_test(test_keys, control))
+        control = {"addrs": None, "failure": "I failed"}
+        test_keys = {"queries": []}
+        assert not check_dns_test(test_keys, control)

@@ -7,4 +7,4 @@ from django.apps import AppConfig
 
 
 class FlagsConfig(AppConfig):
-    name = 'apps.main.measurements.flags'
+    name = "apps.main.measurements.flags"

@@ -1,7 +1,9 @@
-import pytz
 from datetime import datetime, timedelta
 
-CARACAS = pytz.timezone('America/Caracas')
+import pytz
+
+CARACAS = pytz.timezone("America/Caracas")
+
 
 def utc_aware_date(date, sys_tz):
     aware_date = date

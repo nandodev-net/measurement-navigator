@@ -1,141 +1,95 @@
 # WARNING: There's a lot of fields that require to be checked at some point,
-# they're marked with a @TODO, please fix this configuration before launching 
+# they're marked with a @TODO, please fix this configuration before launching
 # the production build
 
 # coding=utf-8
 from __future__ import unicode_literals
-from model_utils.models import TimeStampedModel
-from django.db import models
+
 from datetime import datetime
-from django.db.models.base import Model  
 
+from django.db import models
 from django.db.models.deletion import SET_NULL
+from model_utils.models import TimeStampedModel
 
-from apps.main.sites.models     import Domain 
-from apps.main.asns.models      import ASN
+from apps.main.asns.models import ASN
+from apps.main.sites.models import Domain
+
 
 class Event(TimeStampedModel):
 
     class IssueType(models.TextChoices):
         """
-        	Every type of issue
+        Every type of issue
         """
-        TCP     =   'tcp'
-        DNS     =   'dns'
-        HTTP    =   'http'
-        NDT     =   'ndt'
-        NONE    =   'none'
+
+        TCP = "tcp"
+        DNS = "dns"
+        HTTP = "http"
+        NDT = "ndt"
+        NONE = "none"
 
     # Issue name
-    identification = models.CharField(
-        max_length=200
-    )
+    identification = models.CharField(max_length=200)
 
     # Confirmed by an human
-    confirmed = models.BooleanField(
-        default = False,
-        verbose_name = 'confirmed?'
-    )
+    confirmed = models.BooleanField(default=False, verbose_name="confirmed?")
 
     # First Measurement date
-    start_date = models.DateTimeField(
-        auto_now_add=True, 
-        blank=True
-    )
+    start_date = models.DateTimeField(auto_now_add=True, blank=True)
 
-    current_start_date = models.DateTimeField(
-        null=True, 
-        blank=True
-    )
+    current_start_date = models.DateTimeField(null=True, blank=True)
 
-    start_date_manual = models.BooleanField (
-        default=False 
-    )
+    start_date_manual = models.BooleanField(default=False)
 
     # Last measurement date
-    end_date = models.DateTimeField(
-        null=True, 
-        blank=True
-    )
+    end_date = models.DateTimeField(null=True, blank=True)
 
-    current_end_date = models.DateTimeField(
-        null=True, 
-        blank=True
-    )
+    current_end_date = models.DateTimeField(null=True, blank=True)
 
-    end_date_manual = models.BooleanField (
-        default=False 
-    )
+    end_date_manual = models.BooleanField(default=False)
 
-    public_evidence = models.TextField(
-        null=True, 
-        blank=True
-    )
+    public_evidence = models.TextField(null=True, blank=True)
 
-    private_evidence = models.TextField(
-        null=True, 
-        blank=True
-    )
+    private_evidence = models.TextField(null=True, blank=True)
 
     # Type of issue
     issue_type = models.CharField(
-        max_length=10, 
-        null=False, 
-        choices=IssueType.choices, 
-        default = IssueType.NONE
+        max_length=10, null=False, choices=IssueType.choices, default=IssueType.NONE
     )
 
     it_continues = models.BooleanField(
-        default = True,
+        default=True,
     )
 
-    domain  = models.ForeignKey(
-                            to=Domain,
-                            blank=True,
-                            null=True,
-                            on_delete=SET_NULL
-                            ) 
+    domain = models.ForeignKey(to=Domain, blank=True, null=True, on_delete=SET_NULL)
 
-    asn = models.ForeignKey(
-                            to=ASN,
-                            null=True,
-                            on_delete=SET_NULL
-                            ) 
+    asn = models.ForeignKey(to=ASN, null=True, on_delete=SET_NULL)
 
     # If true, then this event won't register new measurements
     closed = models.BooleanField(default=False)
 
-    muted = models.BooleanField(default=False) 
+    muted = models.BooleanField(default=False)
 
     # Set up by user, with higher priority than automated start date
-    manual_start_date = models.DateTimeField(
-        null = True,
-        default = None,
-        blank= True
-    )
+    manual_start_date = models.DateTimeField(null=True, default=None, blank=True)
 
     # Set up by user, with higher priority than automated start date
-    manual_end_date = models.DateTimeField(
-        null = True,
-        default = None,
-        blank= True
-    )
+    manual_end_date = models.DateTimeField(null=True, default=None, blank=True)
 
     def isStartDateManual(self) -> bool:
         if self.manual_start_date:
-            return True 
+            return True
         return False
 
     def isEndDateManual(self) -> bool:
         if self.manual_end_date:
-            return True 
+            return True
         return False
-
 
     def generate_title(self) -> str:
         """
-            This function will return a string that should be used as auto-title
-            for this event
+        This function will return a string that should be used as auto-title
+        for this event
         """
         min_date = self.start_date
         asn = self.asn
@@ -145,21 +99,21 @@ class Event(TimeStampedModel):
 
     def get_start_date(self) -> datetime:
         """
-            This function returns initial date for this event. If 
-            manual start date is null, return actual start date. Otherwise, 
-            return manual start date
+        This function returns initial date for this event. If
+        manual start date is null, return actual start date. Otherwise,
+        return manual start date
         """
 
         return self.manual_start_date or self.start_date
 
     def get_end_date(self) -> datetime:
         """
-            This function returns initial date for this event. If 
-            manual start date is null, return actual start date. Otherwise, 
-            return manual start date
+        This function returns initial date for this event. If
+        manual start date is null, return actual start date. Otherwise,
+        return manual start date
         """
 
         return self.manual_end_date or self.end_date
 
     def __str__(self):
-        return u"%s" % self.identification
+        return "%s" % self.identification

@@ -1,29 +1,28 @@
 # Django imports
+# Third party imports
+
 from django.db import models
 from model_utils.models import TimeStampedModel
 
-# Third party imports
-from typing import List
 
 # Create your models here.
 class Input(TimeStampedModel):
     """
-        An input is an entry formed by an url and an ASN,
-        then we feed such pair into the ooni api to get agregated data.
-        There's a lot of ways to add input to this table, so we won't related directly 
-        to our other apps. Instead, we will provide an interface to add elements.
-        Try not to make it so big so we don't overload the ooni api with a lot of requests.
-        Also, note that 
+    An input is an entry formed by an url and an ASN,
+    then we feed such pair into the ooni api to get agregated data.
+    There's a lot of ways to add input to this table, so we won't related directly
+    to our other apps. Instead, we will provide an interface to add elements.
+    Try not to make it so big so we don't overload the ooni api with a lot of requests.
+    Also, note that
     """
+
     input = models.TextField(
-                            verbose_name='input url', 
-                            editable=True,
-                        )
-    asn   = models.CharField(
-                            verbose_name='internet provider ASN',
-                            editable=True,
-                            max_length=30              
-                        )
+        verbose_name="input url",
+        editable=True,
+    )
+    asn = models.CharField(
+        verbose_name="internet provider ASN", editable=True, max_length=30
+    )
 
     # anomaly rate for the previous time it was checked (time before the last)
     last_anomaly_rate = models.FloatField(default=0)
@@ -32,43 +31,44 @@ class Input(TimeStampedModel):
     previous_anomaly_rate = models.FloatField(default=0)
 
     # When this model was added
-    added  = models.DateTimeField(auto_now_add=True)
-    
+    added = models.DateTimeField(auto_now_add=True)
+
     # When was updated for the last time
     updated = models.DateTimeField(auto_now=True)
 
     @staticmethod
     def clear_table():
         """
-            Remove all inputs from the table
+        Remove all inputs from the table
         """
         Input.objects.delete()
 
     @staticmethod
     def add_inputs(inputs):
         """
-            Add a list of pairs (url, asn) to the table
+        Add a list of pairs (url, asn) to the table
         """
         input_set = set(inputs)
         already_existing = set(
-                        (i.input, i.asn) for i in Input.objects.filter(
-                            input__in = [url for (url,_) in inputs], 
-                            asn__in   = [ asn for (_,asn) in inputs]
-                        )
-                    )
+            (i.input, i.asn)
+            for i in Input.objects.filter(
+                input__in=[url for (url, _) in inputs],
+                asn__in=[asn for (_, asn) in inputs],
+            )
+        )
         input_set -= already_existing
-        input_objects = ( Input(input=url, asn=asn) for (url, asn) in input_set )
+        input_objects = (Input(input=url, asn=asn) for (url, asn) in input_set)
         Input.objects.bulk_create(input_objects)
 
     @staticmethod
-    def add_input(asn : str, input : str):
+    def add_input(asn: str, input: str):
         """
-            Add a single input to the input list. If it already exists, it's not going to be added
+        Add a single input to the input list. If it already exists, it's not going to be added
         """
         Input.objects.get_or_create(asn=asn, input=input)
 
     @staticmethod
-    def remove_input(asn : str, input : str):
+    def remove_input(asn: str, input: str):
         Input.objects.filter(asn=asn, input=input).delete()
 
     def __str__(self) -> str:
@@ -79,20 +79,22 @@ class Input(TimeStampedModel):
 
     class Meta:
         # So we don't request data twice for each input
-        unique_together = ('input', 'asn')
+        unique_together = ("input", "asn")
+
 
 class EarlyAlertConfig(TimeStampedModel):
     """
-        Config parameters to take in consideration when computing 
-        database updating logic
+    Config parameters to take in consideration when computing
+    database updating logic
     """
-    # how many days to take in cosideration when requesting for 
+
+    # how many days to take in cosideration when requesting for
     # new measurements
     days_before_now = models.IntegerField(default=0)
-    # how many hours to take in cosideration when requesting for 
+    # how many hours to take in cosideration when requesting for
     # new measurements
     hours_before_now = models.IntegerField(default=1)
-    # how many minutes to take in cosideration when requesting for 
+    # how many minutes to take in cosideration when requesting for
     # new measurements
     minutes_before_now = models.IntegerField(default=0)
 
@@ -113,14 +115,18 @@ class EarlyAlertConfig(TimeStampedModel):
     def __str__(self) -> str:
         return f"[days: {self.days_before_now}, hours: {self.hours_before_now}, minutes: {self.minutes_before_now}]{' On' if self.is_current_config else ''}"
 
+
 class Emails(TimeStampedModel):
     """
-        Emails to be notified when an event is triggered
+    Emails to be notified when an event is triggered
     """
-    email = models.EmailField(null=False, verbose_name="Email to be notified", unique=True)
+
+    email = models.EmailField(
+        null=False, verbose_name="Email to be notified", unique=True
+    )
 
     def __str__(self) -> str:
         return f"{self.email}"
-    
+
     def __repr__(self) -> str:
         return str(self)

@@ -15,4 +15,4 @@ from django.apps import AppConfig
 
 
 class SitesConfig(AppConfig):
-    name = 'apps.main.sites'
+    name = "apps.main.sites"

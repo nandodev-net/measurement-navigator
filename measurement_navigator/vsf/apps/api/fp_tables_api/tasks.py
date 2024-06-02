@@ -1,51 +1,57 @@
-from __future__         import absolute_import, unicode_literals
+from __future__ import absolute_import, unicode_literals
 
-# Django imports
-from django.core.cache  import cache
-
-# Third party imports 
-from celery             import shared_task
-
-# Python imports
-from datetime           import date, timedelta, datetime
-from typing import Optional
 import tempfile
+# Python imports
+from datetime import date, datetime, timedelta
 from pathlib import Path
+from typing import Optional
+
+# Third party imports
+from celery import shared_task
+# Django imports
+from django.core.cache import cache
+
+from apps.api.fp_tables_api.s3_ingest import S3IngestManager
+from vsf.utils import ProcessState, VSFTask
 
 # Local imports
-from .utils             import request_fp_data, update_measurement_table
-from vsf.utils          import VSFTask, ProcessState
-from apps.api.fp_tables_api.s3_ingest import S3IngestManager
+from .utils import request_fp_data, update_measurement_table
+
 
 class API_TASKS:
     UPDATE_FASTPATH = "update-fastpath"
     RECOVER_MEASUREMENTS = "recover-measurements"
     S3_INGEST = "s3-ingest"
 
-@shared_task(time_limit=7200, base=VSFTask, vsf_name = API_TASKS.UPDATE_FASTPATH)
-def fp_update(since :  Optional[str] = None, until : Optional[str] = None, only_fastpath : bool = False):
+
+@shared_task(time_limit=7200, base=VSFTask, vsf_name=API_TASKS.UPDATE_FASTPATH)
+def fp_update(
+    since: Optional[str] = None,
+    until: Optional[str] = None,
+    only_fastpath: bool = False,
+):
     """
-        Update the fast path table;
-        This function will request fast path table to the ooni api
-        from  yesterday until the currently running day.
+    Update the fast path table;
+    This function will request fast path table to the ooni api
+    from  yesterday until the currently running day.
     """
 
-    ret = { 'ran' : False } # Required by VSFTask base task class
+    ret = {"ran": False}  # Required by VSFTask base task class
     name = API_TASKS.UPDATE_FASTPATH
     # Idempotency
     state = cache.get(name)
     if state == ProcessState.RUNNING or state == ProcessState.STARTING:
         return ret
 
-    # This task actually ran 
+    # This task actually ran
 
     date_format = "%Y-%m-%d"
-    # note that we use "now" as tomorrow, because the request truncates 
+    # note that we use "now" as tomorrow, because the request truncates
     # the "time" part of the datetime, so the ooni query will search
     # until the next day at the 00:00:00 hour, including 'today' in the query,
     # but excluding "tomorrow".
     # [     interval      ]
-    # | yesterday | today | tomorrow 
+    # | yesterday | today | tomorrow
     cache.set(name, ProcessState.RUNNING)
     if until is None:
         until = datetime.strftime(datetime.now() + timedelta(days=1), date_format)
@@ -53,30 +59,29 @@ def fp_update(since :  Optional[str] = None, until : Optional[str] = None, only_
     if since is None:
         until_datetime = datetime.strptime(until, date_format)
         since = datetime.strftime(until_datetime - timedelta(days=1), date_format)
-    
-    try: 
-        ret['output'] = request_fp_data(since, until, from_fastpath = only_fastpath)
+
+    try:
+        ret["output"] = request_fp_data(since, until, from_fastpath=only_fastpath)
         cache.set(name, ProcessState.IDLE)
     except Exception as e:
         cache.set(name, ProcessState.FAILED)
-        ret['error'] = str(e)
+        ret["error"] = str(e)
 
-    ret['ran'] = True
+    ret["ran"] = True
     return ret
-    
-    
-    
+
+
 @shared_task(time_limit=2000, vsf_name=API_TASKS.RECOVER_MEASUREMENTS, base=VSFTask)
 def measurement_update():
     """
-        Update Measurement table by requesting for new measurements availables
-        in the fast path. If there's too many measurements, it's recommended to 
-        request a small ammount of them periodically rather than requesting them 
-        all at the same time
+    Update Measurement table by requesting for new measurements availables
+    in the fast path. If there's too many measurements, it's recommended to
+    request a small ammount of them periodically rather than requesting them
+    all at the same time
     """
     name = API_TASKS.RECOVER_MEASUREMENTS
     status = cache.get(name)
-    result = {'error' : None, 'ran' : False}
+    result = {"error": None, "ran": False}
 
     # Check if should run
     if status == ProcessState.RUNNING or status == ProcessState.STARTING:
@@ -86,32 +91,33 @@ def measurement_update():
     cache.set(name, ProcessState.RUNNING)
 
     try:
-        result['output'] = update_measurement_table(200)
+        result["output"] = update_measurement_table(200)
         cache.set(name, ProcessState.IDLE)
 
     except Exception as e:
         cache.set(name, ProcessState.FAILED)
-        result['error'] = str(e)
+        result["error"] = str(e)
 
-    # This task actually ran    
-    result['ran'] = True
+    # This task actually ran
+    result["ran"] = True
 
-    return  result 
+    return result
 
-@shared_task(time_limit = 3600 * 24, vsf_name=API_TASKS.S3_INGEST, base=VSFTask)
+
+@shared_task(time_limit=3600 * 24, vsf_name=API_TASKS.S3_INGEST, base=VSFTask)
 def s3_ingest_task():
     """
-        Download all measurements available from the last 24 hours to now.
+    Download all measurements available from the last 24 hours to now.
     """
 
     name = API_TASKS.S3_INGEST
     status = cache.get(name)
-    result = {'error' : None, "ran" : False}
+    result = {"error": None, "ran": False}
 
-    # Check if should run 
+    # Check if should run
     if status == ProcessState.RUNNING or status == ProcessState.STARTING:
         return result
-    
+
     # Set running state to running
 
     cache.set(name, ProcessState.RUNNING)
@@ -125,17 +131,21 @@ def s3_ingest_task():
     ooni_data_dir = str(Path(tempdir, "media", "ooni_data"))
     incompatible_files_dir = str(Path(tempdir, "media", "incompatible_files"))
 
-    # Try to ingest 
+    # Try to ingest
     try:
         s3_ingestor = S3IngestManager()
-        s3_ingestor.ingest(first_date=since, last_date=until, output_dir= ooni_data_dir, incompatible_dir=incompatible_files_dir)
-        result['output'] = None
+        s3_ingestor.ingest(
+            first_date=since,
+            last_date=until,
+            output_dir=ooni_data_dir,
+            incompatible_dir=incompatible_files_dir,
+        )
+        result["output"] = None
         cache.set(name, ProcessState.IDLE)
     except Exception as e:
         cache.set(name, ProcessState.FAILED)
-        result['error'] = str(e)
+        result["error"] = str(e)
 
-    result['ran'] = True
+    result["ran"] = True
 
     return result
-        

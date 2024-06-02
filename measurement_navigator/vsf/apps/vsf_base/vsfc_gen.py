@@ -1,6 +1,7 @@
-from random import random, seed
-import string
 import datetime
+import string
+from random import random, seed
+
 
 class VsfCodeGen:
 
@@ -11,7 +12,7 @@ class VsfCodeGen:
         len_second_charset=1,
         base=36,
         first_charset=string.digits,
-        second_charset="ABCDEFGHIJKLMNPQRSTUVWXYZ"
+        second_charset="ABCDEFGHIJKLMNPQRSTUVWXYZ",
     ):
 
         seed(a=user_seed)
@@ -27,15 +28,9 @@ class VsfCodeGen:
         self.base = base
 
     def get_random_number(self):
-        return int((random() * self.prime_num) % (36 ** 6))
+        return int((random() * self.prime_num) % (36**6))
 
-    def encode_section(
-        self,
-        v: int,
-        base: int,
-        charset: str,
-        section_len: int
-    ):
+    def encode_section(self, v: int, base: int, charset: str, section_len: int):
         result = []
         c = 0
         while c < section_len and v >= 0:
@@ -44,27 +39,21 @@ class VsfCodeGen:
             c += 1
 
         result.reverse()
-        return ''.join(result)
+        return "".join(result)
 
-    def gen_vsfc(self, prefix=''):
+    def gen_vsfc(self, prefix=""):
         num = self.get_random_number()
         now = datetime.datetime.now()
         date = now.strftime("%y%b").upper()
 
         first_section = self.encode_section(
-            num,
-            len(self.first_charset),
-            self.first_charset,
-            self.len_first_charset
+            num, len(self.first_charset), self.first_charset, self.len_first_charset
         )
         second_section = self.encode_section(
-            num,
-            len(self.second_charset),
-            self.second_charset,
-            self.len_second_charset
+            num, len(self.second_charset), self.second_charset, self.len_second_charset
         )
 
         if prefix:
-            return '%s%s%s%s' % (prefix, date, first_section, second_section)
+            return "%s%s%s%s" % (prefix, date, first_section, second_section)
         else:
-            return '%s-%s%s' % (date, first_section, second_section)
+            return "%s-%s%s" % (date, first_section, second_section)

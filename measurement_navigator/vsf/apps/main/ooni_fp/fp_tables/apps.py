@@ -9,5 +9,4 @@ from django.apps import AppConfig
 
 
 class FpTablesConfig(AppConfig):
-    name = 'apps.main.ooni_fp.fp_tables'
-    
+    name = "apps.main.ooni_fp.fp_tables"
